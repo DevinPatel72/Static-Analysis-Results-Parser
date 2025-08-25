@@ -33,6 +33,9 @@
         "Floating-point expressions shall not be directly or indirectly tested for equality or inequality.": {
             "cwe": "1077"
         },
+        "Leak of memory or pointers to system resources": {
+			"cwe": "401"
+		},
         "When dividing two values of integer types, integer division is used, which ignores any remainder. When such a result is used in a context expecting a floating-point number, it is likely that floating-point division was intended.": {
             "cwe": "197"
         }
