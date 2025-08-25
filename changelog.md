@@ -1,8 +1,8 @@
 # Change Log
 
-## [Version 1.0.0](https://) (2025-08-25)
+## [Version 1.0.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.0.0) (2025-08-25)
 
-
+First official release of the software. See Beta changelog below.
 
 
 ## Beta Versions

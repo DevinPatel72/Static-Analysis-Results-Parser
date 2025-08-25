@@ -2,6 +2,7 @@ bin/
 build/
 dist/
 logs/
+.vscode/
 
 # Environments
 .env
