@@ -29,7 +29,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='aioparser-gui',
+    name='SAResultsParserGUI',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

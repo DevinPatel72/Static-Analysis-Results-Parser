@@ -52,8 +52,8 @@ else
 fi
 
 # Build
-python3 -m pyinstaller --clean parse-cli.spec
-python3 -m pyinstaller --clean parse-gui.spec
+pyinstaller --clean parse-cli.spec
+pyinstaller --clean parse-gui.spec
 
 # Copy config
 cp -r config dist/config
