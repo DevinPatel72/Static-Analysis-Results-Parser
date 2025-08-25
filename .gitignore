@@ -1,0 +1,12 @@
+bin/
+build/
+dist/
+logs/
+
+# Environments
+.env
+.venv
+venv/
+
+# Python-specific
+__pycache__/

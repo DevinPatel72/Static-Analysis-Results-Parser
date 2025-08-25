@@ -1,0 +1,9 @@
+altgraph>=0.17.4
+et_xmlfile>=2.0.0
+openpyxl>=3.1.5
+packaging>=25.0
+pefile>=2023.2.7
+pyinstaller>=6.15.0
+pyinstaller-hooks-contrib>=2025.8
+pywin32-ctypes>=0.2.3
+setuptools>=80.9.0

@@ -1,0 +1,283 @@
+﻿{
+    "_comment0": "Override rules based on AIO 'Type' column",
+    "aio" : {},
+    
+    "_comment1": "Override rules based on Checkmarx attribute 'Query'",
+    "checkmarx" : {
+        "Empty Methods": {
+            "cwe": "1071",
+            "confidence": "Info"
+        },
+        "TruffleHog HighEntropy Strings": {
+            "cwe": "331"
+        }
+    },
+    
+    "_comment2": "Override rules based on Coverity attribute 'subcategoryLongDescription'",
+    "coverity" : {
+        "A bit shift operation has a shift amount which is too large or has a negative value.": {
+            "cwe": "1335"
+        },
+        "A virtual method is called from a constructor/destructor.": {
+            "cwe": "664"
+        },
+        "An expression with no side-effect or unintended effect indicates a possible logic flaw": {
+            "cwe": "1164",
+            "confidence": "Info"
+        },
+        "Array compared against NULL pointer": "_coverity_array_compared_to_null_handler",
+        "Assignment of a variable or expression to itself has no effect": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "Floating-point expressions shall not be directly or indirectly tested for equality or inequality.": {
+            "cwe": "1077"
+        },
+        "When dividing two values of integer types, integer division is used, which ignores any remainder. When such a result is used in a context expecting a floating-point number, it is likely that floating-point division was intended.": {
+            "cwe": "197"
+        }
+    },
+    
+    "_comment3": "Override rules based on CPPCheck attribute 'error/id'",
+    "cppcheck" : {
+        "allocaCalled": {
+            "cwe": "676"
+        },
+        "arrayIndexThenCheck": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "constParameter": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "constParameterCallback": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "constParameterPointer": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "constParameterReference": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "constVariable": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "constVariablePointer": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "constVariableReference": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "containerOutOfBounds": {
+            "cwe": "710"
+        },
+        "cStyleCast": {
+            "cwe": "704"
+        },
+        "duplInheritedMember": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "identicalConditionAfterEarlyExit": {
+            "cwe": "710"
+        },
+        "identicalInnerCondition": {
+            "cwe": "710"
+        },
+        "intToPointerCast": {
+            "cwe": "681"
+        },
+        "knownConditionTrueFalse": "_cppcheck_known_condition_handler",
+        "missingOverride": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "multiCondition": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "noConstructor": {
+            "cwe": "655"
+        },
+        "noCopyConstructor": {
+            "cwe": "665"
+        },
+        "noExplicitConstructor": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "noOperatorEq": {
+            "cwe": "665"
+        },
+        "operatorEqVarError": {
+            "cwe": "665"
+        },
+        "passedByValue": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "passedByValueCallback": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "postfixOperator": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "redundantAssignment": {
+            "confidence": "Info"
+        },
+        "redundantCondition": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "redundantInitialization": {
+            "confidence": "Info"
+        },
+        "redundantPointerOp": {
+            "cwe": "710"
+        },
+        "returnByReference": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "shadowArgument": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "shadowFunction": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "shadowVariable": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "stlcstrAssignment": {
+            "confidence": "Info"
+        },
+        "stlcstrParam": {
+            "confidence": "Info"
+        },
+        "stlFindInsert": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "suspiciousFloatingPointCast": {
+            "cwe": "681"
+        },
+        "syntaxError": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "templateRecursion": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "threadsafety-unsafe-call": {
+            "cwe": "362"
+        },
+        "uninitDerivedMemberVar": {
+            "cwe": "665"
+        },
+        "uninitMemberVar": {
+            "cwe": "710"
+        },
+        "uninitMemberVarPrivate": {
+            "cwe": "710"
+        },
+        "unknownMacro": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "unreadVariable": {
+            "confidence": "Info"
+        },
+        "unsignedLessThanZero": {
+            "confidence": "Info"
+        },
+        "unsignedPositive": {
+            "confidence": "Info"
+        },
+        "unusedFunction": {
+            "cwe": "561",
+            "confidence": "Info"
+        },
+        "unusedPrivateFunction": {
+            "cwe": "561",
+            "confidence": "Info"
+        },
+        "unusedVariable": {
+            "confidence": "Info"
+        },
+        "useInitializationList": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "uselessAssignmentArg": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "uselessAssignmentPtrArg": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "uselessCallsSubstr": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "useStlAlgorithm": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "variableScope": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "virtualCallInConstructor": {
+            "cwe": "710",
+            "confidence": "Info"
+        },
+        "y2038-unsafe-call": {
+            "cwe": "190"
+        }
+    },
+    
+    "_comment4": "Override rules based on ESLint attribute 'ruleId'",
+    "eslint" : {},
+    
+    "_comment5": "Override rules based on Fortify attribute 'ns:Vulnerability/ns:ClassInfo/ns:Type'",
+    "fortify" : {
+        "Buffer Overflow": {
+            "cwe": "120"
+        },
+        "Out-of-Bounds Read": {
+            "cwe": "126"
+        }
+    },
+    
+    "_comment6": "Override rules based on Gnat SAS attribute 'kind'",
+    "gnatsas" : {},
+    
+    "_comment7": "Override rules based on manually entered CVEs",
+    "manual_cve" : {},
+    
+    "_comment8": "Override rules based on OWASP DepCheck attribute 'CVE'",
+    "owasp_depcheck" : {},
+    
+    "_comment9": "Override rules based on Pragmatic attribute 'Checker'",
+    "pragmatic" : {},
+    
+    "_comment10": "Override rules based on Pylint attribute 'message-id'",
+    "pylint" : {},
+    
+    "_comment11": "Override rules based on SRM attribute 'Type'",
+    "srm" : {}
+}

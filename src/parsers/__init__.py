@@ -1,0 +1,44 @@
+# Control Flag Names
+FLAG_VULN_MAPPING = 'Vulnerability Mappings'
+FLAG_OVERRIDE_CWE = 'Override CWE'
+FLAG_OVERRIDE_CONFIDENCE = 'Override Confidence'
+FLAG_FORCE_EXPORT_CSV = 'Force Export CSV'
+
+# Set GUI mode to enable/disable messageboxes
+GUI_MODE = False
+
+# Empty overrides for fallback
+EMPTY_OVERRIDES = "{\"aio\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"srm\":{}}\n"
+
+# Keywords for scanners
+aio_keywords = ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser']
+cppcheck_keywords = ['cppcheck']
+coverity_keywords = ['coverity']
+depcheck_keywords = ['dependencycheck', 'depcheck', 'owasp', 'owaspdependencycheck', 'owaspdepcheck']
+eslint_keywords = ['eslint']
+fortify_keywords = ['fortify', 'fortifysca']
+gnatsas_keywords = ['gnatsas', 'codepeer']
+manualcve_keywords = ['cve', 'manualcve', 'manualnvd', 'nvd']
+pragmatic_keywords = ['pragmatic']
+pylint_keywords = ['pylint']
+srm_keywords = ['srm', 'softwareriskmanager', 'codedx']
+xmarx_keywords = ['checkmarx', 'xmarx']
+scanner_keywords = aio_keywords + cppcheck_keywords + coverity_keywords + depcheck_keywords + eslint_keywords + fortify_keywords + gnatsas_keywords + manualcve_keywords + pragmatic_keywords + pylint_keywords + srm_keywords + xmarx_keywords
+nopathoverridescanners_keywords = aio_keywords + manualcve_keywords
+
+# Valid extensions
+valid_extensions = ['.fpr', '.csv', '.xml', '.json', '.xlsx']
+
+# Fieldnames
+fieldnames = ['CWE','Confidence','Maturity','Mitigation','Mitigation Comment','Comment',
+                'ID','Path','Line','Type','Message','Symbol',
+                'Tool CWE','Tool','Scanner','Language','Severity']
+xmarx_fieldnames = fieldnames[:fieldnames.index('Message')+1] + ['DestPath', 'DestLine', 'DestSymbol'] + fieldnames[fieldnames.index('Message')+1:]
+
+# Important Paths (overwritten by parse.py)
+EXE_ROOT_DIR = '.'
+LOGS_DIR = 'logs'
+CONFIG_DIR = 'config'
+
+# Choose specific items to import when using "from parsers import *"
+__all__ = ['FLAG_VULN_MAPPING', 'FLAG_OVERRIDE_CWE', 'FLAG_OVERRIDE_CONFIDENCE', 'FLAG_FORCE_EXPORT_CSV', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'fortify_csv', 'manual_cve', 'pragmatic', 'pylint', 'srm']
