@@ -10,7 +10,7 @@ Inputs can be entered via GUI, guided terminal prompts, or json input.
 Override rules can be defined in the config directory.
 See surrounding comments in the overrides file for detailed help.
 
-### Accepted Inputs:
+### Accepted Inputs
 -  AIO Parser: .xlsx OR .csv
 -  Checkmarx:  Directory of .csv files (Single directory, no recursion)
 -  CppCheck:   .xml
@@ -55,7 +55,7 @@ $ python3 parse-gui.py
 ```
 
 
-## Build instructions:
+## Build instructions
 
 **Requirements:**
 
@@ -71,7 +71,7 @@ Then execute the build script.
 
 
 
-## Additional Notes:
+## Additional Notes
 
 1)  A user-writable config file can be created to quickly pass inputs in bulk.
     To generate this config file, run the parser once against valid input and check the config folder for "user_inputs.json."
