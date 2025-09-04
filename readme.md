@@ -5,7 +5,7 @@ Last updated:  20250903
 Maintained by: Devin Patel
 
 ## Description
-This static analysis results parser will parse a set of output files from static analysis tools and collect them into one Excel or CSV file. Inputs can be entered via GUI, guided terminal prompts, or [json input](#configure-overrides). [Override rules](#configure-bulk-inputs) can be defined in the config directory. See surrounding comments in the overrides file for detailed help.
+This static analysis results parser will parse a set of output files from static analysis tools and collect them into one Excel or CSV file. Inputs can be entered via GUI, guided terminal prompts, or [json input](#configure-bulk-inputs). [Override rules](#configure-overrides) can be defined in the config directory. See surrounding comments in the overrides file for detailed help.
 
 ### Accepted Inputs:
 -  AIO Parser: `.xlsx` OR `.csv`
