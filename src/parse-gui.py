@@ -7,6 +7,7 @@ import traceback
 from parsers.parser_tools.inputs_gui import YesNoGUI, InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
 from parsers.parser_tools.toolbox import InputDictKeys, console, load_config, export_config, check_input_format
 import parsers
+from parsers import PROG_NAME, VERSION
 from parsers import *
 from parsers.parser_tools import parser_writer
 import parsers.parser_tools.progressbar as progressbar
@@ -40,6 +41,7 @@ logging.getLogger().addHandler(consoleHandler)
 logger = logging.getLogger(__name__)
 
 from datetime import datetime
+logger.info(f"{PROG_NAME} {VERSION}")
 logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 

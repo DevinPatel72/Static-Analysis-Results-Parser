@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
-print(r"""
+from parsers import PROG_NAME, VERSION
+
+print(f"""
 #############################################################################################################
+# {PROG_NAME} {VERSION}
 #
 # Please read the readme for further information.
 #
@@ -63,6 +66,7 @@ logging.getLogger().addHandler(consoleHandler)
 logger = logging.getLogger(__name__)
 
 from datetime import datetime
+logger.info(f"{PROG_NAME} {VERSION}")
 logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 # Check if openpyxl is installed. Logged here to ensure correct placement in log file
@@ -139,6 +143,7 @@ def prompt_input_entry():
         + "\n"
         + "Use \'ls [dir]\' to see file names\n"
         + "Enter \'q\' to stop adding inputs\n"
+        + "Enter \'v\' to see the version of this software\n"
         + "Enter \'h\' to see this help message again")
     print_help()
     
@@ -156,6 +161,11 @@ def prompt_input_entry():
         # Help
         if user.lower() == 'h':
             print_help()
+            continue
+        
+        # Version
+        if user.lower() == 'v':
+            print(f"{PROG_NAME} {VERSION}")
             continue
         
         # Quit

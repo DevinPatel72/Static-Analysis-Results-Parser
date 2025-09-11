@@ -1,3 +1,7 @@
+# Version String
+PROG_NAME = 'Static Analysis Results Parser'
+VERSION = '1.0.1'
+
 # Control Flag Names
 FLAG_VULN_MAPPING = 'Vulnerability Mappings'
 FLAG_OVERRIDE_CWE = 'Override CWE'

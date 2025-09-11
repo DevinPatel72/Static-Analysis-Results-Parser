@@ -6,6 +6,7 @@ import parsers
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
+from .. import PROG_NAME, VERSION
 from .toolbox import InputDictKeys, validate_path_and_scanner, get_all_previews, generate_preview
 
 # Constants
@@ -135,6 +136,10 @@ class InputsGUI:
 
         submit_button = tk.Button(self.root, text="Submit", command=self.submit_data)
         submit_button.pack(pady=10)
+        
+        # Version text
+        version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
+        version_label.pack(side="bottom", pady=5)
 
         # Execute GUI
         self.root.mainloop()
@@ -378,6 +383,10 @@ class AdjustPathsGUI:
 
         # Button to finalize or do further actions
         tk.Button(self.root, text="Save Adjusted Paths", command=self.collect_paths).pack(pady=10)
+        
+        # Version text
+        version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
+        version_label.pack(side="bottom", pady=5)
 
         self.root.mainloop()
 
@@ -466,6 +475,10 @@ class OutfileFlagsGUI:
         # ─── Submit Button ─────────────────────────────
         submit_btn = tk.Button(self.root, text="Submit", command=self.submit)
         submit_btn.pack(pady=10)
+        
+        # Version text
+        version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
+        version_label.pack(side="bottom", pady=5)
 
         self.root.mainloop()
 
