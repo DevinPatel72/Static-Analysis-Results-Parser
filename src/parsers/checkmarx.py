@@ -14,14 +14,21 @@ logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Parse the input file
-    try:
-        with open(os.path.join(fpath, os.listdir(fpath)[0]), "r", encoding='utf-8-sig') as read_obj:
-            csv_reader = csv.DictReader(read_obj)
-            first_row = next(csv_reader)
-            cell_preview = first_row['SrcFileName']
-            return cell_preview
-    except Exception as e:
-        return f"[ERROR] {e}"
+    for file in os.listdir(fpath):
+        try:
+            with open(os.path.join(fpath, file), "r", encoding='utf-8-sig') as read_obj:
+                csv_reader = csv.DictReader(read_obj)
+                first_row = next(csv_reader)
+                cell_preview = first_row['SrcFileName']
+                return cell_preview # Immediately return valid value
+        
+        except StopIteration:
+            continue # Wait until all files are iterated through before returning this
+        
+        except Exception as e:
+            return f"[ERROR] {e}" # Immediately return unknown exception message
+    # No data, return error message
+    return "[ERROR] No data found in CSV files"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
     current_parser = __name__.split('.')[1]
