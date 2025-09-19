@@ -103,7 +103,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 
                 # Extract class information
                 class_info = vulnerability.find('./ns:ClassInfo', namespace)
-                vulnerability_type = class_info.find('ns:Type', namespace).text
+                vulnerability_type = class_info.findtext('ns:Type', '', namespace)
+                vulnerability_subtype = class_info.findtext('ns:Subtype', '', namespace)
                 class_id = class_info.find('ns:ClassID', namespace).text
                 analyzer = class_info.find('ns:AnalyzerName', namespace).text
 
@@ -241,6 +242,10 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 # If the type is a Memory Leak, change the line number to the one defined by replacement definition "FirstTraceLocation.line"
                 if vulnerability_type == 'Memory Leak':
                     line = replacement_defs['FirstTraceLocation.line']
+                
+                # Combine vulnerability type and subtype
+                if vulnerability_subtype is not None and len(vulnerability_subtype) > 0:
+                    vulnerability_type += f': {vulnerability_subtype}'.rstrip()
                 
                 # Perform cwe overrides if user requests
                 cwe, confidence = cwe_conf_override(control_flags, override_name=vulnerability_type, cwe=cwe, override_scanner=current_parser)

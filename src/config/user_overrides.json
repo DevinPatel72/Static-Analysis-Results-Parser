@@ -256,8 +256,11 @@
     "_comment4": "Override rules based on ESLint attribute 'ruleId'",
     "eslint" : {},
     
-    "_comment5": "Override rules based on Fortify attribute 'ns:Vulnerability/ns:ClassInfo/ns:Type'",
+    "_comment5": "Override rules based on Fortify attribute 'ns:Vulnerability/ns:ClassInfo/ns:Type' appended with 'ns:Vulnerability/ns:ClassInfo/ns:Subtype' in format 'Type: Subtype'",
     "fortify" : {
+        "Often Misused: Authentication": {
+            "cwe": "350"
+        },
         "Buffer Overflow": {
             "cwe": "120"
         },
