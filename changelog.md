@@ -3,8 +3,9 @@
 ## PRE-RELEASE [Version 1.1.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.1.0) (YYYY-MM-DD)
 
 - Created an override for CWE-247 to reflect its deprecated status.
-- Included subtype when parsing Fortify output.
-- Fixed bug where Checkmarx input will only access the first CSV file to create a path preview. If the first CSV file is empty, the path preview will produce an error. Now, the preview generator will iterate through all CSVs for a valid path instead of stopping at the first one.
+- Appended subtype to Type column when parsing Fortify results.
+- Added a Fortify override to `user_overrides.json` to correct CWE for `Often Misused: Authentication` findings.
+- Fixed bug where Checkmarx path preview parser will only access the first CSV file to create a preview. If the first CSV file is empty, the path preview will produce an error. Now, the path preview parser will iterate through all CSVs for a valid path instead of stopping at the first one.
 
 ## [Version 1.0.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.0.1) (2025-09-11)
 
