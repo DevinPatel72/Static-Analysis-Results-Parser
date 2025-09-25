@@ -12,13 +12,24 @@ os_name="${os_name^}"
 BIN_DIR="../bin/Linux-$os_name"
 mkdir -p "$BIN_DIR"
 
-# Function to check if file is binary
+# Function to check if file is text
 is_text() {
-    if command_output=$(file -b --mime-type $1 2>/dev/null) && [[ $command_output == *"text/"* ]]; then
-        return 0 # text
-    else
-        return 1 # not a text file, ignore it
-    fi
+    # Quick null byte test
+    # if grep -q $'\x00' "$1"; then
+    #     return 0  # not text
+    # fi
+
+    # MIME fallback
+    local mime
+    mime=$(file -b --mime-type "$1" 2>/dev/null) || return 1
+    echo $mime
+
+    case "$mime" in
+        text/*|application/json|application/xml|application/javascript|application/x-sh|*/xml)
+            return 0 ;;  # not binary
+        *)
+            return 1 ;;  # binary
+    esac
 }
 
 # Clean
