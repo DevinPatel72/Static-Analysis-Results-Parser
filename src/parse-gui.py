@@ -154,7 +154,7 @@ def main():
         if any(s in scan_match for s in parsers.aio_keywords):
             err_count += aio.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.xmarx_keywords):
-            err_count += checkmarx_csv.parse(path, scanner, substr, prepend, control_flags)
+            err_count += checkmarx.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.coverity_keywords):
             err_count += coverity.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.cppcheck_keywords):

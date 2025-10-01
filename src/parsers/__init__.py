@@ -47,4 +47,4 @@ LOGS_DIR = 'logs'
 CONFIG_DIR = 'config'
 
 # Choose specific items to import when using "from parsers import *"
-__all__ = ['FLAG_VULN_MAPPING', 'FLAG_OVERRIDE_CWE', 'FLAG_OVERRIDE_CONFIDENCE', 'FLAG_FORCE_EXPORT_CSV', 'aio', 'checkmarx', 'checkmarx_csv', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'fortify_csv', 'manual_cve', 'pragmatic', 'pylint', 'srm', 'srm_csv']
+__all__ = ['FLAG_VULN_MAPPING', 'FLAG_OVERRIDE_CWE', 'FLAG_OVERRIDE_CONFIDENCE', 'FLAG_FORCE_EXPORT_CSV', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'fortify_csv', 'manual_cve', 'pragmatic', 'pylint', 'srm', 'srm_csv']
