@@ -3,6 +3,8 @@ build/
 dist/
 logs/
 .vscode/
+.cspell/
+junkyard/
 
 # Environments
 .env

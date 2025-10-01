@@ -177,7 +177,7 @@ def main():
         elif any(s in scan_match for s in parsers.pylint_keywords):
             err_count += pylint.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            err_count += srm.parse(path, scanner, substr, prepend, control_flags)
+            err_count += srm_csv.parse(path, scanner, substr, prepend, control_flags)
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             err_count += 1

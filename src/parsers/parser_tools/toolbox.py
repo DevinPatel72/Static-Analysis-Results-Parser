@@ -269,7 +269,10 @@ def get_all_previews(inputs):
         elif any(s in scan_match for s in parsers.pylint_keywords):
             preview = pylint.path_preview(fp)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            preview = srm.path_preview(fp)
+            if os.path.splitext(fp)[1] == ".csv":
+                preview = srm_csv.path_preview(fp)
+            elif os.path.splitext(fp)[1] == ".xml":
+                preview = srm.path_preview(fp)
         else:
             preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
 

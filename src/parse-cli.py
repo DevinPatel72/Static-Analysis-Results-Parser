@@ -22,7 +22,7 @@ print(f"""
 #   ->  NVD CVE:    .csv
 #   ->  Pragmatic:  .csv
 #   ->  Pylint:     .json
-#   ->  SRM:        .csv
+#   ->  SRM:        .xml (preferred) OR .csv
 #############################################################################################################
 """, end="\n")
 
@@ -36,7 +36,7 @@ from math import ceil
 import parsers
 from parsers import *
 from parsers.parser_tools import parser_writer
-from parsers.parser_tools.toolbox import InputDictKeys, load_config, export_config, validate_path_and_scanner, check_input_format
+from parsers.parser_tools.toolbox import InputDictKeys, load_config, export_config, validate_path_and_scanner, check_input_format, get_all_previews
 
 
 # Configure root path and important dirs of script
@@ -312,48 +312,7 @@ def prompt_control_flags(control_flags):
     control_flags[FLAG_FORCE_EXPORT_CSV]     = ask("Force export as CSV? This will ignore the output file extension if yes.", default=False) if FLAG_FORCE_EXPORT_CSV not in control_flags.keys() else control_flags[FLAG_FORCE_EXPORT_CSV]
     
     return control_flags
-    
-def get_all_previews(inputs):
-    previews = {}
-    
-    for inp in inputs:
-        fpath = inp[InputDictKeys.PATH.value]
-        scanner = inp[InputDictKeys.SCANNER.value]
-    
-        scan_match = scanner.lower().replace(' ', '')
-        fp = os.path.realpath(fpath)
-        
-        if any(s in scan_match for s in parsers.aio_keywords):
-            preview = aio.path_preview(fp)
-        elif any(s in scan_match for s in parsers.xmarx_keywords):
-            preview = checkmarx.path_preview(fp)
-        elif any(s in scan_match for s in parsers.coverity_keywords):
-            preview = coverity.path_preview(fp)
-        elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            preview = cppcheck.path_preview(fp)
-        elif any(s in scan_match for s in parsers.depcheck_keywords):
-            preview = owasp_depcheck.path_preview(fp)
-        elif any(s in scan_match for s in parsers.eslint_keywords):
-            preview = eslint.path_preview(fp)
-        elif any(s in scan_match for s in parsers.fortify_keywords):
-            if os.path.splitext(fp)[1] == ".csv":
-                preview = fortify_csv.path_preview(fp)
-            elif os.path.splitext(fp)[1] == ".fpr":
-                preview = fortify.path_preview(fp)
-        elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            preview = gnatsas.path_preview(fp)
-        elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            preview = pragmatic.path_preview(fp)
-        elif any(s in scan_match for s in parsers.pylint_keywords):
-            preview = pylint.path_preview(fp)
-        elif any(s in scan_match for s in parsers.srm_keywords):
-            preview = srm.path_preview(fp)
-        else:
-            preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
 
-        previews[fpath] = preview
-    
-    return previews
 
 def fetch_preview(preview, remove_substr='', add_substr=''):
     if remove_substr and remove_substr in preview:
@@ -363,38 +322,6 @@ def fetch_preview(preview, remove_substr='', add_substr=''):
         preview = add_substr + preview
     
     return preview
-
-def get_preview(fpath, scanner):
-    scan_match = scanner.lower().replace(' ', '')
-    fp = os.path.realpath(fpath)
-    
-    if any(s in scan_match for s in parsers.aio_keywords):
-        return aio.path_preview(fp)
-    elif any(s in scan_match for s in parsers.xmarx_keywords):
-        return checkmarx.path_preview(fp)
-    elif any(s in scan_match for s in parsers.coverity_keywords):
-        return coverity.path_preview(fp)
-    elif any(s in scan_match for s in parsers.cppcheck_keywords):
-        return cppcheck.path_preview(fp)
-    elif any(s in scan_match for s in parsers.depcheck_keywords):
-        return owasp_depcheck.path_preview(fp)
-    elif any(s in scan_match for s in parsers.eslint_keywords):
-        return eslint.path_preview(fp)
-    elif any(s in scan_match for s in parsers.fortify_keywords):
-        if os.path.splitext(fp)[1] == ".csv":
-            return fortify_csv.path_preview(fp)
-        elif os.path.splitext(fp)[1] == ".fpr":
-            return fortify.path_preview(fp)
-    elif any(s in scan_match for s in parsers.gnatsas_keywords):
-        return gnatsas.path_preview(fp)
-    elif any(s in scan_match for s in parsers.pragmatic_keywords):
-        return pragmatic.path_preview(fp)
-    elif any(s in scan_match for s in parsers.pylint_keywords):
-        return pylint.path_preview(fp)
-    elif any(s in scan_match for s in parsers.srm_keywords):
-        return srm.path_preview(fp)
-    else:
-        return f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
 
 
 ################################
@@ -516,7 +443,10 @@ def main():
         elif any(s in scan_match for s in parsers.pylint_keywords):
             err_count += pylint.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            err_count += srm.parse(path, scanner, substr, prepend, control_flags)
+            if os.path.splitext(path)[1] == ".csv":
+                err_count += srm_csv.parse(path, scanner, substr, prepend, control_flags)
+            else:
+                err_count += srm.parse(path, scanner, substr, prepend, control_flags)
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             err_count += 1

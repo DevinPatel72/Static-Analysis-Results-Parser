@@ -1,12 +1,11 @@
-# srm.py
+# srm_csv.py
 import os
 import logging
 import traceback
-import xml.etree.ElementTree as ET
+import csv
 from . import FLAG_VULN_MAPPING
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.cwe_categories import cwe_categories
-from parser_tools.pylint_cdata import pylint_cdata
 from .parser_tools.language_resolver import resolve_lang
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
@@ -28,22 +27,15 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     current_parser = __name__.split('.')[1]
     logger.info(f"Parsing {scanner} - {fpath}")
     
-    # Keep track of issue number and errors
-    finding_num = 0
-    total_findings = 0
+    # Keep track of row number and errors
+    row_num = 0
+    total_rows = 0
     finding_count = 0
     err_count = 0
     
-    # Parse the XML file
-    tree = ET.parse(fpath)
-    root = tree.getroot()
-    findings = root.find('findings')
-    
-    # Gather metadata
-    scanner_version = root.find('report').get('generator-version')
-    scanner = f"SRM v{scanner_version}"
-    
     # Get total number of findings
+    with open(fpath, mode='r', encoding='utf-8-sig') as read_obj:
+        total_rows = len([row[list(row.keys())[0]] for row in csv.DictReader(read_obj)])
     
     # Open csv in read
     with open(fpath, mode='r', encoding='utf-8-sig') as read_obj:
@@ -52,23 +44,13 @@ def parse(fpath, scanner, substr, prepend, control_flags):
         # Loop through every row in CSV
         for row in csv_dict_reader:
             try:
-                finding_num += 1
-                progress_bar(finding_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                row_num += 1
+                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
             
                 # Resolve language of the file
                 lang = resolve_lang(os.path.splitext(row['Path'])[1])
                 
                 cwe = row['CWE']
-                
-                # Map pylint message id to CWE
-                message_id = issue['message-id']
-                if message_id in pylint_cdata.keys():
-                    cwe = pylint_cdata[message_id]
-                elif message_id[0] == 'R':
-                    cwe = '710'
-                elif message_id[0] == 'C':
-                    cwe = '1076'
-                else: cwe = ''
                 
                 # Get tool cwe before any overrides are performed
                 if len(cwe) <= 0:
@@ -116,7 +98,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                 })
                 finding_count += 1
             except Exception:
-                logger.error(f"Row {finding_num} of \'{fpath}\': {traceback.format_exc()}")
+                logger.error(f"Row {row_num} of \'{fpath}\': {traceback.format_exc()}")
                 err_count += 1
     logger.info(f"Successfully processed {finding_count} findings")
     logger.info(f"Number of erroneous rows: {err_count}")
