@@ -61,8 +61,8 @@ def validate_path_and_scanner(fpath, scanner):
     if any(s in scan_match for s in parsers.xmarx_keywords) and os.path.exists(fpath):
         if os.path.isdir(fpath):
             # Check if directory contains at least one csv file
-            if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if file.endswith('.csv')]) <= 0):
-                return "No CSV files in the specified directory \'{}\'".format(fpath)
+            if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (file.endswith('.csv') or file.endswith('.xml'))]) <= 0):
+                return "No CSV or XML files in the specified directory \'{}\'".format(fpath)
             else:
                 # Change fieldnames to xmarx fieldnames
                 parsers.fieldnames = parsers.xmarx_fieldnames
@@ -241,6 +241,7 @@ def get_all_previews(inputs):
     for inp in inputs:
         fpath = inp[InputDictKeys.PATH.value]
         scanner = inp[InputDictKeys.SCANNER.value]
+        preview = ''
     
         scan_match = scanner.lower().replace(' ', '')
         fp = os.path.realpath(fpath)

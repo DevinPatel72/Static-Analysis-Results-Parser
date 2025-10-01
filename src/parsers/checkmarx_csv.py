@@ -1,9 +1,8 @@
-# checkmarx.py
+# checkmarx_csv.py
 import os
 import logging
 import traceback
 import csv
-import xml.etree.ElementTree as ET
 from . import FLAG_VULN_MAPPING
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE,progress_bar
@@ -17,28 +16,19 @@ def path_preview(fpath):
     # Parse the input file
     for file in os.listdir(fpath):
         try:
-            # Check if XML or CSV
-            if file.endswith('.xml'):
-                # Parse the XML file
-                tree = ET.parse(os.path.join(fpath, file))
-                root = tree.getroot()
-                preview = root.findtext('.//FileName', '')
-                if len(preview) <= 0: continue
-                else: return preview # Immediately return valid value
-            elif file.endswith('.csv'):
-                with open(os.path.join(fpath, file), "r", encoding='utf-8-sig') as read_obj:
-                    csv_reader = csv.DictReader(read_obj)
-                    first_row = next(csv_reader)
-                    cell_preview = first_row['SrcFileName']
-                    return cell_preview # Immediately return valid value
-                
+            with open(os.path.join(fpath, file), "r", encoding='utf-8-sig') as read_obj:
+                csv_reader = csv.DictReader(read_obj)
+                first_row = next(csv_reader)
+                cell_preview = first_row['SrcFileName']
+                return cell_preview # Immediately return valid value
+        
         except StopIteration:
-            continue # Thrown by next() once a file is done iterating (i.e., it has no data)
+            continue # Wait until all files are iterated through before returning this
         
         except Exception as e:
             return f"[ERROR] {e}" # Immediately return unknown exception message
     # No data, return error message
-    return f"[ERROR] No data found in Checkmarx directory \'{fpath}\'"
+    return "[ERROR] No data found in CSV files"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
     current_parser = __name__.split('.')[1]
