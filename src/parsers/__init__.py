@@ -1,6 +1,6 @@
 # Version String
 PROG_NAME = 'Static Analysis Results Parser'
-VERSION = '1.0.1'
+VERSION = '1.1.0'
 
 # Control Flag Names
 FLAG_VULN_MAPPING = 'Vulnerability Mappings'

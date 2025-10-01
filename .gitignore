@@ -5,6 +5,7 @@ logs/
 .vscode/
 .cspell/
 junkyard/
+user_inputs.json
 
 # Environments
 .env

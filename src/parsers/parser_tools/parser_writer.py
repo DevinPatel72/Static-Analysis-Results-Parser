@@ -47,9 +47,9 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
         except PermissionError:
             if GUI_MODE:
                 from tkinter import messagebox
-                messagebox.showerror("Unable to open file", f"File \"{outfile}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.\n\nPress Enter to continue...")
+                messagebox.showerror("Unable to open file", f"File \"{outfile}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
             else:
-                print(f"File \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
+                input(f"Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
             
 def write_row(r):
     if __excel_enabled:
@@ -70,9 +70,9 @@ def close_writer():
                 except PermissionError:
                     if GUI_MODE:
                         from tkinter import messagebox
-                        messagebox.showerror("Unable to open file", f"File \"{__fp}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.\n\nPress Enter to continue...")
+                        messagebox.showerror("Unable to open file", f"File \"{__fp}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
                     else:
-                        print(f"File \"{__fp}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
+                        input(f"Output file \"{__fp}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
         else:
             if not __fp.closed:
                 __fp.close()

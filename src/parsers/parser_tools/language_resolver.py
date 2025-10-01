@@ -15,7 +15,7 @@ def resolve_lang(lang):
         return 'vbs'
     elif lang == '.js':
         return 'javascript'
-    elif lang == '.html':
+    elif lang in ['.html', '.htm']:
         return 'html'
     elif lang in ['.adb', '.ads', '.ada']:
         return 'ada'
