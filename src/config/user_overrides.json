@@ -286,7 +286,10 @@
     
     "_comment10": "Override rules based on Pylint attribute 'message-id'",
     "pylint" : {},
+
+    "_comment11": "Override rules based on Sigasi json attribute 'code'",
+    "sigasi" : {},
     
-    "_comment11": "Override rules based on SRM attribute 'Type' or XML tag '<rule>' with key 'name'",
+    "_comment12": "Override rules based on SRM attribute 'Type' or XML tag '<rule>' with key 'name'",
     "srm" : {}
 }

@@ -35,7 +35,7 @@ def path_preview(fpath):
         return f"[ERROR] {traceback.print_exc()}"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
+    current_parser = __name__.split('.')[1].replace('_csv','')
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Keep track of row number and error count
@@ -85,7 +85,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
                 # Perform cwe overrides if user requests
-                cwe, confidence = cwe_conf_override(control_flags, override_name=row['category'], cwe=cwe, override_scanner='fortify')
+                cwe, confidence = cwe_conf_override(control_flags, override_name=row['category'], cwe=cwe, override_scanner=current_parser)
                 
                 # Check if cwe is in categories dict
                 if control_flags[FLAG_VULN_MAPPING] and len(cwe) > 0 and cwe in cwe_categories.keys():

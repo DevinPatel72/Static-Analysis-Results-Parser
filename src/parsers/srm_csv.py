@@ -24,7 +24,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
+    current_parser = __name__.split('.')[1].replace('_csv','')
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Keep track of row number and errors

@@ -120,8 +120,8 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
         
         # Loop through every row in CSV
         for row in csv_dict_reader:
+            row_num += 1
             try:
-                row_num += 1
                 i+=1
                 progress_bar(i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
         

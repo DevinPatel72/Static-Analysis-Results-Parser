@@ -55,8 +55,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     total_findings = len(findings)
     
     for finding in findings:
+        finding_num += 1
         try:
-            finding_num += 1
             progress_bar(finding_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
             
             # Get finding ID for logging

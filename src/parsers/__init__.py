@@ -15,7 +15,7 @@ GUI_MODE = False
 LIST_OF_SCANNERS = ["AIO", "Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "GNAT SAS", "OWASP Dependency Check", "Pragmatic", "Pylint", "SRM"]
 
 # Empty overrides for fallback
-EMPTY_OVERRIDES = "{\"aio\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"srm\":{}}\n"
+EMPTY_OVERRIDES = "{\"aio\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"semgrep\":{},\"sigasi\":{},\"srm\":{}}\n"
 
 # Keywords for scanners
 aio_keywords = ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser']
@@ -28,9 +28,11 @@ gnatsas_keywords = ['gnatsas', 'codepeer']
 manualcve_keywords = ['cve', 'manualcve', 'manualnvd', 'nvd']
 pragmatic_keywords = ['pragmatic']
 pylint_keywords = ['pylint']
+sigasi_keywords = ['sigasi', 'vhdl', 'sigasi/vhdl', 'verilog']
+semgrep_keywords = []
 srm_keywords = ['srm', 'softwareriskmanager', 'codedx']
 xmarx_keywords = ['checkmarx', 'xmarx']
-scanner_keywords = aio_keywords + cppcheck_keywords + coverity_keywords + depcheck_keywords + eslint_keywords + fortify_keywords + gnatsas_keywords + manualcve_keywords + pragmatic_keywords + pylint_keywords + srm_keywords + xmarx_keywords
+scanner_keywords = aio_keywords + cppcheck_keywords + coverity_keywords + depcheck_keywords + eslint_keywords + fortify_keywords + gnatsas_keywords + manualcve_keywords + pragmatic_keywords + pylint_keywords + semgrep_keywords + sigasi_keywords + srm_keywords + xmarx_keywords
 nopathoverridescanners_keywords = aio_keywords + manualcve_keywords
 
 # Valid extensions
@@ -47,4 +49,4 @@ LOGS_DIR = 'logs'
 CONFIG_DIR = 'config'
 
 # Choose specific items to import when using "from parsers import *"
-__all__ = ['FLAG_VULN_MAPPING', 'FLAG_OVERRIDE_CWE', 'FLAG_OVERRIDE_CONFIDENCE', 'FLAG_FORCE_EXPORT_CSV', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'fortify_csv', 'manual_cve', 'pragmatic', 'pylint', 'srm', 'srm_csv']
+__all__ = ['FLAG_VULN_MAPPING', 'FLAG_OVERRIDE_CWE', 'FLAG_OVERRIDE_CONFIDENCE', 'FLAG_FORCE_EXPORT_CSV', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'fortify_csv', 'manual_cve', 'pragmatic', 'pylint', 'semgrep', 'sigasi', 'srm', 'srm_csv']

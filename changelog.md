@@ -2,10 +2,10 @@
 
 ## UNRELEASED [Version 1.1.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.1.0) (YYYY-MM-DD)
 
-- Created a Semgrep parser that accepts JSON or CSV files. JSON is preferred because the scanner provides a greater level of detail in JSON than CSV.
-- Created a Sigasi/VHDL parser that accepts input from the standalone executable and text output from the Visual Studio Code extension.
+- Added support for Semgrep that accepts JSON or CSV files. JSON is preferred because the scanner provides a greater level of detail in JSON than CSV.
+- Added support for Sigasi/VHDL that accepts input from the standalone executable and text output from the Visual Studio Code extension.
 - Updated SRM and Checkmarx parsers to accept XML reports, which includes more fine details than CSV reports.
-- Created an override for CWE-247 to reflect its deprecated status.
+- Added more overrides to user_overrides.json
 - Appended subtype to Type column when parsing Fortify results.
 - Added a Fortify override to `user_overrides.json` to correct CWE for `Often Misused: Authentication` findings.
 - Fixed bug where Checkmarx path preview parser will only access the first CSV file to create a preview. If the first CSV file is empty, the path preview will produce an error. Now, the path preview parser will iterate through all CSVs for a valid path instead of stopping at the first one.

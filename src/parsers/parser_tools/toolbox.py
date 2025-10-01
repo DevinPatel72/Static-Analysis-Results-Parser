@@ -260,6 +260,10 @@ def get_all_previews(inputs):
             preview = pragmatic.path_preview(fp)
         elif any(s in scan_match for s in parsers.pylint_keywords):
             preview = pylint.path_preview(fp)
+        elif any(s in scan_match for s in parsers.semgrep_keywords):
+            preview = semgrep.path_preview(fp)
+        elif any(s in scan_match for s in parsers.sigasi_keywords):
+            preview = sigasi.path_preview(fp)
         elif any(s in scan_match for s in parsers.srm_keywords):
             if os.path.splitext(fp)[1] == ".csv":
                 preview = srm_csv.path_preview(fp)

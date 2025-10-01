@@ -442,6 +442,10 @@ def main():
             err_count += pragmatic.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.pylint_keywords):
             err_count += pylint.parse(path, scanner, substr, prepend, control_flags)
+        elif any(s in scan_match for s in parsers.semgrep_keywords):
+            err_count += semgrep.parse(path, scanner, substr, prepend, control_flags)
+        elif any(s in scan_match for s in parsers.sigasi_keywords):
+            err_count += sigasi.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.srm_keywords):
             if os.path.splitext(path)[1] == ".csv":
                 err_count += srm_csv.parse(path, scanner, substr, prepend, control_flags)
