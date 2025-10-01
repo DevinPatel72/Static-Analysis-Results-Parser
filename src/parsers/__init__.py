@@ -40,7 +40,6 @@ valid_extensions = ['.fpr', '.csv', '.xml', '.json', '.xlsx']
 fieldnames = ['CWE','Confidence','Maturity','Mitigation','Mitigation Comment','Comment',
                 'ID','Path','Line','Type','Message','Symbol',
                 'Tool CWE','Tool','Scanner','Language','Severity']
-xmarx_fieldnames = fieldnames[:fieldnames.index('Message')+1] + ['DestPath', 'DestLine', 'DestSymbol'] + fieldnames[fieldnames.index('Message')+1:]
 
 # Important Paths (overwritten by parse.py)
 EXE_ROOT_DIR = '.'

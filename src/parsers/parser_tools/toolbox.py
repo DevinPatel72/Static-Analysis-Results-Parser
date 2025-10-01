@@ -63,9 +63,6 @@ def validate_path_and_scanner(fpath, scanner):
             # Check if directory contains at least one csv file
             if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (file.endswith('.csv') or file.endswith('.xml'))]) <= 0):
                 return "No CSV or XML files in the specified directory \'{}\'".format(fpath)
-            else:
-                # Change fieldnames to xmarx fieldnames
-                parsers.fieldnames = parsers.xmarx_fieldnames
         else:
             return "Checkmarx input must be a directory, not a file"
     
@@ -87,15 +84,9 @@ def validate_path_and_scanner(fpath, scanner):
             with open(fpath, 'r', encoding='utf-8-sig') as f:
                 headers = f.readline().strip().split(',')
         
-        if all(h in parsers.fieldnames for h in headers):
-            # fieldnames don't change
-            pass
-        elif all(h in parsers.xmarx_fieldnames for h in headers):
-            # Change fieldnames to xmarx fieldnames
-            parsers.fieldnames = parsers.xmarx_fieldnames
-        else:
+        if not all(h in parsers.fieldnames for h in headers):
             # Doesn't match any expected headers
-            return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match one of the following configurations:\n    {parsers.fieldnames}\n    {parsers.xmarx_fieldnames}\n"
+            return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match the following format:\n    {parsers.fieldnames}\n"
 
     # All other inputs
     elif os.path.isfile(fpath):

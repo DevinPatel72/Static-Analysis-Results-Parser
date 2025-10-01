@@ -2,11 +2,14 @@
     "_comment0": "Override rules based on AIO 'Type' column",
     "aio" : {},
     
-    "_comment1": "Override rules based on Checkmarx attribute 'Query'",
+    "_comment1": "Override rules based on Checkmarx CSV attribute 'Query' or XML tag '<Query>' with key 'name' (underscores should be replaced with spaces)",
     "checkmarx" : {
         "Empty Methods": {
             "cwe": "1071",
             "confidence": "Info"
+        },
+        "GOTO Statement": {
+            "cwe": "1075"
         },
         "TruffleHog HighEntropy Strings": {
             "cwe": "331"
