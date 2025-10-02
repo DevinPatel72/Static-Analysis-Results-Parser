@@ -351,9 +351,7 @@ def get_checkmarx_cdata(query, lang, default=''):
         checkmarx_cdata = load_checkmarx_cdata()
     
     # Check checkmarx_cdata in cdata.py
-    test = list((c for c in checkmarx_cdata if 
-                c['Lang'] == lang 
-                and c['Query'] == query))
+    possible_entries = [c for c in checkmarx_cdata if c['Lang'] == lang and c['Query'] == query.replace(' ', '_')]
     
     # Return CWE # if found, else leave it blank.
-    return test[0]['CWE'] if len(test) > 0 else default
+    return possible_entries[0]['CWE'] if len(possible_entries) > 0 else default

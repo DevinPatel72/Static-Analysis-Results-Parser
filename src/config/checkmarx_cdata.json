@@ -974,6 +974,13 @@
   },
   {
     "Lang": "CPP",
+    "Catagory": "CPP_Low_Visibility",
+    "Query": "Server_Information_Exposure",
+    "Severity": "High",
+    "CWE": "497"
+  },
+  {
+    "Lang": "CPP",
     "Catagory": "CPP_Buffer_Overflow",
     "Query": "Buffer_Improper_Index_Access",
     "Severity": "High",
@@ -2174,7 +2181,7 @@
     "Catagory": "CPP_Best_Coding_Practice",
     "Query": "Empty_Methods",
     "Severity": "Information",
-    "CWE": "398"
+    "CWE": "1071"
   },
   {
     "Lang": "CPP",
@@ -2188,7 +2195,7 @@
     "Catagory": "CPP_Best_Coding_Practice",
     "Query": "GOTO_Statement",
     "Severity": "Information",
-    "CWE": "699"
+    "CWE": "1075"
   },
   {
     "Lang": "CPP",
@@ -2482,7 +2489,7 @@
     "Catagory": "CPP_MISRA_C",
     "Query": "R14_04_Use_Of_Goto",
     "Severity": "Information",
-    "CWE": "0"
+    "CWE": "1075"
   },
   {
     "Lang": "CPP",
@@ -3084,7 +3091,7 @@
     "Catagory": "CPP_MISRA_CPP",
     "Query": "R06_06_02_Backward_Use_Of_Goto",
     "Severity": "Information",
-    "CWE": "0"
+    "CWE": "1075"
   },
   {
     "Lang": "CPP",
@@ -3098,7 +3105,7 @@
     "Catagory": "CPP_MISRA_CPP",
     "Query": "R06_06_04_One_GoTo_Break_In_Iteration",
     "Severity": "Information",
-    "CWE": "0"
+    "CWE": "1075"
   },
   {
     "Lang": "CPP",
@@ -3280,7 +3287,7 @@
     "Catagory": "CPP_MISRA_CPP",
     "Query": "R15_00_03_Goto_Label_Inside_TryCatch",
     "Severity": "Information",
-    "CWE": "10763"
+    "CWE": "1075"
   },
   {
     "Lang": "CPP",
@@ -5681,7 +5688,7 @@
     "Catagory": "Groovy_Best_Coding_Practice",
     "Query": "Empty_Methods",
     "Severity": "Information",
-    "CWE": "398"
+    "CWE": "1071"
   },
   {
     "Lang": "Groovy",
@@ -5716,7 +5723,7 @@
     "Catagory": "Groovy_Best_Coding_Practice",
     "Query": "GOTO_Statement",
     "Severity": "Information",
-    "CWE": "699"
+    "CWE": "1075"
   },
   {
     "Lang": "Groovy",
@@ -7648,7 +7655,7 @@
     "Catagory": "Java_Best_Coding_Practice",
     "Query": "Empty_Methods",
     "Severity": "Information",
-    "CWE": "398"
+    "CWE": "1071"
   },
   {
     "Lang": "Java",
@@ -7725,7 +7732,7 @@
     "Catagory": "Java_Best_Coding_Practice",
     "Query": "GOTO_Statement",
     "Severity": "Information",
-    "CWE": "699"
+    "CWE": "1075"
   },
   {
     "Lang": "Java",
@@ -9797,7 +9804,7 @@
     "Catagory": "ObjectiveC_Best_Coding_Practice",
     "Query": "Empty_Methods",
     "Severity": "Information",
-    "CWE": "398"
+    "CWE": "1071"
   },
   {
     "Lang": "Objc",
@@ -10105,7 +10112,7 @@
     "Catagory": "Perl_Best_Coding_Practice",
     "Query": "Empty_Methods",
     "Severity": "Information",
-    "CWE": "398"
+    "CWE": "1071"
   },
   {
     "Lang": "Perl",
@@ -10848,6 +10855,13 @@
     "Query": "Connection_String_Injection",
     "Severity": "High",
     "CWE": "99"
+  },
+  {
+    "Lang": "Python",
+    "Catagory": "Python_Medium_Risk",
+    "Query": "Improper_Resource_Shutdown_or_Release",
+    "Severity": "Medium",
+    "CWE": "404"
   },
   {
     "Lang": "Python",

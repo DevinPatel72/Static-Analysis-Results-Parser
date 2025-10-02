@@ -8,9 +8,6 @@
             "cwe": "1071",
             "confidence": "Info"
         },
-        "GOTO Statement": {
-            "cwe": "1075"
-        },
         "TruffleHog HighEntropy Strings": {
             "cwe": "331"
         }
