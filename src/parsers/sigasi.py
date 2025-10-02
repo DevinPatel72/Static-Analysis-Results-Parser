@@ -48,6 +48,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
         logger.error(f"[ERROR] Invalid JSON format: {fpath}")
         return err_count + 1
     
+    sigasi_cdata = load_sigasi_cdata()
+    
     issues = data['issues']
     
     # Get total number of findings
@@ -70,18 +72,31 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             # Resolve language of the file
             lang = resolve_lang(os.path.splitext(path)[1])
             
-            # Map CWE @TODO
-            sigasi_cdata = load_sigasi_cdata()
-            cwe = ''
+            description = issue['description']
+            severity = issue['severity']
+            
+            # Get issue code for CWE mapping
+            issue_code = issue['code']
+            issue_code_description = issue.get('codeDescription', issue_code)
+            issue_code_number = str(issue_code.split('.')[-1])
+            
+            # Map CWE
+            if 'vhdl' in issue_code.lower():
+                cwe = sigasi_cdata['vhdl'].get(issue_code_number, '')
+            elif 'verilog' in issue_code.lower():
+                cwe = sigasi_cdata['verilog'].get(issue_code_number, '')
+            
+            # Custom overrides
+            elif 'Could not find declaration' in description:
+                cwe = '457'
+            else:
+                logger.warning(f"Code \"{issue_code}\" not defined in sigasi_cdata.json")
+                cwe = ''
             
             # Get tool cwe before any overrides are performed
             if len(cwe) <= 0:
                 tool_cwe = '(blank)'
             else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
-            
-            # Get issue code
-            issue_code = issue['code']
-            issue_code_description = issue.get('codeDescription', issue_code)
             
             # Perform cwe overrides if user requests
             cwe, confidence = cwe_conf_override(control_flags, override_name=issue_code, cwe=cwe, override_scanner=current_parser)
@@ -91,9 +106,6 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
             else:
                 cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
-                
-            description = issue['description']
-            severity = issue['severity']
             
             preimage = f"{path}{line}{issue_code}{description}"
             id = idgenerator.hash(preimage)

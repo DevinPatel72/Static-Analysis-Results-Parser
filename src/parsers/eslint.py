@@ -42,6 +42,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     finding_count = 0
     total_issues = 0
     
+    eslint_cdata = load_eslint_cdata()
+    
     # Find total number of issues
     for file in data:
         total_issues += len(file['messages'])
@@ -60,7 +62,6 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                     continue
                 
                 # Map eslint message id to CWE
-                eslint_cdata = load_eslint_cdata()
                 if rule_id in eslint_cdata.keys():
                     cwe = eslint_cdata[rule_id]
                 else: cwe = ''

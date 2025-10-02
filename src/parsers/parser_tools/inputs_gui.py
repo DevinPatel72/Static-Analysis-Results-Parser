@@ -275,6 +275,10 @@ class InputsGUI:
             return 'Pragmatic'
         elif any(s in scan_match for s in parsers.pylint_keywords):
             return 'Pylint'
+        elif any(s in scan_match for s in parsers.semgrep_keywords):
+            return 'Semgrep'
+        elif any(s in scan_match for s in parsers.sigasi_keywords):
+            return 'Sigasi'
         elif any(s in scan_match for s in parsers.srm_keywords):
             return 'SRM'
         else:

@@ -20,8 +20,8 @@ def resolve_lang(lang):
     elif lang in ['.adb', '.ads', '.ada']:
         return 'ada'
     elif lang in ['.vhd', '.vhdl']:
-        return 'VHSIC Hardware Description Language'
+        return 'vhdl'
     elif lang in ['.v', '.sv', '.svh']:
-        return 'Verilog'
+        return 'verilog'
     else:
         return ''
