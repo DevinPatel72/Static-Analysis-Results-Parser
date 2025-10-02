@@ -5,6 +5,7 @@
 - Added support for Semgrep that accepts JSON or CSV files. JSON is preferred because the scanner provides a greater level of detail in JSON than CSV.
 - Added support for Sigasi/VHDL that accepts input from the standalone executable and text output from the Visual Studio Code extension.
 - Updated SRM and Checkmarx parsers to accept XML reports, which include more fine details than CSV reports.
+- Moved CWE mapping data to config folder so that it can be freely edited and pluggable by users.
 - Added more overrides to user_overrides.json
 - Removed support for Fortify CSV results because the CSV results do not contain an adequate level of detail for the findings.
 - Appended subtype to Type column when parsing Fortify results.

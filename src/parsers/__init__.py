@@ -3,7 +3,7 @@ PROG_NAME = 'Static Analysis Results Parser'
 VERSION = '1.1.0'
 
 # Control Flag Names
-FLAG_VULN_MAPPING = 'Vulnerability Mappings'
+FLAG_CATEGORY_MAPPING = 'Category Mappings'
 FLAG_OVERRIDE_CWE = 'Override CWE'
 FLAG_OVERRIDE_CONFIDENCE = 'Override Confidence'
 FLAG_FORCE_EXPORT_CSV = 'Force Export CSV'
@@ -12,7 +12,7 @@ FLAG_FORCE_EXPORT_CSV = 'Force Export CSV'
 GUI_MODE = False
 
 # List of scanners for the GUI dropdown
-LIST_OF_SCANNERS = ["AIO", "Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "GNAT SAS", "OWASP Dependency Check", "Pragmatic", "Pylint", "SRM"]
+LIST_OF_SCANNERS = ["AIO", "Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "GNAT SAS", "OWASP Dependency Check", "Pragmatic", "Pylint", "Semgrep", "Sigasi", "SRM"]
 
 # Empty overrides for fallback
 EMPTY_OVERRIDES = "{\"aio\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"semgrep\":{},\"sigasi\":{},\"srm\":{}}\n"
@@ -48,5 +48,8 @@ EXE_ROOT_DIR = '.'
 LOGS_DIR = 'logs'
 CONFIG_DIR = 'config'
 
+# CWE Category Mappings
+cwe_categories = {}
+
 # Choose specific items to import when using "from parsers import *"
-__all__ = ['FLAG_VULN_MAPPING', 'FLAG_OVERRIDE_CWE', 'FLAG_OVERRIDE_CONFIDENCE', 'FLAG_FORCE_EXPORT_CSV', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'manual_cve', 'pragmatic', 'pylint', 'semgrep', 'sigasi', 'srm']
+__all__ = ['FLAG_CATEGORY_MAPPING', 'FLAG_OVERRIDE_CWE', 'FLAG_OVERRIDE_CONFIDENCE', 'FLAG_FORCE_EXPORT_CSV', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'manual_cve', 'pragmatic', 'pylint', 'semgrep', 'sigasi', 'srm']

@@ -4,7 +4,7 @@ import logging
 import traceback
 import csv
 from .parser_tools import parser_writer
-from .parser_tools.progressbar import SPACE,progress_bar
+from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
 
 __excel_enabled = False

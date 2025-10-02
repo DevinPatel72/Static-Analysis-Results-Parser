@@ -29,7 +29,7 @@ class InputDictKeys(Enum):
     PREPEND = 'prepend'
     REMOVE = 'remove'
     OUTFILE = 'outfile'
-    OVERRIDE_VULN_MAPPING = FLAG_VULN_MAPPING
+    OVERRIDE_VULN_MAPPING = FLAG_CATEGORY_MAPPING
     OVERRIDE_CWE = FLAG_OVERRIDE_CWE
     OVERRIDE_CONFIDENCE = FLAG_OVERRIDE_CONFIDENCE
     FORCE_EXPORT_CSV = FLAG_FORCE_EXPORT_CSV
@@ -117,7 +117,16 @@ def validate_outfile(outfile):
 
     return "TRUE"
 
-def load_config():
+def load_config_cwe_category_mappings():
+    # Load MITRE Category Mappings for each CWE
+    try:
+        with open(os.path.join(parsers.CONFIG_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
+            return json.load(r)
+    except json.JSONDecodeError:
+        console("Unable to load MITRE CWE Category Mappings: Invalid JSON format\nThe program will continue without CWE category mappings.", "Config Error", type='error')
+        return {}
+
+def load_config_user_inputs():
     # Check if there are inputs in user_inputs.json
     inputs_path = os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')
     if os.path.isfile(inputs_path):
@@ -214,7 +223,9 @@ def console(msg, title='', type='info'):
     else:
         print(f'\n[{type.upper()}]  {msg}')
     
-    if type == 'error':
+    if type == 'critical':
+        logger.critical(msg)
+    elif type == 'error':
         logger.error(msg)
     elif type == 'warning':
         logger.warning(msg)

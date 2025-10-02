@@ -11,18 +11,20 @@ print(f"""
 # This all-in-one script will parse a list of scanner output files and collect them into one Excel or CSV file.
 #
 # Accepted Inputs:
-#   ->  AIO Parser: .xlsx OR .csv
-#   ->  Checkmarx:  Directory of .csv files (Single directory, no recursion)
-#   ->  CppCheck:   .xml
-#   ->  Coverity:   .json
-#   ->  Dep Check:  .csv
-#   ->  ESLint:     .json
-#   ->  Fortify:    .fpr (preferred) OR .csv
-#   ->  Gnat SAS:   .csv
-#   ->  NVD CVE:    .csv
-#   ->  Pragmatic:  .csv
-#   ->  Pylint:     .json
-#   ->  SRM:        .xml (preferred) OR .csv
+#   ->  AIO Parser:  .xlsx OR .csv
+#   ->  Checkmarx:   Directory of .xml (preferred) OR .csv files (Single directory, no recursion)
+#   ->  CppCheck:    .xml
+#   ->  Coverity:    .json
+#   ->  Dep Check:   .csv
+#   ->  ESLint:      .json
+#   ->  Fortify:     .fpr
+#   ->  Gnat SAS:    .csv
+#   ->  NVD CVE:     .csv
+#   ->  Pragmatic:   .csv
+#   ->  Pylint:      .json
+#   ->  Sigasi:      .json
+#   ->  SemGrep:     .json (preferred) OR .csv
+#   ->  SRM:         .xml (preferred) OR .csv
 #############################################################################################################
 """, end="\n")
 
@@ -36,7 +38,7 @@ from math import ceil
 import parsers
 from parsers import *
 from parsers.parser_tools import parser_writer
-from parsers.parser_tools.toolbox import InputDictKeys, load_config, export_config, validate_path_and_scanner, check_input_format, get_all_previews
+from parsers.parser_tools.toolbox import InputDictKeys, load_config_user_inputs, load_config_cwe_category_mappings, export_config, validate_path_and_scanner, check_input_format, get_all_previews
 
 
 # Configure root path and important dirs of script
@@ -306,10 +308,14 @@ def prompt_control_flags(control_flags):
             else:
                 print("\n[ERROR]  Invalid input. Please enter yes or no. (Leave blank for {})".format('\"yes\"' if default else '\"no\"'))
     
-    control_flags[FLAG_VULN_MAPPING]         = ask("Enable CWE vulnerability mappings? This will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.") if FLAG_VULN_MAPPING not in control_flags.keys() else control_flags[FLAG_VULN_MAPPING]
+    control_flags[FLAG_CATEGORY_MAPPING]     = ask("Enable CWE category mappings? This will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.") if FLAG_CATEGORY_MAPPING not in control_flags.keys() else control_flags[FLAG_CATEGORY_MAPPING]
     control_flags[FLAG_OVERRIDE_CWE]         = ask("Enable CWE overrides? This will change the scanner's CWE value to a user-specified value for findings of specific types.") if FLAG_OVERRIDE_CWE not in control_flags.keys() else control_flags[FLAG_OVERRIDE_CWE]
     control_flags[FLAG_OVERRIDE_CONFIDENCE]  = ask("Enable Confidence overrides? This will change the confidence value to a user-specified one for findings of specific types.") if FLAG_OVERRIDE_CONFIDENCE not in control_flags.keys() else control_flags[FLAG_OVERRIDE_CONFIDENCE]
     control_flags[FLAG_FORCE_EXPORT_CSV]     = ask("Force export as CSV? This will ignore the output file extension if yes.", default=False) if FLAG_FORCE_EXPORT_CSV not in control_flags.keys() else control_flags[FLAG_FORCE_EXPORT_CSV]
+    
+    # Load the mapping if true
+    if control_flags[FLAG_CATEGORY_MAPPING]:
+        parsers.cwe_categories = load_config_cwe_category_mappings()
     
     return control_flags
 
@@ -345,7 +351,7 @@ def main():
             
             if uinput in ['y', 'yes']:
                 # Load inputs from config file
-                rv = load_config()
+                rv = load_config_user_inputs()
                 if isinstance(rv, str):
                     if "Config file \'user_inputs.json\' not found." != rv:
                         logger.warning(f"{rv}")

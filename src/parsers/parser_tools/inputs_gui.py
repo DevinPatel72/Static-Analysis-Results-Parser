@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 from .. import PROG_NAME, VERSION
-from .toolbox import InputDictKeys, validate_path_and_scanner, get_all_previews, generate_preview
+from .toolbox import InputDictKeys, load_config_cwe_category_mappings, validate_path_and_scanner, get_all_previews, generate_preview
 
 # Constants
 WINDOW_LENGTH = 900
@@ -441,7 +441,7 @@ class OutfileFlagsGUI:
         mapping_val = self.initial_flags.get(InputDictKeys.OVERRIDE_VULN_MAPPING.value, True)
         cwe_val = self.initial_flags.get(InputDictKeys.OVERRIDE_CWE.value, True)
         confidence_val = self.initial_flags.get(InputDictKeys.OVERRIDE_CONFIDENCE.value, True)
-        self.enable_mapping = tk.BooleanVar(value=mapping_val)
+        self.enable_category_mapping = tk.BooleanVar(value=mapping_val)
         self.enable_override_cwe = tk.BooleanVar(value=cwe_val)
         self.enable_override_confidence = tk.BooleanVar(value=confidence_val)
 
@@ -450,8 +450,8 @@ class OutfileFlagsGUI:
 
         self.add_checkbox_with_tooltip(
             checkbox_frame,
-            "Enable Vulnerability Mappings",
-            self.enable_mapping,
+            "Enable CWE Category Mappings",
+            self.enable_category_mapping,
             "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers."
         )
         
@@ -468,9 +468,6 @@ class OutfileFlagsGUI:
             self.enable_override_confidence,
             "If enabled, this will change the confidence value to a user-specified one for findings of specific types."
         )
-        # tk.Checkbutton(checkbox_frame, text="Enable Vulnerability Mappings", variable=self.enable_mapping).pack(anchor="w")
-        # tk.Checkbutton(checkbox_frame, text="Enable Override CWE", variable=self.enable_override_cwe).pack(anchor="w")
-        # tk.Checkbutton(checkbox_frame, text="Enable Override Confidence", variable=self.enable_override_confidence).pack(anchor="w")
 
         # ─── Submit Button ─────────────────────────────
         submit_btn = tk.Button(self.root, text="Submit", command=self.submit)
@@ -513,10 +510,14 @@ class OutfileFlagsGUI:
 
         self.results = {
             InputDictKeys.OUTFILE.value: output_path,
-            InputDictKeys.OVERRIDE_VULN_MAPPING.value: self.enable_mapping.get(),
+            InputDictKeys.OVERRIDE_VULN_MAPPING.value: self.enable_category_mapping.get(),
             InputDictKeys.OVERRIDE_CWE.value: self.enable_override_cwe.get(),
             InputDictKeys.OVERRIDE_CONFIDENCE.value: self.enable_override_confidence.get()
         }
+        
+        # Load cwe mappings if true
+        if self.enable_category_mapping.get():
+            parsers.cwe_categories = load_config_cwe_category_mappings()
 
         self.cleanexit = True
         self.root.destroy()

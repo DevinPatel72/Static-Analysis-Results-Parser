@@ -4,14 +4,15 @@ import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
-from . import FLAG_VULN_MAPPING
+from . import FLAG_CATEGORY_MAPPING, cwe_categories
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.progressbar import SPACE,progress_bar
+from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
-from .parser_tools.cwe_categories import cwe_categories
-from .parser_tools.cdata import cdata as CWEList
+from .parser_tools.toolbox import console
 
 logger = logging.getLogger(__name__)
+
+checkmarx_cdata = []
 
 def path_preview(fpath):
     # Parse the input file
@@ -129,16 +130,12 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
                 # row variable is a dictionary that represents a row in csv
                 lang = row['QueryPath'].split('\\')[0]
 
-                # Check CWEList in cdata.py
-                test = list((c for c in CWEList if 
-                            c['Lang'] == lang 
-                            and c['Query'] == row['Query'].replace(' ','_')))
+                # Check checkmarx_cdata
+                cwe = get_checkmarx_cdata(row['Query'], lang)
                 
+                # Adjust lang
                 if lang == 'CPP': lang = 'c/c++'
                 else: lang = lang.lower()
-
-                # Set CWE # if found, else leave it blank.
-                cwe = test[0]['CWE'] if len(test) > 0 else ''
                 
                 # Get tool cwe before any overrides are performed
                 if len(cwe) <= 0:
@@ -151,7 +148,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
                 cwe, confidence = cwe_conf_override(control_flags, override_name=query, cwe=cwe, override_scanner=current_parser)
                 
                 # Check if cwe is in categories dict
-                if control_flags[FLAG_VULN_MAPPING] and cwe in cwe_categories.keys():
+                if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
                     cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
                 else:
                     cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
@@ -231,12 +228,8 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
             lang = query_path.split('\\')[0]
             
             if len(cwe) <= 0:
-                # Check CWEList in cdata.py
-                test = list((c for c in CWEList if 
-                            c['Lang'] == lang 
-                            and c['Query'] == query.get('name', '')))
-                # Set CWE # if found, else leave it blank.
-                cwe = test[0]['CWE'] if len(test) > 0 else ''
+                # Check checkmarx_cdata
+                cwe = get_checkmarx_cdata(query.get('name', ''), lang)
             
             # Get tool cwe before any overrides are performed
             if len(cwe) <= 0:
@@ -251,7 +244,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
             cwe, confidence = cwe_conf_override(control_flags, override_name=query_name, cwe=cwe, override_scanner=current_parser)
             
             # Check if cwe is in categories dict
-            if control_flags[FLAG_VULN_MAPPING] and cwe in cwe_categories.keys():
+            if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
                 cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
             else:
                 cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
@@ -337,3 +330,29 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
             err_count += 1
     return i, finding_count, err_count
 # End of _parse_xml
+
+def load_checkmarx_cdata():
+    from . import CONFIG_DIR
+    import json
+    
+    try:
+        with open(os.path.join(CONFIG_DIR, 'checkmarx_cdata.json'), 'r', encoding='utf-8-sig') as r:
+            return json.load(r)
+    except json.JSONDecodeError:
+        console("Unable to load Checkmarx CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')
+        return [0]
+    
+def get_checkmarx_cdata(query, lang, default=''):
+    # Maps pylint query to CWE number and returns it
+    global checkmarx_cdata
+    
+    if len(checkmarx_cdata) <= 0:
+        checkmarx_cdata = load_checkmarx_cdata()
+    
+    # Check checkmarx_cdata in cdata.py
+    test = list((c for c in checkmarx_cdata if 
+                c['Lang'] == lang 
+                and c['Query'] == query))
+    
+    # Return CWE # if found, else leave it blank.
+    return test[0]['CWE'] if len(test) > 0 else default

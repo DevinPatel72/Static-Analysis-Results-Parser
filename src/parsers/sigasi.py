@@ -4,10 +4,9 @@ import os
 import logging
 import traceback
 import json
-from . import FLAG_VULN_MAPPING
+from . import FLAG_CATEGORY_MAPPING, cwe_categories
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.cwe_categories import cwe_categories
-from .parser_tools.sigasi_cdata import sigasi_cdata
+from .parser_tools.toolbox import console
 from .parser_tools.language_resolver import resolve_lang
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
@@ -72,6 +71,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             lang = resolve_lang(os.path.splitext(path)[1])
             
             # Map CWE @TODO
+            sigasi_cdata = load_sigasi_cdata()
             cwe = ''
             
             # Get tool cwe before any overrides are performed
@@ -87,7 +87,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             cwe, confidence = cwe_conf_override(control_flags, override_name=issue_code, cwe=cwe, override_scanner=current_parser)
             
             # Check if cwe is in categories dict
-            if control_flags[FLAG_VULN_MAPPING] and cwe in cwe_categories.keys():
+            if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
                 cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
             else:
                 cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
@@ -126,3 +126,13 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     logger.info(f"Number of erroneous rows: {err_count}")
     return err_count
 # End of parse
+
+def load_sigasi_cdata():
+    from . import CONFIG_DIR
+    
+    try:
+        with open(os.path.join(CONFIG_DIR, 'sigasi_cdata.json'), 'r', encoding='utf-8-sig') as r:
+            return json.load(r)
+    except json.JSONDecodeError:
+        console("Unable to load Sigasi CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')
+        return [0]

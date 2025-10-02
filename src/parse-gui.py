@@ -5,7 +5,7 @@ import os
 import sys
 import traceback
 from parsers.parser_tools.inputs_gui import YesNoGUI, InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
-from parsers.parser_tools.toolbox import InputDictKeys, console, load_config, export_config, check_input_format
+from parsers.parser_tools.toolbox import InputDictKeys, console, load_config_user_inputs, export_config, check_input_format
 import parsers
 from parsers import PROG_NAME, VERSION
 from parsers import *
@@ -72,7 +72,7 @@ def main():
         
         # Load inputs from config file
         if uinput:
-            rv = load_config()
+            rv = load_config_user_inputs()
             if isinstance(rv, str):
                 if "Config file \'user_inputs.json\' not found." != rv:
                     logger.warning(f"{rv}")
@@ -108,7 +108,7 @@ def main():
     
     parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
     control_flags = {
-        FLAG_VULN_MAPPING: outfile_flags_gui.results[InputDictKeys.OVERRIDE_VULN_MAPPING.value],
+        FLAG_CATEGORY_MAPPING: outfile_flags_gui.results[InputDictKeys.OVERRIDE_VULN_MAPPING.value],
         FLAG_OVERRIDE_CWE: outfile_flags_gui.results[InputDictKeys.OVERRIDE_CWE.value],
         FLAG_OVERRIDE_CONFIDENCE: outfile_flags_gui.results[InputDictKeys.OVERRIDE_CONFIDENCE.value]
     }

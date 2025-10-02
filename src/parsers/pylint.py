@@ -3,14 +3,15 @@ import os
 import logging
 import traceback
 import json
-from . import FLAG_VULN_MAPPING
+from . import FLAG_CATEGORY_MAPPING, cwe_categories
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.pylint_cdata import pylint_cdata
-from .parser_tools.cwe_categories import cwe_categories
+from .parser_tools.toolbox import console
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
 
 logger = logging.getLogger(__name__)
+
+pylint_cdata = {}
 
 def path_preview(fpath):
     # Open json in read
@@ -49,13 +50,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             
             # Map pylint message id to CWE
             message_id = issue['message-id']
-            if message_id in pylint_cdata.keys():
-                cwe = pylint_cdata[message_id]
-            elif message_id[0] == 'R':
-                cwe = '710'
-            elif message_id[0] == 'C':
-                cwe = '1076'
-            else: cwe = ''
+            cwe = get_pylint_cdata(message_id)
             
             # Get tool cwe before any overrides are performed
             if len(cwe) <= 0:
@@ -66,7 +61,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             cwe, confidence = cwe_conf_override(control_flags, override_name=message_id, cwe=cwe, override_scanner=current_parser)
                 
             # Check if cwe is in categories dict
-            if control_flags[FLAG_VULN_MAPPING] and len(cwe) > 0 and cwe in cwe_categories.keys():
+            if control_flags[FLAG_CATEGORY_MAPPING] and len(cwe) > 0 and cwe in cwe_categories.keys():
                 cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
             else:
                 cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
@@ -118,3 +113,29 @@ def parse(fpath, scanner, substr, prepend, control_flags):
 
 # Pylint message IDs that are not related to the source
 __INTERNAL_MESSAGES = ["F0002", "F0011", "F0001", "F0202", "F0010"]
+
+def load_pylint_cdata():
+    from . import CONFIG_DIR
+    
+    try:
+        with open(os.path.join(CONFIG_DIR, 'pylint_cdata.json'), 'r', encoding='utf-8-sig') as r:
+            return json.load(r)
+    except json.JSONDecodeError:
+        console("Unable to load Pylint CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')
+        return [0]
+    
+
+def get_pylint_cdata(message_id, default=''):
+    # Maps pylint message_id to CWE number and returns it
+    global pylint_cdata
+    
+    if len(pylint_cdata) <= 0:
+        pylint_cdata = load_pylint_cdata()
+    
+    if message_id in pylint_cdata.keys():
+        return pylint_cdata[message_id]
+    elif message_id[0] == 'R':
+        return '710'
+    elif message_id[0] == 'C':
+        return '1076'
+    else: return default

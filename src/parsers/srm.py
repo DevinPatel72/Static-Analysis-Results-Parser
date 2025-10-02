@@ -4,10 +4,9 @@ import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
-from . import FLAG_VULN_MAPPING
+from . import FLAG_CATEGORY_MAPPING, cwe_categories
+from .pylint import get_pylint_cdata
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.cwe_categories import cwe_categories
-from .parser_tools.pylint_cdata import pylint_cdata
 from .parser_tools.language_resolver import resolve_lang
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
@@ -125,7 +124,7 @@ def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
                 cwe, confidence = cwe_conf_override(control_flags, override_name=row['Type'], cwe=cwe, override_scanner=current_parser)
                 
                 # Check if cwe is in categories dict
-                if control_flags[FLAG_VULN_MAPPING] and cwe in cwe_categories.keys():
+                if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
                     cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
                 else:
                     cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
@@ -223,12 +222,7 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                 
                 if tool_name.lower() == 'pylint':
                     message_id = rule.get('code', '').replace('PYLINT-', '').upper()
-                    if message_id in pylint_cdata.keys():
-                        cwe = pylint_cdata[message_id]
-                    elif message_id[0] == 'R':
-                        cwe = '710'
-                    elif message_id[0] == 'C':
-                        cwe = '1076'
+                    cwe = get_pylint_cdata(message_id, cwe)
                 
                 # Get tool cwe before any overrides are performed
                 if len(cwe) <= 0:
@@ -242,7 +236,7 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                 cwe, confidence = cwe_conf_override(control_flags, override_name=finding_type, cwe=cwe, override_scanner=current_parser)
                 
                 # Check if cwe is in categories dict
-                if control_flags[FLAG_VULN_MAPPING] and cwe in cwe_categories.keys():
+                if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
                     cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
                 else:
                     cwe_cat = int(cwe) if str(cwe).isdigit() else cwe

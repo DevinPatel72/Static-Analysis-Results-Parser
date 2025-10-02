@@ -17,7 +17,7 @@ This static analysis results parser will parse a set of output files from static
 -  NVD CVE:     `.csv` (See [Batch-NVD-CVE](https://github.com/DevinPatel72/Batch-NVD-Query))
 -  Pragmatic:   `.csv`
 -  Pylint:      `.json`
--  Sigasi/VHDL: `.json`
+-  Sigasi:      `.json`
 -  SemGrep:     `.json` (preferred) OR `.csv`
 -  SRM:         `.xml` (preferred) OR `.csv`
 

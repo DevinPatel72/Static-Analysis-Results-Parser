@@ -6,9 +6,8 @@ import traceback
 import re
 import csv
 import json
-from . import FLAG_VULN_MAPPING
+from . import FLAG_CATEGORY_MAPPING, cwe_categories
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.cwe_categories import cwe_categories
 from .parser_tools.language_resolver import resolve_lang
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
@@ -117,7 +116,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             cwe, confidence = cwe_conf_override(control_flags, override_name=check_id, cwe=cwe, override_scanner=current_parser)
             
             # Check if cwe is in categories dict
-            if control_flags[FLAG_VULN_MAPPING] and cwe in cwe_categories.keys():
+            if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
                 cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
             else:
                 cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
