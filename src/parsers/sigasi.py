@@ -17,16 +17,19 @@ logger = logging.getLogger(__name__)
 def path_preview(fpath):
     # Parse the input file
     try:
-        with open(fpath, 'r') as r:
+        with open(fpath, 'r', encoding='utf-8-sig') as r:
             data = json.load(r)
         for issue in data['issues']:
-            preview = issue['resource']
+            preview = issue.get('resource', '')
             if len(preview) > 0:
                 return preview
     except json.JSONDecodeError:
         return f"[ERROR] Invalid JSON format: {fpath}"
     except Exception as e:
         return f"[ERROR] {e}"
+    
+    # No data, return error message
+    return f"[ERROR] No data found in \'{fpath}\'"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
     current_parser = __name__.split('.')[1]
@@ -40,7 +43,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     
     # Parse the JSON
     try:
-        with open(fpath, 'r') as r:
+        with open(fpath, 'r', encoding='utf-8-sig') as r:
             data = json.load(r)
     except json.JSONDecodeError:
         logger.error(f"[ERROR] Invalid JSON format: {fpath}")
