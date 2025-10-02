@@ -3,7 +3,7 @@
 Maintained by: Devin Patel
 
 ## Description
-This static analysis results parser will parse a set of output files from static analysis tools and collect them into one Excel or CSV file. Inputs can be entered via GUI, guided terminal prompts, or [json input](#configure-bulk-inputs). [Override rules](#configure-overrides) can be defined in the config directory. See surrounding comments in the overrides file for detailed help.
+The Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel or CSV file. Inputs can be entered via GUI, guided terminal prompts, or [json input](#configure-bulk-inputs). [Override rules](#configure-overrides) can be defined in the config directory. See surrounding comments in the overrides file for detailed help.
 
 ### Accepted Inputs:
 -  AIO Parser:  `.xlsx` OR `.csv`
@@ -37,7 +37,7 @@ This static analysis results parser will parse a set of output files from static
 
 **Dependencies:**
 
-Though not required, the program does use external modules for certain features.
+Though not required, SARP does use external modules for certain features.
 
 ```bash
 $ pip install -r requirements.txt
@@ -74,11 +74,15 @@ If any loaded data is changed in the guided prompts or GUI, "user_inputs.json" w
 
 
 ## Configure Overrides
-The script can perform user-defined overrides on CWEs and Confidence values based on scanner message types.
+SARP can perform user-defined overrides on CWEs and Confidence values based on scanner message types.
 This does NOT affect the "Tool CWE" column, just the "CWE" column.
 These overrides are defined in "config/user_overrides.json" and can be enabled/disabled when prompted.
 To add or remove your own override rules, edit "config/user_overrides.json."
 Follow the formatting of the existing rules.
+
+## Configure CWE Mappings
+SARP allows configurable CWE mappings for scanners that do not output CWE data. A basic set of mappings are provided,
+but users are able to edit and share them if they wish.
 
 
 ## Additional Notes:
@@ -87,7 +91,7 @@ Follow the formatting of the existing rules.
     -  Configuration of inputs
     -  Number of findings output for each scanner input
     
-    The logfile is overwritten every time the script is executed.
+    The logfile is overwritten every time SARP is executed.
 
 2)  If a Checkmarx input is specified, the output CSV will have 3 additional headings: DestPath, DestLine, and DestSymbol
 
@@ -116,4 +120,4 @@ Follow the formatting of the existing rules.
     finding's uniqueness.
 
 6)  In a bash terminal, the progress bar that gets printed may bug out if the terminal window is not sufficiently
-    large enough. This has no effect on the behavior of the script but may create unclean or unreadable console output.
+    large enough. This has no effect on the behavior of SARP but may create unclean or unreadable console output.
