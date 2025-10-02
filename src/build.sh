@@ -36,6 +36,7 @@ is_text() {
 clean() {
     rm -rf "$BIN_DIR"
     mkdir -p "$BIN_DIR"
+    rm config/user_inputs.json
     clean_build_files
 }
 

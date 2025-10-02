@@ -13,6 +13,9 @@ Rem Clean
         echo Deleting folder: %%~fd
         rmdir /s /q "%%d"
     )
+
+    Rem Delete user inputs
+    del config\user_inputs.json
     endlocal
     
     IF "%1"=="clean" (
