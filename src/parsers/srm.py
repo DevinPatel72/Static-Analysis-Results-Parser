@@ -2,6 +2,7 @@
 import os
 import logging
 import traceback
+import csv
 import xml.etree.ElementTree as ET
 from . import FLAG_VULN_MAPPING
 from .parser_tools import idgenerator, parser_writer
@@ -32,13 +33,143 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
+def path_preview(fpath):
+    # Parse the input file
+    try:
+        # Check if XML or CSV
+        if fpath.endswith('.xml'):
+            # Parse the XML file
+            tree = ET.parse(fpath)
+            root = tree.getroot()
+            findings = root.find('findings')
+            
+            for finding in findings:
+                location = finding.find('location')
+                if location.get('type') != 'file': continue
+                
+                path = location.get('path', '')
+                if len(path) <= 0: continue
+                else: return path
+        elif fpath.endswith('.csv'):
+            with open(fpath, "r", encoding='utf-8-sig') as read_obj:
+                csv_reader = csv.DictReader(read_obj)
+                first_row = next(csv_reader)
+                cell_preview = first_row['Path']
+                return cell_preview
+        else:
+            return "[ERROR] Unsupported file type for SRM"
+    except StopIteration:
+        pass # Thrown by next() once a CSV file is done iterating (i.e., it has no data)
+    
+    except Exception as e:
+        return f"[ERROR] {e}" # Immediately return unknown exception message
+    
+    # No data, return error message
+    return f"[ERROR] No data found in \'{fpath}\'"
+
 def parse(fpath, scanner, substr, prepend, control_flags):
     current_parser = __name__.split('.')[1]
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Keep track of issue number and errors
+    finding_count = 0
+    err_count = 0
+    
+    # Parse the file
+    if fpath.endswith('.xml'):
+        finding_count, err_count = _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser)
+    elif fpath.endswith('.csv'):
+        finding_count, err_count = _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser)
+    else:
+        logger.error(f"File {fpath} is not an XML or CSV.")
+        return err_count + 1
+    
+    logger.info(f"Successfully processed {finding_count} findings")
+    logger.info(f"Number of erroneous rows: {err_count}")
+    return err_count
+# End of parse
+
+
+def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
+    # Keep track of row number and errors
+    row_num = 0
+    total_rows = 0
+    finding_count = 0
+    err_count = 0
+    
+    # Get total number of findings
+    with open(fpath, mode='r', encoding='utf-8-sig') as read_obj:
+        total_rows = len([row[list(row.keys())[0]] for row in csv.DictReader(read_obj)])
+    
+    # Open csv in read
+    with open(fpath, mode='r', encoding='utf-8-sig') as read_obj:
+        csv_dict_reader = csv.DictReader(read_obj)
+        
+        # Loop through every row in CSV
+        for row in csv_dict_reader:
+            try:
+                row_num += 1
+                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            
+                # Resolve language of the file
+                lang = resolve_lang(os.path.splitext(row['Path'])[1])
+                
+                cwe = row['CWE']
+                
+                # Get tool cwe before any overrides are performed
+                if len(cwe) <= 0:
+                    tool_cwe = '(blank)'
+                else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
+                
+                # Perform cwe overrides if user requests
+                cwe, confidence = cwe_conf_override(control_flags, override_name=row['Type'], cwe=cwe, override_scanner=current_parser)
+                
+                # Check if cwe is in categories dict
+                if control_flags[FLAG_VULN_MAPPING] and cwe in cwe_categories.keys():
+                    cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
+                else:
+                    cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
+                
+                # Cut and prepend the paths and convert all backslashes to forwardslashes
+                path = str(row['Path']).replace(substr, "", 1)
+                path = os.path.join(prepend, path).replace('\\', '/')
+                
+                line = int(row['Line']) if str(row['Line']).isdigit() else row['Line']
+                
+                # Generate ID for finding (concat Path, Line, Scanner, and Type)
+                preimage = f"{path}{row['Line']}{row['Type']}{tool_cwe}"
+                id = idgenerator.hash(preimage)
+                #id = "SRM{:04}".format(finding_count+1)
+
+                # Write row to outfile
+                parser_writer.write_row({'CWE':cwe_cat,
+                                    'Confidence':confidence,
+                                    'Maturity':'Proof of Concept',
+                                    'Mitigation':'None',
+                                    'Mitigation Comment':'',
+                                    'Comment':'',
+                                    'ID':id,
+                                    'Type':row['Type'],
+                                    'Path':path,
+                                    'Line':line,
+                                    'Symbol':'',
+                                    'Message':'',
+                                    'Tool CWE':tool_cwe,
+                                    'Tool':row['Tool'],
+                                    'Scanner':scanner,
+                                    'Language':lang,
+                                    'Severity':''
+                                })
+                finding_count += 1
+            except Exception:
+                logger.error(f"Row {row_num} of \'{fpath}\': {traceback.format_exc()}")
+                err_count += 1
+    return finding_count, err_count
+# End of _parse_csv
+
+def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
+    # Keep track of issue number and errors
     finding_num = 0
-    total_findings = 0
     finding_count = 0
     err_count = 0
     
@@ -67,6 +198,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             path = location.get('path', '')
             line_xml = location.find('line')
             line = line_xml.get('end', line_xml.get('start', ''))
+            line = int(line) if str(line).isdigit() else line
             
             # Cut and prepend the paths and convert all backslashes to forwardslashes
             path = path.replace(substr, "", 1)
@@ -179,8 +311,5 @@ def parse(fpath, scanner, substr, prepend, control_flags):
         except Exception:
             logger.error(f"Finding with ID {finding_id} in \'{fpath}\': {traceback.format_exc()}")
             err_count += 1
-    
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous rows: {err_count}")
-    return err_count
-# End of parse
+    return finding_count, err_count
+# End of _parse_xml

@@ -25,7 +25,7 @@ def path_preview(fpath):
                 reader = csv.DictReader(r)
                 data = {'findings': [row for row in reader]}
             else:
-                return "[ERROR] Unsupported file type for semgrep results"
+                return "[ERROR] Unsupported file type for Semgrep"
         for finding in data['findings']:
             preview = finding.get('path','')
             if len(preview) > 0:
@@ -84,6 +84,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             # Get path/line and resolve language
             path = finding['path']
             line = finding['start_line']
+            line = int(line) if str(line).isdigit() else line
             
             # Cut and prepend the paths and convert all backslashes to forwardslashes
             path = path.replace(substr, "", 1)

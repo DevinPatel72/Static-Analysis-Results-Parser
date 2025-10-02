@@ -12,7 +12,7 @@ This static analysis results parser will parse a set of output files from static
 -  Coverity:    `.json`
 -  Dep Check:   `.csv`
 -  ESLint:      `.json`
--  Fortify:     `.fpr` (preferred) OR `.csv`
+-  Fortify:     `.fpr`
 -  Gnat SAS:    `.csv`
 -  NVD CVE:     `.csv` (See [Batch-NVD-CVE](https://github.com/DevinPatel72/Batch-NVD-Query))
 -  Pragmatic:   `.csv`

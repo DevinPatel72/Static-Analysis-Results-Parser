@@ -287,7 +287,7 @@
     "_comment10": "Override rules based on Pylint attribute 'message-id'",
     "pylint" : {},
 
-    "_comment11": "Override rules based on Semgrep json attribute 'check_id'",
+    "_comment11": "Override rules based on Semgrep attribute 'check_id'",
     "semgrep" : {},
 
     "_comment12": "Override rules based on Sigasi json attribute 'code'",

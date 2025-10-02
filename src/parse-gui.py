@@ -168,10 +168,7 @@ def main():
         elif any(s in scan_match for s in parsers.gnatsas_keywords):
             err_count += gnatsas.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.fortify_keywords):
-            if os.path.splitext(path)[1] == ".csv":
-                err_count += fortify_csv.parse(path, scanner, substr, prepend, control_flags)
-            else:
-                err_count += fortify.parse(path, scanner, substr, prepend, control_flags)
+            err_count += fortify.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.pragmatic_keywords):
             err_count += pragmatic.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.pylint_keywords):
@@ -181,10 +178,7 @@ def main():
         elif any(s in scan_match for s in parsers.sigasi_keywords):
             err_count += sigasi.parse(path, scanner, substr, prepend, control_flags)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            if os.path.splitext(path)[1] == ".csv":
-                err_count += srm_csv.parse(path, scanner, substr, prepend, control_flags)
-            else:
-                err_count += srm.parse(path, scanner, substr, prepend, control_flags)
+            err_count += srm.parse(path, scanner, substr, prepend, control_flags)
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             err_count += 1

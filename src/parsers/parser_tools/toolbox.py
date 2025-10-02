@@ -250,10 +250,7 @@ def get_all_previews(inputs):
         elif any(s in scan_match for s in parsers.eslint_keywords):
             preview = eslint.path_preview(fp)
         elif any(s in scan_match for s in parsers.fortify_keywords):
-            if os.path.splitext(fp)[1] == ".csv":
-                preview = fortify_csv.path_preview(fp)
-            elif os.path.splitext(fp)[1] == ".fpr":
-                preview = fortify.path_preview(fp)
+            preview = fortify.path_preview(fp)
         elif any(s in scan_match for s in parsers.gnatsas_keywords):
             preview = gnatsas.path_preview(fp)
         elif any(s in scan_match for s in parsers.pragmatic_keywords):
@@ -265,10 +262,7 @@ def get_all_previews(inputs):
         elif any(s in scan_match for s in parsers.sigasi_keywords):
             preview = sigasi.path_preview(fp)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            if os.path.splitext(fp)[1] == ".csv":
-                preview = srm_csv.path_preview(fp)
-            elif os.path.splitext(fp)[1] == ".xml":
-                preview = srm.path_preview(fp)
+            preview = srm.path_preview(fp)
         else:
             preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
 

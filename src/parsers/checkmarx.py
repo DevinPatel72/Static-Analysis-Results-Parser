@@ -37,6 +37,7 @@ def path_preview(fpath):
         
         except Exception as e:
             return f"[ERROR] {e}" # Immediately return unknown exception message
+    
     # No data, return error message
     return f"[ERROR] No data found in Checkmarx directory \'{fpath}\'"
 

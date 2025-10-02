@@ -62,6 +62,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             # Get path/line and resolve language
             path = issue['resource']
             line = issue['line']
+            line = int(line) if str(line).isdigit() else line
             
             # Cut and prepend the paths and convert all backslashes to forwardslashes
             path = path.replace(substr, "", 1)
