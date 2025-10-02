@@ -2,8 +2,8 @@
 
 ## [Version 1.1.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.1.0) (2025-10-02)
 
-- Added support for Semgrep that accepts JSON or CSV files. JSON is preferred because the scanner provides a greater level of detail in JSON than CSV.
-- Added support for Sigasi/VHDL that accepts input from the standalone executable and text output from the Visual Studio Code extension.
+- Added support for Semgrep that accepts JSON or CSV files.
+- Added support for Sigasi/VHDL that accepts JSON input from the standalone executable.
 - Updated SRM and Checkmarx parsers to accept XML reports, which include more fine details than CSV reports.
 - Moved CWE mapping data to config folder so that it can be freely edited and pluggable by users.
 - Added event trace for CPPCheck results. Trace is appended to Message column if it finds more than one event.
