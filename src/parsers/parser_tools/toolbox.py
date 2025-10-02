@@ -7,7 +7,6 @@ import json
 from enum import Enum
 from . import *
 import parsers
-from parsers import *
 
 __excel_enabled = False
 try:
@@ -29,10 +28,10 @@ class InputDictKeys(Enum):
     PREPEND = 'prepend'
     REMOVE = 'remove'
     OUTFILE = 'outfile'
-    OVERRIDE_VULN_MAPPING = FLAG_CATEGORY_MAPPING
-    OVERRIDE_CWE = FLAG_OVERRIDE_CWE
-    OVERRIDE_CONFIDENCE = FLAG_OVERRIDE_CONFIDENCE
-    FORCE_EXPORT_CSV = FLAG_FORCE_EXPORT_CSV
+    OVERRIDE_VULN_MAPPING = parsers.FLAG_CATEGORY_MAPPING
+    OVERRIDE_CWE = parsers.FLAG_OVERRIDE_CWE
+    OVERRIDE_CONFIDENCE = parsers.FLAG_OVERRIDE_CONFIDENCE
+    FORCE_EXPORT_CSV = parsers.FLAG_FORCE_EXPORT_CSV
     
     INPUTS = [PATH, SCANNER, PREPEND, REMOVE]
     FLAGS = [OVERRIDE_VULN_MAPPING, OVERRIDE_CWE, OVERRIDE_CONFIDENCE, FORCE_EXPORT_CSV]
@@ -249,31 +248,31 @@ def get_all_previews(inputs):
         fp = os.path.realpath(fpath)
         
         if any(s in scan_match for s in parsers.aio_keywords):
-            preview = aio.path_preview(fp)
+            preview = parsers.aio.path_preview(fp)
         elif any(s in scan_match for s in parsers.xmarx_keywords):
-            preview = checkmarx.path_preview(fp)
+            preview = parsers.checkmarx.path_preview(fp)
         elif any(s in scan_match for s in parsers.coverity_keywords):
-            preview = coverity.path_preview(fp)
+            preview = parsers.coverity.path_preview(fp)
         elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            preview = cppcheck.path_preview(fp)
+            preview = parsers.cppcheck.path_preview(fp)
         elif any(s in scan_match for s in parsers.depcheck_keywords):
-            preview = owasp_depcheck.path_preview(fp)
+            preview = parsers.owasp_depcheck.path_preview(fp)
         elif any(s in scan_match for s in parsers.eslint_keywords):
-            preview = eslint.path_preview(fp)
+            preview = parsers.eslint.path_preview(fp)
         elif any(s in scan_match for s in parsers.fortify_keywords):
-            preview = fortify.path_preview(fp)
+            preview = parsers.fortify.path_preview(fp)
         elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            preview = gnatsas.path_preview(fp)
+            preview = parsers.gnatsas.path_preview(fp)
         elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            preview = pragmatic.path_preview(fp)
+            preview = parsers.pragmatic.path_preview(fp)
         elif any(s in scan_match for s in parsers.pylint_keywords):
-            preview = pylint.path_preview(fp)
+            preview = parsers.pylint.path_preview(fp)
         elif any(s in scan_match for s in parsers.semgrep_keywords):
-            preview = semgrep.path_preview(fp)
+            preview = parsers.semgrep.path_preview(fp)
         elif any(s in scan_match for s in parsers.sigasi_keywords):
-            preview = sigasi.path_preview(fp)
+            preview = parsers.sigasi.path_preview(fp)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            preview = srm.path_preview(fp)
+            preview = parsers.srm.path_preview(fp)
         else:
             preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
 

@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 from .. import PROG_NAME, VERSION
-from .toolbox import InputDictKeys, load_config_cwe_category_mappings, validate_path_and_scanner, get_all_previews, generate_preview
+from .toolbox import InputDictKeys, validate_path_and_scanner, get_all_previews, generate_preview
 
 # Constants
 WINDOW_LENGTH = 900
@@ -514,10 +514,6 @@ class OutfileFlagsGUI:
             InputDictKeys.OVERRIDE_CWE.value: self.enable_override_cwe.get(),
             InputDictKeys.OVERRIDE_CONFIDENCE.value: self.enable_override_confidence.get()
         }
-        
-        # Load cwe mappings if true
-        if self.enable_category_mapping.get():
-            parsers.cwe_categories = load_config_cwe_category_mappings()
 
         self.cleanexit = True
         self.root.destroy()

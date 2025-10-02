@@ -4,7 +4,6 @@ import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
-from . import FLAG_CATEGORY_MAPPING, cwe_categories
 from .pylint import get_pylint_cdata
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.language_resolver import resolve_lang
@@ -12,25 +11,6 @@ from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
 
 logger = logging.getLogger(__name__)
-
-def path_preview(fpath):
-    # Parse the input file
-    try:
-        # Parse the XML file
-        tree = ET.parse(fpath)
-        root = tree.getroot()
-        findings = root.find('findings')
-        
-        for finding in findings:
-            location = finding.find('location')
-            if location.get('type') != 'file': continue
-            
-            path = location.get('path', '')
-            if len(path) <= 0: continue
-            else: return path
-        
-    except Exception as e:
-        return f"[ERROR] {e}"
 
 def path_preview(fpath):
     # Parse the input file
@@ -90,6 +70,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
 
 
 def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
+    from . import FLAG_CATEGORY_MAPPING, cwe_categories
     # Keep track of row number and errors
     row_num = 0
     total_rows = 0
@@ -167,6 +148,7 @@ def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
 # End of _parse_csv
 
 def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
+    from . import FLAG_CATEGORY_MAPPING, cwe_categories
     # Keep track of issue number and errors
     finding_num = 0
     finding_count = 0
@@ -208,32 +190,51 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
             
             # Get cwe
             if finding.find('cwe') is not None:
-                cwe = finding.find('cwe').get('id', '')
+                finding_cwe = finding.find('cwe').get('id', '')
             else:
-                cwe = ''
+                finding_cwe = ''
             
             # Now iterate through results tag
             for result in finding.find('results'):
+                
+                # Declare this early so it stays in scope
+                confidence = ''
                 
                 # Check if the scanner is pylint, change cwe number if so
                 tool = result.find('tool')
                 tool_name = tool.get('name', '')
                 rule = tool.find('rule')
                 
-                if tool_name.lower() == 'pylint':
-                    message_id = rule.get('code', '').replace('PYLINT-', '').upper()
-                    cwe = get_pylint_cdata(message_id, cwe)
+                # Get result CWE since that is more accurate
+                if result.find('cwe') is not None:
+                    cwe = result.find('cwe').get('id', finding_cwe)
+                else:
+                    cwe = finding_cwe
                 
                 # Get tool cwe before any overrides are performed
                 if len(cwe) <= 0:
                     tool_cwe = '(blank)'
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
+                
+                # Change CWE depending on the tool
+                if tool_name.lower() == 'pylint':
+                    message_id = rule.get('code', '').replace('PYLINT-', '').upper()
+                    cwe = get_pylint_cdata(message_id, cwe)
+                    cwe, confidence = cwe_conf_override(control_flags, override_name=message_id, cwe=cwe, override_scanner=tool_name.lower())
+                elif tool_name.lower() == 'cppcheck':
+                    category = tool.get('code', '').strip()
+                    msg = result.findtext('description', '')
+                    cwe, confidence = cwe_conf_override(control_flags, override_name=category, cwe=cwe, message_content=msg, override_scanner=tool_name.lower())
+                else:
+                    code = tool.get('code', '').strip()
+                    cwe, confidence = cwe_conf_override(control_flags, override_name=code, cwe=cwe, override_scanner=tool_name.lower())
+                
                 # Get finding 'Type'
                 finding_type = rule.get('name', '')
                 
                 # Perform cwe overrides if user requests
-                cwe, confidence = cwe_conf_override(control_flags, override_name=finding_type, cwe=cwe, override_scanner=current_parser)
+                cwe, confidence = cwe_conf_override(control_flags, override_name=finding_type, cwe=cwe, confidence=confidence, override_scanner=current_parser)
                 
                 # Check if cwe is in categories dict
                 if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():

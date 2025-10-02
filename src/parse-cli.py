@@ -313,10 +313,6 @@ def prompt_control_flags(control_flags):
     control_flags[FLAG_OVERRIDE_CONFIDENCE]  = ask("Enable Confidence overrides? This will change the confidence value to a user-specified one for findings of specific types.") if FLAG_OVERRIDE_CONFIDENCE not in control_flags.keys() else control_flags[FLAG_OVERRIDE_CONFIDENCE]
     control_flags[FLAG_FORCE_EXPORT_CSV]     = ask("Force export as CSV? This will ignore the output file extension if yes.", default=False) if FLAG_FORCE_EXPORT_CSV not in control_flags.keys() else control_flags[FLAG_FORCE_EXPORT_CSV]
     
-    # Load the mapping if true
-    if control_flags[FLAG_CATEGORY_MAPPING]:
-        parsers.cwe_categories = load_config_cwe_category_mappings()
-    
     return control_flags
 
 
@@ -402,6 +398,10 @@ def main():
     # Pause for user confirmation
     input("\nPress Enter to continue or CTRL+C to quit...")
     print()
+    
+    # Load the mapping if true
+    if control_flags[FLAG_CATEGORY_MAPPING]:
+        parsers.cwe_categories = load_config_cwe_category_mappings()
 
     # Init the outfile
     if parser_outfile.lower().endswith('.csv') or control_flags[FLAG_FORCE_EXPORT_CSV]:

@@ -5,7 +5,7 @@ import os
 import sys
 import traceback
 from parsers.parser_tools.inputs_gui import YesNoGUI, InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
-from parsers.parser_tools.toolbox import InputDictKeys, console, load_config_user_inputs, export_config, check_input_format
+from parsers.parser_tools.toolbox import InputDictKeys, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
 import parsers
 from parsers import PROG_NAME, VERSION
 from parsers import *
@@ -129,6 +129,10 @@ def main():
     
     # Export parser inputs to config file for reruns
     export_config(parser_inputs, parser_outfile, control_flags)
+    
+    # Load the mapping if true
+    if control_flags[FLAG_CATEGORY_MAPPING]:
+        parsers.cwe_categories = load_config_cwe_category_mappings()
         
     # Init the outfile
     if parser_outfile.lower().endswith('.csv'):

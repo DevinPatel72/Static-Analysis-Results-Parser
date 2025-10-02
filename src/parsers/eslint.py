@@ -3,7 +3,6 @@ import os
 import logging
 import traceback
 import json
-from . import FLAG_CATEGORY_MAPPING, cwe_categories
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
@@ -17,10 +16,13 @@ def path_preview(fpath):
         with open(fpath, mode='r', encoding='utf-8-sig') as f:
             data = json.load(f)
             return data[0]['filePath']
+    except json.JSONDecodeError:
+        return "[ERROR] Invalid JSON format"
     except Exception as e:
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
+    from . import FLAG_CATEGORY_MAPPING, cwe_categories
     current_parser = __name__.split('.')[1]
     logger.info(f"Parsing {scanner} - {fpath}")
     

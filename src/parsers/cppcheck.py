@@ -5,7 +5,6 @@ import traceback
 import html
 from csv import DictWriter
 import xml.etree.ElementTree as ET
-from . import FLAG_CATEGORY_MAPPING, cwe_categories
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
@@ -28,6 +27,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
+    from . import FLAG_CATEGORY_MAPPING, cwe_categories
     current_parser = __name__.split('.')[1]
     logger.info(f"Parsing {scanner} - {fpath}")
     

@@ -40,7 +40,7 @@ def cwe_conf_override(control_flags, override_name, cwe='', confidence='To Verif
         _load_overrides()
     
     # Check if override rule is defined
-    if override_name not in overrides[override_scanner].keys():
+    if override_name not in overrides.get(override_scanner, {}).keys():
         return cwe, confidence
     
     t_override = overrides[override_scanner][override_name]

@@ -4,7 +4,6 @@ import os
 import logging
 import traceback
 import json
-from . import FLAG_CATEGORY_MAPPING, cwe_categories
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.toolbox import console
 from .parser_tools.language_resolver import resolve_lang
@@ -23,7 +22,7 @@ def path_preview(fpath):
             if len(preview) > 0:
                 return preview
     except json.JSONDecodeError:
-        return f"[ERROR] Invalid JSON format: {fpath}"
+        return f"[ERROR] Invalid JSON format"
     except Exception as e:
         return f"[ERROR] {e}"
     
@@ -31,6 +30,7 @@ def path_preview(fpath):
     return f"[ERROR] No data found in \'{fpath}\'"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
+    from . import FLAG_CATEGORY_MAPPING, cwe_categories
     current_parser = __name__.split('.')[1]
     logger.info(f"Parsing {scanner} - {fpath}")
     

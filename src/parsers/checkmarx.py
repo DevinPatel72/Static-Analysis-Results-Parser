@@ -4,7 +4,6 @@ import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
-from . import FLAG_CATEGORY_MAPPING, cwe_categories
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
@@ -113,6 +112,7 @@ def _get_total(path):
 # End of _get_total
 
 def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner, current_parser):
+    from . import FLAG_CATEGORY_MAPPING, cwe_categories
     # Open csv in read
     with open(f, mode='r', encoding='utf-8-sig') as read_obj:
         csv_dict_reader = csv.DictReader(read_obj)
@@ -200,6 +200,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
 # End of _parse_csv
 
 def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner, current_parser):
+    from . import FLAG_CATEGORY_MAPPING, cwe_categories
     # Extract XML
     tree = ET.parse(f)
     root = tree.getroot()
