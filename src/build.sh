@@ -75,7 +75,7 @@ for file in dist/config/**/*; do
     [[ -f "$file" ]] || continue
 
     # Check if file is text
-    if $(is_text "$file"); then
+    if is_text "$file"; then
         eval "$CONVERT_LINE_ENDINGS '$file'"
     fi
 done
