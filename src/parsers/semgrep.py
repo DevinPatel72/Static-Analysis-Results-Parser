@@ -101,7 +101,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 if (m := re.search(r"CWE-(\d+):.*", cwe)):
                     cwe = m.group(1)
                 else:
-                    logger.warning(f'Failed to parse CWE for {fpath}, bad regex matching.') # @DEBUG
+                    logger.warning(f'Failed to parse CWE for {fpath}, bad regex match.')
+                    err_count += 1
                     cwe = ''
             
             # Get tool cwe before any overrides are performed
