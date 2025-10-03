@@ -91,6 +91,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 cwe = '457'
             else:
                 logger.warning(f"Code \"{issue_code}\" not defined in sigasi_cdata.json")
+                err_count += 1
                 cwe = ''
             
             # Get tool cwe before any overrides are performed
