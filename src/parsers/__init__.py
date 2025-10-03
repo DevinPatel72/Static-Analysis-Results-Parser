@@ -18,7 +18,7 @@ LIST_OF_SCANNERS = ["AIO", "Checkmarx", "Coverity", "CPPCheck", "ESLint", "Forti
 EMPTY_OVERRIDES = "{\"aio\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"semgrep\":{},\"sigasi\":{},\"srm\":{}}\n"
 
 # Keywords for scanners
-aio_keywords = ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse']
+aio_keywords = ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser']
 cppcheck_keywords = ['cppcheck']
 coverity_keywords = ['coverity']
 depcheck_keywords = ['dependencycheck', 'depcheck', 'owasp', 'owaspdependencycheck', 'owaspdepcheck']
