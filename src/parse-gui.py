@@ -195,7 +195,7 @@ def main():
         
     
     logger.info("Parsing complete!")
-    console("Parsing Complete!", "All-In-One Parser", 'info')
+    console("Parsing Complete!", PROG_NAME, 'info')
     
     
 

@@ -12,7 +12,7 @@ from .toolbox import InputDictKeys, validate_path_and_scanner, get_all_previews,
 # Constants
 WINDOW_LENGTH = 900
 WINDOW_HEIGHT = 500
-WINDOW_TITLE = 'All-In-One Parser'
+WINDOW_TITLE = PROG_NAME
 
 class YesNoGUI:
     def __init__(self, question="Do you want to continue?", windowsize=f"{WINDOW_LENGTH-400}x{WINDOW_HEIGHT-200}"):
