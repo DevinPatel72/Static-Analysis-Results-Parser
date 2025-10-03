@@ -8,7 +8,7 @@ print(f"""
 #
 # Please read the readme for further information.
 #
-# This all-in-one script will parse a list of scanner output files and collect them into one Excel or CSV file.
+# This software will parse a list of scanner output files and collect them into one Excel or CSV file.
 #
 # Accepted Inputs:
 #   ->  AIO Parser:  .xlsx OR .csv
