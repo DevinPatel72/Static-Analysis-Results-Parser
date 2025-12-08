@@ -18,7 +18,7 @@ print(f"""
 #   ->  Dep Check:   .csv
 #   ->  ESLint:      .json
 #   ->  Fortify:     .fpr
-#   ->  Gnat SAS:    .csv
+#   ->  Gnat SAS:    .csv or SARIF format
 #   ->  NVD CVE:     .csv
 #   ->  Pragmatic:   .csv
 #   ->  Pylint:      .json

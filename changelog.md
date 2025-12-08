@@ -1,8 +1,8 @@
 # Change Log
 
-## [Version 2.0.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.0.0) (YYYY-MM-DD)
+## [Version 1.2.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.0.0) (YYYY-MM-DD)
 - Changed names of the headers to fit with new STITCH scoring method and improve clarity
-- 
+- Added support for SARIF output for GNAT SAS. SARIF format contains event trace, so it is recommended to output GNAT SAS findings in SARIF format.
 
 
 ## [Version 1.1.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.1.0) (2025-10-02)

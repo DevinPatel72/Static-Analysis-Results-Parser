@@ -269,8 +269,12 @@
         }
     },
     
-    "_comment6": "Override rules based on Gnat SAS attribute 'kind'",
-    "gnatsas" : {},
+    "_comment6": "Override rules based on Gnat SAS CSV attribute 'kind' or SARIF attribute 'ruleId'",
+    "gnatsas" : {
+        "precondition <conditional raise>": {
+            "cwe": "628"
+        }
+    },
     
     "_comment7": "Override rules based on manually entered CVEs",
     "manual_cve" : {},

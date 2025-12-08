@@ -13,7 +13,7 @@ The Static Analysis Results Parser (SARP) will parse a set of output files from 
 -  Dep Check:   `.csv`
 -  ESLint:      `.json`
 -  Fortify:     `.fpr`
--  Gnat SAS:    `.csv`
+-  Gnat SAS:    `SARIF format` (preferred) or `.csv`
 -  NVD CVE:     `.csv` (See [Batch-NVD-CVE](https://github.com/DevinPatel72/Batch-NVD-Query))
 -  Pragmatic:   `.csv`
 -  Pylint:      `.json`
