@@ -39,9 +39,9 @@ nopathoverridescanners_keywords = aio_keywords + manualcve_keywords
 valid_extensions = ['.fpr', '.csv', '.xml', '.json', '.xlsx']
 
 # Fieldnames
-fieldnames = ['CWE','Confidence','Maturity','Mitigation','Mitigation Comment','Comment',
+fieldnames = ['Scoring Basis','Confidence','Exploit Maturity','Mitigation CVSS Vector','Proposed Mitigation','Validator Comment',
                 'ID','Path','Line','Type','Message','Symbol',
-                'Tool CWE','Tool','Scanner','Language','Severity']
+                'Tool CWE','Tool','Scanner','Language','Tool Severity']
 
 # Important Paths (overwritten by parse.py)
 EXE_ROOT_DIR = '.'

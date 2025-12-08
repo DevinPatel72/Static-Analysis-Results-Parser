@@ -122,12 +122,12 @@ def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
                 #id = "SRM{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({'CWE':cwe_cat,
+                parser_writer.write_row({'Scoring Basis':cwe_cat,
                                     'Confidence':confidence,
-                                    'Maturity':'Proof of Concept',
-                                    'Mitigation':'None',
-                                    'Mitigation Comment':'',
-                                    'Comment':'',
+                                    'Exploit Maturity':'Unreported',
+                                    'Mitigation CVSS Vector':'',
+                                    'Proposed Mitigation':'',
+                                    'Validator Comment':'',
                                     'ID':id,
                                     'Type':row['Type'],
                                     'Path':path,
@@ -138,7 +138,7 @@ def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
                                     'Tool':row['Tool'],
                                     'Scanner':scanner,
                                     'Language':lang,
-                                    'Severity':''
+                                    'Tool Severity':''
                                 })
                 finding_count += 1
             except Exception:
@@ -284,12 +284,12 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                     id = idgenerator.hash(preimage)
 
                 # Write row to outfile
-                parser_writer.write_row({'CWE':cwe_cat,
+                parser_writer.write_row({'Scoring Basis':cwe_cat,
                                     'Confidence':confidence,
-                                    'Maturity':'Proof of Concept',
-                                    'Mitigation':'None',
-                                    'Mitigation Comment':'',
-                                    'Comment':'',
+                                    'Exploit Maturity':'Unreported',
+                                    'Mitigation CVSS Vector':'',
+                                    'Proposed Mitigation':'',
+                                    'Validator Comment':'',
                                     'ID':id,
                                     'Type':finding_type,
                                     'Path':path,
@@ -300,7 +300,7 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                                     'Tool':tool_name,
                                     'Scanner':scanner,
                                     'Language':lang,
-                                    'Severity':''
+                                    'Tool Severity':''
                                 })
             finding_count += 1
         except Exception:

@@ -103,12 +103,12 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 #id = "ESL{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({'CWE':cwe_cat,
+                parser_writer.write_row({'Scoring Basis':cwe_cat,
                                     'Confidence':confidence,
-                                    'Maturity':'Proof of Concept',
-                                    'Mitigation':'None',
-                                    'Mitigation Comment':'',
-                                    'Comment':'',
+                                    'Exploit Maturity':'Unreported',
+                                    'Mitigation CVSS Vector':'',
+                                    'Proposed Mitigation':'',
+                                    'Validator Comment':'',
                                     'ID':id,
                                     'Type':rule_id,
                                     'Path':path,
@@ -119,7 +119,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                     'Tool':'',
                                     'Scanner':scanner,
                                     'Language':'javascript',
-                                    'Severity':severity
+                                    'Tool Severity':severity
                                 })
                 finding_count += 1
             except:

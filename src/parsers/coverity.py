@@ -124,11 +124,11 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             #id = "COV{:04}".format(finding_count+1)
             
             # Write row to outfile
-            parser_writer.write_row({'CWE':cwe_cat,
+            parser_writer.write_row({'Scoring Basis':cwe_cat,
                                 'Confidence': confidence,
-                                'Maturity': 'Proof of Concept',
-                                'Mitigation': 'None',
-                                'Mitigation Comment': '',
+                                'Exploit Maturity': 'Unreported',
+                                'Mitigation CVSS Vector': '',
+                                'Proposed Mitigation': '',
                                 'Comment': '',
                                 'ID': id,
                                 'Type': subcategoryLongDescription,
@@ -140,7 +140,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                 'Tool':'',
                                 'Scanner':scanner,
                                 'Language':issue['language'].lower(),
-                                'Severity':issue['checkerProperties']['impact']
+                                'Tool Severity':issue['checkerProperties']['impact']
                             })
             finding_count += 1
         except SystemExit as se:

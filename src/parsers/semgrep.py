@@ -133,12 +133,12 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             id = idgenerator.hash(preimage)
 
             # Write row to outfile
-            parser_writer.write_row({'CWE':cwe_cat,
+            parser_writer.write_row({'Scoring Basis':cwe_cat,
                                 'Confidence':confidence,
-                                'Maturity':'Proof of Concept',
-                                'Mitigation':'None',
-                                'Mitigation Comment':'',
-                                'Comment':'',
+                                'Exploit Maturity':'Unreported',
+                                'Mitigation CVSS Vector':'',
+                                'Proposed Mitigation':'',
+                                'Validator Comment':'',
                                 'ID':id,
                                 'Type':check_id,
                                 'Path':path,
@@ -149,7 +149,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                 'Tool':'',
                                 'Scanner':scanner,
                                 'Language':lang,
-                                'Severity':severity
+                                'Tool Severity':severity
                             })
             finding_count += 1
         except Exception:

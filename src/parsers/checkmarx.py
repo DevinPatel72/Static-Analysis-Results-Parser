@@ -173,12 +173,12 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
                 trace = f"Trace:\n<Source> {path}:{line}: {row['Name']}\n<Dest> {dest_path}:{dest_line}: {row['DestName']}"
                 
                 # Write row to outfile
-                parser_writer.write_row({'CWE':cwe_cat,
+                parser_writer.write_row({'Scoring Basis':cwe_cat,
                                         'Confidence':confidence,
-                                        'Maturity':'Proof of Concept',
-                                        'Mitigation':'None',
-                                        'Mitigation Comment':'',
-                                        'Comment':'',
+                                        'Exploit Maturity':'Unreported',
+                                        'Mitigation CVSS Vector':'',
+                                        'Proposed Mitigation':'',
+                                        'Validator Comment':'',
                                         'ID':id,
                                         'Type':query,
                                         'Path':path,
@@ -189,7 +189,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
                                         'Tool':'',
                                         'Scanner':scanner,
                                         'Language':lang,
-                                        'Severity':row['Result Severity']
+                                        'Tool Severity':row['Result Severity']
                                     })
     
                 finding_count += 1
@@ -304,12 +304,12 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
                     id = idgenerator.hash(preimage)
                     
                     # Write row to outfile
-                    parser_writer.write_row({'CWE':cwe_cat,
+                    parser_writer.write_row({'Scoring Basis':cwe_cat,
                                             'Confidence':confidence,
-                                            'Maturity':'Proof of Concept',
-                                            'Mitigation':'None',
-                                            'Mitigation Comment':'',
-                                            'Comment':'',
+                                            'Exploit Maturity':'Unreported',
+                                            'Mitigation CVSS Vector':'',
+                                            'Proposed Mitigation':'',
+                                            'Validator Comment':'',
                                             'ID':id,
                                             'Type':query_name,
                                             'Path':path,
@@ -320,7 +320,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
                                             'Tool':query_path.split('\\')[-1],
                                             'Scanner':scanner,
                                             'Language':lang,
-                                            'Severity':severity
+                                            'Tool Severity':severity
                                         })
                     finding_count += 1
                 except Exception:

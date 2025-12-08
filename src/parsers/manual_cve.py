@@ -79,12 +79,12 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                     logger.error(f"Row {row_num} of \'{fpath}\': Invalid CVE number. Please check \'{fpath}\' and the user overrides.")
 
                 # Write row to outfile
-                parser_writer.write_row({'CWE':cve,
+                parser_writer.write_row({'Scoring Basis':cve,
                                     'Confidence':'Confirmed',
-                                    'Maturity':'High',
-                                    'Mitigation':'None',
-                                    'Mitigation Comment':'',
-                                    'Comment':'[{}]'.format(cve),
+                                    'Exploit Maturity':'Unreported',
+                                    'Mitigation CVSS Vector':'',
+                                    'Proposed Mitigation':'',
+                                    'Validator Comment':'',
                                     'ID':id,
                                     'Type': '',
                                     'Path':'',
@@ -95,7 +95,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                     'Tool':'',
                                     'Scanner':'MANUAL',
                                     'Language':'',
-                                    'Severity': row['Severity']
+                                    'Tool Severity': row['Severity']
                                 })
                 finding_count += 1
             except Exception:

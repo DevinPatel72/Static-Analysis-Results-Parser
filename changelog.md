@@ -1,5 +1,10 @@
 # Change Log
 
+## [Version 2.0.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.0.0) (YYYY-MM-DD)
+- Changed names of the headers to fit with new STITCH scoring method and improve clarity
+- 
+
+
 ## [Version 1.1.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.1.0) (2025-10-02)
 
 - Added support for Semgrep that accepts JSON or CSV files.
