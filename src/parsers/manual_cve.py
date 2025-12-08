@@ -80,7 +80,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
 
                 # Write row to outfile
                 parser_writer.write_row({'Scoring Basis':cve,
-                                    'Confidence':'Confirmed',
+                                    'Confidence':confidence,
                                     'Exploit Maturity':'Unreported',
                                     'Mitigation CVSS Vector':'',
                                     'Proposed Mitigation':'',

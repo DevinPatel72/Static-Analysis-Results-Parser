@@ -103,8 +103,6 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 
                 # Perform cwe overrides if user requests
                 cve, confidence = cwe_conf_override(control_flags, override_name=cve, cwe=cve, message_content=row['Vulnerability'], override_scanner=current_parser)
-                if confidence == 'To Verify':
-                    confidence = 'Confirmed'
                 
                 # Generate ID for Fortify finding (concat CVE, CWE, Path, Scanner, and Vulnerability)
                 preimage = f"{cve}{path}{row['Vulnerability']}"
