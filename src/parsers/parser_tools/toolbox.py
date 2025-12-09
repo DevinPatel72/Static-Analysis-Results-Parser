@@ -39,6 +39,30 @@ class InputDictKeys(Enum):
     def __str__(self):
         return self.value
 
+class Fieldnames(Enum):
+    SCORING_BASIS = 'Scoring Basis'
+    CONFIDENCE = 'Confidence'
+    MATURITY = 'Exploit Maturity'
+    MITIGATION = 'Mitigation CVSS Vector'
+    VALIDATOR_COMMENT = 'Validator Adjudication'
+    PROPOSED_MITIGATION = 'Proposed Mitigation'
+    ID = 'ID'
+    PATH = 'Path'
+    LINE = 'Line'
+    TYPE = 'Type'
+    MESSAGE = 'Message'
+    SYMBOL = 'Symbol'
+    TOOL_CWE = 'Tool CWE'
+    TOOL = 'Tool'
+    SCANNER = 'Scanner'
+    LANGUAGE = 'Language'
+    SEVERITY = 'Tool Severity'
+    
+    HEADERS = [SCORING_BASIS, CONFIDENCE, MATURITY, MITIGATION, VALIDATOR_COMMENT, PROPOSED_MITIGATION, ID, PATH, LINE, TYPE, MESSAGE, SYMBOL, TOOL_CWE, TOOL, SCANNER, LANGUAGE, SEVERITY]
+    
+    def __str__(self):
+        return self.value
+
 def validate_path_and_scanner(fpath, scanner):
     global __excel_enabled, FILE_SIZE_WARNED_ONCE, FORTIFY_FILE_WARNED_ONCE
     scan_match = scanner.lower().replace(' ', '')
@@ -83,9 +107,9 @@ def validate_path_and_scanner(fpath, scanner):
             with open(fpath, 'r', encoding='utf-8-sig') as f:
                 headers = f.readline().strip().split(',')
         
-        if not all(h in parsers.fieldnames for h in headers):
+        if not all(h in Fieldnames.HEADERS.value for h in headers):
             # Doesn't match any expected headers
-            return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match the following format:\n    {parsers.fieldnames}\n"
+            return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match the following format:\n    {Fieldnames.HEADERS.value}\n"
 
     # All other inputs
     elif os.path.isfile(fpath):

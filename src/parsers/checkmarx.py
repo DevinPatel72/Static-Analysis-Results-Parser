@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
-from .parser_tools.toolbox import console
+from .parser_tools.toolbox import Fieldnames, console
 
 logger = logging.getLogger(__name__)
 
@@ -173,23 +173,23 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
                 trace = f"Trace:\n<Source> {path}:{line}: {row['Name']}\n<Dest> {dest_path}:{dest_line}: {row['DestName']}"
                 
                 # Write row to outfile
-                parser_writer.write_row({'Scoring Basis':cwe_cat,
-                                        'Confidence':confidence,
-                                        'Exploit Maturity':'Unreported',
-                                        'Mitigation CVSS Vector':'',
-                                        'Proposed Mitigation':'',
-                                        'Validator Comment':'',
-                                        'ID':id,
-                                        'Type':query,
-                                        'Path':path,
-                                        'Line':line,
-                                        'Symbol':row['Name'],
-                                        'Message':trace,
-                                        'Tool CWE': tool_cwe,
-                                        'Tool':'',
-                                        'Scanner':scanner,
-                                        'Language':lang,
-                                        'Tool Severity':row['Result Severity']
+                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
+                                        Fieldnames.CONFIDENCE.value:confidence,
+                                        Fieldnames.MATURITY.value:'Unreported',
+                                        Fieldnames.MITIGATION.value:'',
+                                        Fieldnames.PROPOSED_MITIGATION.value:'',
+                                        Fieldnames.VALIDATOR_COMMENT.value:'',
+                                        Fieldnames.ID.value:id,
+                                        Fieldnames.TYPE.value:query,
+                                        Fieldnames.PATH.value:path,
+                                        Fieldnames.LINE.value:line,
+                                        Fieldnames.SYMBOL.value:row['Name'],
+                                        Fieldnames.MESSAGE.value:trace,
+                                        Fieldnames.TOOL_CWE.value: tool_cwe,
+                                        Fieldnames.TOOL.value:'',
+                                        Fieldnames.SCANNER.value:scanner,
+                                        Fieldnames.LANGUAGE.value:lang,
+                                        Fieldnames.SEVERITY.value:row['Result Severity']
                                     })
     
                 finding_count += 1
@@ -304,23 +304,23 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
                     id = idgenerator.hash(preimage)
                     
                     # Write row to outfile
-                    parser_writer.write_row({'Scoring Basis':cwe_cat,
-                                            'Confidence':confidence,
-                                            'Exploit Maturity':'Unreported',
-                                            'Mitigation CVSS Vector':'',
-                                            'Proposed Mitigation':'',
-                                            'Validator Comment':'',
-                                            'ID':id,
-                                            'Type':query_name,
-                                            'Path':path,
-                                            'Line':line,
-                                            'Symbol':symbol,
-                                            'Message':trace,
-                                            'Tool CWE': tool_cwe,
-                                            'Tool':query_path.split('\\')[-1],
-                                            'Scanner':scanner,
-                                            'Language':lang,
-                                            'Tool Severity':severity
+                    parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
+                                            Fieldnames.CONFIDENCE.value:confidence,
+                                            Fieldnames.MATURITY.value:'Unreported',
+                                            Fieldnames.MITIGATION.value:'',
+                                            Fieldnames.PROPOSED_MITIGATION.value:'',
+                                            Fieldnames.VALIDATOR_COMMENT.value:'',
+                                            Fieldnames.ID.value:id,
+                                            Fieldnames.TYPE.value:query_name,
+                                            Fieldnames.PATH.value:path,
+                                            Fieldnames.LINE.value:line,
+                                            Fieldnames.SYMBOL.value:symbol,
+                                            Fieldnames.MESSAGE.value:trace,
+                                            Fieldnames.TOOL_CWE.value: tool_cwe,
+                                            Fieldnames.TOOL.value:query_path.split('\\')[-1],
+                                            Fieldnames.SCANNER.value:scanner,
+                                            Fieldnames.LANGUAGE.value:lang,
+                                            Fieldnames.SEVERITY.value:severity
                                         })
                     finding_count += 1
                 except Exception:

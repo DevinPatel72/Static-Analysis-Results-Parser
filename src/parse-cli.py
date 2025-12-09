@@ -38,8 +38,7 @@ from math import ceil
 import parsers
 from parsers import *
 from parsers.parser_tools import parser_writer
-from parsers.parser_tools.toolbox import InputDictKeys, load_config_user_inputs, load_config_cwe_category_mappings, export_config, validate_path_and_scanner, check_input_format, get_all_previews
-
+from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, validate_path_and_scanner, check_input_format, get_all_previews
 
 # Configure root path and important dirs of script
 if getattr(sys, 'frozen', False):
@@ -408,7 +407,7 @@ def main():
         force_csv = True
     else:
         force_csv = False
-    parser_writer.open_writer(parser_outfile, parsers.fieldnames, force_csv=force_csv)
+    parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
 
     # Track number of errors
     err_count = 0

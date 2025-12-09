@@ -5,7 +5,7 @@ import os
 import sys
 import traceback
 from parsers.parser_tools.inputs_gui import YesNoGUI, InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
-from parsers.parser_tools.toolbox import InputDictKeys, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
+from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
 import parsers
 from parsers import PROG_NAME, VERSION
 from parsers import *
@@ -139,7 +139,7 @@ def main():
         force_csv = True
     else:
         force_csv = False
-    parser_writer.open_writer(parser_outfile, parsers.fieldnames, force_csv=force_csv)
+    parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
 
     # Track number of errors
     err_count = 0

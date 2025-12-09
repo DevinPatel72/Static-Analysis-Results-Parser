@@ -10,7 +10,7 @@ The Static Analysis Results Parser (SARP) will parse a set of output files from 
 -  Checkmarx:   Directory of `.xml` (preferred) OR `.csv` files (Single directory, no recursion)
 -  CppCheck:    `.xml`
 -  Coverity:    `.json`
--  Dep Check:   `.csv`
+-  Dep Check:   `.json` or `.csv`
 -  ESLint:      `.json`
 -  Fortify:     `.fpr`
 -  Gnat SAS:    `SARIF format` (preferred) or `.csv`

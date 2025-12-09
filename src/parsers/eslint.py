@@ -6,7 +6,7 @@ import json
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
-from .parser_tools.toolbox import console
+from .parser_tools.toolbox import Fieldnames, console
 
 logger = logging.getLogger(__name__)
 
@@ -103,23 +103,23 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 #id = "ESL{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({'Scoring Basis':cwe_cat,
-                                    'Confidence':confidence,
-                                    'Exploit Maturity':'Unreported',
-                                    'Mitigation CVSS Vector':'',
-                                    'Proposed Mitigation':'',
-                                    'Validator Comment':'',
-                                    'ID':id,
-                                    'Type':rule_id,
-                                    'Path':path,
-                                    'Line':line,
-                                    'Symbol':'',
-                                    'Message':message['message'],
-                                    'Tool CWE':tool_cwe,
-                                    'Tool':'',
-                                    'Scanner':scanner,
-                                    'Language':'javascript',
-                                    'Tool Severity':severity
+                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
+                                    Fieldnames.CONFIDENCE.value:confidence,
+                                    Fieldnames.MATURITY.value:'Unreported',
+                                    Fieldnames.MITIGATION.value:'',
+                                    Fieldnames.PROPOSED_MITIGATION.value:'',
+                                    Fieldnames.VALIDATOR_COMMENT.value:'',
+                                    Fieldnames.ID.value:id,
+                                    Fieldnames.TYPE.value:rule_id,
+                                    Fieldnames.PATH.value:path,
+                                    Fieldnames.LINE.value:line,
+                                    Fieldnames.SYMBOL.value:'',
+                                    Fieldnames.MESSAGE.value:message['message'],
+                                    Fieldnames.TOOL_CWE.value:tool_cwe,
+                                    Fieldnames.TOOL.value:'',
+                                    Fieldnames.SCANNER.value:scanner,
+                                    Fieldnames.LANGUAGE.value:'javascript',
+                                    Fieldnames.SEVERITY.value:severity
                                 })
                 finding_count += 1
             except:

@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
+from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
 config_errors = ['templateRecursion', 'checkLevelNormal', 'checkersReport', 'missingInclude', 'missingIncludeSystem', 'toomanyconfigs', 'ConfigurationNotChecked', 'normalCheckLevelMaxBranches']
@@ -139,23 +140,23 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             #id = "CPP{:04}".format(finding_count+1)
 
             # Write row to outfile
-            parser_writer.write_row({'Scoring Basis':cwe_cat,
-                                'Confidence':confidence,
-                                'Exploit Maturity':'Unreported',
-                                'Mitigation CVSS Vector':'',
-                                'Proposed Mitigation':'',
-                                'Validator Comment':'',
-                                'ID':id,
-                                'Type':category,
-                                'Path':path,
-                                'Line':line,
-                                'Symbol':symbol,
-                                'Message':message,
-                                'Tool CWE':tool_cwe,
-                                'Tool':'',
-                                'Scanner':scanner,
-                                'Language':'c/c++',
-                                'Tool Severity':severity
+            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
+                                Fieldnames.CONFIDENCE.value:confidence,
+                                Fieldnames.MATURITY.value:'Unreported',
+                                Fieldnames.MITIGATION.value:'',
+                                Fieldnames.PROPOSED_MITIGATION.value:'',
+                                Fieldnames.VALIDATOR_COMMENT.value:'',
+                                Fieldnames.ID.value:id,
+                                Fieldnames.TYPE.value:category,
+                                Fieldnames.PATH.value:path,
+                                Fieldnames.LINE.value:line,
+                                Fieldnames.SYMBOL.value:symbol,
+                                Fieldnames.MESSAGE.value:message,
+                                Fieldnames.TOOL_CWE.value:tool_cwe,
+                                Fieldnames.TOOL.value:'',
+                                Fieldnames.SCANNER.value:scanner,
+                                Fieldnames.LANGUAGE.value:'c/c++',
+                                Fieldnames.SEVERITY.value:severity
                             })
             finding_count += 1
     logger.info(f"Successfully processed {finding_count} findings")

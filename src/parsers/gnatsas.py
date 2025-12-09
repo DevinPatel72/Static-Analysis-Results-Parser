@@ -8,6 +8,7 @@ import traceback
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
+from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
 
@@ -181,23 +182,23 @@ def _parse_sarif(fpath, scanner, substr, prepend, control_flags):
             #id = "GS{:04}".format(finding_count+1)
 
             # Write row to outfile
-            parser_writer.write_row({'Scoring Basis':cwe_cat,
-                                'Confidence':confidence,
-                                'Exploit Maturity':'Unreported',
-                                'Mitigation CVSS Vector':'',
-                                'Proposed Mitigation':'',
-                                'Validator Comment':'',
-                                'ID':id,
-                                'Type': t,
-                                'Path':path,
-                                'Line':line,
-                                'Symbol':symbol,
-                                'Message':message,
-                                'Tool CWE':tool_cwe,
-                                'Tool':tool,
-                                'Scanner':scanner,
-                                'Language':lang,
-                                'Tool Severity':severity
+            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
+                                Fieldnames.CONFIDENCE.value:confidence,
+                                Fieldnames.MATURITY.value:'Unreported',
+                                Fieldnames.MITIGATION.value:'',
+                                Fieldnames.PROPOSED_MITIGATION.value:'',
+                                Fieldnames.VALIDATOR_COMMENT.value:'',
+                                Fieldnames.ID.value:id,
+                                Fieldnames.TYPE.value: t,
+                                Fieldnames.PATH.value:path,
+                                Fieldnames.LINE.value:line,
+                                Fieldnames.SYMBOL.value:symbol,
+                                Fieldnames.MESSAGE.value:message,
+                                Fieldnames.TOOL_CWE.value:tool_cwe,
+                                Fieldnames.TOOL.value:tool,
+                                Fieldnames.SCANNER.value:scanner,
+                                Fieldnames.LANGUAGE.value:lang,
+                                Fieldnames.SEVERITY.value:severity
                             })
             finding_count += 1
         except Exception:
@@ -268,23 +269,23 @@ def _parse_csv(fpath, scanner, substr, prepend, control_flags):
                 #id = "GS{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({'Scoring Basis':cwe_cat,
-                                    'Confidence':confidence,
-                                    'Exploit Maturity':'Unreported',
-                                    'Mitigation CVSS Vector':'',
-                                    'Proposed Mitigation':'',
-                                    'Validator Comment':'',
-                                    'ID':id,
-                                    'Type': t,
-                                    'Path':path,
-                                    'Line':line,
-                                    'Symbol':row['subp'],
-                                    'Message':row['message'],
-                                    'Tool CWE':tool_cwe,
-                                    'Tool':row['tool'],
-                                    'Scanner':scanner,
-                                    'Language':'ada',
-                                    'Tool Severity':''
+                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
+                                    Fieldnames.CONFIDENCE.value:confidence,
+                                    Fieldnames.MATURITY.value:'Unreported',
+                                    Fieldnames.MITIGATION.value:'',
+                                    Fieldnames.PROPOSED_MITIGATION.value:'',
+                                    Fieldnames.VALIDATOR_COMMENT.value:'',
+                                    Fieldnames.ID.value:id,
+                                    Fieldnames.TYPE.value: t,
+                                    Fieldnames.PATH.value:path,
+                                    Fieldnames.LINE.value:line,
+                                    Fieldnames.SYMBOL.value:row['subp'],
+                                    Fieldnames.MESSAGE.value:row['message'],
+                                    Fieldnames.TOOL_CWE.value:tool_cwe,
+                                    Fieldnames.TOOL.value:row['tool'],
+                                    Fieldnames.SCANNER.value:scanner,
+                                    Fieldnames.LANGUAGE.value:'ada',
+                                    Fieldnames.SEVERITY.value:''
                                 })
                 finding_count += 1
             except Exception:

@@ -6,6 +6,7 @@ import json
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
+from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
 
@@ -124,23 +125,23 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             #id = "COV{:04}".format(finding_count+1)
             
             # Write row to outfile
-            parser_writer.write_row({'Scoring Basis':cwe_cat,
-                                'Confidence': confidence,
-                                'Exploit Maturity': 'Unreported',
-                                'Mitigation CVSS Vector': '',
-                                'Proposed Mitigation': '',
+            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
+                                Fieldnames.CONFIDENCE.value: confidence,
+                                Fieldnames.MATURITY.value: 'Unreported',
+                                Fieldnames.MITIGATION.value: '',
+                                Fieldnames.PROPOSED_MITIGATION.value: '',
                                 'Comment': '',
-                                'ID': id,
-                                'Type': subcategoryLongDescription,
-                                'Path': path,
-                                'Line': line,
-                                'Symbol': issue['functionDisplayName'],
-                                'Message': eventDesc,
-                                'Tool CWE': tool_cwe,
-                                'Tool':'',
-                                'Scanner':scanner,
-                                'Language':issue['language'].lower(),
-                                'Tool Severity':issue['checkerProperties']['impact']
+                                Fieldnames.ID.value: id,
+                                Fieldnames.TYPE.value: subcategoryLongDescription,
+                                Fieldnames.PATH.value: path,
+                                Fieldnames.LINE.value: line,
+                                Fieldnames.SYMBOL.value: issue['functionDisplayName'],
+                                Fieldnames.MESSAGE.value: eventDesc,
+                                Fieldnames.TOOL_CWE.value: tool_cwe,
+                                Fieldnames.TOOL.value:'',
+                                Fieldnames.SCANNER.value:scanner,
+                                Fieldnames.LANGUAGE.value:issue['language'].lower(),
+                                Fieldnames.SEVERITY.value:issue['checkerProperties']['impact']
                             })
             finding_count += 1
         except SystemExit as se:

@@ -27,7 +27,7 @@ def path_preview(fpath):
             # Extract Path header
             path_col = None
             for cell in sheet[1]:
-                if cell.value == 'Path':
+                if cell.value == Fieldnames.PATH.value:
                     path_col = cell.column
             
             if path_col is None:
