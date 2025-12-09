@@ -15,10 +15,10 @@ print(f"""
 #   ->  Checkmarx:   Directory of .xml (preferred) OR .csv files (Single directory, no recursion)
 #   ->  CppCheck:    .xml
 #   ->  Coverity:    .json
-#   ->  Dep Check:   .csv
+#   ->  Dep Check:   .json (preferred) OR .csv
 #   ->  ESLint:      .json
 #   ->  Fortify:     .fpr
-#   ->  Gnat SAS:    .csv or SARIF format
+#   ->  Gnat SAS:    SARIF format (preferred) OR .csv
 #   ->  NVD CVE:     .csv
 #   ->  Pragmatic:   .csv
 #   ->  Pylint:      .json

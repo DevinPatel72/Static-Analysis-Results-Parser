@@ -67,7 +67,7 @@ def _parse_sarif(fpath, scanner, substr, prepend, control_flags):
     except json.JSONDecodeError:
         err_count += 1
         logger.error(f"Unable to parse input file \"{fpath}\". Ensure GNAT SAS is configured to output in SARIF format.")
-        return err_count
+        return finding_count, err_count
     
     # Get just data
     data = data['runs'][0]
