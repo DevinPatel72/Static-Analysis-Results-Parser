@@ -44,7 +44,7 @@ class Fieldnames(Enum):
     CONFIDENCE = 'Confidence'
     MATURITY = 'Exploit Maturity'
     MITIGATION = 'Mitigation CVSS Vector'
-    VALIDATOR_COMMENT = 'Validator Adjudication'
+    VALIDATOR_COMMENT = 'Validator Justification'
     PROPOSED_MITIGATION = 'Proposed Mitigation'
     ID = 'ID'
     PATH = 'Path'
