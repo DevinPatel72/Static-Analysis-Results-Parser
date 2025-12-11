@@ -200,6 +200,8 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                 
                 # Declare this early so it stays in scope
                 confidence = ''
+                validator_comment = ''
+                id = ''
                 
                 # Check if the scanner is pylint, change cwe number if so
                 tool = result.find('tool')
@@ -223,13 +225,26 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                     message_id = rule.get('code', '').replace('PYLINT-', '').upper()
                     cwe = get_pylint_cdata(message_id, cwe)
                     cwe, confidence = cwe_conf_override(control_flags, override_name=message_id, cwe=cwe, override_scanner=tool_name.lower())
+                    
                 elif tool_name.lower() == 'cppcheck':
                     category = tool.get('code', '').strip()
                     msg = result.findtext('description', '')
                     cwe, confidence = cwe_conf_override(control_flags, override_name=category, cwe=cwe, message_content=msg, override_scanner=tool_name.lower())
+                        
                 else:
                     code = tool.get('code', '').strip()
                     cwe, confidence = cwe_conf_override(control_flags, override_name=code, cwe=cwe, override_scanner=tool_name.lower())
+                
+                # Check for duplicate findings from standalone scanners
+                tool_code = tool.get('code', '').strip()
+                if m := parser_writer.search_row([(Fieldnames.TYPE.value, tool_code, True),
+                                                      (Fieldnames.SCANNER.value, tool_name.lower(), False),
+                                                      (Fieldnames.PATH.value, path, True),
+                                                      (Fieldnames.LINE.value, line, True)
+                                                      ]):
+                        confidence = 'DUPLICATE'
+                        id = m
+                        validator_comment = f"This finding is a duplicate of standalone {tool_name} finding with the same ID"
                 
                 # Get finding 'Type'
                 finding_type = rule.get('name', '')
@@ -279,7 +294,7 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                 
                 
                 # Use the SHA256 hash from the finding as the ID, else generate the ID
-                id = result.get('hash', '')
+                id = result.get('hash', '') if len(id) <= 0 else id
                 if len(id) <= 0:
                     preimage = f"{path}{line}{finding_type}{tool_cwe}"
                     id = idgenerator.hash(preimage)
@@ -290,7 +305,7 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                                     Fieldnames.MATURITY.value:'Unreported',
                                     Fieldnames.MITIGATION.value:'',
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
-                                    Fieldnames.VALIDATOR_COMMENT.value:'',
+                                    Fieldnames.VALIDATOR_COMMENT.value:validator_comment,
                                     Fieldnames.ID.value:id,
                                     Fieldnames.TYPE.value:finding_type,
                                     Fieldnames.PATH.value:path,

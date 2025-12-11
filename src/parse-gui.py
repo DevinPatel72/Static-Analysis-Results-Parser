@@ -143,6 +143,12 @@ def main():
 
     # Track number of errors
     err_count = 0
+    
+    # Put SRM in the back
+    for i, inp in enumerate(parser_inputs, start=0):
+        if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in parsers.srm_keywords):
+            parser_inputs.append(parser_inputs.pop(i))
+            break
 
     # Parse the inputs
     for entry in parser_inputs:

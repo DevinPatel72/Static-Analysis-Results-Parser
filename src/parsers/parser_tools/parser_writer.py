@@ -14,13 +14,13 @@ try:
 except ImportError:
     __excel_enabled = False
 
-__fp = None
-__parser_writer = None
+__filepath = None
+__parser_data = []
 __excel_workbook = None
 __fieldnames = None
 
 def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
-    global __fp, __parser_writer, __excel_workbook, __fieldnames, __excel_enabled
+    global __filepath, __parser_data, __excel_workbook, __fieldnames, __excel_enabled
     from parsers import GUI_MODE
     
     __fieldnames = fieldnames
@@ -32,17 +32,15 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
             if __excel_enabled:
                 if os.path.splitext(outfile)[1] != '.xlsx':
                     outfile = os.path.splitext(outfile)[0] + '.xlsx'
-                __fp = outfile
+                __filepath = outfile
                 __excel_workbook = openpyxl.Workbook()
-                __parser_writer = __excel_workbook.active
-                __parser_writer.title = sheet_name
-                __parser_writer.append([header for header in __fieldnames])
+                temp = __excel_workbook.active
+                temp.title = sheet_name
+                temp.append([header for header in __fieldnames])
             else:
                 if os.path.splitext(outfile)[1] != '.csv':
                     outfile = os.path.splitext(outfile)[0] + '.csv'
-                __fp = open(outfile, 'w', newline='', encoding='utf-8-sig')
-                __parser_writer = csv.DictWriter(__fp, fieldnames=fieldnames)
-                __parser_writer.writeheader()
+                __filepath = outfile
             break
         except PermissionError:
             if GUI_MODE:
@@ -53,27 +51,69 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
             
 def write_row(r):
     if __excel_enabled:
-        __parser_writer.append([r.get(header, '') for header in __fieldnames])
+        __parser_data.append(r)
     else:
-        __parser_writer.writerow(r)
+        __parser_data.append(r)
+        
+def search_row(tuples):
+    """
+    Searches existing rows for parsed findings.
+    
+    :param tuples: List of tuples with format (Fieldnames.<Header>.value, keyword, exact_str_match=[True|False])
+    :return: ID of the first row that matches, otherwise None.
+    """
+    for row in __parser_data:
+        matches = []
+        for header, keyword, exact_str_match in tuples:
+            lookup = row.get(header, '')
+        
+            # First check for NULL
+            if lookup is not None:
+                # If string, check for length and if keyword is contained in lookup
+                if isinstance(lookup, str) and len(lookup) > 0:
+                    if exact_str_match:
+                        matches.append(str(keyword) == lookup)
+                    else: matches.append(str(keyword).lower() in lookup.lower())
+                
+                # If integer, check for exact match
+                elif isinstance(lookup, int):
+                    try:
+                        matches.append(int(keyword) == lookup)
+                    except ValueError:
+                        logger.error(f"Invalid search lookup. Expected integer input, got string \"{keyword}\"")
+                        matches.append(False)
+                        break
+                
+                else:
+                    matches.append(False)
+                    break
+        if all(matches):
+            return row.get('ID', None)
+    return None
+        
 
 @atexit.register
 def close_writer():
-    global __fp
-    if __fp is not None:
+    global __filepath
+    if __filepath is not None:
         from parsers import GUI_MODE
         if __excel_enabled:
             while True:
                 try:
-                    __excel_workbook.save(__fp)
+                    temp = __excel_workbook.active
+                    for r in __parser_data: temp.append([r.get(header, '') for header in __fieldnames])
+                    __excel_workbook.save(__filepath)
                     break
                 except PermissionError:
                     if GUI_MODE:
                         from tkinter import messagebox
-                        messagebox.showerror("Unable to open file", f"File \"{__fp}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
+                        messagebox.showerror("Unable to open file", f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
                     else:
-                        input(f"Output file \"{__fp}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
+                        input(f"Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
         else:
-            if not __fp.closed:
-                __fp.close()
-    __fp = None
+            with open(__filepath, 'w', newline='', encoding='utf-8-sig') as o:
+                csv_writer = csv.DictWriter(o, fieldnames=__fieldnames)
+                csv_writer.writeheader()
+                csv_writer.writerows(__parser_data)
+    __filepath = None
+
