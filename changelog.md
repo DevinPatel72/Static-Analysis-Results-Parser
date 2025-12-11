@@ -1,9 +1,12 @@
 # Change Log
 
+## [Version 1.3.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.3.0) (2025-12-11)
+- Added feature where SRM findings will be marked DUPLICATE if their standalone version already exists. The ID is also overwritten with the ID of the standalone finding. Note this feature only applies to SRM input formatted in XML.
+
 ## [Version 1.2.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.2.0) (2025-12-09)
-- Changed names of the headers to fit with new STITCH scoring method and improve clarity.
-- Added support for SARIF output for GNAT SAS. SARIF format contains event trace, so it is recommended to output GNAT SAS findings in SARIF format.
-- Added support for JSON output for OWASP Dependency Check.
+- Changed names of the headers to fit with new STITCH scoring method and improve clarity. Changed default values of `Maturity` and `Mitigation` columns.
+- Added support for SARIF input from GNAT SAS. SARIF format contains event trace, so it is recommended to output GNAT SAS findings in SARIF format.
+- Added support for JSON input from OWASP Dependency Check.
 
 ## [Version 1.1.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.1.0) (2025-10-02)
 
