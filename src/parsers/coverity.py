@@ -130,7 +130,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                 Fieldnames.MATURITY.value: 'Unreported',
                                 Fieldnames.MITIGATION.value: '',
                                 Fieldnames.PROPOSED_MITIGATION.value: '',
-                                'Comment': '',
+                                Fieldnames.VALIDATOR_COMMENT.value: '',
                                 Fieldnames.ID.value: id,
                                 Fieldnames.TYPE.value: subcategoryLongDescription,
                                 Fieldnames.PATH.value: path,

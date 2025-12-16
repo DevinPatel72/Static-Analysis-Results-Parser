@@ -1,5 +1,8 @@
 # Change Log
 
+## [Version 1.3.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.3.1) (2025-12-16)
+- Fixed bug in Coverity parser that would result in a crash or dropped results.
+
 ## [Version 1.3.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.3.0) (2025-12-11)
 - Added feature where SRM findings will be marked DUPLICATE if their standalone version already exists. The ID is also overwritten with the ID of the standalone finding. Note this feature only applies to SRM input formatted in XML.
 
