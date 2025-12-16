@@ -125,7 +125,8 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
             row_num += 1
             try:
                 i+=1
-                progress_bar(i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                if progress_bar(scanner, i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                    return err_count
         
                 # row variable is a dictionary that represents a row in csv
                 lang = row['QueryPath'].split('\\')[0]
@@ -208,7 +209,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
     # Gather meta information
     scanner_version = root.get('CheckmarxVersion', '')
     if len(scanner_version) > 0:
-        scanner = f"Checkmarx {scanner_version}"
+        o_scanner = f"Checkmarx {scanner_version}"
     
     # Checkmarx is organized via query ('Type'), so iterate through all queries
     queries = root.findall('Query')
@@ -257,7 +258,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
             
             for result in results:
                 i += 1
-                progress_bar(i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(scanner, i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
                 try:
                     # Get result ID for logging purposes
                     result_id = result.get('NodeId', '')
@@ -318,7 +319,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
                                             Fieldnames.MESSAGE.value:trace,
                                             Fieldnames.TOOL_CWE.value: tool_cwe,
                                             Fieldnames.TOOL.value:query_path.split('\\')[-1],
-                                            Fieldnames.SCANNER.value:scanner,
+                                            Fieldnames.SCANNER.value:o_scanner,
                                             Fieldnames.LANGUAGE.value:lang,
                                             Fieldnames.SEVERITY.value:severity
                                         })

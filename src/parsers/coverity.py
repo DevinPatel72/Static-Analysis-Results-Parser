@@ -44,7 +44,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     for issue in data['issues']:
         try:
             issue_num += 1
-            progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            if progress_bar(scanner, issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                return err_count
             
             cwe = issue['checkerProperties']['cweCategory']
             
@@ -130,7 +131,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                 Fieldnames.MATURITY.value: 'Unreported',
                                 Fieldnames.MITIGATION.value: '',
                                 Fieldnames.PROPOSED_MITIGATION.value: '',
-                                'Comment': '',
+                                Fieldnames.VALIDATOR_COMMENT.value: '',
                                 Fieldnames.ID.value: id,
                                 Fieldnames.TYPE.value: subcategoryLongDescription,
                                 Fieldnames.PATH.value: path,

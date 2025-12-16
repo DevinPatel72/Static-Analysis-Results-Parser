@@ -38,6 +38,9 @@ nopathoverridescanners_keywords = aio_keywords + manualcve_keywords
 # Valid extensions
 valid_extensions = ['.fpr', '.csv', '.xml', '.json', '.xlsx']
 
+# Progress Bar GUI Element
+loader = None
+
 # Important Paths (overwritten by parse.py)
 EXE_ROOT_DIR = '.'
 LOGS_DIR = 'logs'

@@ -44,7 +44,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                if progress_bar(scanner, row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                    return err_count
             
                 cwe = row['CWE']
                 

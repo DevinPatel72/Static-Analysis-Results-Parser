@@ -48,7 +48,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     for issue in data:
         try:
             issue_num += 1
-            progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            if progress_bar(scanner, issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                return err_count
             
             # Map pylint message id to CWE
             message_id = issue['message-id']

@@ -76,14 +76,15 @@ def _parse_sarif(fpath, scanner, substr, prepend, control_flags):
     total_results = len(data['results'])
     
     # Get metadata
-    scanner = data['tool']['driver']['version']
+    o_scanner = data['tool']['driver']['version']
     
     # Iterate through results
     for result in data['results']:
         try:
             fingerprint_checksum = result['fingerprints']['checksum']
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            if progress_bar(scanner, result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                return err_count
         
             # Type
             t = result['ruleId']
@@ -196,7 +197,7 @@ def _parse_sarif(fpath, scanner, substr, prepend, control_flags):
                                 Fieldnames.MESSAGE.value:message,
                                 Fieldnames.TOOL_CWE.value:tool_cwe,
                                 Fieldnames.TOOL.value:tool,
-                                Fieldnames.SCANNER.value:scanner,
+                                Fieldnames.SCANNER.value:o_scanner,
                                 Fieldnames.LANGUAGE.value:lang,
                                 Fieldnames.SEVERITY.value:severity
                             })
@@ -233,7 +234,8 @@ def _parse_csv(fpath, scanner, substr, prepend, control_flags):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                if progress_bar(scanner, row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                    return err_count
             
                 cwe = row['cwe']
                 

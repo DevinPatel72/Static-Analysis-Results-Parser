@@ -1,4 +1,4 @@
-# gui.py
+# inputs_gui.py
 
 import os
 import re

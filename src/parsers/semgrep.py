@@ -69,7 +69,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     # Get meta information
     scanner_version = data.get('semgrep_version', '')
     if len(scanner_version) > 0:
-        scanner = f"Semgrep {scanner_version}"
+        o_scanner = f"Semgrep {scanner_version}"
     
     findings = data['findings']
     
@@ -79,7 +79,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     for finding in findings:
         finding_num += 1
         try:
-            progress_bar(finding_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            if progress_bar(scanner, finding_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                return err_count
         
             # Get path/line and resolve language
             path = finding['path']
@@ -148,7 +149,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                 Fieldnames.MESSAGE.value:message,
                                 Fieldnames.TOOL_CWE.value:tool_cwe,
                                 Fieldnames.TOOL.value:'',
-                                Fieldnames.SCANNER.value:scanner,
+                                Fieldnames.SCANNER.value:o_scanner,
                                 Fieldnames.LANGUAGE.value:lang,
                                 Fieldnames.SEVERITY.value:severity
                             })

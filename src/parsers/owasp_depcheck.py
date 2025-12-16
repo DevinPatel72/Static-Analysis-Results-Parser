@@ -85,7 +85,7 @@ def _parse_json(fpath, scanner, substr, prepend, control_flags):
     
     # Get metadata
     if len(data['scanInfo'].get('engineVersion', '')) != 0:
-        scanner = "OWASP Dependency Check {}".format(data['scanInfo']['engineVersion'])
+        o_scanner = "OWASP Dependency Check {}".format(data['scanInfo']['engineVersion'])
     
     # Get total number of findings
     for dep in data['dependencies']:
@@ -104,7 +104,8 @@ def _parse_json(fpath, scanner, substr, prepend, control_flags):
             
             for vuln in dep.get('vulnerabilities', []):
                 vuln_number += 1
-                progress_bar(vuln_number, total_vulns, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                if progress_bar(scanner, vuln_number, total_vulns, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                    return err_count
                 
                 # Extract CWE
                 cwe = vuln.get('cwes', '')
@@ -156,7 +157,7 @@ def _parse_json(fpath, scanner, substr, prepend, control_flags):
                                     Fieldnames.MESSAGE.value:message,
                                     Fieldnames.TOOL_CWE.value:tool_cwe,
                                     Fieldnames.TOOL.value:'',
-                                    Fieldnames.SCANNER.value:scanner,
+                                    Fieldnames.SCANNER.value:o_scanner,
                                     Fieldnames.LANGUAGE.value:lang,
                                     Fieldnames.SEVERITY.value:severity
                                 })
@@ -212,7 +213,8 @@ def _parse_csv(fpath, scanner, substr, prepend, control_flags):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                if progress_bar(scanner, row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                    return err_count
                 
                 # Extract CWE
                 cwe = row['CWE']

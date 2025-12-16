@@ -4,7 +4,9 @@
 import os
 import sys
 import traceback
+import threading
 from parsers.parser_tools.inputs_gui import YesNoGUI, InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
+from parsers.parser_tools.loading_gui import LoadingGUI
 from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
 import parsers
 from parsers import PROG_NAME, VERSION
@@ -140,23 +142,41 @@ def main():
     else:
         force_csv = False
     parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
-
-    # Track number of errors
-    err_count = 0
     
     # Put SRM in the back
     for i, inp in enumerate(parser_inputs, start=0):
         if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in parsers.srm_keywords):
             parser_inputs.append(parser_inputs.pop(i))
             break
-
+    
+    # Start new thread
+    scanner_names = [inp[InputDictKeys.SCANNER.value] for inp in parser_inputs]
+    parsers.loader = LoadingGUI(scanner_names)
+    parsers.loader.attach_logger(logger)
+    
     # Parse the inputs
+    threading.Thread(
+        target=parse_inputs,
+        args=(parser_inputs, control_flags, parsers.loader,),
+        daemon=False
+    ).start()
+    
+    parsers.loader.mainloop()
+
+def parse_inputs(parser_inputs, control_flags, loader):
+    # Track number of errors
+    err_count = 0
+    
     for entry in parser_inputs:
+        # Loading Screen
+        if loader.cancelled():
+            logger.warning(f"{scanner} cancelled")
+            return
+        
         fpath = entry[InputDictKeys.PATH.value]
         scanner = entry[InputDictKeys.SCANNER.value]
         substr = entry[InputDictKeys.REMOVE.value]
         prepend = entry[InputDictKeys.PREPEND.value]
-        
         
         scan_match = scanner.lower().replace(' ', '')
         path = os.path.realpath(fpath)
@@ -192,16 +212,18 @@ def main():
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             err_count += 1
-        
+    
+    loader.mark_all_complete()
     
     parser_writer.close_writer()
     
     if err_count > 0:
-        console(f"{err_count} errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
+        #console(f"{err_count} errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
+        logger.error(f"{err_count} errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.")
         
     
     logger.info("Parsing complete!")
-    console("Parsing Complete!", PROG_NAME, 'info')
+    #console("Parsing Complete!", PROG_NAME, 'info')
     
     
 

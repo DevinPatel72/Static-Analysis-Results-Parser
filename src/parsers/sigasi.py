@@ -58,7 +58,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     for issue in issues:
         issue_num += 1
         try:
-            progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            if progress_bar(scanner, issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                return err_count
         
             # Get path/line and resolve language
             path = issue['resource']

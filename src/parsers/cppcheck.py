@@ -47,7 +47,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
         return err_count + 1
     
     scanner_version = root.find('cppcheck').get('version')
-    scanner = f"CppCheck {scanner_version}"
+    o_scanner = f"CppCheck {scanner_version}"
     
     # Keep track of error number for debug
     error_num = 0
@@ -56,7 +56,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     
     # Output filtered CppCheck findings here
     from . import LOGS_DIR
-    with open(os.path.join(LOGS_DIR, '{}_config_errors.csv'.format(scanner.replace(' ', '_'))), 'w', newline='', encoding='utf-8-sig') as config_out_fp:
+    with open(os.path.join(LOGS_DIR, '{}_config_errors.csv'.format(o_scanner.replace(' ', '_'))), 'w', newline='', encoding='utf-8-sig') as config_out_fp:
         config_out = DictWriter(config_out_fp, fieldnames=['ID','Severity','Message','Verbose'])
         config_out.writeheader()
     
@@ -65,7 +65,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
         for error in errors.findall('error'):
             try:
                 error_num += 1
-                progress_bar(error_num, total_errors, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                if progress_bar(scanner, error_num, total_errors, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                    return err_count
                 
                 if error.get('id') in config_errors:
                     # Config error found. The error will be output to a separate CSV
@@ -154,7 +155,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                 Fieldnames.MESSAGE.value:message,
                                 Fieldnames.TOOL_CWE.value:tool_cwe,
                                 Fieldnames.TOOL.value:'',
-                                Fieldnames.SCANNER.value:scanner,
+                                Fieldnames.SCANNER.value:o_scanner,
                                 Fieldnames.LANGUAGE.value:'c/c++',
                                 Fieldnames.SEVERITY.value:severity
                             })

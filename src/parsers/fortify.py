@@ -1,6 +1,8 @@
 # fortify.py
 
 import os
+import time
+import shutil
 import logging
 import traceback
 import xml.etree.ElementTree as ET
@@ -16,46 +18,53 @@ from .parser_tools.toolbox import Fieldnames
 logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
+    # Create a temporary directory to extract files
+    temp_dir = tempfile.mkdtemp()
+    
     # Parse the input file
     try:
-        # Create a temporary directory to extract files
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Extract the FPR archive
-            with zipfile.ZipFile(fpath, 'r') as zip_ref:
-                zip_ref.extractall(temp_dir)
+        
+        # Extract the FPR archive
+        with zipfile.ZipFile(fpath, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
 
-            # Locate the audit.fvdl file
-            fvdl_path = os.path.join(temp_dir, "audit.fvdl")
-            if not os.path.exists(fvdl_path):
-                return "[ERROR]  audit.fvdl not found in the provided FPR file"
+        # Locate the audit.fvdl file
+        fvdl_path = os.path.join(temp_dir, "audit.fvdl")
+        if not os.path.exists(fvdl_path):
+            return "[ERROR]  audit.fvdl not found in the provided FPR file"
 
-            # Parse the audit.fvdl file
-            tree = ET.parse(fvdl_path)
-            root = tree.getroot()
-            namespace = {'ns': 'xmlns://www.fortifysoftware.com/schema/fvdl'}
+        # Parse the audit.fvdl file
+        tree = ET.parse(fvdl_path)
+        root = tree.getroot()
+        namespace = {'ns': 'xmlns://www.fortifysoftware.com/schema/fvdl'}
 
-            # Extract base path for source files
-            source_base_path_elem = root.find('.//ns:SourceBasePath', namespace)
-            source_base_path = source_base_path_elem.text if source_base_path_elem is not None and source_base_path_elem.text is not None else ""
+        # Extract base path for source files
+        source_base_path_elem = root.find('.//ns:SourceBasePath', namespace)
+        source_base_path = source_base_path_elem.text if source_base_path_elem is not None and source_base_path_elem.text is not None else ""
+        
+        # Extract path from first finding
+        try:
+            vulnerability = root.find('.//ns:Vulnerability', namespace)
+            entries = vulnerability.findall('./ns:AnalysisInfo/ns:Unified/ns:Trace/ns:Primary/ns:Entry', namespace)
+            if len(entries) <= 0:
+                class_id = vulnerability.find('./ns:ClassInfo/ns:ClassID', namespace).text
+                return f"No entries found for vulnerability \"{class_id}\""
+            last_entry = entries[-1]
+            srcLocation = last_entry.find("./ns:Node/ns:SourceLocation", namespace)
+            file_path = srcLocation.get('path')
+            path = os.path.join(source_base_path, file_path) if len(source_base_path) > 0 else file_path
+        except:
+            logger.error("Unable to load preview.\n" + traceback.print_exc())
+            return "[ERROR] Unable to load preview. See log file for details."
+        
+        return path
             
-            # Extract path from first finding
-            try:
-                vulnerability = root.find('.//ns:Vulnerability', namespace)
-                entries = vulnerability.findall('./ns:AnalysisInfo/ns:Unified/ns:Trace/ns:Primary/ns:Entry', namespace)
-                if len(entries) <= 0:
-                    class_id = vulnerability.find('./ns:ClassInfo/ns:ClassID', namespace).text
-                    return f"No entries found for vulnerability \"{class_id}\""
-                last_entry = entries[-1]
-                srcLocation = last_entry.find("./ns:Node/ns:SourceLocation", namespace)
-                file_path = srcLocation.get('path')
-                path = os.path.join(source_base_path, file_path) if len(source_base_path) > 0 else file_path
-            except:
-                logger.error("Unable to load preview.\n" + traceback.print_exc())
-                return "[ERROR] Unable to load preview. See log file for details."
-            
-            return path
     except Exception:
         return f"[ERROR] {traceback.print_exc()}"
+
+    finally:
+        time.sleep(0.5)
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
 def parse(fpath, scanner, substr, prepend, control_flags):
     from . import FLAG_CATEGORY_MAPPING, cwe_categories
@@ -69,7 +78,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     finding_count = 0
     
     # Create a temporary directory to extract files
-    with tempfile.TemporaryDirectory() as temp_dir:
+    temp_dir = tempfile.mkdtemp()
+    try:
         # Extract the FPR archive
         with zipfile.ZipFile(fpath, 'r') as zip_ref:
             zip_ref.extractall(temp_dir)
@@ -99,7 +109,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
         for vulnerability in root.findall('.//ns:Vulnerability', namespace):
             try:
                 vulnerability_num += 1
-                progress_bar(vulnerability_num, total_vulnerabilities, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                if progress_bar(scanner, vulnerability_num, total_vulnerabilities, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE)):
+                    return err_count
                 
                 # Extract class information
                 class_info = vulnerability.find('./ns:ClassInfo', namespace)
@@ -126,8 +137,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 
                 # Check if entries are found. If no entries are found, it is likely a bad vulnerability.
                 if len(entries_info) <= 0:
-                    err_count += 1
-                    logger.error(f"Vulnerability '{class_id}' has no Entry tags. Manually unzip the .fpr file and check the audit.fvdl file for the vulnerability with classID '{class_id}' for any problems.")
+                    logger.warning(f"Vulnerability '{class_id}' has no Entry tags. Manually unzip the .fpr file and check the audit.fvdl file for the vulnerability with classID '{class_id}' for any problems.")
                     continue
                 
                 # Take first 3 events and the 5 events prior to the last if it is larger than 8
@@ -168,7 +178,6 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                             try:
                                 description = description.replace(f"<Replace key=\"{m}\"/>", replacement_defs[m])
                             except KeyError:
-                                err_count += 1
                                 logger.warning(f"Vulnerability {vulnerability_num} (Rule ID: {rule_id}) does not have a replacement definition for key '{m}'. All keys for '{m}' in the message column will be output as '[[{m}]]'")
                                 description = description.replace(f"<Replace key=\"{m}\"/>", f"[[{m}]]")
                         description = re.sub("</?(Content|Paragraph|AltParagraph|code)>", '', description)
@@ -201,7 +210,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                     t_line = srcLocation.get('line')
                         else:
                             err_count += 1
-                            logger.error("Vulnerability {} (Rule ID: {}): Cannot resolve NodeRef ID {} in UnifiedNodePool".format(vulnerability_num, rule_id, node_ref.get('id')))
+                            logger.warning("Vulnerability {} (Rule ID: {}): Cannot resolve NodeRef ID {} in UnifiedNodePool".format(vulnerability_num, rule_id, node_ref.get('id')))
                     # No NodeRef tag means it is a main node
                     else:
                         srcLocation = entry.find("./ns:Node/ns:SourceLocation", namespace)
@@ -296,6 +305,9 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             except Exception:
                 logger.error(f"Vulnerability {vulnerability_num} (Rule ID: {rule_id}) of \'{fpath}\': {traceback.format_exc()}")
                 err_count += 1
+    finally:
+        time.sleep(0.5)
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
     logger.info(f"Successfully processed {finding_count} vulnerabilities")
     logger.info(f"Number of erroneous vulnerabilities: {err_count}")
