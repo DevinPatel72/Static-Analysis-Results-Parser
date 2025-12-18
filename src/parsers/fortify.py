@@ -168,7 +168,6 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                             try:
                                 description = description.replace(f"<Replace key=\"{m}\"/>", replacement_defs[m])
                             except KeyError:
-                                err_count += 1
                                 logger.warning(f"Vulnerability {vulnerability_num} (Rule ID: {rule_id}) does not have a replacement definition for key '{m}'. All keys for '{m}' in the message column will be output as '[[{m}]]'")
                                 description = description.replace(f"<Replace key=\"{m}\"/>", f"[[{m}]]")
                         description = re.sub("</?(Content|Paragraph|AltParagraph|code)>", '', description)
@@ -200,7 +199,6 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                                     t_path = srcLocation.get('path')
                                     t_line = srcLocation.get('line')
                         else:
-                            err_count += 1
                             logger.error("Vulnerability {} (Rule ID: {}): Cannot resolve NodeRef ID {} in UnifiedNodePool".format(vulnerability_num, rule_id, node_ref.get('id')))
                     # No NodeRef tag means it is a main node
                     else:
