@@ -6,7 +6,7 @@ Maintained by: Devin Patel
 The Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel or CSV file. Inputs can be entered via GUI, guided terminal prompts, or [json input](#configure-bulk-inputs). [Override rules](#configure-overrides) can be defined in the config directory. See surrounding comments in the overrides file for detailed help.
 
 ### Accepted Inputs:
--  AIO Parser:  `.xlsx` OR `.csv`
+-  SARP:        `.xlsx` OR `.csv`
 -  Checkmarx:   Directory of `.xml` (preferred) OR `.csv` files (Single directory, no recursion)
 -  CppCheck:    `.xml`
 -  Coverity:    `.json`
