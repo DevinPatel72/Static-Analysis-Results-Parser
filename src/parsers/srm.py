@@ -293,8 +293,7 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                 trace = trace.strip()
                 
                 
-                # Use the SHA256 hash from the finding as the ID, else generate the ID
-                id = result.get('hash', '') if len(id) <= 0 else id
+                # The SHA256 ID from the result is a duplicate across multiple findings, so use our own generated ID
                 if len(id) <= 0:
                     preimage = f"{path}{line}{finding_type}{tool_cwe}"
                     id = idgenerator.hash(preimage)
