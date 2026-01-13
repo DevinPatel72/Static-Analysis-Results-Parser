@@ -1,5 +1,8 @@
 # Change Log
 
+## [Version 1.3.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.3.2) (2026-01-13)
+- Fixed bug where Manual CVEs are not included in GUI list
+
 ## [Version 1.3.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.3.1) (2025-12-16)
 - Fixed bug in Coverity parser that would result in a crash or dropped results.
 
