@@ -279,6 +279,8 @@ def get_all_previews(inputs):
             preview = parsers.coverity.path_preview(fp)
         elif any(s in scan_match for s in parsers.cppcheck_keywords):
             preview = parsers.cppcheck.path_preview(fp)
+        elif any(s in scan_match for s in parsers.manualcve_keywords):
+            preview = 'No preview available for NVD CVEs'
         elif any(s in scan_match for s in parsers.depcheck_keywords):
             preview = parsers.owasp_depcheck.path_preview(fp)
         elif any(s in scan_match for s in parsers.eslint_keywords):

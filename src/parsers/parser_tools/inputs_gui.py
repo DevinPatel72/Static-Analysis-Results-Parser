@@ -256,13 +256,15 @@ class InputsGUI:
     def _select_scanner(self, scanner):
         scan_match = scanner.lower().replace(' ', '')
         if any(s in scan_match for s in parsers.aio_keywords):
-            return 'AIO'
+            return 'SARP'
         elif any(s in scan_match for s in parsers.xmarx_keywords):
             return 'Checkmarx'
         elif any(s in scan_match for s in parsers.coverity_keywords):
             return 'Coverity'
         elif any(s in scan_match for s in parsers.cppcheck_keywords):
             return 'CPPCheck'
+        elif any(s in scan_match for s in parsers.manualcve_keywords):
+            return 'NVD CVEs'
         elif any(s in scan_match for s in parsers.depcheck_keywords):
             return 'OWASP Dependency Check'
         elif any(s in scan_match for s in parsers.eslint_keywords):

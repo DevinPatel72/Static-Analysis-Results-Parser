@@ -12,10 +12,10 @@ FLAG_FORCE_EXPORT_CSV = 'Force Export CSV'
 GUI_MODE = False
 
 # List of scanners for the GUI dropdown
-LIST_OF_SCANNERS = ["AIO", "Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "GNAT SAS", "OWASP Dependency Check", "Pragmatic", "Pylint", "Semgrep", "Sigasi", "SRM"]
+LIST_OF_SCANNERS = ["Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "GNAT SAS", "NVD CVEs", "OWASP Dependency Check", "Pragmatic", "Pylint", "SARP", "Semgrep", "Sigasi", "SRM"]
 
 # Empty overrides for fallback
-EMPTY_OVERRIDES = "{\"aio\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"semgrep\":{},\"sigasi\":{},\"srm\":{}}\n"
+EMPTY_OVERRIDES = "{\"sarp\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"semgrep\":{},\"sigasi\":{},\"srm\":{}}\n"
 
 # Keywords for scanners
 aio_keywords = ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser']

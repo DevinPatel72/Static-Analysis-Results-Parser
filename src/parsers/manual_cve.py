@@ -82,7 +82,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
                                     Fieldnames.CONFIDENCE.value:confidence,
-                                    Fieldnames.MATURITY.value:'Proof of Concept',
+                                    Fieldnames.MATURITY.value:'Unreported',
                                     Fieldnames.MITIGATION.value:'',
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:'',

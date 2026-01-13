@@ -6,6 +6,7 @@ import csv
 from .parser_tools import parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.user_overrides import cwe_conf_override
+from .parser_tools.toolbox import Fieldnames
 
 __excel_enabled = False
 
