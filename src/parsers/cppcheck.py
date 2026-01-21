@@ -122,7 +122,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             locations = error.findall('location')
             if len(locations) > 1:
                 message += "\nTrace:\n"
-                for i, location in enumerate(locations, start=1):
+                for i, location in enumerate(locations[::-1], start=1):
                     t_path = location.get('file', '')
                     t_line = location.get('line', '')
                     t_info = location.get('info', '')
