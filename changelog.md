@@ -1,5 +1,8 @@
 # Change Log
 
+## [Version 1.3.3](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.3.2) (2026-02-24)
+- Fixed bug where passing a SARP spreadsheet will cause failed output.
+
 ## [Version 1.3.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.3.2) (2026-01-13)
 - Fixed bug where Manual CVEs are not included in GUI list
 
