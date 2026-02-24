@@ -40,7 +40,7 @@ def path_preview(fpath):
             with open(fpath, "r", encoding='utf-8-sig') as read_obj:
                 csv_reader = csv.DictReader(read_obj)
                 first_row = next(csv_reader)
-                cell_preview = first_row['Path']
+                cell_preview = first_row[Fieldnames.PATH.value]
                 return cell_preview
     except Exception as e:
         return f"[ERROR] {e}"
@@ -86,16 +86,16 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
 
             # Cut and prepend the paths and convert all backslashes to forwardslashes
-            path = str(row['Path']).replace(substr, "", 1)
+            path = str(row[Fieldnames.PATH.value]).replace(substr, "", 1)
             path = os.path.join(prepend, path).replace('\\', '/')
             
             # Perform cwe overrides if user requests
-            cwe, confidence = cwe_conf_override(control_flags, override_name=row['Type'], cwe=row['CWE'], override_scanner=current_parser)
+            cwe, confidence = cwe_conf_override(control_flags, override_name=row[Fieldnames.TYPE.value], cwe=row[Fieldnames.SCORING_BASIS.value], override_scanner=current_parser)
             
             new_row = {k:v for k,v in row.items()}
-            new_row['Path'] = path
-            new_row['CWE'] = cwe
-            new_row['Confidence'] = confidence
+            new_row[Fieldnames.PATH.value] = path
+            new_row[Fieldnames.SCORING_BASIS.value] = cwe
+            new_row[Fieldnames.CONFIDENCE.value] = confidence
             
             # Write row to outfile
             parser_writer.write_row(new_row)
