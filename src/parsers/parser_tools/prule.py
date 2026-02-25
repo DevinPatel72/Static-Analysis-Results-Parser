@@ -4,6 +4,7 @@ from enum import Enum
 import fnmatch
 import re
 
+# Implementation for a rule expression tree
 
 class Strictness(str, Enum):
     EXACT = ("Exact", lambda v, p: v == p)
@@ -58,7 +59,7 @@ class RuleGroup:
 
     def __init__(self, operator="AND", rules=None):
         self.operator = operator.upper()
-        self.rules = rules if rules else []
+        self.rules = rules if rules is not None else []
 
     def evaluate(self, target):
 
@@ -101,10 +102,14 @@ class RuleGroup:
 
 class PRule:
 
-    def __init__(self, rule_id="", condition=None, replace=None):
-        self.rule_id = rule_id
+    def __init__(self, precedence=None, condition=None, replace=None):
+        
+        if not isinstance(precedence, int) or (isinstance(precedence, int) and precedence < 1):
+            raise ValueError("Parameter 'precedence' must be a positive, nonzero integer")
+        
+        self.precedence = precedence
         self.condition = condition
-        self.replace = replace if replace else {}
+        self.replace = replace if replace is not None else {}
 
     def check_rule(self, target):
         return self.condition.evaluate(target)
@@ -117,7 +122,7 @@ class PRule:
     def to_dict(self):
 
         return {
-            "rule_id": self.rule_id,
+            "precedence": self.precedence,
             "condition": self.condition.to_dict(),
             "replace": self.replace
         }
@@ -133,7 +138,7 @@ class PRule:
             condition = RuleGroup.from_dict(condition_data)
 
         return cls(
-            rule_id=data["rule_id"],
+            precedence=data["precedence"],
             condition=condition,
             replace=data["replace"]
         )

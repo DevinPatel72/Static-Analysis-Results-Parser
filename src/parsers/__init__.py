@@ -17,6 +17,9 @@ LIST_OF_SCANNERS = ["Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "G
 # Empty overrides for fallback
 EMPTY_OVERRIDES = "{\"sarp\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"semgrep\":{},\"sigasi\":{},\"srm\":{}}\n"
 
+# Preflight Rules
+prules = []
+
 # Keywords for scanners
 aio_keywords = ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser']
 cppcheck_keywords = ['cppcheck']
