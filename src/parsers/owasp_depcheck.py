@@ -7,7 +7,6 @@ import csv
 import json
 import traceback
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.user_overrides import cwe_conf_override
 from .parser_tools.language_resolver import resolve_lang
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
@@ -47,13 +46,13 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend, control_flags):
+def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
     if fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend, control_flags)
+        finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
     else:
-        finding_count, err_count = _parse_json(fpath, scanner, substr, prepend, control_flags)
+        finding_count, err_count = _parse_json(fpath, scanner, substr, prepend)
     
     logger.info(f"Successfully processed {finding_count} findings")
     logger.info(f"Number of erroneous rows: {err_count}")
@@ -61,8 +60,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
 # End of parse
 
 
-def _parse_json(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
+def _parse_json(fpath, scanner, substr, prepend):
     
     # Keep track of row number and error count
     vuln_number = 0
@@ -120,9 +118,6 @@ def _parse_json(fpath, scanner, substr, prepend, control_flags):
                     
                 # Get Message
                 message = vuln.get('description', '')
-                    
-                # Perform cwe overrides if user requests
-                cve, confidence = cwe_conf_override(control_flags, override_name=cve, cwe=cve, message_content=message, override_scanner=current_parser)
                 
                 # Generate ID for Fortify finding (concat CVE, CWE, Path, Scanner, and Vulnerability)
                 preimage = f"{cve}{path}{message}"
@@ -143,9 +138,9 @@ def _parse_json(fpath, scanner, substr, prepend, control_flags):
                 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
-                                    Fieldnames.CONFIDENCE.value:confidence,
-                                    Fieldnames.MATURITY.value:'Unreported',
-                                    Fieldnames.MITIGATION.value:'',
+                                    Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                    Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                    Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:'',
                                     Fieldnames.ID.value:id,
@@ -170,8 +165,7 @@ def _parse_json(fpath, scanner, substr, prepend, control_flags):
     
 # End of _parse_json
 
-def _parse_csv(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
+def _parse_csv(fpath, scanner, substr, prepend):
     
     # Keep track of row number and error count
     row_num = 0
@@ -223,6 +217,7 @@ def _parse_csv(fpath, scanner, substr, prepend, control_flags):
                 # Extract CVE
                 cve = row['CVE']
                 
+                
                 # Get tool cwe before any overrides are performed
                 if len(cwe) <= 0:
                     tool_cwe = '(blank)'
@@ -236,9 +231,6 @@ def _parse_csv(fpath, scanner, substr, prepend, control_flags):
                 
                 # Resolve language of the file
                 lang = resolve_lang(os.path.splitext(path)[1])
-                
-                # Perform cwe overrides if user requests
-                cve, confidence = cwe_conf_override(control_flags, override_name=cve, cwe=cve, message_content=row['Vulnerability'], override_scanner=current_parser)
                 
                 # Generate ID for Fortify finding (concat CVE, CWE, Path, Scanner, and Vulnerability)
                 preimage = f"{cve}{path}{row['Vulnerability']}"
@@ -261,9 +253,9 @@ def _parse_csv(fpath, scanner, substr, prepend, control_flags):
 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
-                                    Fieldnames.CONFIDENCE.value:confidence,
-                                    Fieldnames.MATURITY.value:'Proof of Concept',
-                                    Fieldnames.MITIGATION.value:'',
+                                    Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                    Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                    Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:'',
                                     Fieldnames.ID.value:id,

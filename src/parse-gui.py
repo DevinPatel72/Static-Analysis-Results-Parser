@@ -109,9 +109,7 @@ def main():
     parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
     control_flags = {
         FLAG_CATEGORY_MAPPING: outfile_flags_gui.results[InputDictKeys.OVERRIDE_VULN_MAPPING.value],
-        FLAG_PREFLIGHT_RULES: outfile_flags_gui.results[InputDictKeys.PREFLIGHT_RULES.value],
-        FLAG_OVERRIDE_CWE: outfile_flags_gui.results[InputDictKeys.OVERRIDE_CWE.value],
-        FLAG_OVERRIDE_CONFIDENCE: outfile_flags_gui.results[InputDictKeys.OVERRIDE_CONFIDENCE.value]
+        FLAG_PREFLIGHT_RULES: outfile_flags_gui.results[InputDictKeys.PREFLIGHT_RULES.value]
     }
     
     # If the checkbox was enabled, ask if user wants to edit the preflight rules

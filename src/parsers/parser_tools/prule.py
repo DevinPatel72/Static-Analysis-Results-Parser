@@ -49,7 +49,8 @@ class Condition:
             "type": "condition",
             "fieldname": self.fieldname,
             "pattern": self.pattern,
-            "strictness": self.strictness.value
+            "strictness": self.strictness.value,
+            "case_sensitive": self.case_sensitive
         }
 
     @classmethod
@@ -57,7 +58,8 @@ class Condition:
         return cls(
             fieldname=data["fieldname"],
             pattern=data["pattern"],
-            strictness=Strictness(data["strictness"])
+            strictness=Strictness(data["strictness"]),
+            case_sensitive=data["case_sensitive"]
         )
 
 

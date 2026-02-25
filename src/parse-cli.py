@@ -309,8 +309,6 @@ def prompt_control_flags(control_flags):
     
     control_flags[FLAG_CATEGORY_MAPPING]     = ask("Enable CWE category mappings? This will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.") if FLAG_CATEGORY_MAPPING not in control_flags.keys() else control_flags[FLAG_CATEGORY_MAPPING]
     control_flags[FLAG_PREFLIGHT_RULES]      = ask("Enable Preflight Rules? This will apply the rules defined in 'preflight_rules.json'")
-    control_flags[FLAG_OVERRIDE_CWE]         = ask("Enable CWE overrides? This will change the scanner's CWE value to a user-specified value for findings of specific types.") if FLAG_OVERRIDE_CWE not in control_flags.keys() else control_flags[FLAG_OVERRIDE_CWE]
-    control_flags[FLAG_OVERRIDE_CONFIDENCE]  = ask("Enable Confidence overrides? This will change the confidence value to a user-specified one for findings of specific types.") if FLAG_OVERRIDE_CONFIDENCE not in control_flags.keys() else control_flags[FLAG_OVERRIDE_CONFIDENCE]
     control_flags[FLAG_FORCE_EXPORT_CSV]     = ask("Force export as CSV? This will ignore the output file extension if yes.", default=False) if FLAG_FORCE_EXPORT_CSV not in control_flags.keys() else control_flags[FLAG_FORCE_EXPORT_CSV]
     
     return control_flags

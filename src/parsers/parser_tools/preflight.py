@@ -8,6 +8,8 @@ import logging
 import traceback
 import importlib
 from .prule import PRule
+from .cwe_category_mapping import check_CWE
+from .toolbox import Fieldnames
 import parsers
 
 
@@ -21,7 +23,7 @@ def load_prules():
     
     # If the py file doesn't exist
     if not os.path.isfile(data_path):
-        logger.warning("Unable to load preflight rules: 'preflight_rules.json' does not exist.")
+        logger.warning("Unable to load preflight rules: 'preflight_rules.py' does not exist.")
     else:
         # py file does exist
         try:
@@ -38,20 +40,24 @@ def load_prules():
             prules = []
     
     # Now load default rules
-    data_path = os.path.join(CONFIG_DIR, 'default_preflight_rules.json')
+    data_path = os.path.join(CONFIG_DIR, 'default_preflight_rules.py')
     
     if not os.path.isfile(data_path):
-        logger.warning("Unable to load default preflight rules: 'default_preflight_rules.json' does not exist.")
+        logger.warning("Unable to load default preflight rules: 'default_preflight_rules.py' does not exist.")
         parsers.default_prules = []
     else:
-        with open(data_path, 'r', encoding='utf-8-sig') as r:
-            prule_data = json.load(r)
-        
-        for pr in prule_data['Preflight Rules']:
-            parsers.default_prules.append(PRule.from_dict(pr))
-        
-        parsers.default_prules.sort(key=lambda rule: int(rule.precedence))
-        logger.info("Default preflight rules loaded successfully")
+        try:
+            spec = importlib.util.spec_from_file_location("default_preflight_rules", data_path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            parsers.default_prules = module.DEFAULT_PRULES
+            prules.sort(key=lambda rule: int(rule.precedence))
+            logger.info("Default preflight rules loaded successfully")
+        except:
+            logger.error(f"Failed to import DEFAULT_PRULES from '{data_path}'")
+            logger.error(traceback.format_exc())
+            parsers.default_prules
     
     return prules
 
@@ -94,4 +100,8 @@ def apply_prules(data):
         # Default prules first
         loop_rules(parsers.default_prules)
         loop_rules(parsers.prules)
+        
+        # Check if cwe is in categories dict
+        row[Fieldnames.SCORING_BASIS.value] = check_CWE(row[Fieldnames.SCORING_BASIS.value])
+        
     

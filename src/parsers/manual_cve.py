@@ -6,14 +6,12 @@ import logging
 import csv
 import traceback
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.user_overrides import cwe_conf_override
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
 
 def parse(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Keep track of row number and error count
@@ -65,9 +63,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                     tool_cwe = '(blank)'
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
-                # Perform cwe overrides if user requests
-                cve, confidence = cwe_conf_override(control_flags, override_name=cve, cwe=cve, message_content=row['Vulnerability'], override_scanner=current_parser)
-                if confidence == 'To Verify': confidence = 'Confirmed'
+                confidence = 'Confirmed'
                 
                 # Generate ID for Fortify finding (concat CVE, CWE, Path, Scanner, and Vulnerability)
                 preimage = f"{cve}{tool_cwe}MANUAL{row['Vulnerability']}"
@@ -81,9 +77,9 @@ def parse(fpath, scanner, substr, prepend, control_flags):
 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
-                                    Fieldnames.CONFIDENCE.value:confidence,
-                                    Fieldnames.MATURITY.value:'Unreported',
-                                    Fieldnames.MITIGATION.value:'',
+                                    Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                    Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                    Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:'',
                                     Fieldnames.ID.value:id,
