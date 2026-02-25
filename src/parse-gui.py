@@ -116,6 +116,13 @@ def main():
     
     # If the checkbox was enabled, ask if user wants to edit the preflight rules
     if control_flags[FLAG_PREFLIGHT_RULES]:
+        # Load the preflight rules
+        parsers.prules = preflight.load_prules()
+        if isinstance(parsers.prules, str):
+            logger.warning(parsers.prules)
+            parsers.prules = []
+            control_flags[FLAG_PREFLIGHT_RULES] = False
+        
         yesnogui = YesNoGUI("Would you like to edit the preflight rules?")
         uinput = yesnogui.result
         
@@ -126,6 +133,8 @@ def main():
         if uinput:
             # Load the edit window if true
             pass # TODO
+    else:
+        parsers.prules = []
     
     # Log the configuration
     s = "Reading from files:\n"

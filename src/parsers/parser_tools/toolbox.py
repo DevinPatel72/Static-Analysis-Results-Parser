@@ -35,7 +35,7 @@ class InputDictKeys(Enum):
     FORCE_EXPORT_CSV = parsers.FLAG_FORCE_EXPORT_CSV
     
     INPUTS = [PATH, SCANNER, PREPEND, REMOVE]
-    FLAGS = [OVERRIDE_VULN_MAPPING, OVERRIDE_CWE, OVERRIDE_CONFIDENCE, FORCE_EXPORT_CSV]
+    FLAGS = [OVERRIDE_VULN_MAPPING, PREFLIGHT_RULES, OVERRIDE_CWE, OVERRIDE_CONFIDENCE, FORCE_EXPORT_CSV]
     
     def __str__(self):
         return self.value
@@ -166,7 +166,7 @@ def load_config_user_inputs():
         
         # Check if each input contains the right keys
         if not all([all([sorted(list(inp.keys())) == sorted(InputDictKeys.INPUTS.value)]) for inp in user_inputs['main']]):
-            return "Error in parsing config file \'user_inputs.json\'. Invalid keys detected in \"main\". Only the following keys are permitted: {}, {}, {}, {}.".format(*InputDictKeys.INPUTS.value)
+            return "Error in parsing config file \'user_inputs.json\'. Invalid keys detected in \"main\". Only the following keys are permitted: {}.".format(", ".join(InputDictKeys.FLAGS.value))
 
         # All is green, set main equal to parser_inputs
         parser_inputs = user_inputs['main']
@@ -182,7 +182,7 @@ def load_config_user_inputs():
         if 'flags' in user_inputs.keys():
             for k in user_inputs['flags'].keys():
                 if k not in InputDictKeys.FLAGS.value:
-                    return "Error in parsing config file \'user_inputs.json\'. Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}, {}, {}, {}.".format(k, *InputDictKeys.FLAGS.value)
+                    return "Error in parsing config file \'user_inputs.json\'. Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join(InputDictKeys.FLAGS.value))
         else:
             control_flags = {}
 

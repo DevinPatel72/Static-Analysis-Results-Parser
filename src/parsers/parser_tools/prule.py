@@ -20,23 +20,29 @@ class Strictness(str, Enum):
         obj.func = func
         return obj
 
-    def matches(self, value, pattern):
-        return self.func(value, pattern)
+    def matches(self, value, pattern, case_sensitive=False):
+        if case_sensitive:
+            return self.func(value, pattern)
+        else:
+            value = value.lower() if isinstance(value, str) else value
+            pattern = pattern.lower() if isinstance(pattern, str) else pattern
+            return self.func(value, pattern)
 
 
 class Condition:
 
-    def __init__(self, fieldname, pattern, strictness=Strictness.CONTAINS):
+    def __init__(self, fieldname, pattern, strictness=Strictness.CONTAINS, case_sensitive=False):
         self.fieldname = fieldname
         self.pattern = pattern
         self.strictness = strictness
+        self.case_sensitive = case_sensitive
 
     def evaluate(self, target):
         if self.fieldname not in target:
             return False
 
         value = target[self.fieldname]
-        return self.strictness.matches(str(value), str(self.pattern))
+        return self.strictness.matches(str(value), str(self.pattern), case_sensitive=self.case_sensitive)
     
     def to_dict(self):
         return {
@@ -102,7 +108,7 @@ class RuleGroup:
 
 class PRule:
 
-    def __init__(self, rule_id="", precedence=0, condition=None, replace=None):
+    def __init__(self, rule_id="", precedence=0, condition=None, replacement=None):
         
         self.rule_id = rule_id
         
@@ -111,14 +117,14 @@ class PRule:
         
         self.precedence = precedence
         self.condition = condition
-        self.replace = replace if replace is not None else {}
+        self.replacement = replacement if replacement is not None else {}
 
     def check_rule(self, target):
         return self.condition.evaluate(target)
 
     def apply_rule(self, target):
         if self.check_rule(target):
-            return self.replace
+            return self.replacement
         return None
     
     def to_dict(self):
@@ -127,7 +133,7 @@ class PRule:
             "rule_id": self.rule_id,
             "precedence": self.precedence,
             "condition": self.condition.to_dict(),
-            "replace": self.replace
+            "replacement": self.replacement
         }
 
     @classmethod
@@ -144,7 +150,7 @@ class PRule:
             rule_id=data['rule_id'],
             precedence=data["precedence"],
             condition=condition,
-            replace=data["replace"]
+            replacement=data["replacement"]
         )
 
 
