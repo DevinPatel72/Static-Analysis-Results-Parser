@@ -445,9 +445,11 @@ class OutfileFlagsGUI:
 
         # ─── Checkboxes for Flags ─────────────────────────────
         mapping_val = self.initial_flags.get(InputDictKeys.OVERRIDE_VULN_MAPPING.value, True)
+        pr_val = self.initial_flags.get(InputDictKeys.PREFLIGHT_RULES.value, True)
         cwe_val = self.initial_flags.get(InputDictKeys.OVERRIDE_CWE.value, True)
         confidence_val = self.initial_flags.get(InputDictKeys.OVERRIDE_CONFIDENCE.value, True)
         self.enable_category_mapping = tk.BooleanVar(value=mapping_val)
+        self.enable_preflight_rules = tk.BooleanVar(value=pr_val)
         self.enable_override_cwe = tk.BooleanVar(value=cwe_val)
         self.enable_override_confidence = tk.BooleanVar(value=confidence_val)
 
@@ -459,6 +461,13 @@ class OutfileFlagsGUI:
             "Enable CWE Category Mappings",
             self.enable_category_mapping,
             "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers."
+        )
+        
+        self.add_checkbox_with_tooltip(
+            checkbox_frame,
+            "Enable Preflight Rules",
+            self.enable_preflight_rules,
+            "If enabled, this will change final output values according to user-defined rules."
         )
         
         self.add_checkbox_with_tooltip(
@@ -516,6 +525,7 @@ class OutfileFlagsGUI:
 
         self.results = {
             InputDictKeys.OUTFILE.value: output_path,
+            InputDictKeys.PREFLIGHT_RULES.value: self.enable_preflight_rules.get(),
             InputDictKeys.OVERRIDE_VULN_MAPPING.value: self.enable_category_mapping.get(),
             InputDictKeys.OVERRIDE_CWE.value: self.enable_override_cwe.get(),
             InputDictKeys.OVERRIDE_CONFIDENCE.value: self.enable_override_confidence.get()

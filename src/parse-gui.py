@@ -9,7 +9,7 @@ from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, console, loa
 import parsers
 from parsers import PROG_NAME, VERSION
 from parsers import *
-from parsers.parser_tools import parser_writer
+from parsers.parser_tools import parser_writer, preflight
 import parsers.parser_tools.progressbar as progressbar
 
 parsers.GUI_MODE = True
@@ -109,9 +109,23 @@ def main():
     parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
     control_flags = {
         FLAG_CATEGORY_MAPPING: outfile_flags_gui.results[InputDictKeys.OVERRIDE_VULN_MAPPING.value],
+        FLAG_PREFLIGHT_RULES: outfile_flags_gui.results[InputDictKeys.PREFLIGHT_RULES.value],
         FLAG_OVERRIDE_CWE: outfile_flags_gui.results[InputDictKeys.OVERRIDE_CWE.value],
         FLAG_OVERRIDE_CONFIDENCE: outfile_flags_gui.results[InputDictKeys.OVERRIDE_CONFIDENCE.value]
     }
+    
+    # If the checkbox was enabled, ask if user wants to edit the preflight rules
+    if control_flags[FLAG_PREFLIGHT_RULES]:
+        yesnogui = YesNoGUI("Would you like to edit the preflight rules?")
+        uinput = yesnogui.result
+        
+        if uinput is None:
+            sys.exit(0)
+        
+        # Load inputs from config file
+        if uinput:
+            # Load the edit window if true
+            pass # TODO
     
     # Log the configuration
     s = "Reading from files:\n"

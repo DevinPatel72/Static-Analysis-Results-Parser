@@ -37,7 +37,7 @@ import traceback
 from math import ceil
 import parsers
 from parsers import *
-from parsers.parser_tools import parser_writer
+from parsers.parser_tools import parser_writer, preflight
 from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, validate_path_and_scanner, check_input_format, get_all_previews
 
 # Configure root path and important dirs of script
@@ -308,6 +308,7 @@ def prompt_control_flags(control_flags):
                 print("\n[ERROR]  Invalid input. Please enter yes or no. (Leave blank for {})".format('\"yes\"' if default else '\"no\"'))
     
     control_flags[FLAG_CATEGORY_MAPPING]     = ask("Enable CWE category mappings? This will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.") if FLAG_CATEGORY_MAPPING not in control_flags.keys() else control_flags[FLAG_CATEGORY_MAPPING]
+    control_flags[FLAG_PREFLIGHT_RULES]      = ask("Enable Preflight Rules? This will apply the rules defined in 'preflight_rules.json'")
     control_flags[FLAG_OVERRIDE_CWE]         = ask("Enable CWE overrides? This will change the scanner's CWE value to a user-specified value for findings of specific types.") if FLAG_OVERRIDE_CWE not in control_flags.keys() else control_flags[FLAG_OVERRIDE_CWE]
     control_flags[FLAG_OVERRIDE_CONFIDENCE]  = ask("Enable Confidence overrides? This will change the confidence value to a user-specified one for findings of specific types.") if FLAG_OVERRIDE_CONFIDENCE not in control_flags.keys() else control_flags[FLAG_OVERRIDE_CONFIDENCE]
     control_flags[FLAG_FORCE_EXPORT_CSV]     = ask("Force export as CSV? This will ignore the output file extension if yes.", default=False) if FLAG_FORCE_EXPORT_CSV not in control_flags.keys() else control_flags[FLAG_FORCE_EXPORT_CSV]
@@ -401,6 +402,16 @@ def main():
     # Load the mapping if true
     if control_flags[FLAG_CATEGORY_MAPPING]:
         parsers.cwe_categories = load_config_cwe_category_mappings()
+    
+    # Load preflight rules if true
+    if control_flags[FLAG_PREFLIGHT_RULES]:
+        parsers.prules = preflight.load_prules()
+        if isinstance(parsers.prules, str):
+            logger.warning(parsers.prules)
+            parsers.prules = []
+            control_flags[FLAG_PREFLIGHT_RULES] = False
+    else:
+        parsers.prules = []
 
     # Init the outfile
     if parser_outfile.lower().endswith('.csv') or control_flags[FLAG_FORCE_EXPORT_CSV]:

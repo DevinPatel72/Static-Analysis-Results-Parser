@@ -4,7 +4,7 @@ import os
 import atexit
 import csv
 import logging
-from preflight import apply_prules
+from .preflight import apply_prules
 
 logger = logging.getLogger(__name__)
 __excel_enabled = False

@@ -5,7 +5,7 @@
 import os
 import json
 import logging
-from prule import PRule
+from .prule import PRule
 import parsers
 
 
@@ -14,21 +14,25 @@ logger = logging.getLogger(__name__)
 def load_prules():
     from parsers import CONFIG_DIR
     
+    prules = []
     data_path = os.path.join(CONFIG_DIR, 'preflight_rules.json')
     
     if not os.path.isfile(data_path):
-        logger.error("Unable to load preflight rules: 'preflight_rules.json' does not exist")
-        return
+        logger.warning("Unable to load preflight rules: 'preflight_rules.json' does not exist. Loading default list instead.")
+        data_path = os.path.join(CONFIG_DIR, 'default_preflight_rules.json')
+        if not os.path.isfile(data_path):
+            return "Unable to load default preflight rules: 'default_preflight_rules.json' does not exist. Continuing with preflight rules disabled."
     
     with open(data_path, 'r') as r:
         prule_data = json.load(r)
     
     for pr in prule_data['PRules']:
-        parsers.prules.append(PRule.from_dict(pr))
+        prules.append(PRule.from_dict(pr))
     
-    parsers.prules.sort(key=lambda rule: int(rule.precedence))
+    prules.sort(key=lambda rule: int(rule.precedence))
 
     logger.info("Preflight rules loaded successfully")
+    return prules
 
 
 def save_prules():
@@ -36,12 +40,12 @@ def save_prules():
     
     data_path = os.path.join(CONFIG_DIR, 'preflight_rules.json')
     
-    out = {'PRules': []}
+    out = {'Preflight Rules': []}
     
     parsers.prules.sort(key=lambda rule: int(rule.precedence))
     
     for pr in parsers.prules:
-        out['PRules'].append(pr.to_dict())
+        out['Preflight Rules'].append(pr.to_dict())
     
     with open(data_path, 'w') as w:
         json.dump(out, w, indent=4)
