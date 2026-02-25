@@ -18,7 +18,6 @@
 - Added support for JSON input from OWASP Dependency Check.
 
 ## [Version 1.1.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.1.0) (2025-10-02)
-
 - Added support for Semgrep that accepts JSON or CSV files.
 - Added support for Sigasi that accepts JSON input.
 - Updated SRM and Checkmarx parsers to accept XML reports, which include more information than CSV reports.
@@ -31,12 +30,10 @@
 - Fixed bug where Checkmarx path previews will only access the first file in the target directory to create a preview. If the first file is empty, the path preview will produce an error. Now, the parser will iterate through all files for a valid path instead of stopping at the first one.
 
 ## [Version 1.0.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.0.1) (2025-09-11)
-
 - Added version text to both CLI and GUI components of the software.
 - Added another Coverity override to `user_overrides.json` to correct CWE for memory leak findings.
 
 ## [Version 1.0.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.0.0) (2025-08-25)
-
 First official release of the software. See Beta change log below.
 
 
@@ -54,7 +51,8 @@ First official release of the software. See Beta change log below.
     2) The user enters an outfile with a .csv extension
 
     3) External module "openpyxl" is not installed when running from src
-    Minor bug fixes and fine-tuning.
+    
+- Minor bug fixes and fine-tuning.
 
 ### Beta v20250805
 - A GUI version has been created. Please note that compatibility testing with legacy versions of python3 has not been performed, so older python3 versions may not be able to run the GUI. If this is the case, you may have to run the executables or update your python version.
