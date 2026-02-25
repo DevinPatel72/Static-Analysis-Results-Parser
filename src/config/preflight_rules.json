@@ -1,0 +1,18 @@
+﻿{
+    "Preflight Rules": [
+        {
+            "rule_id": "test",
+            "precedence": 0,
+            "condition": {
+                "type": "condition",
+                "fieldname": "Path",
+                "pattern": "grofs-main/target/rtems/**",
+                "strictness": "Glob"
+            },
+            "replacement": {
+                "Scoring Basis": "999999",
+                "Confidence": "Info"
+            }
+        }
+    ]
+}

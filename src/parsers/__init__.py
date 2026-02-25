@@ -20,6 +20,7 @@ EMPTY_OVERRIDES = "{\"sarp\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{}
 
 # Preflight Rules
 prules = []
+default_prules = []
 
 # Keywords for scanners
 aio_keywords = ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser']

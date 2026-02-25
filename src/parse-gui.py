@@ -118,10 +118,6 @@ def main():
     if control_flags[FLAG_PREFLIGHT_RULES]:
         # Load the preflight rules
         parsers.prules = preflight.load_prules()
-        if isinstance(parsers.prules, str):
-            logger.warning(parsers.prules)
-            parsers.prules = []
-            control_flags[FLAG_PREFLIGHT_RULES] = False
         
         yesnogui = YesNoGUI("Would you like to edit the preflight rules?")
         uinput = yesnogui.result
@@ -152,6 +148,9 @@ def main():
     
     # Export parser inputs to config file for reruns
     export_config(parser_inputs, parser_outfile, control_flags)
+    
+    # Save the preflight rules
+    preflight.save_prules(parsers.prules)
     
     # Load the mapping if true
     if control_flags[FLAG_CATEGORY_MAPPING]:
