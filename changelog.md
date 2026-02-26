@@ -1,5 +1,23 @@
 # Change Log
 
+## [Version 2.0.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.0.0) ()
+Removed the old override system in favor of a more streamlined one using rule expressions and globbing.  
+This new system is called the **Preflight** system.
+
+Key features of **Preflight**:
+- Allows full control over what fields get overridden and assigning new values to replace them with
+- Enables matching techniques that are more intricate than exact matches: Contains, StartsWith, EndsWith, Glob, and RegEx.
+- Features the ability to chain match patterns into boolean expressions with operators AND, OR, and NOT
+- The ability to assign precedence to each rule so ordering can matter.
+- The GUI has an editor to easily add, remove, and edit rules.
+- The old `user_overrides.json` template is ported to a default profile that is toggle-able.
+
+Documentation on how **Preflight** works is available in the repo's ReadMe.
+
+Other notable changes:
+- Removed all interactive elements of the CLI executable to enable insertion into automated pipelines. All config must be performed by the GUI executable or manually in the `config` folder.
+
+
 ## [Version 1.3.3](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.3.3) (2026-02-24)
 - Fixed bug where passing a SARP spreadsheet will cause failed output.
 
