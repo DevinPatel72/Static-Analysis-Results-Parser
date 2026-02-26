@@ -5,7 +5,7 @@ Removed the old override system in favor of a more streamlined one using rule ex
 This new system is called the **Preflight** system.
 
 Key features of **Preflight**:
-- Allows full control over what fields get overridden and assigning new values to replace them with
+- Allows full control over what fields get overridden and any new values to replace them with
 - Enables matching techniques that are more intricate than exact matches: Contains, StartsWith, EndsWith, Glob, and RegEx.
 - Features the ability to chain match patterns into boolean expressions with operators AND, OR, and NOT
 - The ability to assign precedence to each rule so ordering can matter.

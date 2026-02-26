@@ -154,7 +154,7 @@ HEADER = '''#############################################################
 #           PRule(
 #               rule_id='example_single_condition',
 #               precedence=1,
-#               condition=Condition(fieldname='Path', pattern='source_dir/dir1/**/*.py', strictness=Strictness.GLOB, case_sensitive=False),
+#               condition=Condition(fieldname=Fieldnames.PATH.value, pattern='source_dir/dir1/**/*.py', strictness=Strictness.GLOB, case_sensitive=False),
 #               replacement={Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'False Positive'}
 #           ),
 #
