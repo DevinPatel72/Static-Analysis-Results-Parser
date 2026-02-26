@@ -5,16 +5,12 @@ VERSION = '1.3.3'
 # Control Flag Names
 FLAG_CATEGORY_MAPPING = 'Category Mappings'
 FLAG_PREFLIGHT_RULES = 'Preflight Rules'
-FLAG_FORCE_EXPORT_CSV = 'Force Export CSV'
 
 # Set GUI mode to enable/disable messageboxes
 GUI_MODE = False
 
 # List of scanners for the GUI dropdown
 LIST_OF_SCANNERS = ["Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "GNAT SAS", "NVD CVEs", "OWASP Dependency Check", "Pragmatic", "Pylint", "SARP", "Semgrep", "Sigasi", "SRM"]
-
-# Empty overrides for fallback
-EMPTY_OVERRIDES = "{\"sarp\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"semgrep\":{},\"sigasi\":{},\"srm\":{}}\n"
 
 # Preflight Rules
 prules = []
@@ -53,4 +49,4 @@ CONFIG_DIR = 'config'
 cwe_categories = {}
 
 # Choose specific items to import when using "from parsers import *"
-__all__ = ['FLAG_CATEGORY_MAPPING', 'FLAG_PREFLIGHT_RULES', 'FLAG_FORCE_EXPORT_CSV', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'manual_cve', 'pragmatic', 'pylint', 'semgrep', 'sigasi', 'srm']
+__all__ = ['FLAG_CATEGORY_MAPPING', 'FLAG_PREFLIGHT_RULES', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'manual_cve', 'pragmatic', 'pylint', 'semgrep', 'sigasi', 'srm']

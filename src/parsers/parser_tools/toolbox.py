@@ -30,10 +30,9 @@ class InputDictKeys(Enum):
     OUTFILE = 'outfile'
     OVERRIDE_VULN_MAPPING = parsers.FLAG_CATEGORY_MAPPING
     PREFLIGHT_RULES = parsers.FLAG_PREFLIGHT_RULES
-    FORCE_EXPORT_CSV = parsers.FLAG_FORCE_EXPORT_CSV
     
     INPUTS = [PATH, SCANNER, PREPEND, REMOVE]
-    FLAGS = [OVERRIDE_VULN_MAPPING, PREFLIGHT_RULES, FORCE_EXPORT_CSV]
+    FLAGS = [OVERRIDE_VULN_MAPPING, PREFLIGHT_RULES]
     
     def __str__(self):
         return self.value
@@ -151,9 +150,8 @@ def load_config_cwe_category_mappings():
         console("Unable to load MITRE CWE Category Mappings: Invalid JSON format\nThe program will continue without CWE category mappings.", "Config Error", type='error')
         return {}
 
-def load_config_user_inputs():
+def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
     # Check if there are inputs in user_inputs.json
-    inputs_path = os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')
     if os.path.isfile(inputs_path):
         try:
             with open(inputs_path, 'r', encoding='utf-8-sig') as uin:
@@ -176,8 +174,12 @@ def load_config_user_inputs():
         if 'outfile' in user_inputs.keys():
             if user_inputs['outfile'] is not None or len(user_inputs['outfile']) > 0:
                 parser_outfile = user_inputs['outfile'] 
-            else: parser_outfile = ""
-        else: parser_outfile = ""
+            else: parser_outfile = default_outfile
+        else: parser_outfile = default_outfile
+        
+        # Check to see if slashes are present, if not, then assume pwd
+        if not ('\\' in parser_outfile or '/' in parser_outfile):
+            parser_outfile = os.path.join(os.getcwd(), parser_outfile)
         
         # Check for control flags
         if 'flags' in user_inputs.keys():
@@ -194,7 +196,7 @@ def load_config_user_inputs():
         return parser_inputs, parser_outfile, control_flags
 
     else:
-        return "Config file \'user_inputs.json\' not found."
+        return f"Config file {inputs_path} not found."
 
 def check_input_format(inputs, outfile, flags):
     # Check if inputs are correct
@@ -205,23 +207,29 @@ def check_input_format(inputs, outfile, flags):
         if (msg := validate_path_and_scanner(inp[InputDictKeys.PATH.value], inp[InputDictKeys.SCANNER.value])) != 'TRUE':
             console(msg, title='Invalid Config Input', type='error')
             failure = True
-            logger.critical("There were errors detected for input \"{}\". Please address them in the log file then run the program again.".format(inp[InputDictKeys.PATH.value]))
     
     # Check outfile
     msg = validate_outfile(outfile)
     if msg == "Outfile not defined":
         pass
     elif msg != 'TRUE':
-        console(msg, title='Invalid Config Input', type='error')
+        console(msg, title='Invalid Config Input', type='critical')
         failure = True
-        logger.critical("There were errors when validating the outfile. Please address them in the log file then run the program again.")
     
     # Check control flags
     for k, v in flags.items():
+        if k not in InputDictKeys.FLAGS.value:
+            console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {InputDictKeys.FLAGS.value}", title='Invalid Config Input', type='error')
+            failure = True
         if not isinstance(v, bool):
             console(f"Invalid data type for control flag \"{k}\". Please ensure all values are boolean types.", title='Invalid Config Input', type='error')
             failure = True
-            logger.critical("There were errors when validating the control flags. Please address them in the log file then run the program again.")
+    
+    # Check if all control flags are present
+    missing = [f"\'{f}\'" for f in InputDictKeys.FLAGS.value if f not in flags.keys()]
+    if len(missing) > 0:
+        console(f"Missing control flag{'s' if len(missing) > 1 else ''} {", ".join(missing)}", title='Invalid Config Input', type='error')
+        failure = True
 
     if failure:
         sys.exit(2)

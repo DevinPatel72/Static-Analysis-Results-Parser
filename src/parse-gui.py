@@ -72,7 +72,7 @@ def main():
         
         # Load inputs from config file
         if uinput:
-            rv = load_config_user_inputs()
+            rv = load_config_user_inputs(os.path.join(parsers.CONFIG_DIR, 'user_inputs.json'))
             if isinstance(rv, str):
                 if "Config file \'user_inputs.json\' not found." != rv:
                     logger.warning(f"{rv}")
