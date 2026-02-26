@@ -61,6 +61,19 @@ class Condition:
             strictness=Strictness(data["strictness"]),
             case_sensitive=data["case_sensitive"]
         )
+    
+    def __str__(self):
+        return (
+            f'Condition('
+            f'fieldname={self.fieldname!r}, '
+            f'pattern={self.pattern!r}, '
+            f'strictness=Strictness.{self.strictness.name}, '
+            f'case_sensitive={self.case_sensitive}'
+            f')'
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class RuleGroup:
@@ -107,6 +120,24 @@ class RuleGroup:
             operator=data["operator"],
             rules=rules
         )
+    
+    def __str__(self):
+        if not self.rules:
+            return f'RuleGroup({self.operator!r}, [])'
+
+        inner = ",\n        ".join(str(r) for r in self.rules)
+
+        return (
+            f'RuleGroup(\n'
+            f'    {self.operator!r},\n'
+            f'    [\n'
+            f'        {inner}\n'
+            f'    ]\n'
+            f')'
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
 class PRule:
 
@@ -154,5 +185,23 @@ class PRule:
             condition=condition,
             replacement=data["replacement"]
         )
+    
+    def __str__(self):
+        replacement_str = repr(self.replacement)
+
+        condition_str = str(self.condition)
+        condition_str = condition_str.replace("\n", "\n    ")
+
+        return (
+            f'PRule(\n'
+            f'    rule_id={self.rule_id!r},\n'
+            f'    precedence={self.precedence},\n'
+            f'    condition={condition_str},\n'
+            f'    replacement={replacement_str}\n'
+            f')'
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
 

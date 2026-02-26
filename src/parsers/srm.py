@@ -206,6 +206,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
                 # Check for duplicate findings from standalone scanners
+                confidence = Fieldnames.DEFAULT_CONF.value
                 tool_code = tool.get('code', '').strip()
                 if m := parser_writer.search_row([(Fieldnames.TYPE.value, tool_code, True),
                                                       (Fieldnames.SCANNER.value, tool_name.lower(), False),
@@ -261,7 +262,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
-                                    Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                    Fieldnames.CONFIDENCE.value:confidence,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',

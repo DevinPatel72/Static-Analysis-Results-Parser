@@ -397,6 +397,9 @@ def main():
     input("\nPress Enter to continue or CTRL+C to quit...")
     print()
     
+    # Put control_flags into module variable
+    parsers.control_flags = control_flags
+    
     # Load the mapping if true
     if control_flags[FLAG_CATEGORY_MAPPING]:
         parsers.cwe_categories = load_config_cwe_category_mappings()
@@ -434,33 +437,33 @@ def main():
         path = os.path.realpath(fpath)
         
         if any(s in scan_match for s in parsers.aio_keywords):
-            err_count += aio.parse(path, scanner, substr, prepend, control_flags)
+            err_count += aio.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.xmarx_keywords):
-            err_count += checkmarx.parse(path, scanner, substr, prepend, control_flags)
+            err_count += checkmarx.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.coverity_keywords):
-            err_count += coverity.parse(path, scanner, substr, prepend, control_flags)
+            err_count += coverity.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            err_count += cppcheck.parse(path, scanner, substr, prepend, control_flags)
+            err_count += cppcheck.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.depcheck_keywords):
-            err_count += owasp_depcheck.parse(path, scanner, substr, prepend, control_flags)
+            err_count += owasp_depcheck.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.eslint_keywords):
-            err_count += eslint.parse(path, scanner, substr, prepend, control_flags)
+            err_count += eslint.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.manualcve_keywords):
-            err_count += manual_cve.parse(path, scanner, substr, prepend, control_flags)
+            err_count += manual_cve.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            err_count += gnatsas.parse(path, scanner, substr, prepend, control_flags)
+            err_count += gnatsas.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.fortify_keywords):
-            err_count += fortify.parse(path, scanner, substr, prepend, control_flags)
+            err_count += fortify.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            err_count += pragmatic.parse(path, scanner, substr, prepend, control_flags)
+            err_count += pragmatic.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.pylint_keywords):
-            err_count += pylint.parse(path, scanner, substr, prepend, control_flags)
+            err_count += pylint.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.semgrep_keywords):
-            err_count += semgrep.parse(path, scanner, substr, prepend, control_flags)
+            err_count += semgrep.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.sigasi_keywords):
-            err_count += sigasi.parse(path, scanner, substr, prepend, control_flags)
+            err_count += sigasi.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            err_count += srm.parse(path, scanner, substr, prepend, control_flags)
+            err_count += srm.parse(path, scanner, substr, prepend)
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             err_count += 1
