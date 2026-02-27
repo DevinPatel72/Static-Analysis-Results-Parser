@@ -235,6 +235,12 @@ def check_input_format(inputs, outfile, flags):
     if failure:
         sys.exit(2)
 
+def check_CWE(cwe):
+    if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING] and cwe in parsers.cwe_categories.keys():
+        return f"{cwe}:{parsers.cwe_categories[cwe]}"
+    else:
+        return int(cwe) if str(cwe).isdigit() else cwe
+
 def export_config(inputs, outfile, control_flags):
     inputs_path = os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')
     with open(inputs_path, 'w', encoding='utf-8-sig') as uout:
