@@ -6,7 +6,6 @@ import os
 import logging
 import traceback
 import importlib
-from .prule import PRule
 from .toolbox import Fieldnames, check_CWE
 import parsers
 
