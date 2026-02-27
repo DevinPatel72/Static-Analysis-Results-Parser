@@ -8,7 +8,7 @@ from parsers.parser_tools.prule import PRule, RuleGroup, Condition, Strictness
 from parsers.parser_tools.toolbox import Fieldnames
 
 DEFAULT_PRULES = [
-    PRule(
+        PRule(
             rule_id = "checkmarx_empty_methods",
             precedence = 0,
             condition=RuleGroup(operator="AND", rules=[
@@ -820,6 +820,6 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"precondition <conditional raise>", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '628'}
-        ),
+        )
     
 ]
