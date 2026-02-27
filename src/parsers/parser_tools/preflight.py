@@ -127,24 +127,24 @@ HEADER = '''#############################################################
 #                               Highest value is last, equal value is random amongst rules of the same value.
 #       condition   (RuleGroup OR Condition): Pass a Condition object if there is only 1 pattern that you want to match.
 #                                             Pass a RuleGroup object if there is an expression of rules you want to match.
-#       replacement (dict)    : Dictionary of Fieldname enum values mapped to the rule's replacement value
+#       replacement (dict)    : Dictionary of Fieldname enum values mapped to their respective replacement values
 #
 #   RuleGroup:
 #       operator    (str) : Choose among "AND", "OR", or "NOT"
-#       rules       (list): List of Condition objects
+#       rules       (list): List of RuleGroup or Condition objects (Note that 'NOT' operators only evaluate the first element and ignore the rest)
 #
 #   Condition:
-#       fieldname   (Fieldname) : Target fieldname to match the pattern parameter to
-#       pattern     (str)       : The pattern to match to the target string
+#       fieldname   (Fieldname) : Target fieldname to match the pattern parameter to (e.g., Path, Line, Type)
+#       pattern     (str)       : The pattern to match to the target fieldname's value (e.g., /proj/src/**/*.cpp)
 #       strictness  (Strictness): Adjusts the strictness of the pattern matching. See below for Enum values.
-#       case_sensitive (bool) : True for case sensitive matching, False for case insensitive matching.
+#       case_sensitive (bool)   : True for case sensitive matching, False for case insensitive matching. Note that the strictness value 'EXACT' will not override this parameter.
 #
 #   Strictness:
-#       EXACT (Does NOT override rule_order parameter)
+#       EXACT (Does NOT override parameter 'case_sensitive')
 #       CONTAINS
 #       STARTSWITH
 #       ENDSWITH
-#       GLOB  (Path Globbing, e.g. /path/**/*.py)
+#       GLOB  (Path Globbing, e.g. src/**/*.py)
 #       REGEX (Regular Expression)
 #
 #
@@ -158,7 +158,7 @@ HEADER = '''#############################################################
 #               replacement={Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'False Positive'}
 #           ),
 #
-#           #### This rule will match (scanner contains "coverity" && type exact matches "An expression with no side-effect or unintended effect indicates a possible logic flaw")
+#           #### This rule will match: (Scanner contains "coverity" && Type exact matches "An expression with no side-effect or unintended effect indicates a possible logic flaw")
 #           PRule(
 #               rule_id='example_AND_conditions',
 #               precedence=2,
@@ -169,7 +169,7 @@ HEADER = '''#############################################################
 #               replacement={Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
 #           ),
 #
-#           #### This rule will match ( (path contains "src" OR path contains "include") && (filename endswith ".cpp") )
+#           #### This rule will match: ( (Path contains "src" OR Path contains "include") && (Path endswith ".cpp") )
 #           PRule(
 #               rule_id='example_NESTED_AND_OR_conditions',
 #               precedence=3,
@@ -178,7 +178,7 @@ HEADER = '''#############################################################
 #                         Condition(Fieldnames.PATH.value, "src", Strictness.CONTAINS),
 #                         Condition(Fieldnames.PATH.value, "include", Strictness.CONTAINS)
 #                     ]),
-#                     Condition("filename", ".cpp", Strictness.ENDSWITH)
+#                     Condition(Fieldnames.PATH.value, ".cpp", Strictness.ENDSWITH)
 #                 ]),
 #               replacement={Fieldnames.CONFIDENCE.value: 'Info', Fieldnames.VALIDATOR_COMMENT.value: "These are all the .cpp files in paths containing 'src' or 'include'"}
 #           ),
