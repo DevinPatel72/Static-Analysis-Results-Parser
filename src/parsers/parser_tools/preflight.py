@@ -125,13 +125,13 @@ HEADER = '''#############################################################
 #       rule_id     (str)     : Name of the rule
 #       precedence  (int >= 0): Order that the rules will be applied.
 #                               Highest value is last, equal value is random amongst rules of the same value.
-#       condition   (RuleGroup OR Condition): Pass a Condition object if there is only 1 pattern that you want to match.
-#                                             Pass a RuleGroup object if there is an expression of rules you want to match.
+#       condition   (ConditionGroup OR Condition): Pass a Condition object if there is only 1 pattern that you want to match.
+#                                             Pass a ConditionGroup object if there is an expression of rules you want to match.
 #       replacement (dict)    : Dictionary of Fieldname enum values mapped to their respective replacement values
 #
-#   RuleGroup:
+#   ConditionGroup:
 #       operator    (str) : Choose among "AND", "OR", or "NOT"
-#       rules       (list): List of RuleGroup or Condition objects (Note that 'NOT' operators only evaluate the first element and ignore the rest)
+#       rules       (list): List of ConditionGroup or Condition objects (Note that 'NOT' operators only evaluate the first element and ignore the rest)
 #
 #   Condition:
 #       fieldname   (Fieldname) : Target fieldname to match the pattern parameter to (e.g., Path, Line, Type)
@@ -162,7 +162,7 @@ HEADER = '''#############################################################
 #           PRule(
 #               rule_id='example_AND_conditions',
 #               precedence=2,
-#               condition=RuleGroup(operator="AND", rules=[
+#               condition=ConditionGroup(operator="AND", rules=[
 #                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
 #                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"An expression with no side-effect or unintended effect indicates a possible logic flaw", strictness=Strictness.EXACT, case_sensitive=False),
 #                    ]),
@@ -173,8 +173,8 @@ HEADER = '''#############################################################
 #           PRule(
 #               rule_id='example_NESTED_AND_OR_conditions',
 #               precedence=3,
-#               condition=RuleGroup("AND", [
-#                     RuleGroup("OR", [
+#               condition=ConditionGroup("AND", [
+#                     ConditionGroup("OR", [
 #                         Condition(Fieldnames.PATH.value, "src", Strictness.CONTAINS),
 #                         Condition(Fieldnames.PATH.value, "include", Strictness.CONTAINS)
 #                     ]),
@@ -185,7 +185,7 @@ HEADER = '''#############################################################
 #       ]
 #############################################################
 
-from parsers.parser_tools.prule import PRule, RuleGroup, Condition, Strictness
+from parsers.parser_tools.prule import PRule, ConditionGroup, Condition, Strictness
 from parsers.parser_tools.toolbox import Fieldnames
 
 PRULES = [

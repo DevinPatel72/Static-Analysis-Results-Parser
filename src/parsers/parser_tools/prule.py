@@ -76,7 +76,7 @@ class Condition:
         return self.__str__()
 
 
-class RuleGroup:
+class ConditionGroup:
 
     def __init__(self, operator="AND", rules=None):
         self.operator = operator.upper()
@@ -114,7 +114,7 @@ class RuleGroup:
                 rules.append(Condition.from_dict(rule_data))
 
             elif rule_data["type"] == "group":
-                rules.append(RuleGroup.from_dict(rule_data))
+                rules.append(ConditionGroup.from_dict(rule_data))
 
         return cls(
             operator=data["operator"],
@@ -123,12 +123,12 @@ class RuleGroup:
     
     def __str__(self):
         if not self.rules:
-            return f'RuleGroup({self.operator!r}, [])'
+            return f'ConditionGroup({self.operator!r}, [])'
 
         inner = ",\n        ".join(str(r) for r in self.rules)
 
         return (
-            f'RuleGroup(\n'
+            f'ConditionGroup(\n'
             f'    {self.operator!r},\n'
             f'    [\n'
             f'        {inner}\n'
@@ -177,7 +177,7 @@ class PRule:
         if condition_data["type"] == "condition":
             condition = Condition.from_dict(condition_data)
         else:
-            condition = RuleGroup.from_dict(condition_data)
+            condition = ConditionGroup.from_dict(condition_data)
 
         return cls(
             rule_id=data['rule_id'],
