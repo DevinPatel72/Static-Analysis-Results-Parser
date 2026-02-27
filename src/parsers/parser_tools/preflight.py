@@ -101,7 +101,7 @@ def apply_prules(data):
                 # Update row fieldnames defined in the rule's replacement dict
                 for fieldname in replacement.keys():
                     # Skip confidence, validator comment, and ID replacements if the finding is a Duplicate
-                    if fieldname in [Fieldnames.CONFIDENCE.value, Fieldnames.VALIDATOR_COMMENT.value, Fieldnames.ID.value] and row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate':
+                    if row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate' and fieldname in [Fieldnames.CONFIDENCE.value, Fieldnames.VALIDATOR_COMMENT.value, Fieldnames.ID.value]:
                         continue
                     # Cast to integer if possible, else just replace
                     if isinstance(replacement[fieldname], str) and replacement[fieldname].isdigit():
@@ -110,9 +110,11 @@ def apply_prules(data):
                         row[fieldname] = replacement[fieldname]
     
     for row in data:
-        # Default prules first
-        loop_rules(parsers.default_prules)
-        loop_rules(parsers.prules)
+        if parsers.control_flags[parsers.FLAG_PREFLIGHT_RULES]:
+            # Default prules first
+            if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
+                loop_rules(parsers.default_prules)
+            loop_rules(parsers.prules)
         
         # Check if cwe is in categories dict
         row[Fieldnames.SCORING_BASIS.value] = check_CWE(row[Fieldnames.SCORING_BASIS.value])
@@ -123,7 +125,7 @@ HEADER = '''#############################################################
 # Parameter Definitions
 #   PRule:
 #       rule_id     (str)     : Name of the rule
-#       precedence (int >= 0): Order that the rules will be applied.
+#       precedence  (int >= 0): Order that the rules will be applied.
 #                               Highest value is last, equal value is random amongst rules of the same value.
 #       condition   (RuleGroup OR Condition): Pass a Condition object if there is only 1 pattern that you want to match.
 #                                             Pass a RuleGroup object if there is an expression of rules you want to match.

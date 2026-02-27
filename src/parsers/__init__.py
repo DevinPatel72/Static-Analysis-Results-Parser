@@ -5,6 +5,7 @@ VERSION = '1.3.3'
 # Control Flag Names
 FLAG_CATEGORY_MAPPING = 'Category Mappings'
 FLAG_PREFLIGHT_RULES = 'Preflight Rules'
+FLAG_DEFAULT_PREFLIGHT_RULES = 'Default Preflight Rules'
 
 # Set GUI mode to enable/disable messageboxes
 GUI_MODE = False
