@@ -106,6 +106,7 @@ def _parse_json(fpath, scanner, substr, prepend):
                 
                 # Extract CWE
                 cwe = vuln.get('cwes', '')
+                confidence = Fieldnames.DEFAULT_CONF.value
                 
                 # Extract CVE
                 cve = vuln['name']
@@ -138,7 +139,7 @@ def _parse_json(fpath, scanner, substr, prepend):
                 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
-                                    Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                    Fieldnames.CONFIDENCE.value:confidence,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
@@ -216,6 +217,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 
                 # Extract CVE
                 cve = row['CVE']
+                confidence = Fieldnames.DEFAULT_CONF.value
                 
                 
                 # Get tool cwe before any overrides are performed
@@ -253,7 +255,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
-                                    Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                    Fieldnames.CONFIDENCE.value:confidence,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',

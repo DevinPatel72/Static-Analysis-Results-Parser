@@ -63,8 +63,6 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                     tool_cwe = '(blank)'
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
-                confidence = 'Confirmed'
-                
                 # Generate ID for Fortify finding (concat CVE, CWE, Path, Scanner, and Vulnerability)
                 preimage = f"{cve}{tool_cwe}MANUAL{row['Vulnerability']}"
                 id = idgenerator.hash(preimage)
