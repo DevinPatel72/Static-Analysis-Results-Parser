@@ -17,7 +17,7 @@ Documentation on how **Preflight** works is available in the repo's ReadMe.
 Other notable changes:
 - Removed all interactive elements of the CLI executable to enable insertion into automated pipelines. All config must be performed by the GUI executable or manually in the `config` folder.
 - Changed `OWASP Dependency Check` and `NVD CVEs` parsers to set confidence to `To Verify` by default instead of `Confirmed`. This is done to encourage additional research to determine exploit maturity for each CVE.
-- Changed header "Mitigation CVSS Vector" to "Environmental Metrics" for clarity
+- Changed header `Mitigation CVSS Vector` to `Environmental Metrics` for clarity
 
 ## [Version 1.3.3](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v1.3.3) (2026-02-24)
 - Fixed bug where passing a SARP spreadsheet will cause failed output.
