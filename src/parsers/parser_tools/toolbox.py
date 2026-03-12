@@ -42,7 +42,7 @@ class Fieldnames(Enum):
     SCORING_BASIS = 'Scoring Basis'
     CONFIDENCE = 'Confidence'
     MATURITY = 'Exploit Maturity'
-    MITIGATION = 'Mitigation CVSS Vector'
+    MITIGATION = 'Environmental Metrics'
     VALIDATOR_COMMENT = 'Validator Justification'
     PROPOSED_MITIGATION = 'Proposed Mitigation'
     ID = 'ID'
