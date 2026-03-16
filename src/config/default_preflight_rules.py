@@ -60,7 +60,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Assignment of a variable or expression to itself has no effect", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "coverity_floating_point_expressions_shall_not_be_directly_or_indirectly_tested_for_equality_or_inequality",
@@ -111,7 +111,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"arrayIndexThenCheck", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '129', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_constparameter",
@@ -123,7 +123,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"constParameter", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_constparametercallback",
@@ -135,7 +135,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"constParameterCallback", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_constparameterpointer",
@@ -147,7 +147,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"constParameterPointer", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_constparameterreference",
@@ -159,7 +159,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"constParameterReference", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_constvariable",
@@ -171,7 +171,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"constVariable", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_constvariablepointer",
@@ -183,7 +183,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"constVariablePointer", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_constvariablereference",
@@ -195,7 +195,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"constVariableReference", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_containeroutofbounds",
@@ -207,7 +207,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"containerOutOfBounds", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '120'}
         ),
         PRule(
             rule_id = "cppcheck_cstylecast",
@@ -231,7 +231,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"duplInheritedMember", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_identicalconditionafterearlyexit",
@@ -255,7 +255,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"identicalInnerCondition", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076'}
         ),
         PRule(
             rule_id = "cppcheck_inttopointercast",
@@ -279,7 +279,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"missingOverride", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_multicondition",
@@ -291,7 +291,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"multiCondition", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_noconstructor",
@@ -303,7 +303,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"noConstructor", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '655'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '457'}
         ),
         PRule(
             rule_id = "cppcheck_nocopyconstructor",
@@ -315,7 +315,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"noCopyConstructor", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '665'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '825'}
         ),
         PRule(
             rule_id = "cppcheck_noexplicitconstructor",
@@ -327,7 +327,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"noExplicitConstructor", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_nooperatoreq",
@@ -339,7 +339,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"noOperatorEq", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '665'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '825'}
         ),
         PRule(
             rule_id = "cppcheck_operatoreqvarerror",
@@ -351,7 +351,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"operatorEqVarError", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '665'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '825'}
         ),
         PRule(
             rule_id = "cppcheck_passedbyvalue",
@@ -363,7 +363,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"passedByValue", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_passedbyvaluecallback",
@@ -375,7 +375,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"passedByValueCallback", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_postfixoperator",
@@ -387,7 +387,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"postfixOperator", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_redundantassignment",
@@ -399,7 +399,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantAssignment", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_redundantcondition",
@@ -411,7 +411,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantCondition", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_redundantinitialization",
@@ -423,7 +423,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantInitialization", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_redundantpointerop",
@@ -435,7 +435,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantPointerOp", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
         ),
         PRule(
             rule_id = "cppcheck_returnbyreference",
@@ -447,7 +447,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"returnByReference", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '562', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_shadowargument",
@@ -459,7 +459,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"shadowArgument", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1109', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_shadowfunction",
@@ -471,7 +471,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"shadowFunction", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1109', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_shadowvariable",
@@ -483,7 +483,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"shadowVariable", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1109', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_stlcstrassignment",
@@ -495,7 +495,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"stlcstrAssignment", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '704', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_stlcstrparam",
@@ -507,7 +507,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"stlcstrParam", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '704', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_stlfindinsert",
@@ -519,7 +519,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"stlFindInsert", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '704', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_suspiciousfloatingpointcast",
@@ -555,7 +555,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"templateRecursion", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_threadsafety_unsafe_call",
@@ -591,7 +591,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uninitMemberVar", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '457'}
         ),
         PRule(
             rule_id = "cppcheck_uninitmembervarprivate",
@@ -603,7 +603,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uninitMemberVarPrivate", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '457'}
         ),
         PRule(
             rule_id = "cppcheck_unknownmacro",
@@ -615,7 +615,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unknownMacro", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_unreadvariable",
@@ -627,7 +627,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unreadVariable", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '563', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_unsignedlessthanzero",
@@ -639,7 +639,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unsignedLessThanZero", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '570', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_unsignedpositive",
@@ -651,7 +651,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unsignedPositive", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '571', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_unusedfunction",
@@ -687,7 +687,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unusedVariable", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '563', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_useinitializationlist",
@@ -699,7 +699,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"useInitializationList", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_uselessassignmentarg",
@@ -711,7 +711,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uselessAssignmentArg", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_uselessassignmentptrarg",
@@ -723,7 +723,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uselessAssignmentPtrArg", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_uselesscallssubstr",
@@ -735,7 +735,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uselessCallsSubstr", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_usestlalgorithm",
@@ -747,7 +747,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"useStlAlgorithm", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_variablescope",
@@ -759,7 +759,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"variableScope", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_virtualcallinconstructor",
@@ -771,7 +771,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"virtualCallInConstructor", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
         ),
         PRule(
             rule_id = "cppcheck_y2038_unsafe_call",
