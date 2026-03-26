@@ -42,7 +42,16 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A virtual method is called from a constructor/destructor.", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '664'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "Attempting to call a virtual function from a constructor or destructor will result in the incorrect function being executed. During construction and destruction, virtual dispatch is disabled. Calls to virtual functions resolve to the class currently being constructed/destructed, not derived classes. The execution of the incorrect definition of a virtual function may result in unexpected or undesirable program behavior, and in security contexts this may result in vulnerabilities."}
+        ),
+        PRule(
+            rule_id = "coverity_an_enum_type_expression_in_boolean_context",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", rules=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"An enum-typed expression is used in a Boolean conditional context", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '570'}
         ),
         PRule(
             rule_id = "coverity_an_expression_with_no_side_effect_or_unintended_effect_indicates_a_possible_logic_flaw",
@@ -61,6 +70,24 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Assignment of a variable or expression to itself has no effect", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "coverity_comparing_two_pointers_not_into_the_same_object",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", rules=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Comparing two pointers not into the same object, which may have nondeterministic results.", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '595'}
+        ),
+        PRule(
+            rule_id = "coverity_excessive_use_of_stack_memory_by_local_variables_or_parameters",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", rules=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Excessive use of stack memory by local variables or parameters", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '789'}
         ),
         PRule(
             rule_id = "coverity_floating_point_expressions_shall_not_be_directly_or_indirectly_tested_for_equality_or_inequality",
@@ -90,6 +117,15 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '197'}
         ),
         PRule(
+            rule_id = "coverity_user_definitions_for_at_least_one_but_not_all_special_functions",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", rules=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"This class has user-definitions for at least one but not all of its special functions (copy constructor, copy assignment operator, destructor).", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '825'}
+        ),
+        PRule(
             rule_id = "cppcheck_allocacalled",
             precedence = 0,
             condition=ConditionGroup(operator="AND", rules=[
@@ -102,6 +138,18 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '676'}
         ),
         PRule(
+            rule_id = "cppcheck_arithmetic_involving_void_ptr",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", rules=[
+                    ConditionGroup(operator="OR", rules=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Arithmetic calculations involving void pointers", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "It is illegal to offset a void* pointer in most compilers. It is possible to perform arithmetic operations on 'void *' using GNU C extensions, but by default a compiler will not allow calculations using void pointers."}
+        ),
+        PRule(
             rule_id = "cppcheck_arrayindexthencheck",
             precedence = 0,
             condition=ConditionGroup(operator="AND", rules=[
@@ -111,7 +159,43 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"arrayIndexThenCheck", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '129', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '129'}
+        ),
+        PRule(
+            rule_id = "cppcheck_assignmentoffunctionparameter",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", rules=[
+                    ConditionGroup(operator="OR", rules=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Assignment of function parameter", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+        ),
+        PRule(
+            rule_id = "cppcheck_baseclassvaralsodefinedinclass",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", rules=[
+                    ConditionGroup(operator="OR", rules=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Base class variable also defined in derived class", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1109'}
+        ),
+        PRule(
+            rule_id = "cppcheck_catchexceptionbyvalue",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", rules=[
+                    ConditionGroup(operator="OR", rules=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"catchExceptionByValue", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_constparameter",
@@ -135,7 +219,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"constParameterCallback", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
         ),
         PRule(
             rule_id = "cppcheck_constparameterpointer",
@@ -231,7 +315,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"duplInheritedMember", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
             rule_id = "cppcheck_identicalconditionafterearlyexit",
@@ -279,7 +363,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"missingOverride", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
             rule_id = "cppcheck_multicondition",
@@ -291,7 +375,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"multiCondition", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
         ),
         PRule(
             rule_id = "cppcheck_noconstructor",
@@ -327,7 +411,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"noExplicitConstructor", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
             rule_id = "cppcheck_nooperatoreq",
@@ -447,7 +531,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"returnByReference", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '562', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '562'}
         ),
         PRule(
             rule_id = "cppcheck_shadowargument",
@@ -495,7 +579,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"stlcstrAssignment", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '704', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '704'}
         ),
         PRule(
             rule_id = "cppcheck_stlcstrparam",
@@ -507,7 +591,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"stlcstrParam", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '704', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '704'}
         ),
         PRule(
             rule_id = "cppcheck_stlfindinsert",
@@ -519,7 +603,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"stlFindInsert", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '704', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '704'}
         ),
         PRule(
             rule_id = "cppcheck_suspiciousfloatingpointcast",
@@ -555,7 +639,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"templateRecursion", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
             rule_id = "cppcheck_threadsafety_unsafe_call",
@@ -615,7 +699,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unknownMacro", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
             rule_id = "cppcheck_unreadvariable",
@@ -771,7 +855,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"virtualCallInConstructor", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.CONFIDENCE.value: 'To Verify'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
             rule_id = "cppcheck_y2038_unsafe_call",

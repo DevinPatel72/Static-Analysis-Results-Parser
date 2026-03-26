@@ -61,6 +61,7 @@ class Fieldnames(Enum):
     DEFAULT_CONF = 'To Verify'
     DEFAULT_MATURITY = 'Unreported'
     DEFAULT_MITIGATION = ''
+    MODIFIED_MITIGATION_NONE = '/MVC:N/MVI:N/MVA:N'
     
     def __str__(self):
         return self.value
