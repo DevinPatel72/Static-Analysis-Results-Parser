@@ -126,7 +126,7 @@ HEADER = '''#############################################################
 #       precedence  (int >= 0): Order that the rules will be applied.
 #                               Highest value is last, equal value is random amongst rules of the same value.
 #       condition   (ConditionGroup OR Condition): Pass a Condition object if there is only 1 pattern that you want to match.
-#                                             Pass a ConditionGroup object if there is an expression of rules you want to match.
+#                                                  Pass a ConditionGroup object if there is an expression of patterns you want to match.
 #       replacement (dict)    : Dictionary of Fieldname enum values mapped to their respective replacement values
 #
 #   ConditionGroup:
@@ -169,7 +169,7 @@ HEADER = '''#############################################################
 #               replacement={Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
 #           ),
 #
-#           #### This rule will match: ( (Path contains "src" OR Path contains "include") && (Path endswith ".cpp") )
+#           #### This rule will match: ( (Path contains "src" || Path contains "include") && (Path endswith ".cpp") )
 #           PRule(
 #               rule_id='example_NESTED_AND_OR_conditions',
 #               precedence=3,
