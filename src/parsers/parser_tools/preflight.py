@@ -135,7 +135,7 @@ HEADER = '''#############################################################
 #
 #   ConditionGroup:
 #       operator    (str) : Choose among "AND", "OR", or "NOT"
-#       rules       (list): List of ConditionGroup or Condition objects (Note that 'NOT' operators only evaluate the first element and ignore the rest)
+#       conditions  (list): List of ConditionGroup or Condition objects (Note that 'NOT' operators only evaluate the first element and ignore the rest)
 #
 #   Condition:
 #       fieldname   (Fieldname) : Target fieldname to match the pattern parameter to (e.g., Path, Line, Type)
@@ -166,7 +166,7 @@ HEADER = '''#############################################################
 #           PRule(
 #               rule_id='example_AND_conditions',
 #               precedence=2,
-#               condition=ConditionGroup(operator="AND", rules=[
+#               condition=ConditionGroup(operator="AND", conditions=[
 #                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
 #                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"An expression with no side-effect or unintended effect indicates a possible logic flaw", strictness=Strictness.EXACT, case_sensitive=False),
 #                    ]),

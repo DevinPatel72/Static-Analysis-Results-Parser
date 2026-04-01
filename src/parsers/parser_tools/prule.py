@@ -78,20 +78,20 @@ class Condition:
 
 class ConditionGroup:
 
-    def __init__(self, operator="AND", rules=None):
+    def __init__(self, operator="AND", conditions=None):
         self.operator = operator.upper()
-        self.rules = rules if rules is not None else []
+        self.conditions = conditions if conditions is not None else []
 
     def evaluate(self, target):
 
         if self.operator == "AND":
-            return all(rule.evaluate(target) for rule in self.rules)
+            return all(rule.evaluate(target) for rule in self.conditions)
 
         elif self.operator == "OR":
-            return any(rule.evaluate(target) for rule in self.rules)
+            return any(rule.evaluate(target) for rule in self.conditions)
 
         elif self.operator == "NOT":
-            return not self.rules[0].evaluate(target)
+            return not self.conditions[0].evaluate(target)
 
         else:
             raise ValueError(f"Unknown operator {self.operator}")
@@ -100,32 +100,32 @@ class ConditionGroup:
         return {
             "type": "group",
             "operator": self.operator,
-            "rules": [rule.to_dict() for rule in self.rules]
+            "conditions": [rule.to_dict() for rule in self.conditions]
         }
 
     @classmethod
     def from_dict(cls, data):
 
-        rules = []
+        conditions = []
 
-        for rule_data in data["rules"]:
+        for rule_data in data["conditions"]:
 
             if rule_data["type"] == "condition":
-                rules.append(Condition.from_dict(rule_data))
+                conditions.append(Condition.from_dict(rule_data))
 
             elif rule_data["type"] == "group":
-                rules.append(ConditionGroup.from_dict(rule_data))
+                conditions.append(ConditionGroup.from_dict(rule_data))
 
         return cls(
             operator=data["operator"],
-            rules=rules
+            conditions=conditions
         )
     
     def __str__(self):
-        if not self.rules:
+        if not self.conditions:
             return f'ConditionGroup({self.operator!r}, [])'
 
-        inner = ",\n        ".join(str(r) for r in self.rules)
+        inner = ",\n        ".join(str(r) for r in self.conditions)
 
         return (
             f'ConditionGroup(\n'
