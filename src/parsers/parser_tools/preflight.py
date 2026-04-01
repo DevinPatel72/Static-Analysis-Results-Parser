@@ -109,6 +109,10 @@ def apply_prules(data):
     
     for row in data:
         if parsers.control_flags[parsers.FLAG_PREFLIGHT_RULES]:
+            # Ensure prules are sorted by precedence
+            parsers.prules.sort(key=lambda rule: int(rule.precedence))
+            parsers.default_prules.sort(key=lambda rule: int(rule.precedence))
+            
             # Default prules first
             if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
                 loop_rules(parsers.default_prules)

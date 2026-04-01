@@ -117,6 +117,15 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '1077'}
         ),
         PRule(
+            rule_id = "coverity_header_file_included_but_not_used",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", rules=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A header file was included but none of its contents were used in the rest of the source file", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '561'}
+        ),
+        PRule(
             rule_id = "coverity_leak_of_memory_or_pointers_to_system_resources",
             precedence = 0,
             condition=ConditionGroup(operator="AND", rules=[
