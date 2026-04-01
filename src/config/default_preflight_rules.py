@@ -42,7 +42,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A virtual method is called from a constructor/destructor.", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "Attempting to call a virtual function from a constructor or destructor will result in the incorrect function being executed. During construction and destruction, virtual dispatch is disabled. Calls to virtual functions resolve to the class currently being constructed/destructed, not derived classes. The execution of the incorrect definition of a virtual function may result in unexpected or undesirable program behavior, and in security contexts this may result in vulnerabilities."}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "Attempting to call a virtual function from a constructor or destructor will result in the incorrect function being executed. During construction and destruction, virtual dispatch is disabled. Calls to virtual functions resolve to the class currently being constructed/destructed, not derived classes. The execution of the incorrect definition of a virtual function might result in unexpected or undesirable program behavior, and in security contexts this might result in weaknesses."}
         ),
         PRule(
             rule_id = "coverity_an_enum_type_expression_in_boolean_context",
@@ -96,7 +96,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Creating a copy of a variable that is no longer used instead of using std::move().", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info', Fieldnames.VALIDATOR_COMMENT.value: "The software may see a performance benefit from switching to std::move()"}
         ),
         PRule(
             rule_id = "coverity_excessive_use_of_stack_memory_by_local_variables_or_parameters",
@@ -449,7 +449,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"C-style pointer casting can make the code overly complex and error prone", strictness=Strictness.EXACT, case_sensitive=False),
                     ])
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "C++ offers four different kinds of casts as replacements: static_cast, const_cast, dynamic_cast and reinterpret_cast. A C-style cast could evaluate to any of those automatically, thus it is considered safer if the programmer explicitly states which kind of cast is expected."}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "C++ offers four different kinds of casts as a replacement for a C-style cast: static_cast, const_cast, dynamic_cast and reinterpret_cast. A C-style cast could evaluate to any of those automatically, thus it is considered safer if the programmer explicitly states which kind of cast is expected."}
         ),
         PRule(
             rule_id = "cppcheck_duplicateConditionalAssign_duplicateExpression",
@@ -1161,7 +1161,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad assignment", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "An assignment expression has a call expression in the left-hand side. It makes no sense to assign a value to a call expression. The return value will be a literal value (such as a string or number) or an object reference, neither of which can be directly assigned to. In the case of assignment to a property of an arguments object this error is raised to highlight a bad practice."}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "An assignment expression has a call expression in the left-hand side. It makes no sense to assign a value to a call expression. The return value will be a literal value (such as a string or number) or an object reference, neither of which can be directly assigned a value. In the case of assignment to a property of an arguments object, this error is raised to highlight a bad practice."}
         ),
         PRule(
             rule_id = "jshint_unexpected_token",
@@ -1173,7 +1173,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Unexpected token", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.VALIDATOR_COMMENT.value: "Unexpected token is a JSHint syntax error caused JSHint fails to parse the javascript file due to an encoding error. This is a junk finding."}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.VALIDATOR_COMMENT.value: "\"Unexpected token\" is a JSHint syntax error triggered when JSHint fails to parse the javascript file, most likely due to an encoding error. This is a junk finding."}
         ),
         PRule(
             rule_id = "pylint_anomalous_backslash",
