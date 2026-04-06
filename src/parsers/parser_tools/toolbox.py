@@ -231,7 +231,7 @@ def check_input_format(inputs, outfile, flags):
     # Check if all control flags are present
     missing = [f"\'{f}\'" for f in InputDictKeys.FLAGS.value if f not in flags.keys()]
     if len(missing) > 0 and not parsers.GUI_MODE:
-        console(f"Missing control flag{'s' if len(missing) > 1 else ''} {", ".join(missing)}", title='Invalid Config Input', type='error')
+        console(f"Missing control flag{'s' if len(missing) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', type='error')
         failure = True
 
     if failure:
