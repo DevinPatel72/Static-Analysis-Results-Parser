@@ -49,7 +49,7 @@ def load_prules():
             spec.loader.exec_module(module)
 
             parsers.default_prules = module.DEFAULT_PRULES
-            prules.sort(key=lambda rule: int(rule.precedence))
+            parsers.default_prules.sort(key=lambda rule: int(rule.precedence))
             logger.info("Default preflight rules loaded successfully")
         except:
             logger.error(f"Failed to import DEFAULT_PRULES from '{data_path}'")

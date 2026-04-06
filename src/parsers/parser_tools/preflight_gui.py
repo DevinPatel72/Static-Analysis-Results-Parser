@@ -9,6 +9,8 @@ WINDOW_TITLE = "Rule Builder"
 WINDOW_LENGTH = 1000
 WINDOW_HEIGHT = 700
 
+BG_COLOR1 = "#ffffff" 
+BG_COLOR2 = "#e0e0e0"
 
 class ConditionFrame:
     def __init__(self, master, bg=None, remove_callback=None):
@@ -292,7 +294,7 @@ class RuleFrame:
         self.move_up_callback = move_up
         self.move_down_callback = move_down
 
-        self.bg = "#f0f0f0" if index % 2 == 0 else "#ffffff"
+        self.bg = BG_COLOR1 if index % 2 == 0 else BG_COLOR2
 
         self.frame = tk.Frame(master, relief=tk.RAISED, borderwidth=2, bg=self.bg)
 
@@ -326,21 +328,18 @@ class RuleFrame:
             text="↓",
             command=self.move_down
         ).pack(side=tk.LEFT)
+        
+        tk.Button(
+            header,
+            text="Edit Replacement",
+            command=self.edit_replacement
+        ).pack(side=tk.LEFT, padx=10)
 
         tk.Button(
             header,
             text="Delete Rule",
             command=self.remove
         ).pack(side=tk.RIGHT)
-
-        btn_frame = tk.Frame(self.frame, bg=self.bg)
-        btn_frame.pack(fill="x", pady=2)
-
-        tk.Button(
-            btn_frame,
-            text="Edit Replacement",
-            command=self.edit_replacement
-        ).pack(side=tk.LEFT, padx=5)
 
         self.group = ConditionGroupFrame(self.frame, bg=self.bg)
         self.group.frame.pack(fill="both", expand=True, pady=5)
@@ -387,6 +386,7 @@ class RuleBuilderGUI:
     def __init__(self):
 
         self.result = None
+        self.enable_default_rules = None
         self.rules = []
 
         self.root = tk.Tk()
@@ -438,7 +438,7 @@ class RuleBuilderGUI:
         control.pack()
         
         # Enable Default Rules checkbox
-        self.enable_default_rules = tk.BooleanVar(value=True)
+        self.cb_enable_default_rules = tk.BooleanVar(value=True)
 
         # default_frame = tk.Frame(self.root)
         # default_frame.pack(fill='x', padx=10, pady=(5,0))
@@ -446,7 +446,7 @@ class RuleBuilderGUI:
         tk.Checkbutton(
             control,
             text="Enable Default Rule Profile",
-            variable=self.enable_default_rules
+            variable=self.cb_enable_default_rules
         ).pack(side="top", pady=6)
 
         tk.Button(
@@ -475,7 +475,7 @@ class RuleBuilderGUI:
 
     def refresh_colors(self):
         for i, rule in enumerate(self.rules):
-            bg = "#f0f0f0" if i % 2 == 0 else "#ffffff"
+            bg = BG_COLOR1 if i % 2 == 0 else BG_COLOR2
             rule.frame.configure(bg=bg)
 
     def add_rule(self):
@@ -558,10 +558,12 @@ class RuleBuilderGUI:
             return
 
         self.reorder()
-
+        
         self.result = []
 
         for rule in self.rules:
             self.result.append(rule.get_rule())
 
+        self.enable_default_rules = self.cb_enable_default_rules.get()
+        
         self.root.destroy()

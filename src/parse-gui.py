@@ -57,7 +57,7 @@ if find_spec('openpyxl') is None:
 ################################
 
 def main():
-    
+    parsers.prules = preflight.load_prules()
     gui = RuleBuilderGUI()
     print(gui.result)
     sys.exit(0)
@@ -128,10 +128,15 @@ def main():
         if uinput is None:
             sys.exit(0)
         
-        # Load inputs from config file
+        # Load the edit window if true
         if uinput:
-            # Load the edit window if true
-            pass # TODO
+            rulebuildergui = RuleBuilderGUI()
+            
+            if rulebuildergui.result is not None and len(rulebuildergui.result) > 0:
+                parsers.prules = rulebuildergui.result
+            
+            if rulebuildergui.enable_default_rules is not None:
+                control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = rulebuildergui.enable_default_rules
     else:
         parsers.prules = []
     
