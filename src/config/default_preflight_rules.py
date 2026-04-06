@@ -570,6 +570,21 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
+            rule_id = "cppcheck_moduloofone",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"moduloofone", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Modulo of one is always equal to zero", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '571'}
+        ),
+        PRule(
             rule_id = "cppcheck_multicondition",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[

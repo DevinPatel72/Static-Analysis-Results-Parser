@@ -6,8 +6,8 @@ from .prule import PRule, Condition, ConditionGroup, Strictness
 from .toolbox import Fieldnames
 
 WINDOW_TITLE = "Rule Builder"
-WINDOW_LENGTH = 1000
-WINDOW_HEIGHT = 700
+WINDOW_LENGTH = 1100
+WINDOW_HEIGHT = 750
 
 BG_COLOR1 = "#ffffff" 
 BG_COLOR2 = "#e0e0e0"
@@ -35,10 +35,12 @@ class ConditionFrame:
         )
         self.strictness.current(0)
         self.strictness.grid(row=0, column=3, padx=5)
+        
+        self.frame.columnconfigure(5, weight=3)
 
-        tk.Label(self.frame, text="Pattern", bg=bg).grid(row=0, column=4, padx=5)
-        self.pattern = tk.Entry(self.frame, width=50)
-        self.pattern.grid(row=0, column=5, padx=5)
+        tk.Label(self.frame, text="Pattern", bg=bg).grid(row=0, column=4, padx=5, sticky='w')
+        self.pattern = tk.Entry(self.frame)
+        self.pattern.grid(row=0, column=5, padx=5, sticky="ew")
 
         self.case = tk.BooleanVar()
         tk.Checkbutton(
@@ -287,7 +289,7 @@ class ReplacementEditor:
 
 class RuleFrame:
 
-    def __init__(self, master, index=0, remove_callback=None, move_up=None, move_down=None):
+    def __init__(self, master, index=0, remove_callback=None, move_up=None, move_down=None, rule_data=None):
 
         self.master = master
         self.remove_callback = remove_callback
@@ -343,6 +345,11 @@ class RuleFrame:
 
         self.group = ConditionGroupFrame(self.frame, bg=self.bg)
         self.group.frame.pack(fill="both", expand=True, pady=5)
+        
+        self.replacement = {}
+
+        if rule_data:
+            self.load_rule(rule_data)
 
     def set_bg(self, bg):
         self.bg = bg
@@ -370,6 +377,62 @@ class RuleFrame:
     def edit_replacement(self):
         editor = ReplacementEditor(self.frame, getattr(self, 'replacement', {}), Fieldnames.HEADERS.value)
         self.replacement = editor.result
+        
+    def load_rule(self, rule):
+
+        self.rule_id.insert(0, rule.rule_id)
+
+        self.replacement = rule.replacement.copy() if rule.replacement else {}
+
+        # Load condition tree
+        self.group.frame.destroy()
+        self.group = ConditionGroupFrame(
+            self.frame,
+            bg=self.bg
+        )
+        self.group.frame.pack(fill="both", expand=True, pady=5)
+
+        self.load_group(self.group, rule.condition)
+    
+    def load_group(self, group_frame, group_data):
+
+        group_frame.operator.set(group_data.operator)
+
+        # remove default child
+        for child in group_frame.children[:]:
+            child.frame.destroy()
+            group_frame.children.remove(child)
+
+        for cond in group_data.conditions:
+
+            if isinstance(cond, Condition):
+
+                cf = ConditionFrame(
+                    group_frame.child_frame,
+                    bg=self.bg,
+                    remove_callback=group_frame.remove_child
+                )
+
+                cf.field.set(cond.fieldname)
+                cf.pattern.insert(0, cond.pattern)
+                cf.strictness.set(cond.strictness.value)
+                cf.case.set(cond.case_sensitive)
+
+                cf.frame.pack(fill="x", pady=2)
+                group_frame.children.append(cf)
+
+            else:
+
+                sub = ConditionGroupFrame(
+                    group_frame.child_frame,
+                    bg=self.bg,
+                    remove_callback=group_frame.remove_child
+                )
+
+                sub.frame.pack(fill="x", pady=5)
+                group_frame.children.append(sub)
+
+                self.load_group(sub, cond)
 
     def get_rule(self):
 
@@ -383,7 +446,7 @@ class RuleFrame:
 
 class RuleBuilderGUI:
 
-    def __init__(self):
+    def __init__(self, rules=None):
 
         self.result = None
         self.enable_default_rules = None
@@ -461,7 +524,10 @@ class RuleBuilderGUI:
             command=self.submit
         ).pack(side=tk.LEFT, padx=10)
 
-        self.add_rule()
+        if rules is not None:
+            for rule in rules:
+                self.add_rule(rule)
+        else: self.add_rule()
 
         version_label = tk.Label(
             self.root,
@@ -478,14 +544,15 @@ class RuleBuilderGUI:
             bg = BG_COLOR1 if i % 2 == 0 else BG_COLOR2
             rule.frame.configure(bg=bg)
 
-    def add_rule(self):
+    def add_rule(self, rule_data=None):
 
         rule = RuleFrame(
             self.rule_frame,
             index=len(self.rules),
             remove_callback=self.remove_rule,
             move_up=self.move_up,
-            move_down=self.move_down
+            move_down=self.move_down,
+            rule_data=rule_data
         )
 
         rule.frame.pack(fill="x", pady=5)

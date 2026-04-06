@@ -508,7 +508,7 @@ class OutfileFlagsGUI:
         self.results = {
             InputDictKeys.OUTFILE.value: output_path,
             InputDictKeys.PREFLIGHT_RULES.value: self.enable_preflight_rules.get(),
-            InputDictKeys.OVERRIDE_VULN_MAPPING.value: self.enable_category_mapping.get(),
+            InputDictKeys.OVERRIDE_VULN_MAPPING.value: self.enable_category_mapping.get()
         }
 
         self.cleanexit = True

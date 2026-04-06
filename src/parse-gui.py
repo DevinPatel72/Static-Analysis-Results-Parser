@@ -57,11 +57,6 @@ if find_spec('openpyxl') is None:
 ################################
 
 def main():
-    parsers.prules = preflight.load_prules()
-    gui = RuleBuilderGUI()
-    print(gui.result)
-    sys.exit(0)
-    
     parser_inputs = []
     parser_outfile = ""
     control_flags = {}
@@ -121,22 +116,14 @@ def main():
     if control_flags[FLAG_PREFLIGHT_RULES]:
         # Load the preflight rules
         parsers.prules = preflight.load_prules()
+
+        rulebuildergui = RuleBuilderGUI(parsers.prules)
         
-        yesnogui = YesNoGUI("Would you like to edit the preflight rules?")
-        uinput = yesnogui.result
+        if rulebuildergui.result is not None and len(rulebuildergui.result) > 0:
+            parsers.prules = rulebuildergui.result
         
-        if uinput is None:
-            sys.exit(0)
-        
-        # Load the edit window if true
-        if uinput:
-            rulebuildergui = RuleBuilderGUI()
-            
-            if rulebuildergui.result is not None and len(rulebuildergui.result) > 0:
-                parsers.prules = rulebuildergui.result
-            
-            if rulebuildergui.enable_default_rules is not None:
-                control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = rulebuildergui.enable_default_rules
+        if rulebuildergui.enable_default_rules is not None:
+            control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = rulebuildergui.enable_default_rules
     else:
         parsers.prules = []
     
