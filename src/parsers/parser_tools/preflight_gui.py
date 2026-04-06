@@ -286,6 +286,77 @@ class ReplacementEditor:
 
         self.root.destroy()
 
+class RootConditionFrame:
+
+    def __init__(self, master, bg=None):
+
+        self.master = master
+        self.bg = bg
+        self.children = []
+
+        self.frame = tk.Frame(master, bg=bg)
+
+        top = tk.Frame(self.frame, bg=bg)
+        top.pack(fill="x")
+
+        tk.Button(
+            top,
+            text="Add Condition",
+            command=self.add_condition
+        ).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(
+            top,
+            text="Add Group",
+            command=self.add_group
+        ).pack(side=tk.LEFT, padx=5)
+
+        self.child_frame = tk.Frame(self.frame, bg=bg)
+        self.child_frame.pack(fill="both", expand=True, padx=15, pady=5)
+
+        self.add_condition()
+
+    def add_condition(self):
+
+        cond = ConditionFrame(
+            self.child_frame,
+            bg=self.bg,
+            remove_callback=self.remove_child
+        )
+
+        cond.frame.pack(fill="x", pady=2)
+        self.children.append(cond)
+
+    def add_group(self):
+
+        group = ConditionGroupFrame(
+            self.child_frame,
+            bg=self.bg,
+            remove_callback=self.remove_child
+        )
+
+        group.frame.pack(fill="x", pady=5)
+        self.children.append(group)
+
+    def remove_child(self, child):
+        child.frame.destroy()
+        self.children.remove(child)
+
+        if len(self.children) == 0:
+            self.add_condition()
+
+    def get_conditions(self):
+
+        conditions = []
+
+        for child in self.children:
+            if isinstance(child, ConditionFrame):
+                conditions.append(child.get_condition())
+            else:
+                conditions.append(child.get_group())
+
+        return conditions
+
 
 class RuleFrame:
 
@@ -343,7 +414,7 @@ class RuleFrame:
             command=self.remove
         ).pack(side=tk.RIGHT)
 
-        self.group = ConditionGroupFrame(self.frame, bg=self.bg)
+        self.group = RootConditionFrame(self.frame, bg=self.bg)
         self.group.frame.pack(fill="both", expand=True, pady=5)
         
         self.replacement = {}
@@ -386,13 +457,13 @@ class RuleFrame:
 
         # Load condition tree
         self.group.frame.destroy()
-        self.group = ConditionGroupFrame(
+        self.group = RootConditionFrame(
             self.frame,
             bg=self.bg
         )
         self.group.frame.pack(fill="both", expand=True, pady=5)
 
-        self.load_group(self.group, rule.condition)
+        self.load_root(self.group, rule.condition)
     
     def load_group(self, group_frame, group_data):
 
@@ -433,13 +504,53 @@ class RuleFrame:
                 group_frame.children.append(sub)
 
                 self.load_group(sub, cond)
+    
+    def load_root(self, root_frame, group_data):
+
+        for child in root_frame.children[:]:
+            child.frame.destroy()
+            root_frame.children.remove(child)
+
+        for cond in group_data.conditions:
+
+            if isinstance(cond, Condition):
+
+                cf = ConditionFrame(
+                    root_frame.child_frame,
+                    bg=self.bg,
+                    remove_callback=root_frame.remove_child
+                )
+
+                cf.field.set(cond.fieldname)
+                cf.pattern.insert(0, cond.pattern)
+                cf.strictness.set(cond.strictness.value)
+                cf.case.set(cond.case_sensitive)
+
+                cf.frame.pack(fill="x", pady=2)
+                root_frame.children.append(cf)
+
+            else:
+
+                sub = ConditionGroupFrame(
+                    root_frame.child_frame,
+                    bg=self.bg,
+                    remove_callback=root_frame.remove_child
+                )
+
+                sub.frame.pack(fill="x", pady=5)
+                root_frame.children.append(sub)
+
+                self.load_group(sub, cond)
 
     def get_rule(self):
 
         return PRule(
             rule_id=self.rule_id.get(),
             precedence=max(1, self.get_precedence()),
-            condition=self.group.get_group(),
+            condition=ConditionGroup(
+                operator="AND",
+                conditions=self.group.get_conditions()
+            ),
             replacement=getattr(self, 'replacement', {})
         )
 
@@ -565,6 +676,7 @@ class RuleBuilderGUI:
         rule.frame.destroy()
         self.rules.remove(rule)
         self.update_precedence()
+        self.reorder()
         self.refresh_colors()
 
     def validate(self):
