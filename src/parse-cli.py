@@ -2,42 +2,20 @@
 
 from parsers import PROG_NAME, VERSION
 
-print(f"""
-#############################################################################################################
-# {PROG_NAME} {VERSION}
-#
-# Please read the readme for further information.
-#
-# This software will parse a list of scanner output files and collect them into one Excel or CSV file.
-#
-# Accepted Inputs:
-#   ->  AIO Parser:  .xlsx OR .csv
-#   ->  Checkmarx:   Directory of .xml (preferred) OR .csv files (Single directory, no recursion)
-#   ->  CppCheck:    .xml
-#   ->  Coverity:    .json
-#   ->  Dep Check:   .json (preferred) OR .csv
-#   ->  ESLint:      .json
-#   ->  Fortify:     .fpr
-#   ->  Gnat SAS:    SARIF format (preferred) OR .csv
-#   ->  NVD CVE:     .csv
-#   ->  Pragmatic:   .csv
-#   ->  Pylint:      .json
-#   ->  Sigasi:      .json
-#   ->  SemGrep:     .json (preferred) OR .csv
-#   ->  SRM:         .xml (preferred) OR .csv
-#############################################################################################################
-""", end="\n")
+help_description = f"""This software will parse a list of scanner output files and collect them into one Excel or CSV file.
+The following control flags must be defined: """
 
 # Imports
 import os
 import sys
+import argparse
 import re
 import shutil
 import traceback
 from math import ceil
 import parsers
 from parsers import *
-from parsers.parser_tools import parser_writer
+from parsers.parser_tools import parser_writer, preflight
 from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, validate_path_and_scanner, check_input_format, get_all_previews
 
 # Configure root path and important dirs of script
@@ -308,9 +286,7 @@ def prompt_control_flags(control_flags):
                 print("\n[ERROR]  Invalid input. Please enter yes or no. (Leave blank for {})".format('\"yes\"' if default else '\"no\"'))
     
     control_flags[FLAG_CATEGORY_MAPPING]     = ask("Enable CWE category mappings? This will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.") if FLAG_CATEGORY_MAPPING not in control_flags.keys() else control_flags[FLAG_CATEGORY_MAPPING]
-    control_flags[FLAG_OVERRIDE_CWE]         = ask("Enable CWE overrides? This will change the scanner's CWE value to a user-specified value for findings of specific types.") if FLAG_OVERRIDE_CWE not in control_flags.keys() else control_flags[FLAG_OVERRIDE_CWE]
-    control_flags[FLAG_OVERRIDE_CONFIDENCE]  = ask("Enable Confidence overrides? This will change the confidence value to a user-specified one for findings of specific types.") if FLAG_OVERRIDE_CONFIDENCE not in control_flags.keys() else control_flags[FLAG_OVERRIDE_CONFIDENCE]
-    control_flags[FLAG_FORCE_EXPORT_CSV]     = ask("Force export as CSV? This will ignore the output file extension if yes.", default=False) if FLAG_FORCE_EXPORT_CSV not in control_flags.keys() else control_flags[FLAG_FORCE_EXPORT_CSV]
+    control_flags[FLAG_PREFLIGHT_RULES]      = ask("Enable Preflight Rules? This will apply the rules defined in 'preflight_rules.json'")
     
     return control_flags
 
@@ -335,49 +311,33 @@ def main():
     parser_outfile = ""
     control_flags = {}
     
-    # Ask user if they wish to load configuration data from file
-    if os.path.isfile(os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')):
-        while True:
-            uinput = input("A user inputs file has been detected. Would you like to load this data?\n(y/n): ")
-            
-            if len(uinput) <= 0:
-                print("\n[ERROR]  Please answer \'y\' or \'n\'", end='\n\n')
-                continue
-            
-            if uinput in ['y', 'yes']:
-                # Load inputs from config file
-                rv = load_config_user_inputs()
-                if isinstance(rv, str):
-                    if "Config file \'user_inputs.json\' not found." != rv:
-                        logger.warning(f"{rv}")
-                        print(f"[WARNING]  {rv}\n{' '*11}Defaulting to using guided prompts.")
-                        input("Press Enter to continue...")
-                    parser_inputs = []
-                    parser_outfile = ""
-                    control_flags = {}
-                else:
-                    parser_inputs, parser_outfile, control_flags = rv
-                break
-            elif uinput in ['n', 'no']:
-                parser_inputs = []
-                parser_outfile = ""
-                control_flags = {}
-                break
-            else:
-                print("[ERROR]  Please answer \'y\' or \'n\'")
-                continue
+    argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
+    argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.CONFIG_DIR, "user_inputs.json"), help="Path to user inputs JSON file. By default looks for 'user_inputs.json' in config directory.")
+    argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
+    argparser.add_argument('-v', '--version', action='store_true', help='Prints software version and exits')
+    
+    args = argparser.parse_args()
+    
+    # Parse args
+    if args.version:
+        print(f"{PROG_NAME} {VERSION}")
+        sys.exit(0)
+    
+    # Load inputs from config file
+    rv = load_config_user_inputs(args.inputs, default_outfile="sarp_output.xlsx")
+    if isinstance(rv, str):
+        logger.critical(f"Unable to open inputs: {rv}")
+        sys.exit(3)
+    else:
+        parser_inputs, parser_outfile, control_flags = rv
+    
+    if args.out is not None and len(args.out) > 0:
+        parser_outfile = args.out
         
     # Check inputs format
     if len(parser_inputs) > 0:
         check_input_format(parser_inputs, parser_outfile, control_flags)
 
-    # Guided prompts if there are missing inputs
-    parser_inputs = prompt_input_entry() if len(parser_inputs) <= 0 else parser_inputs
-    parser_inputs = prompt_substr(parser_inputs) if len(list(parser_inputs[0].keys())) <= 2 else parser_inputs
-    parser_inputs = prompt_prepend_str(parser_inputs) if len(list(parser_inputs[0].keys())) <= 3 else parser_inputs
-    parser_outfile = prompt_outfile() if len(parser_outfile) <= 0 else parser_outfile
-    control_flags = prompt_control_flags(control_flags) if len(control_flags) < len(InputDictKeys.FLAGS.value) else control_flags
-    
     # Output confirmation
     print('\n#################################################################\n')
     s = "Reading from files:\n"
@@ -398,12 +358,21 @@ def main():
     input("\nPress Enter to continue or CTRL+C to quit...")
     print()
     
+    # Put control_flags into module variable
+    parsers.control_flags = control_flags
+    
     # Load the mapping if true
     if control_flags[FLAG_CATEGORY_MAPPING]:
         parsers.cwe_categories = load_config_cwe_category_mappings()
+    
+    # Load preflight rules if true
+    if control_flags[FLAG_PREFLIGHT_RULES]:
+        parsers.prules = preflight.load_prules()
+    else:
+        parsers.prules = []
 
     # Init the outfile
-    if parser_outfile.lower().endswith('.csv') or control_flags[FLAG_FORCE_EXPORT_CSV]:
+    if parser_outfile.lower().endswith('.csv'):
         force_csv = True
     else:
         force_csv = False
@@ -429,33 +398,33 @@ def main():
         path = os.path.realpath(fpath)
         
         if any(s in scan_match for s in parsers.aio_keywords):
-            err_count += aio.parse(path, scanner, substr, prepend, control_flags)
+            err_count += aio.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.xmarx_keywords):
-            err_count += checkmarx.parse(path, scanner, substr, prepend, control_flags)
+            err_count += checkmarx.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.coverity_keywords):
-            err_count += coverity.parse(path, scanner, substr, prepend, control_flags)
+            err_count += coverity.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            err_count += cppcheck.parse(path, scanner, substr, prepend, control_flags)
+            err_count += cppcheck.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.depcheck_keywords):
-            err_count += owasp_depcheck.parse(path, scanner, substr, prepend, control_flags)
+            err_count += owasp_depcheck.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.eslint_keywords):
-            err_count += eslint.parse(path, scanner, substr, prepend, control_flags)
+            err_count += eslint.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.manualcve_keywords):
-            err_count += manual_cve.parse(path, scanner, substr, prepend, control_flags)
+            err_count += manual_cve.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            err_count += gnatsas.parse(path, scanner, substr, prepend, control_flags)
+            err_count += gnatsas.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.fortify_keywords):
-            err_count += fortify.parse(path, scanner, substr, prepend, control_flags)
+            err_count += fortify.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            err_count += pragmatic.parse(path, scanner, substr, prepend, control_flags)
+            err_count += pragmatic.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.pylint_keywords):
-            err_count += pylint.parse(path, scanner, substr, prepend, control_flags)
+            err_count += pylint.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.semgrep_keywords):
-            err_count += semgrep.parse(path, scanner, substr, prepend, control_flags)
+            err_count += semgrep.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.sigasi_keywords):
-            err_count += sigasi.parse(path, scanner, substr, prepend, control_flags)
+            err_count += sigasi.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            err_count += srm.parse(path, scanner, substr, prepend, control_flags)
+            err_count += srm.parse(path, scanner, substr, prepend)
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             err_count += 1

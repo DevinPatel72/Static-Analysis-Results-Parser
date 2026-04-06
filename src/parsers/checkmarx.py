@@ -6,7 +6,6 @@ import csv
 import xml.etree.ElementTree as ET
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
-from .parser_tools.user_overrides import cwe_conf_override
 from .parser_tools.toolbox import Fieldnames, console
 
 logger = logging.getLogger(__name__)
@@ -42,7 +41,6 @@ def path_preview(fpath):
     return f"[ERROR] No data found in Checkmarx directory \'{fpath}\'"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Count errors encountered while running
@@ -66,12 +64,12 @@ def parse(fpath, scanner, substr, prepend, control_flags):
         
         # Parse the file
         if f.endswith('.xml'):
-            t_i, t_finding_count, t_err_count = _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner, current_parser)
+            t_i, t_finding_count, t_err_count = _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner)
             i = t_i
             finding_count = t_finding_count
             err_count = t_err_count
         elif f.endswith('.csv'):
-            t_i, t_finding_count, t_err_count = _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner, current_parser)
+            t_i, t_finding_count, t_err_count = _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner)
             i = t_i
             finding_count = t_finding_count
             err_count = t_err_count
@@ -111,8 +109,7 @@ def _get_total(path):
     return finding_count
 # End of _get_total
 
-def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner, current_parser):
-    from . import FLAG_CATEGORY_MAPPING, cwe_categories
+def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner):
     # Open csv in read
     with open(f, mode='r', encoding='utf-8-sig') as read_obj:
         csv_dict_reader = csv.DictReader(read_obj)
@@ -129,6 +126,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
         
                 # row variable is a dictionary that represents a row in csv
                 lang = row['QueryPath'].split('\\')[0]
+                
 
                 # Check checkmarx_cdata
                 cwe = get_checkmarx_cdata(row['Query'], lang)
@@ -143,15 +141,6 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
                 query = row['Query']
-                
-                # Perform cwe overrides if user requests
-                cwe, confidence = cwe_conf_override(control_flags, override_name=query, cwe=cwe, override_scanner=current_parser)
-                
-                # Check if cwe is in categories dict
-                if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
-                    cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
-                else:
-                    cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
                 
                 # Cut and prepend the paths and convert all backslashes to forwardslashes
                 path = str(row['SrcFileName']).replace(substr, "", 1)
@@ -173,10 +162,10 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
                 trace = f"Trace:\n<Source> {path}:{line}: {row['Name']}\n<Dest> {dest_path}:{dest_line}: {row['DestName']}"
                 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
-                                        Fieldnames.CONFIDENCE.value:confidence,
-                                        Fieldnames.MATURITY.value:'Unreported',
-                                        Fieldnames.MITIGATION.value:'',
+                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                                        Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                        Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                        Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                         Fieldnames.PROPOSED_MITIGATION.value:'',
                                         Fieldnames.VALIDATOR_COMMENT.value:'',
                                         Fieldnames.ID.value:id,
@@ -199,8 +188,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
     return i, finding_count, err_count
 # End of _parse_csv
 
-def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner, current_parser):
-    from . import FLAG_CATEGORY_MAPPING, cwe_categories
+def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner):
     # Extract XML
     tree = ET.parse(f)
     root = tree.getroot()
@@ -237,18 +225,10 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
                 tool_cwe = '(blank)'
             else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
             
+            
             # Adjust lang
             if lang == 'CPP': lang = 'c/c++'
             else: lang = lang.lower()
-            
-            # Perform cwe overrides if user requests
-            cwe, confidence = cwe_conf_override(control_flags, override_name=query_name, cwe=cwe, override_scanner=current_parser)
-            
-            # Check if cwe is in categories dict
-            if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
-                cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
-            else:
-                cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
             
             # Iterate through every result in the query
             results = query.findall('Result')
@@ -304,10 +284,10 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, t
                     id = idgenerator.hash(preimage)
                     
                     # Write row to outfile
-                    parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
-                                            Fieldnames.CONFIDENCE.value:confidence,
-                                            Fieldnames.MATURITY.value:'Unreported',
-                                            Fieldnames.MITIGATION.value:'',
+                    parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                                            Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                            Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                            Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                             Fieldnames.PROPOSED_MITIGATION.value:'',
                                             Fieldnames.VALIDATOR_COMMENT.value:'',
                                             Fieldnames.ID.value:id,

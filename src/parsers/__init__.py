@@ -1,12 +1,11 @@
 # Version String
 PROG_NAME = 'Static Analysis Results Parser'
-VERSION = '1.3.3'
+VERSION = '2.0.0'
 
 # Control Flag Names
 FLAG_CATEGORY_MAPPING = 'Category Mappings'
-FLAG_OVERRIDE_CWE = 'Override CWE'
-FLAG_OVERRIDE_CONFIDENCE = 'Override Confidence'
-FLAG_FORCE_EXPORT_CSV = 'Force Export CSV'
+FLAG_PREFLIGHT_RULES = 'Preflight Rules'
+FLAG_DEFAULT_PREFLIGHT_RULES = 'Default Preflight Rules'
 
 # Set GUI mode to enable/disable messageboxes
 GUI_MODE = False
@@ -14,8 +13,12 @@ GUI_MODE = False
 # List of scanners for the GUI dropdown
 LIST_OF_SCANNERS = ["Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "GNAT SAS", "NVD CVEs", "OWASP Dependency Check", "Pragmatic", "Pylint", "SARP", "Semgrep", "Sigasi", "SRM"]
 
-# Empty overrides for fallback
-EMPTY_OVERRIDES = "{\"sarp\":{},\"checkmarx\":{},\"coverity\":{},\"cppcheck\":{},\"eslint\":{},\"fortify\":{},\"gnatsas\":{},\"manual_cve\":{},\"owasp_depcheck\":{},\"pragmatic\":{},\"pylint\":{},\"semgrep\":{},\"sigasi\":{},\"srm\":{}}\n"
+# Preflight Rules
+prules = []
+default_prules = []
+
+# Control Flags
+control_flags = []
 
 # Keywords for scanners
 aio_keywords = ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser']
@@ -47,4 +50,4 @@ CONFIG_DIR = 'config'
 cwe_categories = {}
 
 # Choose specific items to import when using "from parsers import *"
-__all__ = ['FLAG_CATEGORY_MAPPING', 'FLAG_OVERRIDE_CWE', 'FLAG_OVERRIDE_CONFIDENCE', 'FLAG_FORCE_EXPORT_CSV', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'manual_cve', 'pragmatic', 'pylint', 'semgrep', 'sigasi', 'srm']
+__all__ = ['FLAG_CATEGORY_MAPPING', 'FLAG_PREFLIGHT_RULES', 'FLAG_DEFAULT_PREFLIGHT_RULES', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'manual_cve', 'pragmatic', 'pylint', 'semgrep', 'sigasi', 'srm']

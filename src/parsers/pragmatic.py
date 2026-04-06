@@ -5,7 +5,6 @@ import traceback
 import csv
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE,progress_bar
-from .parser_tools.user_overrides import cwe_conf_override
 from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
@@ -21,9 +20,7 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend, control_flags):
-    from . import FLAG_CATEGORY_MAPPING, cwe_categories
-    current_parser = __name__.split('.')[1]
+def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Keep track of row number and errors
@@ -53,15 +50,6 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                     tool_cwe = '(blank)'
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
-                # Perform cwe overrides if user requests
-                cwe, confidence = cwe_conf_override(control_flags, override_name=row['Checker'], cwe=cwe, override_scanner=current_parser)
-                
-                # Check if cwe is in categories dict
-                if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
-                    cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
-                else:
-                    cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
-                
                 # Cut and prepend the paths and convert all backslashes to forwardslashes
                 path = str(row['Filename']).replace(substr, "", 1)
                 path = os.path.join(prepend, path).replace('\\', '/')
@@ -74,10 +62,10 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 #id = "PRG{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
-                                    Fieldnames.CONFIDENCE.value:confidence,
-                                    Fieldnames.MATURITY.value:'Unreported',
-                                    Fieldnames.MITIGATION.value:'',
+                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                                    Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                    Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                    Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:'',
                                     Fieldnames.ID.value:id,

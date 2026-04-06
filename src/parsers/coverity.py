@@ -5,7 +5,6 @@ import traceback
 import json
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
-from .parser_tools.user_overrides import cwe_conf_override
 from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
@@ -20,8 +19,6 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
     
 def parse(fpath, scanner, substr, prepend, control_flags):
-    from . import FLAG_CATEGORY_MAPPING, cwe_categories
-    current_parser = __name__.split('.')[1]
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Count errors encountered while running
@@ -55,13 +52,6 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             
             # Perform cwe overrides if user requests
             subcategoryLongDescription = issue['checkerProperties']['subcategoryLongDescription']
-            cwe, confidence = cwe_conf_override(control_flags, override_name=subcategoryLongDescription, cwe=cwe, override_scanner=current_parser)
-            
-            # Check if cwe is in categories dict
-            if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
-                cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
-            else:
-                cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
                 
             # Find the main events
             mainEventsIdxs = []
@@ -125,19 +115,19 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             #id = "COV{:04}".format(finding_count+1)
             
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
-                                Fieldnames.CONFIDENCE.value: confidence,
-                                Fieldnames.MATURITY.value: 'Unreported',
-                                Fieldnames.MITIGATION.value: '',
-                                Fieldnames.PROPOSED_MITIGATION.value: '',
-                                Fieldnames.VALIDATOR_COMMENT.value: '',
-                                Fieldnames.ID.value: id,
-                                Fieldnames.TYPE.value: subcategoryLongDescription,
-                                Fieldnames.PATH.value: path,
-                                Fieldnames.LINE.value: line,
-                                Fieldnames.SYMBOL.value: issue['functionDisplayName'],
-                                Fieldnames.MESSAGE.value: eventDesc,
-                                Fieldnames.TOOL_CWE.value: tool_cwe,
+            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                                Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
+                                Fieldnames.PROPOSED_MITIGATION.value:'',
+                                Fieldnames.VALIDATOR_COMMENT.value:'',
+                                Fieldnames.ID.value:id,
+                                Fieldnames.TYPE.value:subcategoryLongDescription,
+                                Fieldnames.PATH.value:path,
+                                Fieldnames.LINE.value:line,
+                                Fieldnames.SYMBOL.value:issue['functionDisplayName'],
+                                Fieldnames.MESSAGE.value:eventDesc,
+                                Fieldnames.TOOL_CWE.value:tool_cwe,
                                 Fieldnames.TOOL.value:'',
                                 Fieldnames.SCANNER.value:scanner,
                                 Fieldnames.LANGUAGE.value:issue['language'].lower(),

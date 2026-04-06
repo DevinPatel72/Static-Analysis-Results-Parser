@@ -5,7 +5,6 @@ import traceback
 import csv
 from .parser_tools import parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
-from .parser_tools.user_overrides import cwe_conf_override
 from .parser_tools.toolbox import Fieldnames
 
 __excel_enabled = False
@@ -46,7 +45,6 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Keep track of row number and errors
@@ -89,13 +87,8 @@ def parse(fpath, scanner, substr, prepend, control_flags):
             path = str(row[Fieldnames.PATH.value]).replace(substr, "", 1)
             path = os.path.join(prepend, path).replace('\\', '/')
             
-            # Perform cwe overrides if user requests
-            cwe, confidence = cwe_conf_override(control_flags, override_name=row[Fieldnames.TYPE.value], cwe=row[Fieldnames.SCORING_BASIS.value], override_scanner=current_parser)
-            
             new_row = {k:v for k,v in row.items()}
             new_row[Fieldnames.PATH.value] = path
-            new_row[Fieldnames.SCORING_BASIS.value] = cwe
-            new_row[Fieldnames.CONFIDENCE.value] = confidence
             
             # Write row to outfile
             parser_writer.write_row(new_row)

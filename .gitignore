@@ -5,6 +5,7 @@ logs/
 .vscode/
 .cspell/
 junkyard/
+preflight_rules.py
 user_inputs.json
 
 # Environments

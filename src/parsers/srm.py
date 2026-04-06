@@ -8,7 +8,6 @@ from .pylint import get_pylint_cdata
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.language_resolver import resolve_lang
 from .parser_tools.progressbar import SPACE,progress_bar
-from .parser_tools.user_overrides import cwe_conf_override
 from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
@@ -47,8 +46,7 @@ def path_preview(fpath):
     # No data, return error message
     return f"[ERROR] No data found in \'{fpath}\'"
 
-def parse(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
+def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Keep track of issue number and errors
@@ -57,9 +55,9 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     
     # Parse the file
     if fpath.endswith('.xml'):
-        finding_count, err_count = _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser)
+        finding_count, err_count = _parse_xml(fpath, substr, prepend, scanner)
     elif fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser)
+        finding_count, err_count = _parse_csv(fpath, substr, prepend, scanner)
     else:
         logger.error(f"File {fpath} is not an XML or CSV.")
         return err_count + 1
@@ -70,8 +68,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
 # End of parse
 
 
-def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
-    from . import FLAG_CATEGORY_MAPPING, cwe_categories
+def _parse_csv(fpath, substr, prepend, scanner):
     # Keep track of row number and errors
     row_num = 0
     total_rows = 0
@@ -102,15 +99,6 @@ def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
                     tool_cwe = '(blank)'
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
-                # Perform cwe overrides if user requests
-                cwe, confidence = cwe_conf_override(control_flags, override_name=row['Type'], cwe=cwe, override_scanner=current_parser)
-                
-                # Check if cwe is in categories dict
-                if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
-                    cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
-                else:
-                    cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
-                
                 # Cut and prepend the paths and convert all backslashes to forwardslashes
                 path = str(row['Path']).replace(substr, "", 1)
                 path = os.path.join(prepend, path).replace('\\', '/')
@@ -123,10 +111,10 @@ def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
                 #id = "SRM{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
-                                    Fieldnames.CONFIDENCE.value:confidence,
-                                    Fieldnames.MATURITY.value:'Unreported',
-                                    Fieldnames.MITIGATION.value:'',
+                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                                    Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                    Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                    Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:'',
                                     Fieldnames.ID.value:id,
@@ -148,8 +136,7 @@ def _parse_csv(fpath, substr, prepend, control_flags, scanner, current_parser):
     return finding_count, err_count
 # End of _parse_csv
 
-def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
-    from . import FLAG_CATEGORY_MAPPING, cwe_categories
+def _parse_xml(fpath, substr, prepend, scanner):
     # Keep track of issue number and errors
     finding_num = 0
     finding_count = 0
@@ -199,7 +186,6 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
             for result in finding.find('results'):
                 
                 # Declare this early so it stays in scope
-                confidence = ''
                 validator_comment = ''
                 id = ''
                 
@@ -219,23 +205,8 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                     tool_cwe = '(blank)'
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
-                
-                # Change CWE depending on the tool
-                if tool_name.lower() == 'pylint':
-                    message_id = rule.get('code', '').replace('PYLINT-', '').upper()
-                    cwe = get_pylint_cdata(message_id, cwe)
-                    cwe, confidence = cwe_conf_override(control_flags, override_name=message_id, cwe=cwe, override_scanner=tool_name.lower())
-                    
-                elif tool_name.lower() == 'cppcheck':
-                    category = tool.get('code', '').strip()
-                    msg = result.findtext('description', '')
-                    cwe, confidence = cwe_conf_override(control_flags, override_name=category, cwe=cwe, message_content=msg, override_scanner=tool_name.lower())
-                        
-                else:
-                    code = tool.get('code', '').strip()
-                    cwe, confidence = cwe_conf_override(control_flags, override_name=code, cwe=cwe, override_scanner=tool_name.lower())
-                
                 # Check for duplicate findings from standalone scanners
+                confidence = Fieldnames.DEFAULT_CONF.value
                 tool_code = tool.get('code', '').strip()
                 if m := parser_writer.search_row([(Fieldnames.TYPE.value, tool_code, True),
                                                       (Fieldnames.SCANNER.value, tool_name.lower(), False),
@@ -248,15 +219,6 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                 
                 # Get finding 'Type'
                 finding_type = rule.get('name', '')
-                
-                # Perform cwe overrides if user requests
-                cwe, confidence = cwe_conf_override(control_flags, override_name=finding_type, cwe=cwe, confidence=confidence, override_scanner=current_parser)
-                
-                # Check if cwe is in categories dict
-                if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
-                    cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
-                else:
-                    cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
                     
                 # Get the description
                 trace = result.findtext('description', '')
@@ -299,10 +261,10 @@ def _parse_xml(fpath, substr, prepend, control_flags, scanner, current_parser):
                     id = idgenerator.hash(preimage)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
+                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:confidence,
-                                    Fieldnames.MATURITY.value:'Unreported',
-                                    Fieldnames.MITIGATION.value:'',
+                                    Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                    Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:validator_comment,
                                     Fieldnames.ID.value:id,

@@ -4,6 +4,7 @@ import os
 import atexit
 import csv
 import logging
+from .preflight import apply_prules
 
 logger = logging.getLogger(__name__)
 __excel_enabled = False
@@ -95,6 +96,12 @@ def search_row(tuples):
 @atexit.register
 def close_writer():
     global __filepath
+    
+    # Perform preflighting
+    if len(__parser_data) > 0:
+        apply_prules(__parser_data)
+        
+    # Write out parser data to file
     if __filepath is not None:
         from parsers import GUI_MODE
         if __excel_enabled:

@@ -7,7 +7,6 @@ import re
 import traceback
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE,progress_bar
-from .parser_tools.user_overrides import cwe_conf_override
 from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
@@ -36,13 +35,13 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend, control_flags):
+def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
     if fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend, control_flags)
+        finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
     else:
-        finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend, control_flags)
+        finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
     
     
     logger.info(f"Successfully processed {finding_count} findings")
@@ -50,9 +49,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
     return err_count
 # End of parse
 
-def _parse_sarif(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
-    from . import FLAG_CATEGORY_MAPPING, cwe_categories
+def _parse_sarif(fpath, scanner, substr, prepend):
     
     finding_count = 0
     result_num = 0
@@ -95,21 +92,13 @@ def _parse_sarif(fpath, scanner, substr, prepend, control_flags):
                    cwe += taxa.get('id', '').replace('CWE', '') + ','
             cwe = cwe.rstrip(',')
             
+            
             # Get tool cwe before any overrides are performed
             if len(cwe) <= 0:
                 tool_cwe = '(blank)'
             else:
                 tool_cwe = int(cwe.split(',')[0]) if len(cwe.split(',')) > 1 and str(cwe.split(',')[0]).isdigit() else cwe
                 cwe = int(cwe.split(',')[0])
-            
-            # Perform cwe overrides if user requests
-            cwe, confidence = cwe_conf_override(control_flags, override_name=t, cwe=cwe, override_scanner=current_parser)
-            
-            # Check if cwe is in categories dict
-            if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
-                cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
-            else:
-                cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
             
             
             # Cut and prepend the paths and convert all backslashes to forwardslashes
@@ -182,10 +171,10 @@ def _parse_sarif(fpath, scanner, substr, prepend, control_flags):
             #id = "GS{:04}".format(finding_count+1)
 
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
-                                Fieldnames.CONFIDENCE.value:confidence,
-                                Fieldnames.MATURITY.value:'Unreported',
-                                Fieldnames.MITIGATION.value:'',
+            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                                Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                 Fieldnames.PROPOSED_MITIGATION.value:'',
                                 Fieldnames.VALIDATOR_COMMENT.value:'',
                                 Fieldnames.ID.value:id,
@@ -209,9 +198,7 @@ def _parse_sarif(fpath, scanner, substr, prepend, control_flags):
 # End of _parse_sarif
 
 
-def _parse_csv(fpath, scanner, substr, prepend, control_flags):
-    current_parser = __name__.split('.')[1]
-    from . import FLAG_CATEGORY_MAPPING, cwe_categories
+def _parse_csv(fpath, scanner, substr, prepend):
     
     # Count errors encountered while running
     err_count = 0
@@ -242,15 +229,6 @@ def _parse_csv(fpath, scanner, substr, prepend, control_flags):
                     tool_cwe = '(blank)'
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
-                # Perform cwe overrides if user requests
-                cwe, confidence = cwe_conf_override(control_flags, override_name=row['kind'], cwe=cwe, override_scanner=current_parser)
-                
-                # Check if cwe is in categories dict
-                if control_flags[FLAG_CATEGORY_MAPPING] and cwe in cwe_categories.keys():
-                    cwe_cat = f"{cwe}:{cwe_categories[cwe]}"
-                else:
-                    cwe_cat = int(cwe) if str(cwe).isdigit() else cwe
-                
                 # Type
                 if len(row['related_checks']) > 0:
                     t = row['kind'] + ": " + row['related_checks']
@@ -269,10 +247,10 @@ def _parse_csv(fpath, scanner, substr, prepend, control_flags):
                 #id = "GS{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe_cat,
-                                    Fieldnames.CONFIDENCE.value:confidence,
-                                    Fieldnames.MATURITY.value:'Unreported',
-                                    Fieldnames.MITIGATION.value:'',
+                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                                    Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
+                                    Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                    Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:'',
                                     Fieldnames.ID.value:id,
