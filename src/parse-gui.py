@@ -109,7 +109,7 @@ def main():
     parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
     control_flags = {
         FLAG_CATEGORY_MAPPING: outfile_flags_gui.results[InputDictKeys.OVERRIDE_VULN_MAPPING.value],
-        FLAG_PREFLIGHT_RULES: outfile_flags_gui.results[InputDictKeys.PREFLIGHT_RULES.value]
+        FLAG_PREFLIGHT_RULES: outfile_flags_gui.results[InputDictKeys.PREFLIGHT_RULES.value],
     }
     
     # If the checkbox was enabled, ask if user wants to edit the preflight rules
@@ -124,8 +124,16 @@ def main():
         
         if rulebuildergui.enable_default_rules is not None:
             control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = rulebuildergui.enable_default_rules
+        else:
+            control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = True
+        
+        if rulebuildergui.result is None and rulebuildergui.enable_default_rules is None:
+            # Alert that execution is stopped
+            console("No parsing was done.", title="Program terminated", type='info')
+            sys.exit(0)
     else:
         parsers.prules = []
+        control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = True
     
     # Log the configuration
     s = "Reading from files:\n"

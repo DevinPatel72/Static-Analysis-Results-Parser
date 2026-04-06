@@ -185,14 +185,14 @@ class ConditionGroupFrame:
 
 class ReplacementEditor:
 
-    def __init__(self, parent, replacement, fieldnames):
+    def __init__(self, parent, replacement, fieldnames, rule_id=None, precedence=None):
 
         self.result = replacement.copy()
         self.fieldnames = fieldnames
         self.rows = []
 
         self.root = tk.Toplevel(parent)
-        self.root.title("Edit Replacement")
+        self.root.title(f"Replacement for \"{rule_id}\" ({precedence})")
         self.root.geometry("400x400")
         
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -446,7 +446,7 @@ class RuleFrame:
         return int(self.precedence_var.get())
 
     def edit_replacement(self):
-        editor = ReplacementEditor(self.frame, getattr(self, 'replacement', {}), Fieldnames.HEADERS.value)
+        editor = ReplacementEditor(self.frame, getattr(self, 'replacement', {}), Fieldnames.HEADERS.value, self.rule_id.get(), self.get_precedence())
         self.replacement = editor.result
         
     def load_rule(self, rule):
@@ -576,6 +576,8 @@ class RuleBuilderGUI:
         self.rule_frame = tk.Frame(canvas)
 
         window = canvas.create_window((0, 0), window=self.rule_frame, anchor="nw")
+        
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
         def on_config(event):
             canvas.configure(scrollregion=canvas.bbox("all"))
@@ -730,6 +732,11 @@ class RuleBuilderGUI:
             self.rules[index], self.rules[index+1] = self.rules[index+1], self.rules[index]
             self.update_precedence()
             self.reorder()
+
+    def on_close(self):
+        self.result = None
+        self.enable_default_rules = None
+        self.root.destroy()
 
     def submit(self):
 
