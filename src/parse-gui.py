@@ -5,6 +5,7 @@ import os
 import sys
 import traceback
 from parsers.parser_tools.inputs_gui import YesNoGUI, InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
+from parsers.parser_tools.preflight_gui import RuleBuilderGUI
 from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
 import parsers
 from parsers import PROG_NAME, VERSION
@@ -56,6 +57,10 @@ if find_spec('openpyxl') is None:
 ################################
 
 def main():
+    
+    gui = RuleBuilderGUI()
+    print(gui.result)
+    sys.exit(0)
     
     parser_inputs = []
     parser_outfile = ""
