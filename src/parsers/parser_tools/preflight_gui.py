@@ -446,7 +446,7 @@ class RuleFrame:
         return int(self.precedence_var.get())
 
     def edit_replacement(self):
-        editor = ReplacementEditor(self.frame, getattr(self, 'replacement', {}), Fieldnames.HEADERS.value, self.rule_id.get(), self.get_precedence())
+        editor = ReplacementEditor(self.frame, getattr(self, 'replacement', {}), Fieldnames.EDITABLE_HEADERS.value, self.rule_id.get(), self.get_precedence())
         self.replacement = editor.result
         
     def load_rule(self, rule):
