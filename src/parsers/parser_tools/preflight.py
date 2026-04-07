@@ -144,7 +144,7 @@ HEADER = '''#############################################################
 #       case_sensitive (bool)   : True for case sensitive matching, False for case insensitive matching. Note that the strictness value 'EXACT' will not override this parameter.
 #
 #   Strictness:
-#       EXACT (Does NOT override parameter 'case_sensitive')
+#       EXACT (Will be case insensitive unless the case_sensitive flag is passed)
 #       CONTAINS
 #       STARTSWITH
 #       ENDSWITH
