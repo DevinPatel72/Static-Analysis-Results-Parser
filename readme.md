@@ -81,7 +81,7 @@ SARP can perform user-defined overrides on any of the output fields using rule e
 Each rule contains a condition that attempts to match a Fieldname value to a user-defined pattern. If a match is found, the condition is resolved to true.
 
 Patterns can be matched according to the following techniques:
-- Exact (Not affected by Case Sensitive option)
+- Exact (Will be case insensitive unless optioned otherwise)
 - Contains
 - StartsWith
 - EndsWith
