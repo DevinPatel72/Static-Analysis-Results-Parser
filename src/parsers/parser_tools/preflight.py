@@ -92,7 +92,7 @@ def save_prules(prules):
 
 def apply_prules(data):
     
-    def loop_rules(rules):
+    def loop_rules(rules, row):
         for pr in rules:
             # Returns None if row does not match a rule
             if replacement := pr.apply_rule(row):
@@ -115,8 +115,8 @@ def apply_prules(data):
             
             # Default prules first
             if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
-                loop_rules(parsers.default_prules)
-            loop_rules(parsers.prules)
+                loop_rules(parsers.default_prules, row)
+            loop_rules(parsers.prules, row)
         
         # Check if cwe is in categories dict. Control flag check is performed in the function.
         row[Fieldnames.SCORING_BASIS.value] = check_CWE(row[Fieldnames.SCORING_BASIS.value])
