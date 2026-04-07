@@ -92,7 +92,7 @@ Patterns can be matched according to the following techniques:
 Each rule can contain condition groups that apply a boolean operator to each of the conditions within the group.
 - AND (All conditions in the group must evaluate to True)
 - OR (At least one condition in the group must evaluate to True)
-- NOT (***Only the first conditon is negated. All others are ignored.***)
+- NOT (Only the first conditon is negated. ***All others are ignored.***)
 
 A condition group can contain another condition group to create nested boolean expressions. Note that every condition group must contain at least one condition.
 
