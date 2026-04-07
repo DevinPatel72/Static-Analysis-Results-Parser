@@ -81,7 +81,7 @@ SARP can perform user-defined overrides on any of the output fields using rule e
 Each rule contains a condition that attempts to match a Fieldname value to a user-defined pattern. If a match is found, the condition is resolved to true.
 
 Patterns can be matched according to the following techniques:
-- Exact (Not affected by Case Sensitive option)
+- Exact (Will be case insensitive unless optioned otherwise)
 - Contains
 - StartsWith
 - EndsWith
@@ -92,7 +92,7 @@ Patterns can be matched according to the following techniques:
 Each rule can contain condition groups that apply a boolean operator to each of the conditions within the group.
 - AND (All conditions in the group must evaluate to True)
 - OR (At least one condition in the group must evaluate to True)
-- NOT (***Only the first conditon is negated. All others are ignored.***)
+- NOT (Only the first conditon is negated. ***All others are ignored.***)
 
 A condition group can contain another condition group to create nested boolean expressions. Note that every condition group must contain at least one condition.
 
