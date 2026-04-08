@@ -225,6 +225,24 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '1109'}
         ),
         PRule(
+            rule_id = "cppcheck_bitwiseonboolean",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False)
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"bitwiseOnBoolean", strictness=Strictness.EXACT, case_sensitive=False),
+                        ConditionGroup(operator="AND", conditions=[
+                            Condition(fieldname=Fieldnames.MESSAGE.value, pattern=r"Boolean expression", strictness=Strictness.CONTAINS, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.MESSAGE.value, pattern=r"is used in bitwise operation", strictness=Strictness.CONTAINS, case_sensitive=False)
+                        ])
+                    ])
+            ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '480'}
+        ),
+        PRule(
             rule_id = "cppcheck_catchexceptionbyvalue",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
