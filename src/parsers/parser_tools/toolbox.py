@@ -168,7 +168,7 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         
         # Check if each input contains the right keys
         if not all([all([sorted(list(inp.keys())) == sorted(InputDictKeys.INPUTS.value)]) for inp in user_inputs['main']]):
-            return "Error in parsing config file \'user_inputs.json\'. Invalid keys detected in \"main\". Only the following keys are permitted: {}.".format(", ".join(InputDictKeys.FLAGS.value))
+            return "Error in parsing config file \'user_inputs.json\'. Invalid keys detected in \"main\". Only the following keys are permitted: {}.".format(", ".join(InputDictKeys.INPUTS.value))
 
         # All is green, set main equal to parser_inputs
         parser_inputs = user_inputs['main']
