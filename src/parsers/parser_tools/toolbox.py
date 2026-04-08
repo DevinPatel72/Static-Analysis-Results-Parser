@@ -5,7 +5,6 @@ import sys
 import logging
 import json
 from enum import Enum
-from . import *
 import parsers
 
 __excel_enabled = False
