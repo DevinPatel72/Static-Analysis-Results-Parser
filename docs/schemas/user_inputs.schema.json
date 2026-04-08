@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SARP User Inputs Schema",
+  "type": "object",
+  "required": ["main", "outfile", "flags"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "main": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scanner", "path", "remove", "prepend"],
+        "properties": {
+          "scanner": {
+            "type": "string",
+            "description": "Name and version of the scanner"
+          },
+          "path": {
+            "type": "string",
+            "description": "Path to the input XML file"
+          },
+          "remove": {
+            "type": "string",
+            "description": "String to remove from paths"
+          },
+          "prepend": {
+            "type": "string",
+            "description": "String to prepend to paths"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "outfile": {
+      "type": "string",
+      "pattern": ".*\\.(xlsx|csv)$",
+      "description": "Output file path (.xlsx or .csv only)"
+    },
+    "flags": {
+      "type": "object",
+      "required": [
+        "Category Mappings",
+        "Preflight Rules",
+        "Default Preflight Rules"
+      ],
+      "properties": {
+        "Category Mappings": {
+          "type": "boolean"
+        },
+        "Preflight Rules": {
+          "type": "boolean"
+        },
+        "Default Preflight Rules": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

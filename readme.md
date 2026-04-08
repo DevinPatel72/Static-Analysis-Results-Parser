@@ -4,20 +4,20 @@
 The Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel or CSV file. Inputs can be entered via GUI or [json input](#configure-bulk-inputs). [Preflight override rules](#configure-preflight) can be defined in the config directory.
 
 ### Accepted Inputs:
--  SARP:        `.xlsx` OR `.csv`
--  Checkmarx:   Directory of `.xml` (preferred) OR `.csv` files (Single directory, no recursion)
+-  SARP:        `.xlsx` or `.csv`
+-  Checkmarx:   Directory of `.xml` (preferred) or `.csv` files (Single directory, no recursion)
 -  CppCheck:    `.xml`
 -  Coverity:    `.json`
--  Dep Check:   `.json` or `.csv`
+-  OWASP Dependency Check: `.json` or `.csv`
 -  ESLint:      `.json`
 -  Fortify:     `.fpr`
--  Gnat SAS:    `SARIF format` (preferred) or `.csv`
+-  Gnat SAS:    `.json (aka SARIF format)` (preferred) or `.csv`
 -  NVD CVE:     `.csv` (See [Batch-NVD-CVE](https://github.com/DevinPatel72/Batch-NVD-Query))
 -  Pragmatic:   `.csv`
 -  Pylint:      `.json`
--  Semgrep:     `.json` (preferred) OR `.csv`
+-  Semgrep:     `.json` (preferred) or `.csv`
 -  Sigasi:      `.json`
--  SRM:         `.xml` (preferred) OR `.csv`
+-  SRM:         `.xml` (preferred) or `.csv`
 
 
 ## Execute using binaries
@@ -101,21 +101,21 @@ A precedence ordering can be applied to each rule. The rules will be applied fro
 
 ### Examples
 #### Example 1
-![Example1](doc/images/Example1.png)
+![Example1](docs/images/Example1.png)
 
 The above `Rule1` looks for an exact match for the value in field `Scoring Basis` (e.g., a CWE or CVE ID) and replaces the `Scoring Basis` with *710* and `Confidence` with *Info*.
 
 Expression: `Scoring Basis == 398`
 
 #### Example 2
-![Example2](doc/images/Example2.png)
+![Example2](docs/images/Example2.png)
 
 The above `Rule2` looks for any finding that is in a `.cpp` file **AND** contains *nullptr* in the `Type` column. The `Scoring Basis` is replaced with *476* and the `Validator Justification` is replaced with *Insert validator comment here*.
 
 Expression: `(Path glob "**/*.cpp") && ("nullptr" in Type)`
 
 #### Example 3
-![Example3](doc/images/Example3.png)
+![Example3](docs/images/Example3.png)
 
 The above `Rule3` looks for any finding that originates from either CPPCheck **OR** SRM, **AND** it is either of `Type` *nullPtrDeref* **OR** contains *Null Pointer*. The `Scoring Basis` is replaced with *476*.
 
