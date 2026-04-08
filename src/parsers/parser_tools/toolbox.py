@@ -246,7 +246,7 @@ def check_CWE(cwe):
 def export_config(inputs, outfile, control_flags):
     inputs_path = os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')
     with open(inputs_path, 'w', encoding='utf-8-sig') as uout:
-        json.dump({"$schema": "../../docs/schemas/user_inputs.schema.json", 'main': inputs, 'outfile': outfile, 'flags': control_flags}, uout, indent=4)
+        json.dump({"$schema": "schemas/user_inputs.schema.json", 'main': inputs, 'outfile': outfile, 'flags': control_flags}, uout, indent=4)
 
 
 def generate_preview(preview, remove_substr='', add_substr=''):
