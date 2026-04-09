@@ -19,7 +19,7 @@
           },
           "path": {
             "type": "string",
-            "description": "Path to the input XML file"
+            "description": "Path to the input file"
           },
           "remove": {
             "type": "string",
