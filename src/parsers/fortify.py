@@ -56,7 +56,7 @@ def path_preview(fpath):
     except Exception:
         return f"[ERROR] {traceback.print_exc()}"
 
-def parse(fpath, scanner, substr, prepend, control_flags):
+def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Count errors encountered while running
@@ -237,7 +237,7 @@ def parse(fpath, scanner, substr, prepend, control_flags):
                 
                 # If the type is a Memory Leak, change the line number to the one defined by replacement definition "FirstTraceLocation.line"
                 if vulnerability_type == 'Memory Leak':
-                    line = replacement_defs['FirstTraceLocation.line']
+                    line = replacement_defs.get('FirstTraceLocation.line', '')
                 
                 # Combine vulnerability type and subtype
                 if vulnerability_subtype is not None and len(vulnerability_subtype) > 0:

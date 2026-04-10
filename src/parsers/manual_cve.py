@@ -11,7 +11,7 @@ from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
 
-def parse(fpath, scanner, substr, prepend, control_flags):
+def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Keep track of row number and error count

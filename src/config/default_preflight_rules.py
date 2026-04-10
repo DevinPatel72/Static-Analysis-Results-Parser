@@ -45,6 +45,27 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "Attempting to call a virtual function from a constructor or destructor will result in the incorrect function being executed. During construction and destruction, virtual dispatch is disabled. Calls to virtual functions resolve to the class currently being constructed/destructed, not derived classes. The execution of the incorrect definition of a virtual function might result in unexpected or undesirable program behavior, and in security contexts this might result in weaknesses."}
         ),
         PRule(
+            rule_id = "coverity_access_of_memory_past_the_end_of_a_memory_buffer",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Access of memory past the end of a memory buffer", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Out-of-bounds access to a buffer", strictness=Strictness.EXACT, case_sensitive=False)
+                        ]),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '126'}
+        ),
+        PRule(
+            rule_id = "coverity_an_array_is_accessed_by_index_before_index_is_checked",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"An array is accessed by an index before the index is checked", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '129'}
+        ),
+        PRule(
             rule_id = "coverity_an_enum_type_expression_in_boolean_context",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -52,6 +73,15 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"An enum-typed expression is used in a Boolean conditional context", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '570'}
+        ),
+        PRule(
+            rule_id = "coverity_an_enum_type_expression_in_integer_expression",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"An integer expression which was inferred to have an enum type is mixed with a different enum type", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '681'}
         ),
         PRule(
             rule_id = "coverity_an_expression_with_no_side_effect_or_unintended_effect_indicates_a_possible_logic_flaw",
@@ -126,6 +156,33 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '561'}
         ),
         PRule(
+            rule_id = "coverity_header_include_recursion",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Recursion in included header files", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
+        ),
+        PRule(
+            rule_id = "coverity_increment_of_pointer_address_not_pointed_data",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Increment (or decrement) of pointer value, not the value pointed-to", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '823'}
+        ),
+        PRule(
+            rule_id = "coverity_large_parameter_value",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"function call parameter exceeding the", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '789'}
+        ),
+        PRule(
             rule_id = "coverity_leak_of_memory_or_pointers_to_system_resources",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -142,6 +199,24 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Function that returns non-void is missing a return value", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '758'}
+        ),
+        PRule(
+            rule_id = "coverity_out_of_bounds_write_to_a_buffer",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Out-of-bounds write to a buffer", strictness=Strictness.EXACT, case_sensitive=False)
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '787'}
+        ),
+        PRule(
+            rule_id = "coverity_parse_warning",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A parse warning from the Coverity parser may indicate a bug, or poor coding practice", strictness=Strictness.EXACT, case_sensitive=False)
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076'}
         ),
         PRule(
             rule_id = "coverity_user_definitions_for_at_least_one_but_not_all_special_functions",
@@ -1162,7 +1237,7 @@ DEFAULT_PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"fortify", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Buffer Overflow", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Buffer Overflow", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '120'}
         ),
@@ -1171,7 +1246,7 @@ DEFAULT_PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"fortify", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Out-of-Bounds Read", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Out-of-Bounds Read", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '126'}
         ),

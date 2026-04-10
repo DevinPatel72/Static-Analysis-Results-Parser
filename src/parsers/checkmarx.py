@@ -40,7 +40,7 @@ def path_preview(fpath):
     # No data, return error message
     return f"[ERROR] No data found in Checkmarx directory \'{fpath}\'"
 
-def parse(fpath, scanner, substr, prepend, control_flags):
+def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Count errors encountered while running
@@ -64,12 +64,12 @@ def parse(fpath, scanner, substr, prepend, control_flags):
         
         # Parse the file
         if f.endswith('.xml'):
-            t_i, t_finding_count, t_err_count = _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner)
+            t_i, t_finding_count, t_err_count = _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, fpath, scanner)
             i = t_i
             finding_count = t_finding_count
             err_count = t_err_count
         elif f.endswith('.csv'):
-            t_i, t_finding_count, t_err_count = _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner)
+            t_i, t_finding_count, t_err_count = _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, fpath, scanner)
             i = t_i
             finding_count = t_finding_count
             err_count = t_err_count
@@ -109,7 +109,7 @@ def _get_total(path):
     return finding_count
 # End of _get_total
 
-def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner):
+def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, fpath, scanner):
     # Open csv in read
     with open(f, mode='r', encoding='utf-8-sig') as read_obj:
         csv_dict_reader = csv.DictReader(read_obj)
@@ -188,7 +188,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, control_flags, t
     return i, finding_count, err_count
 # End of _parse_csv
 
-def _parse_xml(f, i, finding_count, err_count, substr, prepend, control_flags, total_findings, fpath, scanner):
+def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, fpath, scanner):
     # Extract XML
     tree = ET.parse(f)
     root = tree.getroot()
