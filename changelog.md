@@ -1,5 +1,11 @@
 # Change Log
 
+## [Version 2.0.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.0.1) (2026-04-10)
+- Fixed a bug where some scanners will result in failure to output
+- Included a json schema for users attempting to create a `user_inputs.json` file
+- Added new default rules
+- Other minor bug fixes
+
 ## [Version 2.0.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.0.0) (2026-04-06)
 Removed the old override system in favor of a more fully-featured one using rule expressions and extended matching techniques.  
 This new system is called the **Preflight** system.
