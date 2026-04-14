@@ -1242,6 +1242,16 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '120'}
         ),
         PRule(
+            rule_id = "fortify_memset_optimization",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"fortify", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Insecure Compiler Optimization", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"If calling memset() is intended to scrub sensitive data from memory", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '244'}
+        ),
+        PRule(
             rule_id = "fortify_out_of_bounds_read",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
