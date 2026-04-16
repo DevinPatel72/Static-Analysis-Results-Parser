@@ -192,7 +192,7 @@ class ReplacementEditor:
         self.rows = []
 
         self.root = tk.Toplevel(parent)
-        self.root.title(f"Replacement for \"{rule_id}\" ({precedence})")
+        self.root.title(f"Replacement for {rule_id} ({precedence})")
         self.root.geometry("400x400")
         
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)

@@ -1258,7 +1258,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"fortify", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Out-of-Bounds Read", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '126'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '125'}
         ),
         PRule(
             rule_id = "gnatsas_precondition_conditional_raise",
