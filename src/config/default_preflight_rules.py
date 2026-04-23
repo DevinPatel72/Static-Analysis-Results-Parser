@@ -330,6 +330,21 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
+            rule_id = "cppcheck_clarifycondition",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"clarifyCondition", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Suspicious condition (assignment", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '481'}
+        ),
+        PRule(
             rule_id = "cppcheck_class_constructor_1_argument",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -478,6 +493,21 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
+            rule_id = "cppcheck_conststatement",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"constStatement", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Found a statement that begins with type constant", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
             rule_id = "cppcheck_constvariable",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -555,6 +585,7 @@ DEFAULT_PRULES = [
                     ConditionGroup(operator="OR", conditions=[
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"duplicateConditionalAssign", strictness=Strictness.EXACT, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"duplicateExpression", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"duplicateAssignExpression", strictness=Strictness.EXACT, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Duplicate expression for condition and assignment", strictness=Strictness.EXACT, case_sensitive=False),
                     ])
                 ]),
@@ -585,7 +616,39 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"duplInheritedMember", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1109'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1109', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "cppcheck_exceptrethrowcopy",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"exceptRethrowCopy", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Throwing a copy of the caught exception instead of rethrowing the original exception", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "cppcheck_functionconststatic",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"functionConst", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"^Technically the member function .*? can be const", strictness=Strictness.REGEX, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"functionStatic", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"^The member function .*? can be static", strictness=Strictness.REGEX, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_identicalconditionafterearlyexit",
@@ -645,7 +708,34 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Found a statement that begins with a numeric/string constant", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "cppcheck_iteratebyvalue",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"iterateByValue", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "cppcheck_missingmembercopy",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"missingMemberCopy", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"^Member variable .*? is not assigned in the move constructor", strictness=Strictness.REGEX, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '457'}
         ),
         PRule(
             rule_id = "cppcheck_missingoverride",
@@ -750,6 +840,21 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '825'}
         ),
         PRule(
+            rule_id = "cppcheck_oppositeinnercondition",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"oppositeInnerCondition", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"^Opposite inner .*? condition leads to a dead code block", strictness=Strictness.REGEX, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '570'}
+        ),
+        PRule(
             rule_id = "cppcheck_passedbyvalue",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -789,6 +894,21 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
+            rule_id = "cppcheck_publicallocationerror",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"publicAllocationError", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"^Possible leak in public function\. The pointer .*? is not deallocated before it is allocated", strictness=Strictness.REGEX, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '401'}
+        ),
+        PRule(
             rule_id = "cppcheck_redundantassignment",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -813,7 +933,22 @@ DEFAULT_PRULES = [
                     ]),
                     ConditionGroup(operator="OR", conditions=[
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantCondition", strictness=Strictness.EXACT, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant condition: part of a conditional negates the need for the other part", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant condition: part of a conditional negates the need for the other part", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+        ),
+        PRule(
+            rule_id = "cppcheck_redundantifremove",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantIfRemove", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant checking of STL container element existence before removing it", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
@@ -865,6 +1000,21 @@ DEFAULT_PRULES = [
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Same expression on both sides of OPERATOR", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '682'}
+        ),
+        PRule(
+            rule_id = "cppcheck_selfassignment",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"selfAssignment", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant assignment of ", strictness=Strictness.STARTSWITH, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
         ),
         PRule(
             rule_id = "cppcheck_shadowargument",
@@ -949,6 +1099,21 @@ DEFAULT_PRULES = [
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"suspiciousFloatingPointCast", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '681'}
+        ),
+        PRule(
+            rule_id = "cppcheck_suspicioussemicolon",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"suspiciousSemicolon", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Suspicious use of ; at the end of", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
         ),
         PRule(
             rule_id = "cppcheck_syntaxerror",
@@ -1050,6 +1215,21 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '563', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
+            rule_id = "cppcheck_unsafeclasscanleak",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unsafeClassCanLeak", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"^Class .*? is unsafe, .*? can leak by wrong usage", strictness=Strictness.REGEX, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '401'}
+        ),
+        PRule(
             rule_id = "cppcheck_unsignedlessthanzero",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -1082,6 +1262,18 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unusedFunction", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '561', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "cppcheck_unusedlabelconfiguration",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unusedLabelConfiguration", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '561', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
