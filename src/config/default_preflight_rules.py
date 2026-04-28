@@ -1147,7 +1147,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
-                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"threadsafety-unsafe-call", strictness=Strictness.EXACT, case_sensitive=False),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"threadsafety-", strictness=Strictness.STARTSWITH, case_sensitive=False),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '362'}
         ),
