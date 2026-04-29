@@ -271,6 +271,7 @@ DEFAULT_PRULES = [
                     ConditionGroup(operator="OR", conditions=[
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"arrayIndexOutOfBounds", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Array argument accessed out of bounds", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Array is accessed out of bounds", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '125'}
@@ -354,10 +355,10 @@ DEFAULT_PRULES = [
                     ]),
                     ConditionGroup(operator="OR", conditions=[
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"clarifyCondition", strictness=Strictness.EXACT, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Suspicious condition (assignment", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Suspicious condition", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '481'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '480'}
         ),
         PRule(
             rule_id = "cppcheck_class_constructor_1_argument",
@@ -412,7 +413,7 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '570'}
         ),
         PRule(
-            rule_id = "cppcheck_condition_always_false_compareValueOutOfTypeRangeError",
+            rule_id = "cppcheck_condition_always_false",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                     ConditionGroup(operator="OR", conditions=[
@@ -421,6 +422,7 @@ DEFAULT_PRULES = [
                     ]),
                     ConditionGroup(operator="OR", conditions=[
                         Condition(fieldname=Fieldnames.MESSAGE.value, pattern=r"is always false", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"is always false", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"compareValueOutOfTypeRangeError", strictness=Strictness.EXACT, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Else If matches previous condition", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
@@ -428,7 +430,7 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '570'}
         ),
         PRule(
-            rule_id = "cppcheck_condition_always_true_compareValueOutOfTypeRangeError",
+            rule_id = "cppcheck_condition_always_true",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                     ConditionGroup(operator="OR", conditions=[
@@ -709,7 +711,10 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
-                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"invalidTestForOverflow", strictness=Strictness.EXACT, case_sensitive=False),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"invalidTestForOverflow", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Invalid test for overflow", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '733'}
         ),
@@ -1508,13 +1513,13 @@ DEFAULT_PRULES = [
         PRule(
             rule_id = "pylint_anomalous_backslash",
             precedence = 0,
-            condition=ConditionGroup(operator="OR", conditions=[
-                        ConditionGroup(operator="AND", conditions=[
+            condition=ConditionGroup(operator="AND", conditions=[
+                        ConditionGroup(operator="OR", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"pylint", strictness=Strictness.CONTAINS, case_sensitive=False),
-                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"anomalous-backslash", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        ]),
-                        ConditionGroup(operator="AND", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ]),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"anomalous-backslash", strictness=Strictness.CONTAINS, case_sensitive=False),
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Anomalous backslash ", strictness=Strictness.STARTSWITH, case_sensitive=False),
                         ]),
                     ]),
@@ -1523,14 +1528,14 @@ DEFAULT_PRULES = [
         PRule(
             rule_id = "pylint_bad_indentation",
             precedence = 0,
-            condition=ConditionGroup(operator="OR", conditions=[
-                        ConditionGroup(operator="AND", conditions=[
+            condition=ConditionGroup(operator="AND", conditions=[
+                        ConditionGroup(operator="OR", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"pylint", strictness=Strictness.CONTAINS, case_sensitive=False),
-                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"bad-indentation", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        ]),
-                        ConditionGroup(operator="AND", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ]),
+                        ConditionGroup(operator="OR", conditions=[
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad indentation ", strictness=Strictness.STARTSWITH, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"bad-indentation", strictness=Strictness.CONTAINS, case_sensitive=False),
                         ]),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1078', Fieldnames.CONFIDENCE.value: 'Info'}
@@ -1547,13 +1552,13 @@ DEFAULT_PRULES = [
         PRule(
             rule_id = "pylint_consider_using",
             precedence = 0,
-            condition=ConditionGroup(operator="OR", conditions=[
-                        ConditionGroup(operator="AND", conditions=[
+            condition=ConditionGroup(operator="AND", conditions=[
+                        ConditionGroup(operator="OR", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"pylint", strictness=Strictness.CONTAINS, case_sensitive=False),
-                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"consider-using-", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        ]),
-                        ConditionGroup(operator="AND", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ]),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"consider-using-", strictness=Strictness.CONTAINS, case_sensitive=False),
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Consider using ", strictness=Strictness.STARTSWITH, case_sensitive=False),
                         ]),
                     ]),
@@ -1562,13 +1567,13 @@ DEFAULT_PRULES = [
         PRule(
             rule_id = "pylint_implicit_string_concat",
             precedence = 0,
-            condition=ConditionGroup(operator="OR", conditions=[
-                        ConditionGroup(operator="AND", conditions=[
+            condition=ConditionGroup(operator="AND", conditions=[
+                        ConditionGroup(operator="OR", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"pylint", strictness=Strictness.CONTAINS, case_sensitive=False),
-                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"implicit-str-concat-in-sequence", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        ]),
-                        ConditionGroup(operator="AND", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ]),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"implicit-str-concat-in-sequence", strictness=Strictness.CONTAINS, case_sensitive=False),
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Implicit string concatenation", strictness=Strictness.STARTSWITH, case_sensitive=False),
                         ]),
                     ]),
@@ -1577,13 +1582,13 @@ DEFAULT_PRULES = [
         PRule(
             rule_id = "pylint_no_else",
             precedence = 0,
-            condition=ConditionGroup(operator="OR", conditions=[
-                        ConditionGroup(operator="AND", conditions=[
+            condition=ConditionGroup(operator="AND", conditions=[
+                        ConditionGroup(operator="OR", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"pylint", strictness=Strictness.CONTAINS, case_sensitive=False),
-                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"no-else", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        ]),
-                        ConditionGroup(operator="AND", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ]),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"no-else", strictness=Strictness.CONTAINS, case_sensitive=False),
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Unnecessary \"else\" after ", strictness=Strictness.STARTSWITH, case_sensitive=False),
                         ]),
                     ]),
@@ -1610,13 +1615,13 @@ DEFAULT_PRULES = [
         PRule(
             rule_id = "pylint_unnecessary",
             precedence = 0,
-            condition=ConditionGroup(operator="OR", conditions=[
-                        ConditionGroup(operator="AND", conditions=[
+            condition=ConditionGroup(operator="AND", conditions=[
+                        ConditionGroup(operator="OR", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"pylint", strictness=Strictness.CONTAINS, case_sensitive=False),
-                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unnecessary-", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        ]),
-                        ConditionGroup(operator="AND", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ]),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unnecessary-", strictness=Strictness.CONTAINS, case_sensitive=False),
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Unnecessary ", strictness=Strictness.STARTSWITH, case_sensitive=False),
                         ]),
                     ]),
@@ -1625,13 +1630,13 @@ DEFAULT_PRULES = [
         PRule(
             rule_id = "pylint_useless",
             precedence = 0,
-            condition=ConditionGroup(operator="OR", conditions=[
-                        ConditionGroup(operator="AND", conditions=[
+            condition=ConditionGroup(operator="AND", conditions=[
+                        ConditionGroup(operator="OR", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"pylint", strictness=Strictness.CONTAINS, case_sensitive=False),
-                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"useless-", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        ]),
-                        ConditionGroup(operator="AND", conditions=[
                             Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ]),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"useless-", strictness=Strictness.CONTAINS, case_sensitive=False),
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Useless ", strictness=Strictness.STARTSWITH, case_sensitive=False),
                         ]),
                     ]),

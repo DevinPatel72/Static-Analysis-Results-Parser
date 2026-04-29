@@ -1,7 +1,6 @@
 # parser_writer.py
 
 import os
-import atexit
 import csv
 import logging
 from .preflight import apply_prules
@@ -102,7 +101,6 @@ def search_row(tuples):
     return None
         
 
-@atexit.register
 def close_writer():
     global __filepath
     
@@ -132,4 +130,3 @@ def close_writer():
                 csv_writer.writeheader()
                 csv_writer.writerows(__parser_data)
     __filepath = None
-
