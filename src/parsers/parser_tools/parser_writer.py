@@ -50,10 +50,7 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
                 input(f"Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
             
 def write_row(r):
-    if __excel_enabled:
-        __parser_data.append(r)
-    else:
-        __parser_data.append(r)
+    __parser_data.append(r)
         
 def search_row(tuples):
     """

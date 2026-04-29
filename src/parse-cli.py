@@ -353,7 +353,6 @@ def main():
     # Export parser inputs to config file for reruns
     export_config(parser_inputs, parser_outfile, control_flags)
     
-    
     print('\n{}\n'.format('#'*90))
     
     # Put control_flags into module variable
