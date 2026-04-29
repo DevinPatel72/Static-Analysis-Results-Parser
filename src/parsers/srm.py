@@ -187,22 +187,15 @@ def _parse_xml(fpath, substr, prepend, scanner):
             for result in finding.find('results'):
                 
                 # Declare this early so it stays in scope
+                maturity = Fieldnames.DEFAULT_MATURITY.value
+                mitigation = Fieldnames.DEFAULT_MITIGATION.value
                 validator_comment = ''
                 id = ''
                 
-                # Check if the scanner is pylint or eslint, change cwe number if so
                 tool = result.find('tool')
                 tool_name = tool.get('name', '')
                 rule = tool.find('rule')
                 rule_code = rule.get('code', '')
-                
-                if len(rule_code) > 0:
-                    if 'PYLINT' in rule_code:
-                        pylint_code = rule_code.replace('PYLINT-', '')
-                        cwe = get_pylint_cdata(pylint_code, default=cwe)
-                    elif 'ESLINT' in rule_code:
-                        eslint_code = rule_code.replace('ESLINT-', '')
-                        cwe = get_eslint_cdata(eslint_code, default=cwe)
                 
                 # Get result CWE since that is more accurate
                 if result.find('cwe') is not None:
@@ -215,6 +208,15 @@ def _parse_xml(fpath, substr, prepend, scanner):
                     tool_cwe = '(blank)'
                 else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
                 
+                # Check if the scanner is pylint or eslint, change cwe number if so
+                if len(rule_code) > 0:
+                    if 'PYLINT' in rule_code:
+                        pylint_code = rule_code.replace('PYLINT-', '')
+                        cwe = get_pylint_cdata(pylint_code, default=cwe)
+                    elif 'ESLINT' in rule_code:
+                        eslint_code = rule_code.replace('ESLINT-', '')
+                        cwe = get_eslint_cdata(eslint_code, default=cwe)
+                
                 # Check for duplicate findings from standalone scanners
                 confidence = Fieldnames.DEFAULT_CONF.value
                 tool_code = tool.get('code', '').strip()
@@ -223,9 +225,12 @@ def _parse_xml(fpath, substr, prepend, scanner):
                                                       (Fieldnames.PATH.value, path, True),
                                                       (Fieldnames.LINE.value, line, True)
                                                       ]):
+                        cwe = m[Fieldnames.SCORING_BASIS.value]
                         confidence = 'DUPLICATE'
-                        id = m
-                        validator_comment = f"This finding is a duplicate of standalone {tool_name} finding with the same ID"
+                        maturity = m[Fieldnames.MATURITY.value]
+                        mitigation = m[Fieldnames.MITIGATION.value]
+                        id = m[Fieldnames.ID.value]
+                        validator_comment = f"This finding is a duplicate of standalone {tool_name} finding with the same ID. " + m[Fieldnames.VALIDATOR_COMMENT.value]
                 
                 # Get finding 'Type'
                 finding_type = rule.get('name', '')
@@ -273,8 +278,8 @@ def _parse_xml(fpath, substr, prepend, scanner):
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:confidence,
-                                    Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
-                                    Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
+                                    Fieldnames.MATURITY.value:maturity,
+                                    Fieldnames.MITIGATION.value:mitigation,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:validator_comment,
                                     Fieldnames.ID.value:id,

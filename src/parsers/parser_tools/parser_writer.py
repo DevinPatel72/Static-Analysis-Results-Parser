@@ -57,11 +57,12 @@ def write_row(r):
         __parser_data.append(r)
         
 def search_row(tuples):
+    from .toolbox import Fieldnames
     """
     Searches existing rows for parsed findings.
     
     :param tuples: List of tuples with format (Fieldnames.<Header>.value, keyword, exact_str_match=[True|False])
-    :return: ID of the first row that matches, otherwise None.
+    :return: First 6 headers and the ID of the first row that matches, otherwise None.
     """
     for row in __parser_data:
         matches = []
@@ -89,7 +90,15 @@ def search_row(tuples):
                     matches.append(False)
                     break
         if all(matches):
-            return row.get('ID', None)
+            return {
+                Fieldnames.SCORING_BASIS.value: row[Fieldnames.SCORING_BASIS.value],
+                Fieldnames.CONFIDENCE.value: row[Fieldnames.CONFIDENCE.value],
+                Fieldnames.MATURITY.value: row[Fieldnames.MATURITY.value],
+                Fieldnames.MITIGATION.value: row[Fieldnames.MITIGATION.value],
+                Fieldnames.PROPOSED_MITIGATION.value: row[Fieldnames.PROPOSED_MITIGATION.value],
+                Fieldnames.VALIDATOR_COMMENT.value: row[Fieldnames.VALIDATOR_COMMENT.value],
+                Fieldnames.ID.value: row[Fieldnames.ID.value]
+            }
     return None
         
 

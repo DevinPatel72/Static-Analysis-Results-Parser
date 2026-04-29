@@ -339,7 +339,6 @@ def main():
         check_input_format(parser_inputs, parser_outfile, control_flags)
 
     # Output confirmation
-    print('\n#################################################################\n')
     s = "Reading from files:\n"
     for i, inp in enumerate(parser_inputs, 1):
         s += f"{i})  Scanner: {inp[InputDictKeys.SCANNER.value]}\n    Path: {inp[InputDictKeys.PATH.value]}\n    Path substring to delete: {inp[InputDictKeys.REMOVE.value]}\n    Path substring to prepend: {inp[InputDictKeys.PREPEND.value]}\n"
@@ -354,9 +353,8 @@ def main():
     # Export parser inputs to config file for reruns
     export_config(parser_inputs, parser_outfile, control_flags)
     
-    # Pause for user confirmation
-    input("\nPress Enter to continue or CTRL+C to quit...")
-    print()
+    
+    print('\n{}\n'.format('#'*90))
     
     # Put control_flags into module variable
     parsers.control_flags = control_flags
@@ -428,13 +426,11 @@ def main():
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             err_count += 1
-        
-        print() # Create a new line after each progressbar
     
     parser_writer.close_writer()
     
     logger.info("Parsing complete!")
-    print("Parsing complete!")
+    print("\nParsing complete!")
     
     if err_count > 0:
         print(f"{err_count} errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")

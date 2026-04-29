@@ -10,7 +10,7 @@ from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
-config_errors = ['templateRecursion', 'checkLevelNormal', 'checkersReport', 'missingInclude', 'missingIncludeSystem', 'toomanyconfigs', 'ConfigurationNotChecked', 'normalCheckLevelMaxBranches']
+config_errors = ['templateRecursion', 'checkLevelNormal', 'checkersReport', 'missingInclude', 'missingIncludeSystem', 'toomanyconfigs', 'ConfigurationNotChecked', 'normalCheckLevelMaxBranches', 'noValidConfiguration']
 
 def path_preview(fpath):
     # Parse the XML file
