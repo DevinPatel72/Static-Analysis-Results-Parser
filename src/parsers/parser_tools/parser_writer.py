@@ -56,13 +56,13 @@ def write_row(r):
         __parser_data.append(r)
         
 def search_row(tuples):
-    from .toolbox import Fieldnames
     """
     Searches existing rows for parsed findings.
     
-    :param tuples: List of tuples with format (Fieldnames.<Header>.value, keyword, exact_str_match=[True|False])
+    :param tuples: List of tuples with format (Fieldnames.[Header].value, keyword, exact_str_match=[True|False])
     :return: First 6 headers and the ID of the first row that matches, otherwise None.
     """
+    from .toolbox import Fieldnames
     for row in __parser_data:
         matches = []
         for header, keyword, exact_str_match in tuples:
