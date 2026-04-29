@@ -9,6 +9,8 @@ from .parser_tools.toolbox import Fieldnames, console
 
 logger = logging.getLogger(__name__)
 
+eslint_cdata = {}
+
 def path_preview(fpath):
     # Open json in read
     try:
@@ -39,8 +41,6 @@ def parse(fpath, scanner, substr, prepend):
     finding_count = 0
     total_issues = 0
     
-    eslint_cdata = load_eslint_cdata()
-    
     # Find total number of issues
     for file in data:
         total_issues += len(file['messages'])
@@ -59,10 +59,7 @@ def parse(fpath, scanner, substr, prepend):
                     continue
                 
                 # Map eslint message id to CWE
-                if rule_id in eslint_cdata.keys():
-                    cwe = eslint_cdata[rule_id]
-                else: cwe = ''
-                
+                cwe = get_eslint_cdata(rule_id, default='')
                 
                 # Get tool cwe before any overrides are performed
                 if len(cwe) <= 0:
@@ -94,8 +91,8 @@ def parse(fpath, scanner, substr, prepend):
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
-                                    Fieldnames.MATURITY.value:'Unreported',
-                                    Fieldnames.MITIGATION.value:'',
+                                    Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
+                                    Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
                                     Fieldnames.PROPOSED_MITIGATION.value:'',
                                     Fieldnames.VALIDATOR_COMMENT.value:'',
                                     Fieldnames.ID.value:id,
@@ -120,6 +117,7 @@ def parse(fpath, scanner, substr, prepend):
 # End of parse
 
 def load_eslint_cdata():
+    # Loads eslint cdata info from config dir
     from . import CONFIG_DIR
     
     try:
@@ -127,4 +125,19 @@ def load_eslint_cdata():
             return json.load(r)
     except json.JSONDecodeError:
         console("Unable to load Eslint CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')
-        return [0]
+        return {"__eslint_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
+
+def get_eslint_cdata(rule_id, default=''):
+    # Maps eslint rule_id to CWE number and returns it
+    global eslint_cdata
+    
+    if rule_id == '__eslint_cdata_error__':
+        return default
+    
+    if len(eslint_cdata) <= 0:
+        eslint_cdata = load_eslint_cdata()
+    
+    if rule_id in eslint_cdata.keys():
+        return eslint_cdata[rule_id]
+    else:
+        return default

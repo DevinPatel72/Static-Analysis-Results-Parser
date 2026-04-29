@@ -129,4 +129,5 @@ def get_pylint_cdata(message_id, default=''):
         return '710'
     elif message_id[0] == 'C':
         return '1076'
-    else: return default
+    else:
+        return default

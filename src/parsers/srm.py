@@ -4,6 +4,7 @@ import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
+from .eslint import get_eslint_cdata
 from .pylint import get_pylint_cdata
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.language_resolver import resolve_lang
@@ -189,10 +190,19 @@ def _parse_xml(fpath, substr, prepend, scanner):
                 validator_comment = ''
                 id = ''
                 
-                # Check if the scanner is pylint, change cwe number if so
+                # Check if the scanner is pylint or eslint, change cwe number if so
                 tool = result.find('tool')
                 tool_name = tool.get('name', '')
                 rule = tool.find('rule')
+                rule_code = rule.get('code', '')
+                
+                if len(rule_code) > 0:
+                    if 'PYLINT' in rule_code:
+                        pylint_code = rule_code.replace('PYLINT-', '')
+                        cwe = get_pylint_cdata(pylint_code, default=cwe)
+                    elif 'ESLINT' in rule_code:
+                        eslint_code = rule_code.replace('ESLINT-', '')
+                        cwe = get_eslint_cdata(eslint_code, default=cwe)
                 
                 # Get result CWE since that is more accurate
                 if result.find('cwe') is not None:
