@@ -1,5 +1,11 @@
 # Change Log
 
+## [Version 2.0.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.0.2) (2026-04-29)
+- Identified and fixed a bug where the CLI executable will still hang for user input
+- Added more default preflight rules
+- Removed "DISCOURAGED" status for CWE-682 category mapping
+- Improved SRM parsing of duplicate findings and CWE mappings for SRM-Pylint and SRM-ESLint
+
 ## [Version 2.0.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.0.1) (2026-04-10)
 - Fixed a bug where some scanners will result in failure to output
 - Included a json schema for users attempting to create a `user_inputs.json` file
