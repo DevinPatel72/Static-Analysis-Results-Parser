@@ -1,6 +1,6 @@
 # Version String
 PROG_NAME = 'Static Analysis Results Parser'
-VERSION = '2.0.0'
+VERSION = '2.0.1'
 
 # Control Flag Names
 FLAG_CATEGORY_MAPPING = 'Category Mappings'
