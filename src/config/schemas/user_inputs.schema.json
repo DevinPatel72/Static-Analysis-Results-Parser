@@ -9,6 +9,7 @@
     },
     "main": {
       "type": "array",
+      "description": "Main body of inputs",
       "items": {
         "type": "object",
         "required": ["scanner", "path", "remove", "prepend"],
@@ -47,13 +48,16 @@
       ],
       "properties": {
         "Category Mappings": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "True: Appends \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers"
         },
         "Preflight Rules": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "True: Changes final output values according to user-defined rules"
         },
         "Default Preflight Rules": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "True: Changes final output values according to a default profile of rules. Only activated if \"Preflight Rules\" flag is also true."
         }
       },
       "additionalProperties": false
