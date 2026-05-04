@@ -256,9 +256,12 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
-                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Arithmetic calculations involving void pointers", strictness=Strictness.EXACT, case_sensitive=False),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"arithOperationsOnVoidPointer", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Arithmetic calculations involving void pointers", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "It is illegal to offset a void* pointer in most compilers. It is possible to perform arithmetic operations on 'void *' using GNU C extensions, but by default a compiler will not allow calculations using void pointers."}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "It is illegal to offset a void* pointer in most compilers. It is possible to perform arithmetic operations on 'void *' using non-standard GNU C extensions or Clang, but usually a compiler will not allow calculations using void pointers."}
         ),
         PRule(
             rule_id = "cppcheck_arrayindexoutofbounds",
