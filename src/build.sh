@@ -1,16 +1,22 @@
 #!/bin/bash
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 shopt -s globstar  # Enable recursive ** globbing (bash 4+)
 
-# Create Bin Dir
-os_name=$(grep ^ID= /etc/os-release | cut -d= -f2 | tr -d '"')
-if [ -z "$os_name" ]; then
-    os_name="unknown"
+# Get arch info
+osName=$(grep ^ID= /etc/os-release | cut -d= -f2 | tr -d '"')
+if [ -z "$osName" ]; then
+    osName="unknown"
 fi
-os_name="${os_name^}"
+osName="${osName^,,}"
+osArch=$(uname -m)
 
-BIN_DIR="../bin/Linux-$os_name"
-mkdir -p "$BIN_DIR"
+# Get SARP version
+ver=$(head -n 3 "$SCRIPT_DIR/parsers/__init__.py" | grep "^VERSION" | cut -d= -f2 | tr -d " '")
+
+# Create Bin Dir
+BIN_DIR="../bin/SARP_v${ver}_${osName}_${osArch}"
 
 # Function to check if file is text
 is_text() {
@@ -81,6 +87,7 @@ for file in dist/config/**/*; do
 done
 
 # Copy files to bin dir
+mkdir -p "$BIN_DIR"
 cp -r dist/. "$BIN_DIR/"
 
 # Delete the user_inputs.json

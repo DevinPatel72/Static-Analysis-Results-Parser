@@ -1,6 +1,24 @@
 @ECHO OFF
 
-set "BIN_DIR=..\bin\Windows"
+Rem Get SARP version
+for /f "tokens=2 delims==" %%A in ('findstr /b "VERSION" "%~dp0parsers\__init__.py"') do (
+    set "ver=%%~A"
+)
+
+:: Trim spaces and quotes
+set "ver=%ver: =%"
+set "ver=%ver:'=%"
+
+Rem Get Architecture info
+if defined PROCESSOR_ARCHITEW6432 (
+    set "arch=x64"
+) else if /i "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+    set "arch=x64"
+) else (
+    set "arch=x86"
+)
+
+set "BIN_DIR=..\bin\SARP_v%ver%_windows_%arch%"
 
 Rem Clean
 :clean
