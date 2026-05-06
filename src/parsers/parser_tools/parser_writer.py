@@ -20,7 +20,7 @@ __excel_workbook = None
 __fieldnames = None
 
 def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
-    global __filepath, __parser_data, __excel_workbook, __fieldnames, __excel_enabled
+    global __filepath, __excel_workbook, __fieldnames, __excel_enabled
     from parsers import GUI_MODE
     
     __fieldnames = fieldnames
