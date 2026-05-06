@@ -20,15 +20,11 @@ The Static Analysis Results Parser (SARP) will parse a set of output files from 
 -  SRM:         `.xml` (preferred) or `.csv`
 
 
-## Execute using binaries
+## Execute using executables
 
 **Requirements:**
 - Ensure the config folder is in the same directory as the executables.
-
-**Instructions:**
-- Double-click on the binary or execute them from the command line.
-- No external dependencies are required to execute the binaries.
-
+- No external dependencies are required to execute the executables.
 
 
 ## Execute using interpreter
