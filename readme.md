@@ -68,7 +68,7 @@ Then execute the build script.
 ## Configure Bulk Inputs
 A user-writable config file can be created to quickly pass inputs in bulk.
 To generate this config file, run the parser once against valid input and check the config folder for "user_inputs.json."
-If any loaded data is changed in the guided prompts or GUI, "user_inputs.json" will be overwritten with the new data.
+If any loaded data is changed in the GUI, "user_inputs.json" will be overwritten with the new data.
 
 ## Configure CWE Mappings
 SARP allows configurable CWE mappings for scanners that do not output CWE data. A basic set of mappings are provided,
