@@ -119,7 +119,8 @@ def apply_prules(data):
             loop_rules(parsers.prules, row)
         
         # Check if cwe is in categories dict. Control flag check is performed in the function.
-        row[Fieldnames.SCORING_BASIS.value] = check_CWE(row[Fieldnames.SCORING_BASIS.value])
+        if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING]:
+            row[Fieldnames.SCORING_BASIS.value] = check_CWE(row[Fieldnames.SCORING_BASIS.value])
         
     
 
