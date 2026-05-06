@@ -75,7 +75,7 @@ def _parse_json(fpath, scanner, substr, prepend):
     try:
         with open(fpath, "r", encoding='utf-8-sig') as read_obj:
             data = json.load(read_obj)
-    except json.JSONDecodeError:
+    except (FileNotFoundError, json.JSONDecodeError):
         err_count += 1
         logger.error(f"Unable to parse input file \"{fpath}\". Ensure Dependency Check output the file as JSON or CSV.")
         return finding_count, err_count

@@ -319,12 +319,12 @@ def load_checkmarx_cdata():
     try:
         with open(os.path.join(CONFIG_DIR, 'checkmarx_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except json.JSONDecodeError:
+    except (FileNotFoundError, json.JSONDecodeError):
         console("Unable to load Checkmarx CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')
         return [0]
     
 def get_checkmarx_cdata(query, lang, default=''):
-    # Maps pylint query to CWE number and returns it
+    # Maps checkmarx query to CWE number and returns it
     global checkmarx_cdata
     
     if len(checkmarx_cdata) <= 0:

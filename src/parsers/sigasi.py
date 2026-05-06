@@ -11,6 +11,8 @@ from .parser_tools.toolbox import Fieldnames, console
 
 logger = logging.getLogger(__name__)
 
+sigasi_cdata = {}
+
 def path_preview(fpath):
     # Parse the input file
     try:
@@ -41,11 +43,9 @@ def parse(fpath, scanner, substr, prepend):
     try:
         with open(fpath, 'r', encoding='utf-8-sig') as r:
             data = json.load(r)
-    except json.JSONDecodeError:
+    except (FileNotFoundError, json.JSONDecodeError):
         logger.error(f"[ERROR] Invalid JSON format: {fpath}")
         return err_count + 1
-    
-    sigasi_cdata = load_sigasi_cdata()
     
     issues = data['issues']
     
@@ -79,9 +79,9 @@ def parse(fpath, scanner, substr, prepend):
             
             # Map CWE
             if 'vhdl' in issue_code.lower():
-                cwe = sigasi_cdata['vhdl'].get(issue_code_number, '')
+                cwe = get_sigasi_cdata(issue_code_number, 'vhdl', default='')
             elif 'verilog' in issue_code.lower():
-                cwe = sigasi_cdata['verilog'].get(issue_code_number, '')
+                cwe = get_sigasi_cdata(issue_code_number, 'verilog', default='')
             # Custom overrides
             elif 'Could not find declaration' in description:
                 cwe = '457'
@@ -133,6 +133,23 @@ def load_sigasi_cdata():
     try:
         with open(os.path.join(CONFIG_DIR, 'sigasi_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except json.JSONDecodeError:
+    except (FileNotFoundError, json.JSONDecodeError):
         console("Unable to load Sigasi CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')
-        return [0]
+        return {"__sigasi_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
+
+def get_sigasi_cdata(rule_id, rule_type, default=''):
+    # Maps sigasi rule_id to CWE number and returns it
+    global sigasi_cdata
+    
+    if rule_id == '__sigasi_cdata_error__':
+        return default
+    
+    if len(sigasi_cdata) <= 0:
+        sigasi_cdata = load_sigasi_cdata()
+    
+    if rule_type == 'vhdl':
+        return sigasi_cdata['vhdl'].get(key=rule_id, default=default)
+    elif rule_type == 'verilog':
+        return sigasi_cdata['verilog'].get(key=rule_id, default=default)
+    else:
+        return default

@@ -148,7 +148,7 @@ def load_config_cwe_category_mappings():
     try:
         with open(os.path.join(parsers.CONFIG_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except json.JSONDecodeError:
+    except (FileNotFoundError, json.JSONDecodeError):
         console("Unable to load MITRE CWE Category Mappings: Invalid JSON format\nThe program will continue without CWE category mappings.", "Config Error", type='error')
         return {}
 
@@ -158,7 +158,7 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         try:
             with open(inputs_path, 'r', encoding='utf-8-sig') as uin:
                 user_inputs = json.load(uin)
-        except json.JSONDecodeError:
+        except (FileNotFoundError, json.JSONDecodeError):
             return f"Unable to parse \"{os.path.basename(inputs_path)}.\" This may be due to an improperly formatted or corrupted JSON file."
         
         # Attempt to parse the main inputs

@@ -123,7 +123,7 @@ def load_eslint_cdata():
     try:
         with open(os.path.join(CONFIG_DIR, 'eslint_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except json.JSONDecodeError:
+    except (FileNotFoundError, json.JSONDecodeError):
         console("Unable to load Eslint CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')
         return {"__eslint_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
 
@@ -137,7 +137,4 @@ def get_eslint_cdata(rule_id, default=''):
     if len(eslint_cdata) <= 0:
         eslint_cdata = load_eslint_cdata()
     
-    if rule_id in eslint_cdata.keys():
-        return eslint_cdata[rule_id]
-    else:
-        return default
+    return eslint_cdata.get(key=rule_id, default=default)
