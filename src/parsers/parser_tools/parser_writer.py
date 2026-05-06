@@ -50,9 +50,11 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
                 input(f"Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
             
 def write_row(r):
+    global __parser_data
     __parser_data.append(r)
         
 def search_row(tuples):
+    global __parser_data
     """
     Searches existing rows for parsed findings.
     
@@ -99,7 +101,7 @@ def search_row(tuples):
         
 
 def close_writer():
-    global __filepath
+    global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __parser_data
     
     # Perform preflighting
     if len(__parser_data) > 0:
