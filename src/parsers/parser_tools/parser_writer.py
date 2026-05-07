@@ -54,7 +54,7 @@ def write_row(r):
     global __parser_data
     __parser_data.append(r)
         
-def search_row(tuples, skip_ids=''):
+def search_row(tuples, skip_ids='', skip_dupes=False):
     """
     Searches existing rows for parsed findings.
     
@@ -67,7 +67,7 @@ def search_row(tuples, skip_ids=''):
     for row in __parser_data:
         matches = []
         # Skip id's
-        if len(skip_ids) > 0 and row[Fieldnames.ID.value] in skip_ids:
+        if (len(skip_ids) > 0 and row[Fieldnames.ID.value] in skip_ids) or (skip_dupes and row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate'):
             continue
         for header, keyword, exact_str_match in tuples:
             lookup = row.get(header, '')

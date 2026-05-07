@@ -44,7 +44,7 @@ def parse(fpath, scanner, substr, prepend):
         return err_count + 1
     
     scanner_version = root.find('cppcheck').get('version')
-    scanner = f"CppCheck {scanner_version}"
+    #scanner = f"CppCheck {scanner_version}"
     
     # Keep track of error number for debug
     error_num = 0

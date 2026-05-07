@@ -146,7 +146,7 @@ def main():
         s += f"{i})  Scanner: {scanner}\n    Path: {fpath}\n    Path substring to delete: {substr}\n    Path substring to prepend: {prepend}\n"
     s += f"\nWriting to file: {parser_outfile}\n"
     s += "\nParser Switches:\n"
-    s += "\n".join([f"  Enable {k}:".ljust(34) + f"{v}" for k,v in control_flags.items()]).strip('\n')
+    s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in control_flags.items()]).strip('\n')
     
     logger.info("\n".join(['    ' + l for l in s.split('\n')]))
     

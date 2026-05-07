@@ -7,7 +7,7 @@ def dupe_scan_consolidation(data):
     from .parser_writer import search_row
     if not DISABLE_PROGRESS_BAR: print()
     
-    for i, row in enumerate(data, start=1):
+    for i, row in enumerate(data[::-1], start=1):
         progress_bar(i, len(data), prefix=InputDictKeys.DUPE_SCAN_CONSOLIDATION.value.rjust(SPACE))
         
         # Check to see if this is already a duplicate row
@@ -20,7 +20,8 @@ def dupe_scan_consolidation(data):
                             (Fieldnames.PATH.value, row[Fieldnames.PATH.value], True),
                             (Fieldnames.LINE.value, row[Fieldnames.LINE.value], True)
                         ],
-                        skip_ids=row[Fieldnames.ID.value]):
+                        skip_ids=row[Fieldnames.ID.value],
+                        skip_dupes=True):
             row[Fieldnames.SCORING_BASIS.value] = m[Fieldnames.SCORING_BASIS.value]
             row[Fieldnames.CONFIDENCE.value] = 'DUPLICATE'
             row[Fieldnames.MATURITY.value] = m[Fieldnames.MATURITY.value]
