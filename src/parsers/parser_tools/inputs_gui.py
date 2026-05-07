@@ -444,9 +444,11 @@ class OutfileFlagsGUI:
         browse_btn.pack(side="left")
 
         # ─── Checkboxes for Flags ─────────────────────────────
-        mapping_val = self.initial_flags.get(InputDictKeys.OVERRIDE_VULN_MAPPING.value, True)
-        pr_val = self.initial_flags.get(InputDictKeys.PREFLIGHT_RULES.value, True)
+        mapping_val = self.initial_flags.get(InputDictKeys.OVERRIDE_VULN_MAPPING.value, InputDictKeys.OVERRIDE_VULN_MAPPING_DEFVAL.value)
+        dedupe_val = self.initial_flags.get(InputDictKeys.DUPE_SCAN_CONSOLIDATION.value, InputDictKeys.DUPE_SCAN_CONSOLIDATION_DEFVAL.value)
+        pr_val = self.initial_flags.get(InputDictKeys.PREFLIGHT_RULES.value, InputDictKeys.PREFLIGHT_RULES_DEFVAL.value)
         self.enable_category_mapping = tk.BooleanVar(value=mapping_val)
+        self.enable_dupe_scan_consolidation = tk.BooleanVar(value=dedupe_val)
         self.enable_preflight_rules = tk.BooleanVar(value=pr_val)
 
         checkbox_frame = tk.LabelFrame(self.root, text="Output Flags", padx=10, pady=10)
@@ -457,6 +459,13 @@ class OutfileFlagsGUI:
             "Enable CWE Category Mappings",
             self.enable_category_mapping,
             "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers."
+        )
+        
+        self.add_checkbox_with_tooltip(
+            checkbox_frame,
+            "Enable Duplicate Scanner Consolidation",
+            self.enable_dupe_scan_consolidation,
+            "If enabled, this will identify duplicate findings for results from identical scanners. This option significantly increases completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner."
         )
         
         self.add_checkbox_with_tooltip(
@@ -507,6 +516,7 @@ class OutfileFlagsGUI:
 
         self.results = {
             InputDictKeys.OUTFILE.value: output_path,
+            InputDictKeys.DUPE_SCAN_CONSOLIDATION.value: self.enable_preflight_rules.get(),
             InputDictKeys.PREFLIGHT_RULES.value: self.enable_preflight_rules.get(),
             InputDictKeys.OVERRIDE_VULN_MAPPING.value: self.enable_category_mapping.get()
         }

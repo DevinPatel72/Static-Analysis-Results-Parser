@@ -4,6 +4,7 @@ import os
 import csv
 import logging
 from .preflight import apply_prules
+from .dupe_scan_consolidation import dupe_scan_consolidation
 
 logger = logging.getLogger(__name__)
 __excel_enabled = False
@@ -53,17 +54,21 @@ def write_row(r):
     global __parser_data
     __parser_data.append(r)
         
-def search_row(tuples):
-    global __parser_data
+def search_row(tuples, skip_ids=''):
     """
     Searches existing rows for parsed findings.
     
     :param tuples: List of tuples with format (Fieldnames.[Header].value, keyword, exact_str_match=[True|False])
-    :return: First 6 headers and the ID of the first row that matches, otherwise None.
+    :param skip_ids: List of string IDs to skip over when searching
+    :return: First row that matches, otherwise None.
     """
+    global __parser_data
     from .toolbox import Fieldnames
     for row in __parser_data:
         matches = []
+        # Skip id's
+        if len(skip_ids) > 0 and row[Fieldnames.ID.value] in skip_ids:
+            continue
         for header, keyword, exact_str_match in tuples:
             lookup = row.get(header, '')
         
@@ -85,7 +90,7 @@ def search_row(tuples):
                         break
                 
                 else:
-                    matches.append(False)
+                    matches.append(keyword == lookup)
                     break
         if all(matches):
             return {
@@ -103,8 +108,11 @@ def search_row(tuples):
 def close_writer():
     global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __parser_data
     
-    # Perform preflighting
     if len(__parser_data) > 0:
+        # Duplicate Scanner Consolidation
+        dupe_scan_consolidation(__parser_data)
+        
+        # Perform preflighting
         apply_prules(__parser_data)
         
     # Write out parser data to file

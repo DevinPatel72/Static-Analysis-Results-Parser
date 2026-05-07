@@ -109,6 +109,7 @@ def main():
     parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
     control_flags = {
         FLAG_CATEGORY_MAPPING: outfile_flags_gui.results[InputDictKeys.OVERRIDE_VULN_MAPPING.value],
+        FLAG_DUPE_SCAN_CONSOLIDATION: outfile_flags_gui.results[InputDictKeys.DUPE_SCAN_CONSOLIDATION.value],
         FLAG_PREFLIGHT_RULES: outfile_flags_gui.results[InputDictKeys.PREFLIGHT_RULES.value],
     }
     

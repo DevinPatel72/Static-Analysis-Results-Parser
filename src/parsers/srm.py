@@ -230,7 +230,8 @@ def _parse_xml(fpath, substr, prepend, scanner):
                         maturity = m[Fieldnames.MATURITY.value]
                         mitigation = m[Fieldnames.MITIGATION.value]
                         id = m[Fieldnames.ID.value]
-                        validator_comment = f"This finding is a duplicate of standalone {tool_name} finding with the same ID. " + m[Fieldnames.VALIDATOR_COMMENT.value]
+                        _end = f". {m[Fieldnames.VALIDATOR_COMMENT.value]}" if len(m[Fieldnames.VALIDATOR_COMMENT.value]) > 0 else m[Fieldnames.VALIDATOR_COMMENT.value]
+                        validator_comment = f"This finding is a duplicate of standalone {tool_name} finding with the same ID" + _end
                 
                 # Get finding 'Type'
                 finding_type = rule.get('name', '')

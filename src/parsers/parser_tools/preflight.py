@@ -98,8 +98,8 @@ def apply_prules(data):
             if replacement := pr.apply_rule(row):
                 # Update row fieldnames defined in the rule's replacement dict
                 for fieldname in replacement.keys():
-                    # Skip confidence, validator comment, and ID replacements if the finding is a Duplicate
-                    if row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate' and fieldname in [Fieldnames.CONFIDENCE.value, Fieldnames.VALIDATOR_COMMENT.value, Fieldnames.ID.value]:
+                    # Skip confidence replacement if the finding is a Duplicate
+                    if row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate' and fieldname == Fieldnames.CONFIDENCE.value:
                         continue
                     # Cast to integer if possible, else just replace
                     if isinstance(replacement[fieldname], str) and replacement[fieldname].isdigit():
