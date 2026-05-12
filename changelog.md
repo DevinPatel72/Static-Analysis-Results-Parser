@@ -1,5 +1,9 @@
 # Change Log
 
+## [Version 2.1.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.1.0) (2026-05-12)
+- New feature: Deduping among findings from the same scanner. If a finding addresses the same issue as another finding from the same scanner, it will be marked as a duplicate and choose the first finding as the canonical (order is determined by order of initial inputs). This feature is toggle-able via GUI or control flag defined in user_inputs.json.
+- Minor changes to default rules
+
 ## [Version 2.0.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.0.2) (2026-04-29)
 - Identified and fixed a bug where the CLI executable will still hang for user input
 - Added more default preflight rules
