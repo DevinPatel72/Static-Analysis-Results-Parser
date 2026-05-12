@@ -465,7 +465,7 @@ class OutfileFlagsGUI:
             checkbox_frame,
             "Enable Duplicate Scanner Consolidation",
             self.enable_dupe_scan_consolidation,
-            "If enabled, this will identify duplicate findings for results from identical scanners. This option significantly increases completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner."
+            "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner."
         )
         
         self.add_checkbox_with_tooltip(

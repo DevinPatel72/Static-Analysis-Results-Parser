@@ -53,7 +53,7 @@
         },
         "Duplicate Scanner Consolidation": {
           "type": "boolean",
-          "description": "True: Identifies duplicate findings for results from identical scanners. This option significantly increases completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner."
+          "description": "True: Identifies duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner."
         },
         "Preflight Rules": {
           "type": "boolean",
