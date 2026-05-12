@@ -6,7 +6,7 @@ import os
 import logging
 import traceback
 import importlib
-from .toolbox import Fieldnames, check_CWE
+from .toolbox import Fieldnames
 import parsers
 
 
@@ -117,10 +117,6 @@ def apply_prules(data):
             if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
                 loop_rules(parsers.default_prules, row)
             loop_rules(parsers.prules, row)
-        
-        # Check if cwe is in categories dict. Control flag check is performed in the function.
-        if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING]:
-            row[Fieldnames.SCORING_BASIS.value] = check_CWE(row[Fieldnames.SCORING_BASIS.value])
         
     
 

@@ -242,11 +242,20 @@ def check_input_format(inputs, outfile, flags):
     if failure:
         sys.exit(2)
 
-def check_CWE(cwe):
-    if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING] and cwe in parsers.cwe_categories.keys():
+def check_all_CWEs(data):
+    # Check if cwe is in categories dict
+    for row in data:
+        # Control flag check
+        if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING]:
+            row[Fieldnames.SCORING_BASIS.value] = check_CWE_category(row[Fieldnames.SCORING_BASIS.value])
+        # Turn CWE into int if capable
+        row[Fieldnames.SCORING_BASIS.value] = int(row[Fieldnames.SCORING_BASIS.value]) if str(row[Fieldnames.SCORING_BASIS.value]).isdigit() else row[Fieldnames.SCORING_BASIS.value]
+
+def check_CWE_category(cwe):
+    if cwe in parsers.cwe_categories.keys():
         return f"{cwe}:{parsers.cwe_categories[cwe]}"
     else:
-        return int(cwe) if str(cwe).isdigit() else cwe
+        return cwe
 
 def export_config(inputs, outfile, control_flags):
     inputs_path = os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')

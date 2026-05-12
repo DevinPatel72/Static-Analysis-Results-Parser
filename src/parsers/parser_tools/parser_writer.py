@@ -3,6 +3,7 @@
 import os
 import csv
 import logging
+from .toolbox import check_all_CWEs
 from .preflight import apply_prules
 from .dupe_scan_consolidation import dupe_scan_consolidation
 
@@ -54,7 +55,7 @@ def write_row(r):
     global __parser_data
     __parser_data.append(r)
         
-def search_row(tuples, skip_ids='', skip_dupes=False):
+def search_row(tuples, skip_ids=''):
     """
     Searches existing rows for parsed findings.
     
@@ -67,7 +68,7 @@ def search_row(tuples, skip_ids='', skip_dupes=False):
     for row in __parser_data:
         matches = []
         # Skip id's
-        if (len(skip_ids) > 0 and row[Fieldnames.ID.value] in skip_ids) or (skip_dupes and row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate'):
+        if (len(skip_ids) > 0 and row[Fieldnames.ID.value] in skip_ids):
             continue
         for header, keyword, exact_str_match in tuples:
             lookup = row.get(header, '')
@@ -108,12 +109,19 @@ def search_row(tuples, skip_ids='', skip_dupes=False):
 def close_writer():
     global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __parser_data
     
+    # Post-processing of data
     if len(__parser_data) > 0:
+        
         # Duplicate Scanner Consolidation
-        dupe_scan_consolidation(__parser_data)
+        dupes_count = dupe_scan_consolidation(__parser_data)
+        if dupes_count >= 0:
+            logger.info(f"Discovered {dupes_count} duplicate findings")
         
         # Perform preflighting
         apply_prules(__parser_data)
+        
+        # Check for CWE category mappings
+        check_all_CWEs(__parser_data)
         
     # Write out parser data to file
     if __filepath is not None:

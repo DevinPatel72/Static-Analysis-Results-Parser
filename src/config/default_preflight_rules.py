@@ -612,7 +612,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Duplicate if condition", strictness=Strictness.EXACT, case_sensitive=False),
                     ])
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1076'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
         ),
         PRule(
             rule_id = "cppcheck_duplinheritedmember",
@@ -692,7 +692,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Consider performing initialization in initialization list", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1076'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_inttopointercast",
@@ -1325,7 +1325,10 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
+                    ConditionGroup(operator="OR", conditions=[
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unusedVariable", strictness=Strictness.EXACT, case_sensitive=False),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"unusedStructMember", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '563', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
