@@ -344,7 +344,7 @@ def main():
         s += f"{i})  Scanner: {inp[InputDictKeys.SCANNER.value]}\n    Path: {inp[InputDictKeys.PATH.value]}\n    Path substring to delete: {inp[InputDictKeys.REMOVE.value]}\n    Path substring to prepend: {inp[InputDictKeys.PREPEND.value]}\n"
     s += f"\nWriting to file: {parser_outfile}\n"
     s += "\nParser Switches:\n"
-    s += "\n".join([f"  Enable {k}:".ljust(34) + f"{v}" for k,v in control_flags.items()]).strip('\n')
+    s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in control_flags.items()]).strip('\n')
     print(s)
     
     # Log the configuration

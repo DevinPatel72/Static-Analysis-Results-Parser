@@ -6,7 +6,7 @@ import os
 import logging
 import traceback
 import importlib
-from .toolbox import Fieldnames, check_CWE
+from .toolbox import Fieldnames
 import parsers
 
 
@@ -98,8 +98,8 @@ def apply_prules(data):
             if replacement := pr.apply_rule(row):
                 # Update row fieldnames defined in the rule's replacement dict
                 for fieldname in replacement.keys():
-                    # Skip confidence, validator comment, and ID replacements if the finding is a Duplicate
-                    if row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate' and fieldname in [Fieldnames.CONFIDENCE.value, Fieldnames.VALIDATOR_COMMENT.value, Fieldnames.ID.value]:
+                    # Skip confidence replacement if the finding is a Duplicate
+                    if row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate' and fieldname == Fieldnames.CONFIDENCE.value:
                         continue
                     # Cast to integer if possible, else just replace
                     if isinstance(replacement[fieldname], str) and replacement[fieldname].isdigit():
@@ -117,10 +117,6 @@ def apply_prules(data):
             if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
                 loop_rules(parsers.default_prules, row)
             loop_rules(parsers.prules, row)
-        
-        # Check if cwe is in categories dict. Control flag check is performed in the function.
-        if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING]:
-            row[Fieldnames.SCORING_BASIS.value] = check_CWE(row[Fieldnames.SCORING_BASIS.value])
         
     
 
