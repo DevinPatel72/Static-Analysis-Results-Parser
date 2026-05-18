@@ -68,15 +68,7 @@ def save_prules(prules):
     data_path = os.path.join(CONFIG_DIR, 'preflight_rules.py')
     
     prules.sort(key=lambda rule: int(rule.precedence))
-    
-    s_prules = []
-    
-    for pr in prules:
-        rule_str = str(pr).replace("\n", "\n    ")
-        s_prules.append(f"    {rule_str},\n")
-    
-    
-    
+
     with open(data_path, "w", encoding="utf-8") as f:
 
         f.write(HEADER)
