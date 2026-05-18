@@ -2,8 +2,9 @@
 
 import os
 import csv
+import time
 import logging
-from .toolbox import check_all_CWEs
+from .toolbox import check_all_CWEs, format_time
 from .preflight import apply_prules
 from .dupe_scan_consolidation import dupe_scan_consolidation
 
@@ -51,7 +52,9 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
                 from tkinter import messagebox
                 messagebox.showerror("Unable to open file", f"File \"{outfile}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
             else:
-                input(f"Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
+                print(f"Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.", end='\r')
+                time.sleep(1.5)
+                
             
 def write_row(r):
     global __parser_data
@@ -129,6 +132,7 @@ def close_writer():
         if __filepath is not None:
             from parsers import GUI_MODE
             if __excel_enabled:
+                elapsed_time = -1
                 while True:
                     try:
                         temp = __excel_workbook.active
@@ -140,10 +144,17 @@ def close_writer():
                             from tkinter import messagebox
                             messagebox.showerror("Unable to open file", f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
                         else:
-                            input(f"Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
+                            if elapsed_time < 0:
+                                print(f"Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
+                                elapsed_time = 0
+                            print('Waiting: ' + format_time(elapsed_time), end='\r')
+                            time.sleep(1)
+                            elapsed_time += 1
             else:
                 with open(__filepath, 'w', newline='', encoding='utf-8-sig') as o:
                     csv_writer = csv.DictWriter(o, fieldnames=__fieldnames)
                     csv_writer.writeheader()
                     csv_writer.writerows(__parser_data)
+            if not GUI_MODE:
+                print()
     __filepath = None
