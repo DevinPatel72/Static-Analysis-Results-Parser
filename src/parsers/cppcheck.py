@@ -53,7 +53,7 @@ def parse(fpath, scanner, substr, prepend):
     
     # Output filtered CppCheck findings here
     from . import LOGS_DIR
-    with open(os.path.join(LOGS_DIR, '{}_config_errors.csv'.format(scanner.replace(' ', '_'))), 'w', newline='', encoding='utf-8-sig') as config_out_fp:
+    with open(os.path.join(LOGS_DIR, '{}_config_errors.csv'.format(os.path.splitext((os.path.basename(fpath)))[0].replace(' ', '_'))), 'w', newline='', encoding='utf-8-sig') as config_out_fp:
         config_out = DictWriter(config_out_fp, fieldnames=['ID','Severity','Message','Verbose'])
         config_out.writeheader()
     
