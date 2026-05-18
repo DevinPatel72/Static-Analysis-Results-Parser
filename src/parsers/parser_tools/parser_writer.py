@@ -27,6 +27,7 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
     from parsers import GUI_MODE
     
     __fieldnames = fieldnames
+    elapsed_time = -1
     
     # Update the boolean to include whether the user requests CSV
     __excel_enabled = __excel_enabled and not force_csv
@@ -52,8 +53,12 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
                 from tkinter import messagebox
                 messagebox.showerror("Unable to open file", f"File \"{outfile}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
             else:
-                print(f"Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.", end='\r')
-                time.sleep(1.5)
+                if elapsed_time < 0:
+                    print(f"Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
+                    elapsed_time = 0
+                print('Waiting: ' + format_time(elapsed_time), end='\r')
+                time.sleep(1)
+                elapsed_time += 1
                 
             
 def write_row(r):
