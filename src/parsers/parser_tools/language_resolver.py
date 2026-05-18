@@ -3,7 +3,7 @@
 def resolve_lang(lang):
     if lang in ['.cpp', '.c', '.cc', '.h', '.hh', '.hpp']:
         return 'c/c++'
-    elif lang in ['cs']:
+    elif lang in ['.cs']:
         return 'c#'
     elif lang in ['.cl']:
         return 'API'

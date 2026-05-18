@@ -27,10 +27,12 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
     
     __fieldnames = fieldnames
     
+    # Update the boolean to include whether the user requests CSV
+    __excel_enabled = __excel_enabled and not force_csv
+    
     while True:
+        # Attempt to open file
         try:
-            # Update the boolean to include whether the user requests CSV
-            __excel_enabled = __excel_enabled and not force_csv
             if __excel_enabled:
                 if os.path.splitext(outfile)[1] != '.xlsx':
                     outfile = os.path.splitext(outfile)[0] + '.xlsx'
@@ -123,25 +125,25 @@ def close_writer():
         # Check for CWE category mappings
         check_all_CWEs(__parser_data)
         
-    # Write out parser data to file
-    if __filepath is not None:
-        from parsers import GUI_MODE
-        if __excel_enabled:
-            while True:
-                try:
-                    temp = __excel_workbook.active
-                    for r in __parser_data: temp.append([r.get(header, '') for header in __fieldnames])
-                    __excel_workbook.save(__filepath)
-                    break
-                except PermissionError:
-                    if GUI_MODE:
-                        from tkinter import messagebox
-                        messagebox.showerror("Unable to open file", f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
-                    else:
-                        input(f"Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
-        else:
-            with open(__filepath, 'w', newline='', encoding='utf-8-sig') as o:
-                csv_writer = csv.DictWriter(o, fieldnames=__fieldnames)
-                csv_writer.writeheader()
-                csv_writer.writerows(__parser_data)
+        # Write out parser data to file
+        if __filepath is not None:
+            from parsers import GUI_MODE
+            if __excel_enabled:
+                while True:
+                    try:
+                        temp = __excel_workbook.active
+                        for r in __parser_data: temp.append([r.get(header, '') for header in __fieldnames])
+                        __excel_workbook.save(__filepath)
+                        break
+                    except PermissionError:
+                        if GUI_MODE:
+                            from tkinter import messagebox
+                            messagebox.showerror("Unable to open file", f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
+                        else:
+                            input(f"Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.\nPress Enter to continue...")
+            else:
+                with open(__filepath, 'w', newline='', encoding='utf-8-sig') as o:
+                    csv_writer = csv.DictWriter(o, fieldnames=__fieldnames)
+                    csv_writer.writeheader()
+                    csv_writer.writerows(__parser_data)
     __filepath = None
