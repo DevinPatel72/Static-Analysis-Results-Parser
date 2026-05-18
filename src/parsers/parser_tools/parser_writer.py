@@ -59,6 +59,8 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
                 print('Waiting: ' + format_time(elapsed_time), end='\r')
                 time.sleep(1)
                 elapsed_time += 1
+    if not GUI_MODE and elapsed_time >= 0:
+        print()
                 
             
 def write_row(r):
@@ -118,6 +120,9 @@ def search_row(tuples, skip_ids=''):
 
 def close_writer():
     global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __parser_data
+    from parsers import GUI_MODE
+    
+    elapsed_time = -1
     
     # Post-processing of data
     if len(__parser_data) > 0:
@@ -135,9 +140,7 @@ def close_writer():
         
         # Write out parser data to file
         if __filepath is not None:
-            from parsers import GUI_MODE
             if __excel_enabled:
-                elapsed_time = -1
                 while True:
                     try:
                         temp = __excel_workbook.active
@@ -160,6 +163,8 @@ def close_writer():
                     csv_writer = csv.DictWriter(o, fieldnames=__fieldnames)
                     csv_writer.writeheader()
                     csv_writer.writerows(__parser_data)
-            if not GUI_MODE:
-                print()
+
+    if not GUI_MODE and elapsed_time >= 0:
+        print()
+    
     __filepath = None
