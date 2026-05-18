@@ -54,7 +54,7 @@ def load_prules():
         except:
             logger.error(f"Failed to import DEFAULT_PRULES from '{data_path}'")
             logger.error(traceback.format_exc())
-            parsers.default_prules
+            parsers.default_prules = []
     
     return prules
 
