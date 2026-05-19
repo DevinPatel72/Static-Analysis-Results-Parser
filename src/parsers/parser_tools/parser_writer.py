@@ -74,11 +74,12 @@ def search_row(tuples, skip_ids=''):
     Searches existing rows for parsed findings.
     
     :param tuples: List of tuples with format (Fieldnames.[Header].value, keyword, exact_str_match=[True|False])
-    :param skip_ids: List of string IDs to skip over when searching
-    :return: First row that matches, otherwise None.
+    :param skip_ids: Iterable of string IDs to skip over when searching
+    :return: All rows that match, otherwise None.
     """
     global __parser_data
     from .toolbox import Fieldnames
+    row_matches = []
     for row in __parser_data:
         matches = []
         # Skip id's
@@ -108,7 +109,7 @@ def search_row(tuples, skip_ids=''):
                     matches.append(keyword == lookup)
                     break
         if all(matches):
-            return {
+            row_matches.append({
                 Fieldnames.SCORING_BASIS.value: row[Fieldnames.SCORING_BASIS.value],
                 Fieldnames.CONFIDENCE.value: row[Fieldnames.CONFIDENCE.value],
                 Fieldnames.MATURITY.value: row[Fieldnames.MATURITY.value],
@@ -116,9 +117,42 @@ def search_row(tuples, skip_ids=''):
                 Fieldnames.PROPOSED_MITIGATION.value: row[Fieldnames.PROPOSED_MITIGATION.value],
                 Fieldnames.VALIDATOR_COMMENT.value: row[Fieldnames.VALIDATOR_COMMENT.value],
                 Fieldnames.ID.value: row[Fieldnames.ID.value]
-            }
-    return None
-        
+            })
+    return row_matches
+
+def update_row(id, updates, skip_ids='', match_once=False):
+    """
+    Searches for the provided ID and updates row data. Updates all findings with the provided ID or just the first match.
+    
+    :param id: ID of finding(s) to be updated
+    :param updates: Dictionary with format {Fieldnames.[Header].value: replacement_def}
+    :param skip_ids: Iterable of string IDs to skip over when searching. A ValueError will be raised if parameter 'id' exists in this iterable.
+    :param match_once: Boolean value that triggers an early exit upon first match
+    :return: Number of findings that were updated
+    """
+    global __parser_data
+    from .toolbox import Fieldnames
+    
+    updated_rows_count = 0
+    
+    # Basic check
+    if id in skip_ids:
+        raise ValueError('Defined search ID also exists in skip_ids')
+    
+    for row in __parser_data:
+        # Skip id's
+        if (len(skip_ids) > 0 and row[Fieldnames.ID.value] in skip_ids):
+            continue
+        # Check if ID matches
+        if id == row[Fieldnames.ID.value]:
+            # Perform updates
+            for fieldname, replacement in updates.items():
+                row[fieldname] = replacement
+            updated_rows_count += 1
+            
+            # Update only the first found row if defined
+            if match_once: return updated_rows_count
+    return updated_rows_count
 
 def close_writer():
     global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __parser_data
@@ -133,9 +167,7 @@ def close_writer():
         if not GUI_MODE: print()
         
         # Duplicate Scanner Consolidation
-        dupes_count = dupe_scan_consolidation(__parser_data)
-        if dupes_count >= 0:
-            logger.info(f"Discovered {dupes_count} duplicate findings")
+        dupe_scan_consolidation(__parser_data)
         
         # Perform preflighting
         apply_prules(__parser_data)

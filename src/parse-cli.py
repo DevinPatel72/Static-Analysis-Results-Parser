@@ -364,7 +364,7 @@ def main():
     
     # Load preflight rules if true
     if control_flags[FLAG_PREFLIGHT_RULES]:
-        parsers.prules = preflight.load_prules()
+        preflight.load_prules()
     else:
         parsers.prules = []
 

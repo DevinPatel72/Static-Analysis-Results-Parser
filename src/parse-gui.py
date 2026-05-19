@@ -116,7 +116,7 @@ def main():
     # If the checkbox was enabled, ask if user wants to edit the preflight rules
     if control_flags[FLAG_PREFLIGHT_RULES]:
         # Load the preflight rules
-        parsers.prules = preflight.load_prules()
+        preflight.load_prules()
 
         rulebuildergui = RuleBuilderGUI(parsers.prules)
         

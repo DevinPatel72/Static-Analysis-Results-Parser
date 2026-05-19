@@ -245,21 +245,24 @@ def check_input_format(inputs, outfile, flags):
         sys.exit(2)
 
 def check_all_CWEs(data):
+    count = 0
+    
     # Check if cwe is in categories dict
     for i, row in enumerate(data, start=1):
         # Control flag check
         if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING]:
             progress_bar(i, len(data), prefix=InputDictKeys.OVERRIDE_VULN_MAPPING.value.rjust(SPACE))
-            row[Fieldnames.SCORING_BASIS.value] = check_CWE_category(row[Fieldnames.SCORING_BASIS.value])
+            row[Fieldnames.SCORING_BASIS.value], count = check_CWE_category(row[Fieldnames.SCORING_BASIS.value], count)
         
         # Turn CWE into int if capable
         row[Fieldnames.SCORING_BASIS.value] = int(row[Fieldnames.SCORING_BASIS.value]) if str(row[Fieldnames.SCORING_BASIS.value]).isdigit() else row[Fieldnames.SCORING_BASIS.value]
+    logger.info(f"Identified {count} CWE IDs that may require remapping")
 
-def check_CWE_category(cwe):
+def check_CWE_category(cwe, count=0):
     if cwe in parsers.cwe_categories.keys():
-        return f"{cwe}:{parsers.cwe_categories[cwe]}"
+        return f"{cwe}:{parsers.cwe_categories[cwe]}", count + 1
     else:
-        return cwe
+        return cwe, count
 
 def export_config(inputs, outfile, control_flags):
     inputs_path = os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')

@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 def load_prules():
     from parsers import CONFIG_DIR
-    
-    prules = []
+
     data_path = os.path.join(CONFIG_DIR, 'preflight_rules.py')
     
     # If the py file doesn't exist
@@ -29,13 +28,13 @@ def load_prules():
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
-            prules = module.PRULES
-            prules.sort(key=lambda rule: int(rule.precedence))
+            parsers.prules = module.PRULES
+            parsers.prules.sort(key=lambda rule: int(rule.precedence))
             logger.info("Preflight rules loaded successfully")
         except:
             logger.error(f"Failed to import PRULES from '{data_path}'")
             logger.error(traceback.format_exc())
-            prules = []
+            parsers.prules = []
     
     # Now load default rules
     data_path = os.path.join(CONFIG_DIR, 'default_preflight_rules.py')
@@ -56,8 +55,6 @@ def load_prules():
             logger.error(f"Failed to import DEFAULT_PRULES from '{data_path}'")
             logger.error(traceback.format_exc())
             parsers.default_prules = []
-    
-    return prules
 
 
 def save_prules(prules):
@@ -115,6 +112,11 @@ def apply_prules(data):
         if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
             loop_rules(parsers.default_prules, row)
         loop_rules(parsers.prules, row)
+    
+    if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
+        def_len = len(parsers.default_prules)
+    else: def_len = 0
+    logger.info(f"Preflight: Applied {len(parsers.prules)} user rules and {def_len} default rules")
         
     
 
