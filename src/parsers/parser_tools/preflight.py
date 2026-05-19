@@ -6,7 +6,8 @@ import os
 import logging
 import traceback
 import importlib
-from .toolbox import Fieldnames
+from .toolbox import Fieldnames, InputDictKeys
+from .progressbar import progress_bar,SPACE
 import parsers
 
 
@@ -84,6 +85,14 @@ def save_prules(prules):
 
 def apply_prules(data):
     
+    # Check control flag
+    if not parsers.control_flags[parsers.FLAG_PREFLIGHT_RULES]:
+        return
+    
+    # Ensure prules are sorted by precedence
+    parsers.prules.sort(key=lambda rule: int(rule.precedence))
+    parsers.default_prules.sort(key=lambda rule: int(rule.precedence))
+    
     def loop_rules(rules, row):
         for pr in rules:
             # Returns None if row does not match a rule
@@ -91,7 +100,7 @@ def apply_prules(data):
                 # Update row fieldnames defined in the rule's replacement dict
                 for fieldname in replacement.keys():
                     # Skip confidence replacement if the finding is a Duplicate
-                    if row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate' and fieldname == Fieldnames.CONFIDENCE.value:
+                    if row[Fieldnames.CONFIDENCE.value].lower() == Fieldnames.DUPLICATE_CONF.value.lower() and fieldname == Fieldnames.CONFIDENCE.value:
                         continue
                     # Cast to integer if possible, else just replace
                     if isinstance(replacement[fieldname], str) and replacement[fieldname].isdigit():
@@ -99,16 +108,13 @@ def apply_prules(data):
                     else:
                         row[fieldname] = replacement[fieldname]
     
-    for row in data:
-        if parsers.control_flags[parsers.FLAG_PREFLIGHT_RULES]:
-            # Ensure prules are sorted by precedence
-            parsers.prules.sort(key=lambda rule: int(rule.precedence))
-            parsers.default_prules.sort(key=lambda rule: int(rule.precedence))
-            
-            # Default prules first
-            if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
-                loop_rules(parsers.default_prules, row)
-            loop_rules(parsers.prules, row)
+    for i, row in enumerate(data, start=1):
+        progress_bar(i, len(data), prefix=InputDictKeys.PREFLIGHT_RULES.value.rjust(SPACE))
+        
+        # Default prules first
+        if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
+            loop_rules(parsers.default_prules, row)
+        loop_rules(parsers.prules, row)
         
     
 

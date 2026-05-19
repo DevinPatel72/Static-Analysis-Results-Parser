@@ -226,7 +226,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
                                                       (Fieldnames.LINE.value, line, True)
                                                       ]):
                         cwe = m[Fieldnames.SCORING_BASIS.value]
-                        confidence = 'DUPLICATE'
+                        confidence = Fieldnames.DUPLICATE_CONF.value
                         maturity = m[Fieldnames.MATURITY.value]
                         mitigation = m[Fieldnames.MITIGATION.value]
                         id = m[Fieldnames.ID.value]

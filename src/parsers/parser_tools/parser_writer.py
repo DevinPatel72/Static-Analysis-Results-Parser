@@ -27,6 +27,8 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
     from parsers import GUI_MODE
     
     __fieldnames = fieldnames
+    
+    # Track time for outfile holding
     elapsed_time = -1
     
     # Update the boolean to include whether the user requests CSV
@@ -122,10 +124,13 @@ def close_writer():
     global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __parser_data
     from parsers import GUI_MODE
     
+    # Track time for outfile holding
     elapsed_time = -1
     
     # Post-processing of data
     if len(__parser_data) > 0:
+        # Set spacing in terminal if in CLI mode
+        if not GUI_MODE: print()
         
         # Duplicate Scanner Consolidation
         dupes_count = dupe_scan_consolidation(__parser_data)

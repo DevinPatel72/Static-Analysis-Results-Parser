@@ -5,6 +5,7 @@ import sys
 import logging
 import json
 from enum import Enum
+from .progressbar import progress_bar,SPACE
 import parsers
 
 __excel_enabled = False
@@ -65,6 +66,7 @@ class Fieldnames(Enum):
     HEADERS = [SCORING_BASIS, CONFIDENCE, MATURITY, MITIGATION, PROPOSED_MITIGATION, VALIDATOR_COMMENT, ID, PATH, LINE, TYPE, MESSAGE, SYMBOL, TOOL_CWE, TOOL, SCANNER, LANGUAGE, SEVERITY]
     EDITABLE_HEADERS = [SCORING_BASIS, CONFIDENCE, MATURITY, MITIGATION, PROPOSED_MITIGATION, VALIDATOR_COMMENT]
     DEFAULT_CONF = 'To Verify'
+    DUPLICATE_CONF = 'DUPLICATE'
     DEFAULT_MATURITY = 'Unreported'
     DEFAULT_MITIGATION = ''
     MODIFIED_MITIGATION_NONE = '/MVC:N/MVI:N/MVA:N'
@@ -244,10 +246,12 @@ def check_input_format(inputs, outfile, flags):
 
 def check_all_CWEs(data):
     # Check if cwe is in categories dict
-    for row in data:
+    for i, row in enumerate(data, start=1):
         # Control flag check
         if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING]:
+            progress_bar(i, len(data), prefix=InputDictKeys.OVERRIDE_VULN_MAPPING.value.rjust(SPACE))
             row[Fieldnames.SCORING_BASIS.value] = check_CWE_category(row[Fieldnames.SCORING_BASIS.value])
+        
         # Turn CWE into int if capable
         row[Fieldnames.SCORING_BASIS.value] = int(row[Fieldnames.SCORING_BASIS.value]) if str(row[Fieldnames.SCORING_BASIS.value]).isdigit() else row[Fieldnames.SCORING_BASIS.value]
 

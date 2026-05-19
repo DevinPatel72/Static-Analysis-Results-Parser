@@ -133,7 +133,7 @@ def _parse_json(fpath, scanner, substr, prepend):
                 
                 # Perform the duplicate CVE check last to ensure overrides are processed first
                 if cve in written_cves:
-                    confidence = 'DUPLICATE'
+                    confidence = Fieldnames.DUPLICATE_CONF.value
                 else:
                     written_cves.append(cve)
                 
@@ -244,7 +244,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 
                 # Perform the duplicate CVE check last to ensure overrides are processed first
                 if cve in written_cves:
-                    confidence = 'DUPLICATE'
+                    confidence = Fieldnames.DUPLICATE_CONF.value
                 else:
                     written_cves.append(cve)
                 
