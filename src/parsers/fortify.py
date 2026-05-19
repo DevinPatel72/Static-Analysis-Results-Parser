@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 import tempfile
 import re
+import parsers
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.language_resolver import resolve_lang
 from .parser_tools.progressbar import SPACE,progress_bar
@@ -288,6 +289,7 @@ def parse(fpath, scanner, substr, prepend):
     logger.info(f"Number of erroneous vulnerabilities: {err_count}")
     if err_count > 0:
         logger.warning("Errors have been detected while parsing a Fortify .fpr file. To troubleshoot, unzip the .fpr file and manually search the \"audit.fvdl\" file for the problematic vulnerabilities.")
+    parsers.findings_count += finding_count
     return err_count
 # End of parse
 
