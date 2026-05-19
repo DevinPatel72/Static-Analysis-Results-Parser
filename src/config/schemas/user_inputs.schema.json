@@ -49,19 +49,19 @@
       "properties": {
         "Category Mappings": {
           "type": "boolean",
-          "description": "True: Appends \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers"
+          "description": "If enabled, appends \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers"
         },
         "Duplicate Scanner Consolidation": {
           "type": "boolean",
-          "description": "True: Identifies duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner."
+          "description": "If enabled, identifies duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner."
         },
         "Preflight Rules": {
           "type": "boolean",
-          "description": "True: Changes final output values according to user-defined rules"
+          "description": "If enabled, changes final output values according to user-defined rules"
         },
         "Default Preflight Rules": {
           "type": "boolean",
-          "description": "True: Changes final output values according to a default profile of rules. Only activated if \"Preflight Rules\" flag is also true."
+          "description": "If enabled, changes final output values according to a default profile of rules. Only activated if \"Preflight Rules\" flag is also true."
         }
       },
       "additionalProperties": false
