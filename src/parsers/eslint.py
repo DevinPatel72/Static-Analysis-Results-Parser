@@ -3,6 +3,7 @@ import os
 import logging
 import traceback
 import json
+import parsers
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.toolbox import Fieldnames, console
@@ -113,6 +114,7 @@ def parse(fpath, scanner, substr, prepend):
                 err_count += 1
     logger.info(f"Successfully processed {finding_count} findings")
     logger.info(f"Number of erroneous findings: {err_count}")
+    parsers.findings_count += finding_count
     return err_count
 # End of parse
 

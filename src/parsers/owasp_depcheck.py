@@ -6,6 +6,7 @@ import logging
 import csv
 import json
 import traceback
+import parsers
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.language_resolver import resolve_lang
 from .parser_tools.progressbar import SPACE,progress_bar
@@ -56,6 +57,7 @@ def parse(fpath, scanner, substr, prepend):
     
     logger.info(f"Successfully processed {finding_count} findings")
     logger.info(f"Number of erroneous rows: {err_count}")
+    parsers.findings_count += finding_count
     return err_count
 # End of parse
 
@@ -133,7 +135,7 @@ def _parse_json(fpath, scanner, substr, prepend):
                 
                 # Perform the duplicate CVE check last to ensure overrides are processed first
                 if cve in written_cves:
-                    confidence = 'DUPLICATE'
+                    confidence = Fieldnames.DUPLICATE_CONF.value
                 else:
                     written_cves.append(cve)
                 
@@ -161,9 +163,6 @@ def _parse_json(fpath, scanner, substr, prepend):
             logger.error(f"Dependency \"{dependency_name}\" with hash SHA256-{dependency_hash} in \'{fpath}\': {traceback.format_exc()}")
             err_count += 1
     return finding_count, err_count
-    
-    
-    
 # End of _parse_json
 
 def _parse_csv(fpath, scanner, substr, prepend):
@@ -244,7 +243,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 
                 # Perform the duplicate CVE check last to ensure overrides are processed first
                 if cve in written_cves:
-                    confidence = 'DUPLICATE'
+                    confidence = Fieldnames.DUPLICATE_CONF.value
                 else:
                     written_cves.append(cve)
                 

@@ -364,7 +364,7 @@ def main():
     
     # Load preflight rules if true
     if control_flags[FLAG_PREFLIGHT_RULES]:
-        parsers.prules = preflight.load_prules()
+        preflight.load_prules()
     else:
         parsers.prules = []
 
@@ -428,8 +428,8 @@ def main():
     
     parser_writer.close_writer()
     
-    logger.info("Parsing complete!")
-    print("\nParsing complete!")
+    logger.info(f"Parsing complete!\nSuccessfully parsed {parsers.findings_count} findings")
+    print(f"\nParsing complete!\nSuccessfully parsed {parsers.findings_count} findings")
     
     if err_count > 0:
         print(f"{err_count} errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")

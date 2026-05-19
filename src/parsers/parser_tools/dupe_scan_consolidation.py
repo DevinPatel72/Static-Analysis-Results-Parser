@@ -1,46 +1,55 @@
 # dupe_scan_consolidation.py
 
 import re
+import logging
 import parsers
 from .toolbox import Fieldnames, InputDictKeys
-from .progressbar import progress_bar,SPACE,DISABLE_PROGRESS_BAR
+from .progressbar import progress_bar,SPACE
+
+logger = logging.getLogger(__name__)
+
+def _fix_scanner_name(scanner):
+    if match := re.match(r"^(.*?)\s+v?\d+(?:\.\d+)*$", scanner):
+        return match.group(1).lower()
+    else:
+        return scanner.lower()
 
 def dupe_scan_consolidation(data):
-    from .parser_writer import search_row
+    from .parser_writer import search_row, update_row
     
     if not parsers.control_flags[parsers.FLAG_DUPE_SCAN_CONSOLIDATION]:
         return -1
     
-    if not DISABLE_PROGRESS_BAR: print()
-    
-    def _fix_scanner_name(scanner):
-        if match := re.match(r"^(.*?)\s+v?\d+(?:\.\d+)*$", scanner):
-            return match.group(1).lower()
-        else:
-            return scanner.lower()
-    
-    # Track IDs that were already marked as duplicates so they can be skipped in the search_row function
-    finished_ids = set()
-    for i, row in enumerate(data[::-1], start=1):
+    # Perform dupe searching
+    dupe_count = 0
+    for i, row in enumerate(data, start=1):
         progress_bar(i, len(data), prefix=InputDictKeys.DUPE_SCAN_CONSOLIDATION.value.rjust(SPACE))
         
-        # Check to see if this is already a duplicate row
-        if row[Fieldnames.CONFIDENCE.value].lower() == 'duplicate':
+        # Check to see if this is already a duplicate row or if it is designated as a canon row
+        if (row[Fieldnames.CONFIDENCE.value].lower() == Fieldnames.DUPLICATE_CONF.value.lower()):
             continue
         
         # Check to see if the row exists
-        if m := search_row([(Fieldnames.TYPE.value, row[Fieldnames.TYPE.value], True),
+        matches = search_row([(Fieldnames.TYPE.value, row[Fieldnames.TYPE.value], True),
                             (Fieldnames.SCANNER.value, _fix_scanner_name(row[Fieldnames.SCANNER.value]), False),
                             (Fieldnames.PATH.value, row[Fieldnames.PATH.value], True),
                             (Fieldnames.LINE.value, row[Fieldnames.LINE.value], True)
                         ],
-                        skip_ids=finished_ids):
-            row[Fieldnames.SCORING_BASIS.value] = m[Fieldnames.SCORING_BASIS.value]
-            row[Fieldnames.CONFIDENCE.value] = 'DUPLICATE'
-            row[Fieldnames.MATURITY.value] = m[Fieldnames.MATURITY.value]
-            row[Fieldnames.MITIGATION.value] = m[Fieldnames.MITIGATION.value]
-            row[Fieldnames.ID.value] = m[Fieldnames.ID.value]
-            _end = f". {m[Fieldnames.VALIDATOR_COMMENT.value]}" if len(m[Fieldnames.VALIDATOR_COMMENT.value]) > 0 else m[Fieldnames.VALIDATOR_COMMENT.value]
-            row[Fieldnames.VALIDATOR_COMMENT.value] = f"This finding is a duplicate of a {row[Fieldnames.SCANNER.value]} finding with the same ID" + _end
-            finished_ids.add(row[Fieldnames.ID.value])
-    return len(finished_ids)
+                        skip_ids=row[Fieldnames.ID.value])
+        for m in matches:
+            # Replace all matches with the current row's data
+            _end = f". {row[Fieldnames.VALIDATOR_COMMENT.value]}" if len(row[Fieldnames.VALIDATOR_COMMENT.value]) > 0 else row[Fieldnames.VALIDATOR_COMMENT.value]
+            validator_comment_replacement = f"This finding is a duplicate of a {row[Fieldnames.SCANNER.value]} finding with the same ID" + _end
+            update_row(m[Fieldnames.ID.value],
+                        updates={
+                            Fieldnames.SCORING_BASIS.value: row[Fieldnames.SCORING_BASIS.value],
+                            Fieldnames.CONFIDENCE.value: Fieldnames.DUPLICATE_CONF.value,
+                            Fieldnames.MATURITY.value : row[Fieldnames.MATURITY.value],
+                            Fieldnames.MITIGATION.value: row[Fieldnames.MITIGATION.value],
+                            Fieldnames.ID.value: row[Fieldnames.ID.value],
+                            Fieldnames.VALIDATOR_COMMENT.value: validator_comment_replacement
+                        },
+                        skip_ids=row[Fieldnames.ID.value])
+        dupe_count += len(matches)
+    logger.info(f"Discovered {dupe_count} duplicate findings")
+    return dupe_count

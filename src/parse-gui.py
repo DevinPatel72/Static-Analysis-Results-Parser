@@ -116,7 +116,7 @@ def main():
     # If the checkbox was enabled, ask if user wants to edit the preflight rules
     if control_flags[FLAG_PREFLIGHT_RULES]:
         # Load the preflight rules
-        parsers.prules = preflight.load_prules()
+        preflight.load_prules()
 
         rulebuildergui = RuleBuilderGUI(parsers.prules)
         
@@ -229,8 +229,8 @@ def main():
         console(f"{err_count} errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
         
     
-    logger.info("Parsing complete!")
-    console("Parsing Complete!", PROG_NAME, 'info')
+    logger.info(f"Parsing complete!\nSuccessfully parsed {parsers.findings_count} findings")
+    console(f"Parsing Complete!\nSuccessfully parsed {parsers.findings_count} findings.", PROG_NAME, 'info')
     
     
 

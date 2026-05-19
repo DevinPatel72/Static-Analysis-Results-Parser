@@ -4,6 +4,7 @@ import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
+import parsers
 from .eslint import get_eslint_cdata
 from .pylint import get_pylint_cdata
 from .parser_tools import idgenerator, parser_writer
@@ -65,6 +66,7 @@ def parse(fpath, scanner, substr, prepend):
     
     logger.info(f"Successfully processed {finding_count} findings")
     logger.info(f"Number of erroneous rows: {err_count}")
+    parsers.findings_count += finding_count
     return err_count
 # End of parse
 
@@ -226,7 +228,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
                                                       (Fieldnames.LINE.value, line, True)
                                                       ]):
                         cwe = m[Fieldnames.SCORING_BASIS.value]
-                        confidence = 'DUPLICATE'
+                        confidence = Fieldnames.DUPLICATE_CONF.value
                         maturity = m[Fieldnames.MATURITY.value]
                         mitigation = m[Fieldnames.MITIGATION.value]
                         id = m[Fieldnames.ID.value]

@@ -5,6 +5,7 @@ import traceback
 import html
 from csv import DictWriter
 import xml.etree.ElementTree as ET
+import parsers
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.toolbox import Fieldnames
@@ -144,5 +145,6 @@ def parse(fpath, scanner, substr, prepend):
             finding_count += 1
     logger.info(f"Successfully processed {finding_count} findings")
     logger.info(f"Number of erroneous entries: {err_count}")
+    parsers.findings_count += finding_count
     return err_count
 # End of parse
