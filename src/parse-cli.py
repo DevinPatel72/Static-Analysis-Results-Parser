@@ -313,8 +313,9 @@ def main():
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.CONFIG_DIR, "user_inputs.json"), help="Path to user inputs JSON file. By default looks for 'user_inputs.json' in config directory.")
     argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
-    argparser.add_argument('-c', '--check-inputdefs', dest="checkinputdefs", action='store_true', help="Checks current 'user_inputs.json' file for validity and report any errors without parsing.")
-    argparser.add_argument('-l', '--list-inputdefs', dest="listinputdefs", action='store_true', help="Prints a template of what a user inputs JSON file should contain.")
+    argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Checks current 'user_inputs.json' file for validity and report any errors without parsing.")
+    argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Prints current input configuration from the user inputs JSON file pointed to by the 'inputs' option.")
+    argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Prints a template of what a user inputs JSON file should contain.")
     argparser.add_argument('-v', '--version', action='store_true', help='Prints software version and exits')
     
     args = argparser.parse_args()
@@ -325,7 +326,7 @@ def main():
         sys.exit(0)
     
     # Print user inputs template
-    if args.listinputdefs:
+    if args.exampletemplate:
         print_user_inputs_template()
         sys.exit(0)
     
@@ -345,7 +346,7 @@ def main():
         # Return value is true for success
         rv = check_input_format(parser_inputs, parser_outfile, control_flags)
         
-        if rv and args.checkinputdefs:
+        if rv and args.checkinputs:
             logger.info("[PASS] Inputs are valid")
             print("\n[PASS] Inputs are valid")
             sys.exit(0)
@@ -364,6 +365,9 @@ def main():
     s += "\nParser Switches:\n"
     s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in control_flags.items()]).strip('\n')
     print(s)
+    
+    if args.listinputs:
+        sys.exit(0)
     
     # Log the configuration
     logger.info("\n".join(['    ' + l for l in s.split('\n')]))
@@ -459,17 +463,17 @@ if __name__ == "__main__":
     except SystemExit as se:
         exitcode = se.code
     except KeyboardInterrupt:
-        print("\n\nScript terminated by user...")
-        logger.info("Script terminated by user...")
+        print("\n\nProgram terminated by user...")
+        logger.info("Program terminated by user...")
         exitcode = 0
     except PermissionError:
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        logger.critical("Uncaught exception caused the script to crash. Exception trace has been output to the logfile.")
+        logger.critical("Uncaught exception caused the program to crash. Exception trace has been output to the logfile.")
         logger.error("\n" + traceback.format_exc())
         exitcode = 1
     finally:
-        logger.info(f"Script terminated with exit code {exitcode}")
+        logger.info(f"Program terminated with exit code {exitcode}")
         print()
         sys.exit(exitcode)

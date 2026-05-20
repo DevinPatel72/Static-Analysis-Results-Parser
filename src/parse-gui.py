@@ -241,15 +241,15 @@ if __name__ == "__main__":
     except SystemExit as se:
         exitcode = se.code
     except KeyboardInterrupt:
-        logger.info("Script terminated by user...")
+        logger.info("Program terminated by user...")
         sys.exit(0)
     except PermissionError:
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        console(f"Uncaught exception caused the script to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error")
+        console(f"Uncaught exception caused the program to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error")
         logger.error("\n" + traceback.format_exc())
         exitcode = 1
     finally:
-        logger.info(f"Script terminated with exit code {exitcode}")
+        logger.info(f"Program terminated with exit code {exitcode}")
         sys.exit(exitcode)

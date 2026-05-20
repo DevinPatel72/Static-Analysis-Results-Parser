@@ -1,7 +1,6 @@
 # toolbox.py
 
 import os
-import sys
 import logging
 import json
 from enum import Enum
@@ -79,7 +78,7 @@ def validate_path_and_scanner(fpath, scanner):
     scan_match = scanner.lower().replace(' ', '')
     
     if not any(s in scan_match for s in parsers.scanner_keywords):
-        return "The script does not support input from {}. A list of acceptable scanners and their file types is in the readme.txt file.".format(scanner)
+        return "{} does not currently support input from {}. A list of acceptable scanners and their file types is in the readme.txt file.".format(parsers.PROG_NAME, scanner)
     
     # Alert for large file size for CLI
     if not FILE_SIZE_WARNED_ONCE and os.path.isfile(fpath) and get_file_size_mb(fpath) > LARGE_FILE_THRESHOLD_MB:
