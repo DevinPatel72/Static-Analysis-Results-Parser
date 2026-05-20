@@ -26,9 +26,8 @@ is_text() {
     # fi
 
     # MIME fallback
-    local mime
     mime=$(file -b --mime-type "$1" 2>/dev/null) || return 1
-    echo $mime
+    echo "$mime"
 
     case "$mime" in
         text/*|application/json|application/xml|application/javascript|application/x-sh|*/xml)
