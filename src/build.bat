@@ -81,8 +81,9 @@ Rem Build
     Rem Copy dist contents to new directory
     robocopy dist "%BIN_DIR%" /E /NFL /NDL /NJH /NJS /W:0 /R:0
 
-    Rem Delete the user_inputs.json
+    Rem Delete the user_inputs.json and preflight_rules.py
     del "%BIN_DIR%\config\user_inputs.json"
+    del "%BIN_DIR%\config\preflight\preflight_rules.py"
 
     Rem Clean the build files
     call :clean_build_files

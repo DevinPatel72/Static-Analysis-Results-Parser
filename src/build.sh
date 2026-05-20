@@ -89,8 +89,9 @@ done
 mkdir -p "$BIN_DIR"
 cp -r dist/. "$BIN_DIR/"
 
-# Delete the user_inputs.json
+# Delete the user_inputs.json and preflight_rules.py
 rm "$BIN_DIR/config/user_inputs.json"
+rm "$BIN_DIR/config/preflight/preflight_rules.py"
 
 # Cleanup build files
 clean_build_files
