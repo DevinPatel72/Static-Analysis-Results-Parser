@@ -33,7 +33,7 @@ Rem Clean
     )
 
     Rem Delete user inputs
-    del config\user_inputs.json
+    Rem del config\user_inputs.json
     endlocal
     
     IF "%1"=="clean" (

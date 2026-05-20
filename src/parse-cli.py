@@ -2,8 +2,7 @@
 
 from parsers import PROG_NAME, VERSION
 
-help_description = f"""This software will parse a list of scanner output files and collect them into one Excel or CSV file.
-The following control flags must be defined: """
+help_description = f"""This software will parse a list of scanner output files and collect them into one Excel or CSV file."""
 
 # Imports
 import os
@@ -16,7 +15,7 @@ from math import ceil
 import parsers
 from parsers import *
 from parsers.parser_tools import parser_writer, preflight
-from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, validate_path_and_scanner, check_input_format, get_all_previews
+from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, validate_path_and_scanner, check_input_format, get_all_previews, print_user_inputs_template
 
 # Configure root path and important dirs of script
 if getattr(sys, 'frozen', False):
@@ -314,6 +313,8 @@ def main():
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.CONFIG_DIR, "user_inputs.json"), help="Path to user inputs JSON file. By default looks for 'user_inputs.json' in config directory.")
     argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
+    argparser.add_argument('-c', '--check-inputdefs', dest="checkinputdefs", action='store_true', help="Checks current 'user_inputs.json' file for validity and report any errors without parsing.")
+    argparser.add_argument('-l', '--list-inputdefs', dest="listinputdefs", action='store_true', help="Prints a template of what a user inputs JSON file should contain.")
     argparser.add_argument('-v', '--version', action='store_true', help='Prints software version and exits')
     
     args = argparser.parse_args()
@@ -321,6 +322,11 @@ def main():
     # Parse args
     if args.version:
         print(f"{PROG_NAME} {VERSION}")
+        sys.exit(0)
+    
+    # Print user inputs template
+    if args.listinputdefs:
+        print_user_inputs_template()
         sys.exit(0)
     
     # Load inputs from config file
@@ -336,7 +342,19 @@ def main():
         
     # Check inputs format
     if len(parser_inputs) > 0:
-        check_input_format(parser_inputs, parser_outfile, control_flags)
+        # Return value is true for success
+        rv = check_input_format(parser_inputs, parser_outfile, control_flags)
+        
+        if rv and args.checkinputdefs:
+            logger.info("[PASS] Inputs are valid")
+            print("\n[PASS] Inputs are valid")
+            sys.exit(0)
+        elif not rv:
+            sys.exit(2)
+    else:
+        logger.info("No inputs defined. Terminating script...")
+        print("No inputs defined. Terminating script...")
+        sys.exit(0)
 
     # Output confirmation
     s = "Reading from files:\n"

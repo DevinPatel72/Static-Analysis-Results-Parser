@@ -145,10 +145,12 @@ def validate_outfile(outfile):
         return "Outfile not defined"
     
     # Check if outfile parent directory exists
-    
     if ('\\' in outfile or '/' in outfile) and not os.path.isdir(os.path.dirname(outfile)):
         return "Parent directory of outfile does not exist"
 
+    if not (outfile.endswith('.xlsx') ^ outfile.endswith('.csv')):
+        return "Outfile must end with either '.xslx' or '.csv'"
+    
     return "TRUE"
 
 def load_config_cwe_category_mappings():
@@ -175,7 +177,7 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         
         # Check if each input contains the right keys
         if not all([all([sorted(list(inp.keys())) == sorted(InputDictKeys.INPUTS.value)]) for inp in user_inputs['main']]):
-            return "Error in parsing config file \'user_inputs.json\'. Invalid keys detected in \"main\". Only the following keys are permitted: {}.".format(", ".join(InputDictKeys.INPUTS.value))
+            return "Error in parsing config file \'user_inputs.json\'. Invalid keys detected in \"main\". All of the following keys (and only these keys) must be defined: {}.".format(", ".join(InputDictKeys.INPUTS.value))
 
         # All is green, set main equal to parser_inputs
         parser_inputs = user_inputs['main']
@@ -210,39 +212,38 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
 
 def check_input_format(inputs, outfile, flags):
     # Check if inputs are correct
-    failure = False
+    success = True
         
     for inp in inputs:
         # Check if path and scanner exist
         if (msg := validate_path_and_scanner(inp[InputDictKeys.PATH.value], inp[InputDictKeys.SCANNER.value])) != 'TRUE':
             console(msg, title='Invalid Config Input', type='error')
-            failure = True
+            success = False
     
     # Check outfile
     msg = validate_outfile(outfile)
     if msg == "Outfile not defined":
         pass
     elif msg != 'TRUE':
-        console(msg, title='Invalid Config Input', type='critical')
-        failure = True
+        console(msg, title='Invalid Config Input', type='error')
+        success = False
     
     # Check control flags
     for k, v in flags.items():
         if k not in InputDictKeys.FLAGS.value:
             console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {InputDictKeys.FLAGS.value}", title='Invalid Config Input', type='error')
-            failure = True
+            success = False
         if not isinstance(v, bool):
             console(f"Invalid data type for control flag \"{k}\". Please ensure all values are boolean types.", title='Invalid Config Input', type='error')
-            failure = True
+            success = False
     
     # Check if all control flags are present
     missing = [f"\'{f}\'" for f in InputDictKeys.FLAGS.value if f not in flags.keys()]
     if len(missing) > 0 and not parsers.GUI_MODE:
         console(f"Missing control flag{'s' if len(missing) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', type='error')
-        failure = True
+        success = False
 
-    if failure:
-        sys.exit(2)
+    return success
 
 def check_all_CWEs(data):
     count = 0
@@ -352,3 +353,36 @@ def get_all_previews(inputs):
         previews[fpath] = preview
     
     return previews
+
+def print_user_inputs_template():
+    s = """{
+    "$schema": "schemas/user_inputs.schema.json",
+    "main": [
+        {
+            "scanner": "CPPCheck",
+            "path": "C:\\\\Users\\\\...\\\\Documents\\\\project1\\\\scan_results\\\\cppcheck-output.xml",
+            "remove": "C:\\\\Users\\\\...\\\\Documents\\\\project1\\\\top_level_src_dir",
+            "prepend": ""
+        },
+        {
+            "scanner": "Coverity v2023.2.5",
+            "path": "/home/user/project2/coverity_results/coverity-output.json",
+            "remove": "/home/user/project2/top_level_src_dir/second_level",
+            "prepend": "replacement_second_level"
+        },
+        {
+            "scanner": "GNAT SAS 24.0",
+            "path": "../../../../scan_results_relative_to_pwd/gnatsas-output.json",
+            "remove": "",
+            "prepend": "top_level_src_dir/"
+        }
+    ],
+    "outfile": "path/to/outfile.[xlsx|csv]",
+    "flags": {
+        "Category Mappings": [true|false],
+        "Duplicate Scanner Consolidation": [true|false],
+        "Preflight Rules": [true|false],
+        "Default Preflight Rules": [true|false]
+    }
+}"""
+    print(s)

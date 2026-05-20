@@ -75,7 +75,7 @@ def parse(fpath, scanner, substr, prepend):
         # Locate the audit.fvdl file
         fvdl_path = os.path.join(temp_dir, "audit.fvdl")
         if not os.path.exists(fvdl_path):
-            logger.critical("audit.fvdl not found in the provided FPR file. Skipping fortify parsing.")
+            logger.error("audit.fvdl not found in the provided FPR file. Skipping fortify parsing.")
             return err_count + 1
 
         # Parse the audit.fvdl file
