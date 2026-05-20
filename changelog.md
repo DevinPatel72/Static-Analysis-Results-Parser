@@ -1,5 +1,9 @@
 # Change Log
 
+## [Version 2.2.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.2.0) (2026-05-20)
+- CLI: Added command line switches to validate `user_inputs.json`, list its contents, and print an example template of a `user_inputs.json` file. Run with `--help` to see options.
+- Reorganized config directory into separate directories for CWE mappings, preflight rules, and json schemas.
+
 ## [Version 2.1.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.1.0) (2026-05-19)
 - New feature: Deduping among findings from the same scanner. If a finding addresses the same issue as another finding from the same scanner, it will be marked as a duplicate and choose the first finding as the canonical (order is determined by order of initial inputs). This feature is toggle-able via GUI or control flag defined in user_inputs.json.
 - Removed user interaction when the outfile is locked. Instead of waiting for the user to press "Enter," SARP will keep checking the lock every second until the outfile can be written to.
