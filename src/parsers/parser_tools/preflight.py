@@ -14,13 +14,13 @@ import parsers
 logger = logging.getLogger(__name__)
 
 def load_prules():
-    from parsers import CONFIG_DIR
+    from parsers import PREFLIGHT_DIR
 
-    data_path = os.path.join(CONFIG_DIR, 'preflight_rules.py')
+    data_path = os.path.join(PREFLIGHT_DIR, 'preflight_rules.py')
     
     # If the py file doesn't exist
     if not os.path.isfile(data_path):
-        logger.warning("Unable to load preflight rules: 'preflight_rules.py' does not exist in config directory.")
+        logger.warning("Unable to load preflight rules: 'preflight_rules.py' does not exist in config/preflight directory.")
     else:
         # py file does exist
         try:
@@ -37,10 +37,10 @@ def load_prules():
             parsers.prules = []
     
     # Now load default rules
-    data_path = os.path.join(CONFIG_DIR, 'default_preflight_rules.py')
+    data_path = os.path.join(PREFLIGHT_DIR, 'default_preflight_rules.py')
     
     if not os.path.isfile(data_path):
-        logger.warning("Unable to load default preflight rules: 'default_preflight_rules.py' does not exist in config directory.")
+        logger.warning("Unable to load default preflight rules: 'default_preflight_rules.py' does not exist in config/preflight directory.")
         parsers.default_prules = []
     else:
         try:
@@ -58,12 +58,12 @@ def load_prules():
 
 
 def save_prules(prules):
-    from parsers import CONFIG_DIR
+    from parsers import PREFLIGHT_DIR
     
     if len(prules) <= 0:
         return
     
-    data_path = os.path.join(CONFIG_DIR, 'preflight_rules.py')
+    data_path = os.path.join(PREFLIGHT_DIR, 'preflight_rules.py')
     
     prules.sort(key=lambda rule: int(rule.precedence))
 

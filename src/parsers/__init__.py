@@ -46,6 +46,8 @@ valid_extensions = ['.fpr', '.csv', '.xml', '.json', '.xlsx']
 EXE_ROOT_DIR = '.'
 LOGS_DIR = 'logs'
 CONFIG_DIR = 'config'
+MAPPINGS_DIR = 'mappings'
+PREFLIGHT_DIR = 'preflight'
 
 # CWE Category Mappings
 cwe_categories = {}

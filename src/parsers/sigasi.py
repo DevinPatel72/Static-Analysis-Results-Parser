@@ -130,10 +130,10 @@ def parse(fpath, scanner, substr, prepend):
 # End of parse
 
 def load_sigasi_cdata():
-    from . import CONFIG_DIR
+    from . import MAPPINGS_DIR
     
     try:
-        with open(os.path.join(CONFIG_DIR, 'sigasi_cdata.json'), 'r', encoding='utf-8-sig') as r:
+        with open(os.path.join(MAPPINGS_DIR, 'sigasi_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
         console("Unable to load Sigasi CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')

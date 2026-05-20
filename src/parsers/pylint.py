@@ -108,10 +108,10 @@ def parse(fpath, scanner, substr, prepend):
 __INTERNAL_MESSAGES = ["F0002", "F0011", "F0001", "F0202", "F0010"]
 
 def load_pylint_cdata():
-    from . import CONFIG_DIR
+    from . import MAPPINGS_DIR
     
     try:
-        with open(os.path.join(CONFIG_DIR, 'pylint_cdata.json'), 'r', encoding='utf-8-sig') as r:
+        with open(os.path.join(MAPPINGS_DIR, 'pylint_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
         console("Unable to load Pylint CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')

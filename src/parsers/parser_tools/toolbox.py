@@ -155,7 +155,7 @@ def validate_outfile(outfile):
 def load_config_cwe_category_mappings():
     # Load MITRE Category Mappings for each CWE
     try:
-        with open(os.path.join(parsers.CONFIG_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
+        with open(os.path.join(parsers.MAPPINGS_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
         console("Unable to load MITRE CWE Category Mappings: Invalid JSON format\nThe program will continue without CWE category mappings.", "Config Error", type='error')

@@ -120,10 +120,10 @@ def parse(fpath, scanner, substr, prepend):
 
 def load_eslint_cdata():
     # Loads eslint cdata info from config dir
-    from . import CONFIG_DIR
+    from . import MAPPINGS_DIR
     
     try:
-        with open(os.path.join(CONFIG_DIR, 'eslint_cdata.json'), 'r', encoding='utf-8-sig') as r:
+        with open(os.path.join(MAPPINGS_DIR, 'eslint_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
         console("Unable to load Eslint CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')

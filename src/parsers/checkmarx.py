@@ -315,11 +315,11 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
 # End of _parse_xml
 
 def load_checkmarx_cdata():
-    from . import CONFIG_DIR
+    from . import MAPPINGS_DIR
     import json
     
     try:
-        with open(os.path.join(CONFIG_DIR, 'checkmarx_cdata.json'), 'r', encoding='utf-8-sig') as r:
+        with open(os.path.join(MAPPINGS_DIR, 'checkmarx_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
         console("Unable to load Checkmarx CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')

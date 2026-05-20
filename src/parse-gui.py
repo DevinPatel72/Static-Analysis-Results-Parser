@@ -27,6 +27,8 @@ else:
     logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
 
 parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
+parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
+parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
 
 parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
 os.makedirs(parsers.LOGS_DIR, exist_ok=True)
