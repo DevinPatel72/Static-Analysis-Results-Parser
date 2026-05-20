@@ -354,34 +354,34 @@ def get_all_previews(inputs):
     return previews
 
 def print_user_inputs_template():
-    s = """{
+    s = """{{
     "$schema": "schemas/user_inputs.schema.json",
     "main": [
-        {
+        {{
             "scanner": "CPPCheck",
             "path": "C:\\\\Users\\\\...\\\\Documents\\\\project1\\\\scan_results\\\\cppcheck-output.xml",
             "remove": "C:\\\\Users\\\\...\\\\Documents\\\\project1\\\\top_level_src_dir",
             "prepend": ""
-        },
-        {
+        }},
+        {{
             "scanner": "Coverity v2023.2.5",
             "path": "/home/user/project2/coverity_results/coverity-output.json",
             "remove": "/home/user/project2/top_level_src_dir/second_level",
             "prepend": "replacement_second_level"
-        },
-        {
+        }},
+        {{
             "scanner": "GNAT SAS 24.0",
             "path": "../../../../scan_results_relative_to_pwd/gnatsas-output.json",
             "remove": "",
             "prepend": "top_level_src_dir/"
-        }
+        }}
     ],
     "outfile": "path/to/outfile.[xlsx|csv]",
-    "flags": {
-        "Category Mappings": [true|false],
-        "Duplicate Scanner Consolidation": [true|false],
-        "Preflight Rules": [true|false],
-        "Default Preflight Rules": [true|false]
-    }
-}"""
+    "flags": {{
+        "{}": [true|false],
+        "{}": [true|false],
+        "{}": [true|false],
+        "{}": [true|false]
+    }}
+}}""".format(parsers.FLAG_CATEGORY_MAPPING, parsers.FLAG_DUPE_SCAN_CONSOLIDATION, parsers.FLAG_PREFLIGHT_RULES, parsers.FLAG_DEFAULT_PREFLIGHT_RULES)
     print(s)
