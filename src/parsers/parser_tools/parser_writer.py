@@ -56,7 +56,7 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
                 messagebox.showerror("Unable to open file", f"File \"{outfile}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
             else:
                 if elapsed_time < 0:
-                    print(f"Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
+                    print(f"\n[ERROR]  Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
                     elapsed_time = 0
                 print('Waiting: ' + format_time(elapsed_time), end='\r')
                 time.sleep(1)
@@ -190,7 +190,7 @@ def close_writer():
                             messagebox.showerror("Unable to open file", f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
                         else:
                             if elapsed_time < 0:
-                                print(f"Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
+                                print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
                                 elapsed_time = 0
                             print('Waiting: ' + format_time(elapsed_time), end='\r')
                             time.sleep(1)
