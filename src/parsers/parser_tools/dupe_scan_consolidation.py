@@ -40,16 +40,19 @@ def dupe_scan_consolidation(data):
             # Replace all matches with the current row's data
             _end = f". {row[Fieldnames.VALIDATOR_COMMENT.value]}" if len(row[Fieldnames.VALIDATOR_COMMENT.value]) > 0 else row[Fieldnames.VALIDATOR_COMMENT.value]
             validator_comment_replacement = f"This finding is a duplicate of a {row[Fieldnames.SCANNER.value]} finding with the same ID" + _end
-            update_row(m[Fieldnames.ID.value],
-                        updates={
-                            Fieldnames.SCORING_BASIS.value: row[Fieldnames.SCORING_BASIS.value],
-                            Fieldnames.CONFIDENCE.value: Fieldnames.DUPLICATE_CONF.value,
-                            Fieldnames.MATURITY.value : row[Fieldnames.MATURITY.value],
-                            Fieldnames.MITIGATION.value: row[Fieldnames.MITIGATION.value],
-                            Fieldnames.ID.value: row[Fieldnames.ID.value],
-                            Fieldnames.VALIDATOR_COMMENT.value: validator_comment_replacement
-                        },
-                        skip_ids=row[Fieldnames.ID.value])
+            try:
+                update_row(m[Fieldnames.ID.value],
+                            updates={
+                                Fieldnames.SCORING_BASIS.value: row[Fieldnames.SCORING_BASIS.value],
+                                Fieldnames.CONFIDENCE.value: Fieldnames.DUPLICATE_CONF.value,
+                                Fieldnames.MATURITY.value : row[Fieldnames.MATURITY.value],
+                                Fieldnames.MITIGATION.value: row[Fieldnames.MITIGATION.value],
+                                Fieldnames.ID.value: row[Fieldnames.ID.value],
+                                Fieldnames.VALIDATOR_COMMENT.value: validator_comment_replacement
+                            },
+                            skip_ids=row[Fieldnames.ID.value])
+            except ValueError:
+                continue
         dupe_count += len(matches)
     logger.info(f"Discovered {dupe_count} duplicate findings")
     return dupe_count
