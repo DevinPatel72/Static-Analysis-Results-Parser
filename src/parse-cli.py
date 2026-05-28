@@ -398,9 +398,6 @@ def main():
     else:
         force_csv = False
     parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
-
-    # Track number of errors
-    err_count = 0
     
     # Put SRM in the back
     for i, inp in enumerate(parser_inputs, start=0):
@@ -421,64 +418,79 @@ def main():
         scan_match = scanner.lower().replace(' ', '')
         path = os.path.realpath(fpath)
         
-        f_count = 0
+        t_finding_count = 0
         t_err_count = 0
         if any(s in scan_match for s in parsers.aio_keywords):
-            f_count, t_err_count = aio.parse(path, scanner, substr, prepend)
-            report.aio_count += f_count
+            t_finding_count, t_err_count = aio.parse(path, scanner, substr, prepend)
+            report.aio_count[0] += t_finding_count
+            report.aio_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.xmarx_keywords):
-            f_count, t_err_count = checkmarx.parse(path, scanner, substr, prepend)
-            report.checkmarx_count += f_count
+            t_finding_count, t_err_count = checkmarx.parse(path, scanner, substr, prepend)
+            report.checkmarx_count[0] += t_finding_count
+            report.checkmarx_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.coverity_keywords):
-            f_count, t_err_count = coverity.parse(path, scanner, substr, prepend)
-            report.coverity_count += f_count
+            t_finding_count, t_err_count = coverity.parse(path, scanner, substr, prepend)
+            report.coverity_count[0] += t_finding_count
+            report.coverity_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            f_count, t_err_count = cppcheck.parse(path, scanner, substr, prepend)
-            report.cppcheck += f_count
+            t_finding_count, t_err_count = cppcheck.parse(path, scanner, substr, prepend)
+            report.cppcheck_count[0] += t_finding_count
+            report.cppcheck_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.depcheck_keywords):
-            f_count, t_err_count = owasp_depcheck.parse(path, scanner, substr, prepend)
-            report.depcheck_count += f_count
+            t_finding_count, t_err_count = owasp_depcheck.parse(path, scanner, substr, prepend)
+            report.depcheck_count[0] += t_finding_count
+            report.depcheck_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.eslint_keywords):
-            f_count, t_err_count = eslint.parse(path, scanner, substr, prepend)
-            report.eslint_count += f_count
+            t_finding_count, t_err_count = eslint.parse(path, scanner, substr, prepend)
+            report.eslint_count[0] += t_finding_count
+            report.eslint_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.manualcve_keywords):
-            f_count, t_err_count = manual_cve.parse(path, scanner, substr, prepend)
-            report.manual_cwe_count += f_count
+            t_finding_count, t_err_count = manual_cve.parse(path, scanner, substr, prepend)
+            report.manual_cwe_count[0] += t_finding_count
+            report.manual_cwe_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            f_count, t_err_count = gnatsas.parse(path, scanner, substr, prepend)
-            report.gnatsas_count += f_count
+            t_finding_count, t_err_count = gnatsas.parse(path, scanner, substr, prepend)
+            report.gnatsas_count[0] += t_finding_count
+            report.gnatsas_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.fortify_keywords):
-            f_count, t_err_count = fortify.parse(path, scanner, substr, prepend)
-            report.fortify_count += f_count
+            t_finding_count, t_err_count = fortify.parse(path, scanner, substr, prepend)
+            report.fortify_count[0] += t_finding_count
+            report.fortify_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            f_count, t_err_count = pragmatic.parse(path, scanner, substr, prepend)
-            report.pragmatic_count += f_count
+            t_finding_count, t_err_count = pragmatic.parse(path, scanner, substr, prepend)
+            report.pragmatic_count[0] += t_finding_count
+            report.pragmatic_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.pylint_keywords):
-            f_count, t_err_count = pylint.parse(path, scanner, substr, prepend)
-            report.pylint_count += f_count
+            t_finding_count, t_err_count = pylint.parse(path, scanner, substr, prepend)
+            report.pylint_count[0] += t_finding_count
+            report.pylint_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.semgrep_keywords):
-            f_count, t_err_count = semgrep.parse(path, scanner, substr, prepend)
-            report.semgrep_count += f_count
+            t_finding_count, t_err_count = semgrep.parse(path, scanner, substr, prepend)
+            report.semgrep_count[0] += t_finding_count
+            report.semgrep_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.sigasi_keywords):
-            f_count, t_err_count = sigasi.parse(path, scanner, substr, prepend)
-            report.sigasi_count += f_count
+            t_finding_count, t_err_count = sigasi.parse(path, scanner, substr, prepend)
+            report.sigasi_count[0] += t_finding_count
+            report.sigasi_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.srm_keywords):
-            f_count, t_err_count = srm.parse(path, scanner, substr, prepend)
-            report.srm_count += f_count
+            t_finding_count, t_err_count = srm.parse(path, scanner, substr, prepend)
+            report.srm_count[0] += t_finding_count
+            report.srm_count[1] += t_err_count
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
+            t_finding_count = 0
             t_err_count = 1
         
-        report.total_findings += f_count
-        err_count += t_err_count
+        report.total_count[0] += t_finding_count
+        report.total_count[1] += t_err_count
     
     parser_writer.close_writer()
     
-    logger.info(f"Parsing complete!\nSuccessfully parsed {report.total_findings} findings")
-    print(f"\nParsing complete!\nSuccessfully parsed {report.total_findings} findings")
+    logger.info(f"Parsing complete!\nSuccessfully parsed {report.total_count} findings")
+    print(f"\nParsing complete!\nSuccessfully parsed {report.total_count} findings")
     
-    if err_count > 0:
-        print(f"{err_count} errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")
+    if report.total_count[1] > 0:
+        print(f"{report.total_count[1]} errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")
 
 
 if __name__ == "__main__":
