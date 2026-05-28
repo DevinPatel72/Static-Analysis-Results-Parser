@@ -52,8 +52,5 @@ PREFLIGHT_DIR = 'preflight'
 # CWE Category Mappings
 cwe_categories = {}
 
-# Counts
-findings_count = 0
-
 # Choose specific items to import when using "from parsers import *"
 __all__ = ['FLAG_CATEGORY_MAPPING', 'FLAG_PREFLIGHT_RULES', 'FLAG_DEFAULT_PREFLIGHT_RULES', 'FLAG_DUPE_SCAN_CONSOLIDATION', 'aio', 'checkmarx', 'coverity', 'cppcheck', 'owasp_depcheck', 'eslint', 'gnatsas', 'fortify', 'manual_cve', 'pragmatic', 'pylint', 'semgrep', 'sigasi', 'srm']
