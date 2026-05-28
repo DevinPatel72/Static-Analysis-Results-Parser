@@ -230,8 +230,6 @@ def main():
         
         report.counts[scanner][0] += t_finding_count
         report.counts[scanner][1] += t_err_count
-        report.inc_total_findings(t_finding_count)
-        report.inc_total_errors(t_err_count)
     
     parser_writer.close_writer()
     
