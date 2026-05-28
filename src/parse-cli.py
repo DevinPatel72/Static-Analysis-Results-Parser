@@ -406,7 +406,7 @@ def main():
             break
         
     # Init Report object
-    report = Report()
+    report = Report(scanners=[i[InputDictKeys.SCANNER.value] for i in parser_inputs])
     
     # Parse the inputs
     for i in parser_inputs:
@@ -422,75 +422,49 @@ def main():
         t_err_count = 0
         if any(s in scan_match for s in parsers.aio_keywords):
             t_finding_count, t_err_count = aio.parse(path, scanner, substr, prepend)
-            report.aio_count[0] += t_finding_count
-            report.aio_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.xmarx_keywords):
             t_finding_count, t_err_count = checkmarx.parse(path, scanner, substr, prepend)
-            report.checkmarx_count[0] += t_finding_count
-            report.checkmarx_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.coverity_keywords):
             t_finding_count, t_err_count = coverity.parse(path, scanner, substr, prepend)
-            report.coverity_count[0] += t_finding_count
-            report.coverity_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.cppcheck_keywords):
             t_finding_count, t_err_count = cppcheck.parse(path, scanner, substr, prepend)
-            report.cppcheck_count[0] += t_finding_count
-            report.cppcheck_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.depcheck_keywords):
             t_finding_count, t_err_count = owasp_depcheck.parse(path, scanner, substr, prepend)
-            report.depcheck_count[0] += t_finding_count
-            report.depcheck_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.eslint_keywords):
             t_finding_count, t_err_count = eslint.parse(path, scanner, substr, prepend)
-            report.eslint_count[0] += t_finding_count
-            report.eslint_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.manualcve_keywords):
             t_finding_count, t_err_count = manual_cve.parse(path, scanner, substr, prepend)
-            report.manual_cwe_count[0] += t_finding_count
-            report.manual_cwe_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.gnatsas_keywords):
             t_finding_count, t_err_count = gnatsas.parse(path, scanner, substr, prepend)
-            report.gnatsas_count[0] += t_finding_count
-            report.gnatsas_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.fortify_keywords):
             t_finding_count, t_err_count = fortify.parse(path, scanner, substr, prepend)
-            report.fortify_count[0] += t_finding_count
-            report.fortify_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.pragmatic_keywords):
             t_finding_count, t_err_count = pragmatic.parse(path, scanner, substr, prepend)
-            report.pragmatic_count[0] += t_finding_count
-            report.pragmatic_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.pylint_keywords):
             t_finding_count, t_err_count = pylint.parse(path, scanner, substr, prepend)
-            report.pylint_count[0] += t_finding_count
-            report.pylint_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.semgrep_keywords):
             t_finding_count, t_err_count = semgrep.parse(path, scanner, substr, prepend)
-            report.semgrep_count[0] += t_finding_count
-            report.semgrep_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.sigasi_keywords):
             t_finding_count, t_err_count = sigasi.parse(path, scanner, substr, prepend)
-            report.sigasi_count[0] += t_finding_count
-            report.sigasi_count[1] += t_err_count
         elif any(s in scan_match for s in parsers.srm_keywords):
             t_finding_count, t_err_count = srm.parse(path, scanner, substr, prepend)
-            report.srm_count[0] += t_finding_count
-            report.srm_count[1] += t_err_count
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             t_finding_count = 0
             t_err_count = 1
         
-        report.total_count[0] += t_finding_count
-        report.total_count[1] += t_err_count
+        report.counts[scanner][0] += t_finding_count
+        report.counts[scanner][1] += t_err_count
+        report.inc_total_findings(t_finding_count)
+        report.inc_total_errors(t_err_count)
     
     parser_writer.close_writer()
     
-    logger.info(f"Parsing complete!\nSuccessfully parsed {report.total_count} findings")
-    print(f"\nParsing complete!\nSuccessfully parsed {report.total_count} findings")
+    logger.info(f"Parsing complete!\nSuccessfully parsed {report.get_total_findings()} findings")
+    print(f"\nParsing complete!\nSuccessfully parsed {report.get_total_findings()} findings")
     
-    if report.total_count[1] > 0:
-        print(f"{report.total_count[1]} errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")
+    if report.get_total_errors() > 0:
+        print(f"{report.get_total_errors()} errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")
 
 
 if __name__ == "__main__":
