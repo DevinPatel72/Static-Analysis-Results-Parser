@@ -1,8 +1,6 @@
 # reporting.py
 
 import logging
-from enum import Enum
-import parsers
 
 __plotlib_enabled = False
 
@@ -35,13 +33,41 @@ class Report:
         return sum([v[1] for v in self.counts.values()])
 
     def generate_report(self):
-        pass
+        from parsers import GUI_MODE
+        
+        
+        # Prep string here
+        outstr = "\nFindings Report\n—————————————————————————————————————————————————————————————\n"
+        outstr += str(self)
+        outstr += "—————————————————————————————————————————————————————————————"
+
+        logger.info('\n' + outstr + '\n')
+        
+        if not GUI_MODE:
+            print(outstr)
+        
     
     def save_chart(self):
         pass
     
     def __str__(self):
-        return str(self.counts)
+        _max_key_len = max([len(k) for k in self.counts.keys()])
+        outstr = ""
+        for k, v in self.counts.items():
+            # Findings count
+            space = ' '*(_max_key_len-len(k)+1)
+            outstr += f"{k}:{space}{v[0]}"
+            
+            # Error count
+            if v[1] > 0:
+                outstr += f", Errors: {v[1]}"
+            outstr += '\n'
         
-
-
+        # Calculate total
+        outstr += f"Total:{space}{self.get_total_findings()}"
+        err_count = self.get_total_errors()
+        if err_count > 0:
+            outstr += f", Errors: {err_count}"
+        outstr += '\n'
+        
+        return outstr

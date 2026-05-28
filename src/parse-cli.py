@@ -38,7 +38,7 @@ logfile = os.path.join(parsers.LOGS_DIR, logname)
 
 # Configure logger
 import logging
-logging.basicConfig(filename=logfile, level=logging.INFO, format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
+logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
 consoleHandler = logging.StreamHandler()
 consoleHandler.setLevel(logging.CRITICAL)
 consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
@@ -457,6 +457,8 @@ def main():
         report.counts[scanner][1] += t_err_count
     
     parser_writer.close_writer()
+    
+    report.generate_report()
     
     logger.info(f"Parsing complete!\nSuccessfully parsed {report.get_total_findings()} findings")
     print(f"\nParsing complete!\nSuccessfully parsed {report.get_total_findings()} findings")

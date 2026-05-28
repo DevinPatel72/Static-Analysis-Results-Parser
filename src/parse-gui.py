@@ -37,7 +37,7 @@ logfile = os.path.join(parsers.LOGS_DIR, logname)
 
 # Configure logger
 import logging
-logging.basicConfig(filename=logfile, level=logging.INFO, format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
+logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
 consoleHandler = logging.StreamHandler()
 consoleHandler.setLevel(logging.CRITICAL)
 consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
