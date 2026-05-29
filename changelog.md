@@ -1,5 +1,10 @@
 # Change Log
 
+## [Version 2.3.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.3.0) (2026-05-29)
+- New feature: Added finding reports to GUI and CLI. A chart graphic is displayed in the GUI executable but is always saved to the `logs` directory regardless of GUI or CLI.
+- Added ability to specify project name and version
+- Fixed bug where SRM parser fails to dedupe its own findings against standalone versions
+
 ## [Version 2.2.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.2.0) (2026-05-20)
 - CLI: Added command line switches to validate `user_inputs.json`, list its contents, and print an example template of a `user_inputs.json` file. Run with `--help` to see options.
 - Reorganized config directory into separate directories for CWE mappings, preflight rules, and json schemas.

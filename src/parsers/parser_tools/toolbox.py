@@ -170,6 +170,10 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         except (FileNotFoundError, json.JSONDecodeError):
             return f"Unable to parse \"{os.path.basename(inputs_path)}.\" This may be due to an improperly formatted or corrupted JSON file."
         
+        # Attempt to parse project name and version
+        parsers.PROJ_NAME = user_inputs.get('project_name', "")
+        parsers.PROJ_VERSION = user_inputs.get('project_version', "")
+        
         # Attempt to parse the main inputs
         if 'main' not in user_inputs.keys() and len(user_inputs['main']) <= 0:
             return "Error in parsing config file \'user_inputs.json\'. No inputs defined in \"main\"."
@@ -266,8 +270,15 @@ def check_CWE_category(cwe, count=0):
 
 def export_config(inputs, outfile, control_flags):
     inputs_path = os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')
+    out_dict = {"$schema": "schemas/user_inputs.schema.json",
+                'project_name': parsers.PROJ_NAME,
+                'project_version': parsers.PROJ_VERSION,
+                'main': inputs,
+                'outfile': outfile,
+                'flags': control_flags}
+    
     with open(inputs_path, 'w', encoding='utf-8-sig') as uout:
-        json.dump({"$schema": "schemas/user_inputs.schema.json", 'main': inputs, 'outfile': outfile, 'flags': control_flags}, uout, indent=4)
+        json.dump(out_dict, uout, indent=4)
 
 
 def generate_preview(preview, remove_substr='', add_substr=''):
@@ -356,6 +367,8 @@ def get_all_previews(inputs):
 def print_user_inputs_template():
     s = """{{
     "$schema": "schemas/user_inputs.schema.json",
+    "project_name": "example_proj",
+    "project_version": "v1.0",
     "main": [
         {{
             "scanner": "CPPCheck",

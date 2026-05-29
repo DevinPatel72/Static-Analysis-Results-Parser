@@ -7,6 +7,14 @@
     "$schema": {
       "type": "string"
     },
+    "project_name": {
+      "type": "string",
+      "description": "Project Name"
+    },
+    "project_version": {
+      "type": "string",
+      "description": "Project Version"
+    },
     "main": {
       "type": "array",
       "description": "Main body of inputs",

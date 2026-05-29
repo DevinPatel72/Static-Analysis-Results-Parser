@@ -10,6 +10,7 @@ from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, console, loa
 import parsers
 from parsers import PROG_NAME, VERSION
 from parsers import *
+from parsers.parser_tools.reporting import Report
 from parsers.parser_tools import parser_writer, preflight
 import parsers.parser_tools.progressbar as progressbar
 
@@ -26,17 +27,25 @@ else:
     parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
     logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
 
+# Captialized drive letter if on Windows
+drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
+if len(drive) > 0: drive = drive.upper()
+parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
+
+# Set import directories
 parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
 parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
 parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
 
+# Set log paths
 parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
 os.makedirs(parsers.LOGS_DIR, exist_ok=True)
 logfile = os.path.join(parsers.LOGS_DIR, logname)
+parsers.LOGFILE = logfile
 
 # Configure logger
 import logging
-logging.basicConfig(filename=logfile, level=logging.INFO, format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
+logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
 consoleHandler = logging.StreamHandler()
 consoleHandler.setLevel(logging.CRITICAL)
 consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
@@ -97,6 +106,9 @@ def main():
     inputs_gui = InputsGUI(parser_inputs)
     if not inputs_gui.cleanexit or (inputs_gui.results is None or len(inputs_gui.results) <= 0):
         sys.exit(0)
+        
+    parsers.PROJ_NAME = inputs_gui.results_project_name
+    parsers.PROJ_VERSION = inputs_gui.results_project_version
     
     adjust_paths_gui = AdjustPathsGUI(inputs_gui.results)
     if not adjust_paths_gui.cleanexit or (adjust_paths_gui.results is None or len(adjust_paths_gui.results) <= 0):
@@ -172,14 +184,14 @@ def main():
         force_csv = False
     parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
 
-    # Track number of errors
-    err_count = 0
-    
     # Put SRM in the back
     for i, inp in enumerate(parser_inputs, start=0):
         if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in parsers.srm_keywords):
             parser_inputs.append(parser_inputs.pop(i))
             break
+        
+    # Init report object
+    report = Report(scanners=[i[InputDictKeys.SCANNER.value] for i in parser_inputs])
 
     # Parse the inputs
     for entry in parser_inputs:
@@ -192,47 +204,52 @@ def main():
         scan_match = scanner.lower().replace(' ', '')
         path = os.path.realpath(fpath)
         
+        t_finding_count = 0
+        t_err_count = 0
         if any(s in scan_match for s in parsers.aio_keywords):
-            err_count += aio.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = aio.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.xmarx_keywords):
-            err_count += checkmarx.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = checkmarx.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.coverity_keywords):
-            err_count += coverity.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = coverity.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            err_count += cppcheck.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = cppcheck.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.depcheck_keywords):
-            err_count += owasp_depcheck.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = owasp_depcheck.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.eslint_keywords):
-            err_count += eslint.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = eslint.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.manualcve_keywords):
-            err_count += manual_cve.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = manual_cve.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            err_count += gnatsas.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = gnatsas.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.fortify_keywords):
-            err_count += fortify.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = fortify.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            err_count += pragmatic.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = pragmatic.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.pylint_keywords):
-            err_count += pylint.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = pylint.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.semgrep_keywords):
-            err_count += semgrep.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = semgrep.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.sigasi_keywords):
-            err_count += sigasi.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = sigasi.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            err_count += srm.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = srm.parse(path, scanner, substr, prepend)
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
-            err_count += 1
+            t_finding_count = 0
+            t_err_count = 1
         
+        report.counts[scanner][0] += t_finding_count
+        report.counts[scanner][1] += t_err_count
     
     parser_writer.close_writer()
     
-    if err_count > 0:
-        console(f"{err_count} errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
-        
+    report.generate_report()
     
-    logger.info(f"Parsing complete!\nSuccessfully parsed {parsers.findings_count} findings")
-    console(f"Parsing Complete!\nSuccessfully parsed {parsers.findings_count} findings.", PROG_NAME, 'info')
+    # if report.get_total_errors() > 0:
+    #     console(f"Errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
+        
+    #console(f"Parsing Complete!\nSuccessfully parsed {report.get_total_findings()} findings.", PROG_NAME, 'info')
     
     
 

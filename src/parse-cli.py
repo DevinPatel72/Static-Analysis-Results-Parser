@@ -15,6 +15,7 @@ from math import ceil
 import parsers
 from parsers import *
 from parsers.parser_tools import parser_writer, preflight
+from parsers.parser_tools.reporting import Report
 from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, validate_path_and_scanner, check_input_format, get_all_previews, print_user_inputs_template
 
 # Configure root path and important dirs of script
@@ -27,17 +28,25 @@ else:
     parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
     logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
 
+# Captialized drive letter if on Windows
+drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
+if len(drive) > 0: drive = drive.upper()
+parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
+
+# Set import directories
 parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
 parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
 parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
 
+# Set log paths
 parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
 os.makedirs(parsers.LOGS_DIR, exist_ok=True)
 logfile = os.path.join(parsers.LOGS_DIR, logname)
+parsers.LOGFILE = logfile
 
 # Configure logger
 import logging
-logging.basicConfig(filename=logfile, level=logging.INFO, format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
+logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
 consoleHandler = logging.StreamHandler()
 consoleHandler.setLevel(logging.CRITICAL)
 consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
@@ -312,12 +321,14 @@ def main():
     control_flags = {}
     
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
+    argparser.add_argument('-v', '--version', action='store_true', help='Prints software version and exits')
     argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.CONFIG_DIR, "user_inputs.json"), help="Path to user inputs JSON file. By default looks for 'user_inputs.json' in config directory.")
     argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Checks current 'user_inputs.json' file for validity and report any errors without parsing.")
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Prints current input configuration from the user inputs JSON file pointed to by the 'inputs' option.")
+    argparser.add_argument('-pn', '--project-name', dest="projectname", help="Name of the project")
+    argparser.add_argument('-pv', '--project-version', dest="projectversion", help="Version of the project")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Prints a template of what a user inputs JSON file should contain.")
-    argparser.add_argument('-v', '--version', action='store_true', help='Prints software version and exits')
     
     args = argparser.parse_args()
     
@@ -341,6 +352,12 @@ def main():
     
     if args.out is not None and len(args.out) > 0:
         parser_outfile = args.out
+    
+    # Project name + version
+    if args.projectname is not None and len(args.projectname) > 0:
+        parsers.PROJ_NAME = args.projectname
+    if args.projectversion is not None and len(args.projectversion) > 0:
+        parsers.PROJ_VERSION = args.projectversion
         
     # Check inputs format
     if len(parser_inputs) > 0:
@@ -359,7 +376,10 @@ def main():
         sys.exit(0)
 
     # Output confirmation
-    s = "Reading from files:\n"
+    if len(parsers.PROJ_NAME) > 0:
+        s = f"\nConfiguration for " + " ".join([part for part in [parsers.PROJ_NAME, parsers.PROJ_VERSION]]) + ":\n"
+    else:
+        s = "\nConfiguration:\n"
     for i, inp in enumerate(parser_inputs, 1):
         s += f"{i})  Scanner: {inp[InputDictKeys.SCANNER.value]}\n    Path: {inp[InputDictKeys.PATH.value]}\n    Path substring to delete: {inp[InputDictKeys.REMOVE.value]}\n    Path substring to prepend: {inp[InputDictKeys.PREPEND.value]}\n"
     s += f"\nWriting to file: {parser_outfile}\n"
@@ -397,15 +417,15 @@ def main():
     else:
         force_csv = False
     parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
-
-    # Track number of errors
-    err_count = 0
     
     # Put SRM in the back
     for i, inp in enumerate(parser_inputs, start=0):
         if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in parsers.srm_keywords):
             parser_inputs.append(parser_inputs.pop(i))
             break
+        
+    # Init Report object
+    report = Report(scanners=[i[InputDictKeys.SCANNER.value] for i in parser_inputs])
     
     # Parse the inputs
     for i in parser_inputs:
@@ -417,45 +437,54 @@ def main():
         scan_match = scanner.lower().replace(' ', '')
         path = os.path.realpath(fpath)
         
+        t_finding_count = 0
+        t_err_count = 0
         if any(s in scan_match for s in parsers.aio_keywords):
-            err_count += aio.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = aio.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.xmarx_keywords):
-            err_count += checkmarx.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = checkmarx.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.coverity_keywords):
-            err_count += coverity.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = coverity.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            err_count += cppcheck.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = cppcheck.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.depcheck_keywords):
-            err_count += owasp_depcheck.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = owasp_depcheck.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.eslint_keywords):
-            err_count += eslint.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = eslint.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.manualcve_keywords):
-            err_count += manual_cve.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = manual_cve.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            err_count += gnatsas.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = gnatsas.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.fortify_keywords):
-            err_count += fortify.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = fortify.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            err_count += pragmatic.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = pragmatic.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.pylint_keywords):
-            err_count += pylint.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = pylint.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.semgrep_keywords):
-            err_count += semgrep.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = semgrep.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.sigasi_keywords):
-            err_count += sigasi.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = sigasi.parse(path, scanner, substr, prepend)
         elif any(s in scan_match for s in parsers.srm_keywords):
-            err_count += srm.parse(path, scanner, substr, prepend)
+            t_finding_count, t_err_count = srm.parse(path, scanner, substr, prepend)
         else:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
-            err_count += 1
+            t_finding_count = 0
+            t_err_count = 1
+        
+        report.counts[scanner][0] += t_finding_count
+        report.counts[scanner][1] += t_err_count
     
     parser_writer.close_writer()
     
-    logger.info(f"Parsing complete!\nSuccessfully parsed {parsers.findings_count} findings")
-    print(f"\nParsing complete!\nSuccessfully parsed {parsers.findings_count} findings")
+    report.generate_report()
     
-    if err_count > 0:
-        print(f"{err_count} errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")
+    logger.info(f"Parsing complete!")
+    print(f"\nParsing complete!")
+    
+    if report.get_total_errors() > 0:
+        print(f"Errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")
+
 
 if __name__ == "__main__":
     exitcode = 0
