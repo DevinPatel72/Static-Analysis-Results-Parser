@@ -7,7 +7,7 @@ from .toolbox import console
 _plotlib_enabled = False
 
 try:
-    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+    import matplotlib.pyplot as plt
     from matplotlib.figure import Figure
     _plotlib_enabled = True
 except ImportError:
@@ -57,38 +57,69 @@ class Report:
         fig = self._build_chart()
 
         # Always save PNG
+        outpath = os.path.join(LOGS_DIR, "parse_results.png")
         fig.savefig(
-            os.path.join(LOGS_DIR, "parse_results.png"),
+            outpath,
             bbox_inches="tight"
         )
+        
+        logger.info(f"Output report chart to \"{outpath}\"")
 
         # Only display GUI if enabled
         if GUI_MODE:
             self._gui_chart(fig)
                     
     def _build_chart(self):
-        total_findings, total_errors = self._get_total()
-
         findings = [i[0] for i in self.counts.values()]
         labels = list(self.counts.keys())
 
-        fig = Figure(figsize=(6, 5), dpi=100)
-        ax = fig.add_subplot(111)
-
-        ax.pie(
-            findings,
-            labels=labels,
-            autopct="%1.1f%%"
+        fig = Figure(
+            figsize=(8, 6),
+            dpi=100,
+            constrained_layout=True
         )
 
-        ax.set_title("Parse Results")
+        ax = fig.add_subplot(111)
 
+        explode = [0.03] * len(findings)
+
+        wedges, texts, autotexts = ax.pie(
+            findings,
+            labels=labels,
+            autopct=lambda pct: (
+                f"{pct:.1f}%\n({int(round(pct/100 * sum(findings)))})"
+            ),
+            startangle=90,
+            explode=explode,
+            pctdistance=0.82,
+            textprops={
+                "fontsize": 10
+            }
+        )
+
+        # Donut center
+        centre_circle = plt.Circle(
+            (0, 0),
+            0.60,
+            fc="white"
+        )
+
+        ax.add_artist(centre_circle)
+
+        ax.set_title(
+            "Scanner Findings",
+            fontsize=16,
+            pad=20
+        )
+
+        ax.axis("equal")
+        
         return fig
     
     def _gui_chart(self, fig):
+        from parsers import LOGFILE
         import tkinter as tk
 
-        import matplotlib.pyplot as plt
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
         from matplotlib.figure import Figure
 
@@ -247,6 +278,7 @@ class Report:
         if total_errors > 0:
             total_error_kwargs["fg"] = "red"
 
+        # Errors value
         tk.Label(
             table_frame,
             text=total_errors,
@@ -258,6 +290,57 @@ class Report:
             column=3,
             sticky="ew"
         )
+
+        # Optional tooltip icon
+        if total_errors > 0:
+
+            tooltip = None
+
+            def show_tooltip(event):
+                nonlocal tooltip
+
+                tooltip = tk.Toplevel(root)
+                tooltip.wm_overrideredirect(True)
+
+                x = event.x_root + 10
+                y = event.y_root + 10
+
+                tooltip.wm_geometry(f"+{x}+{y}")
+
+                tk.Label(
+                    tooltip,
+                    text=f"Please see logfile \"{LOGFILE}\" for more details.",
+                    background="#ffffe0",
+                    relief="solid",
+                    borderwidth=1,
+                    padx=6,
+                    pady=4
+                ).pack()
+
+            def hide_tooltip(event):
+                nonlocal tooltip
+
+                if tooltip is not None:
+                    tooltip.destroy()
+                    tooltip = None
+
+            info_label = tk.Label(
+                table_frame,
+                text="?",
+                fg="blue",
+                cursor="question_arrow",
+                font=("Arial", 10, "bold")
+            )
+
+            info_label.grid(
+                row=total_row,
+                column=4,
+                sticky="w",
+                padx=(0, 8)
+            )
+
+            info_label.bind("<Enter>", show_tooltip)
+            info_label.bind("<Leave>", hide_tooltip)
 
         # =========================
         # Better Looking Pie Chart
@@ -279,7 +362,9 @@ class Report:
         wedges, texts, autotexts = ax.pie(
             findings,
             labels=labels,
-            autopct="%1.1f%%",
+            autopct=lambda pct: (
+                f"{pct:.1f}%\n({int(round(pct/100 * sum(findings)))})"
+            ),
             startangle=90,
             explode=explode,
             pctdistance=0.82,
@@ -298,7 +383,7 @@ class Report:
         ax.add_artist(centre_circle)
 
         ax.set_title(
-            "Parse Results",
+            "Scanner Findings",
             fontsize=16,
             pad=20
         )

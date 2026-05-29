@@ -45,6 +45,7 @@ valid_extensions = ['.fpr', '.csv', '.xml', '.json', '.xlsx']
 # Important Paths (overwritten by parse.py)
 EXE_ROOT_DIR = '.'
 LOGS_DIR = 'logs'
+LOGFILE = 'temp.log'
 CONFIG_DIR = 'config'
 MAPPINGS_DIR = 'mappings'
 PREFLIGHT_DIR = 'preflight'

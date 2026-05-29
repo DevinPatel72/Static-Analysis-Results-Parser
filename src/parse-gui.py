@@ -27,13 +27,21 @@ else:
     parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
     logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
 
+# Captialized drive letter if on Windows
+drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
+if len(drive) > 0: drive = drive.upper()
+parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
+
+# Set import directories
 parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
 parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
 parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
 
+# Set log paths
 parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
 os.makedirs(parsers.LOGS_DIR, exist_ok=True)
 logfile = os.path.join(parsers.LOGS_DIR, logname)
+parsers.LOGFILE = logfile
 
 # Configure logger
 import logging
@@ -235,12 +243,10 @@ def main():
     
     report.generate_report()
     
-    if report.get_total_errors() > 0:
-        console(f"Errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
+    # if report.get_total_errors() > 0:
+    #     console(f"Errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
         
-    
-    logger.info(f"Parsing complete!\nSuccessfully parsed {report.get_total_findings()} findings")
-    console(f"Parsing Complete!\nSuccessfully parsed {report.get_total_findings()} findings.", PROG_NAME, 'info')
+    #console(f"Parsing Complete!\nSuccessfully parsed {report.get_total_findings()} findings.", PROG_NAME, 'info')
     
     
 
