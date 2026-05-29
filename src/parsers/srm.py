@@ -224,7 +224,11 @@ def _parse_xml(fpath, substr, prepend, scanner):
                                                       (Fieldnames.SCANNER.value, tool_name.lower(), False),
                                                       (Fieldnames.PATH.value, path, True),
                                                       (Fieldnames.LINE.value, line, True)
-                                                      ]):
+                                                      ],
+                                                 match_once=True):
+                        # None check
+                        for k, v in m.items():
+                            m[k] = "" if v is None else v
                         cwe = m[Fieldnames.SCORING_BASIS.value]
                         confidence = Fieldnames.DUPLICATE_CONF.value
                         maturity = m[Fieldnames.MATURITY.value]

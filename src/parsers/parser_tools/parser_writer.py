@@ -69,13 +69,14 @@ def write_row(r):
     global __parser_data
     __parser_data.append(r)
         
-def search_row(tuples, skip_ids=''):
+def search_row(tuples, skip_ids='', match_once=False):
     """
     Searches existing rows for parsed findings.
     
     :param tuples: List of tuples with format (Fieldnames.[Header].value, keyword, exact_str_match=[True|False])
     :param skip_ids: Iterable of string IDs to skip over when searching
-    :return: All rows that match, otherwise None.
+    :param match_once: True to return only the first match. False to return a list of all matches.
+    :return: All rows that match or only the first match, otherwise None.
     """
     global __parser_data
     from .toolbox import Fieldnames
@@ -118,6 +119,7 @@ def search_row(tuples, skip_ids=''):
                 Fieldnames.VALIDATOR_COMMENT.value: row[Fieldnames.VALIDATOR_COMMENT.value],
                 Fieldnames.ID.value: row[Fieldnames.ID.value]
             })
+            if match_once: return row_matches[0]
     return row_matches
 
 def update_row(id, updates, skip_ids='', match_once=False):
