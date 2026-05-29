@@ -57,13 +57,14 @@ class Report:
         fig = self._build_chart()
 
         # Always save PNG
-        outpath = os.path.join(LOGS_DIR, f"{PROJ_NAME.replace(' ', '_')}_{PROJ_VERSION.replace(' ', '_')}.png")
+        fname = "_".join(part for part in [PROJ_NAME.replace(' ', '_'), PROJ_VERSION.replace(' ', '_'), "Findings.png"] if part.strip())
+        outpath = os.path.join(LOGS_DIR, fname)
         fig.savefig(
             outpath,
             bbox_inches="tight"
         )
         
-        logger.info(f"Output report chart to \"{outpath}\"")
+        logger.info(f"Report chart saved to \"{outpath}\"")
 
         # Only display GUI if enabled
         if GUI_MODE:

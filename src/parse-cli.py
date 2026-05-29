@@ -321,12 +321,14 @@ def main():
     control_flags = {}
     
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
+    argparser.add_argument('-v', '--version', action='store_true', help='Prints software version and exits')
     argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.CONFIG_DIR, "user_inputs.json"), help="Path to user inputs JSON file. By default looks for 'user_inputs.json' in config directory.")
     argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Checks current 'user_inputs.json' file for validity and report any errors without parsing.")
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Prints current input configuration from the user inputs JSON file pointed to by the 'inputs' option.")
+    argparser.add_argument('-pn', '--project-name', dest="projectname", help="Name of the project")
+    argparser.add_argument('-pv', '--project-version', dest="projectversion", help="Version of the project")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Prints a template of what a user inputs JSON file should contain.")
-    argparser.add_argument('-v', '--version', action='store_true', help='Prints software version and exits')
     
     args = argparser.parse_args()
     
@@ -350,6 +352,12 @@ def main():
     
     if args.out is not None and len(args.out) > 0:
         parser_outfile = args.out
+    
+    # Project name + version
+    if args.projectname is not None and len(args.projectname) > 0:
+        parsers.PROJ_NAME = args.projectname
+    if args.projectversion is not None and len(args.projectversion) > 0:
+        parsers.PROJ_VERSION = args.projectversion
         
     # Check inputs format
     if len(parser_inputs) > 0:
@@ -368,7 +376,10 @@ def main():
         sys.exit(0)
 
     # Output confirmation
-    s = "Reading from files:\n"
+    if len(parsers.PROJ_NAME) > 0:
+        s = f"\nConfiguration for " + " ".join([part for part in [parsers.PROJ_NAME, parsers.PROJ_VERSION]]) + ":\n"
+    else:
+        s = "\nConfiguration:\n"
     for i, inp in enumerate(parser_inputs, 1):
         s += f"{i})  Scanner: {inp[InputDictKeys.SCANNER.value]}\n    Path: {inp[InputDictKeys.PATH.value]}\n    Path substring to delete: {inp[InputDictKeys.REMOVE.value]}\n    Path substring to prepend: {inp[InputDictKeys.PREPEND.value]}\n"
     s += f"\nWriting to file: {parser_outfile}\n"
@@ -468,8 +479,8 @@ def main():
     
     report.generate_report()
     
-    logger.info(f"Parsing complete!\nSuccessfully parsed {report.get_total_findings()} findings")
-    print(f"\nParsing complete!\nSuccessfully parsed {report.get_total_findings()} findings")
+    logger.info(f"Parsing complete!")
+    print(f"\nParsing complete!")
     
     if report.get_total_errors() > 0:
         print(f"Errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")
