@@ -394,7 +394,7 @@ class Report:
         
         # Calculate total
         space = ' '*(_max_key_len-len("Total")+1)
-        outstr += f"\nTotal:{space}\t{str(total_findings).rjust(_max_val_len)}\t\t{"100.0%".rjust(6)}"
+        outstr += f"\nTotal:{space}\t{str(total_findings).rjust(_max_val_len)}\t\t{'100.0%'.rjust(6)}"
         total_errors = self.get_total_errors()
         outstr += f"\t\t{total_errors}"
         
