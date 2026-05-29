@@ -50,10 +50,10 @@ $ python3 parse-gui.py
 
 **Requirements:**
 
-External modules `tkinter`, `openpyxl`, and `pyinstaller` must be installed.
+External modules `tkinter`, `openpyxl`, `matplotlib`, and `pyinstaller` must be installed.
 
 ```bash
-$ pip install pyinstaller openpyxl
+$ pip install pyinstaller openpyxl matplotlib
 ```
 
 `tkinter` must be installed system-wide. Methods vary for [Windows](https://www.pythonguis.com/installation/install-tkinter-windows/) and [Linux](https://www.pythonguis.com/installation/install-tkinter-linux/).
