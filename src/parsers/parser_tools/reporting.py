@@ -37,7 +37,7 @@ class Report:
 
     def generate_report(self):
         global _plotlib_enabled
-        from parsers import GUI_MODE, LOGS_DIR
+        from parsers import PROJ_NAME, PROJ_VERSION, GUI_MODE, LOGS_DIR
         
         # Print CLI and log string here
         outstr = self._cli_table()
@@ -57,7 +57,7 @@ class Report:
         fig = self._build_chart()
 
         # Always save PNG
-        outpath = os.path.join(LOGS_DIR, "parse_results.png")
+        outpath = os.path.join(LOGS_DIR, f"{PROJ_NAME.replace(' ', '_')}_{PROJ_VERSION.replace(' ', '_')}.png")
         fig.savefig(
             outpath,
             bbox_inches="tight"
@@ -70,6 +70,7 @@ class Report:
             self._gui_chart(fig)
                     
     def _build_chart(self):
+        from parsers import PROJ_NAME, PROJ_VERSION
         findings = [i[0] for i in self.counts.values()]
         labels = list(self.counts.keys())
 
@@ -107,7 +108,7 @@ class Report:
         ax.add_artist(centre_circle)
 
         ax.set_title(
-            "Scanner Findings",
+            " ".join(part for part in [PROJ_NAME, PROJ_VERSION, "Findings"] if part.strip()),
             fontsize=16,
             pad=20
         )
@@ -117,7 +118,7 @@ class Report:
         return fig
     
     def _gui_chart(self, fig):
-        from parsers import LOGFILE
+        from parsers import PROJ_NAME, PROJ_VERSION, LOGFILE
         import tkinter as tk
 
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -383,7 +384,7 @@ class Report:
         ax.add_artist(centre_circle)
 
         ax.set_title(
-            "Scanner Findings",
+            " ".join(part for part in [PROJ_NAME, PROJ_VERSION, "Findings"] if part.strip()),
             fontsize=16,
             pad=20
         )

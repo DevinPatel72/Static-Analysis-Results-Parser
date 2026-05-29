@@ -106,6 +106,9 @@ def main():
     inputs_gui = InputsGUI(parser_inputs)
     if not inputs_gui.cleanexit or (inputs_gui.results is None or len(inputs_gui.results) <= 0):
         sys.exit(0)
+        
+    parsers.PROJ_NAME = inputs_gui.results_project_name
+    parsers.PROJ_VERSION = inputs_gui.results_project_version
     
     adjust_paths_gui = AdjustPathsGUI(inputs_gui.results)
     if not adjust_paths_gui.cleanexit or (adjust_paths_gui.results is None or len(adjust_paths_gui.results) <= 0):

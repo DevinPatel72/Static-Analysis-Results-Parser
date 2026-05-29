@@ -90,6 +90,33 @@ class InputsGUI:
         self.root.update()
         self.root.attributes('-topmost', False)
         
+        # Top row: Project Name + Version
+        top_frame = tk.Frame(self.root)
+        top_frame.pack(pady=(10, 0), padx=10, fill='x')
+
+        tk.Label(top_frame, text="Project:", font=("Arial", 10)).pack(side=tk.LEFT, padx=5)
+
+        self.project_name = PathInputWithPlaceholder(
+            top_frame,
+            placeholder="Project name...",
+            width=45
+        )
+        self.project_name.set_real_value(parsers.PROJ_NAME)
+        self.project_name.pack(side=tk.LEFT, padx=5)
+
+        tk.Label(top_frame, text="Version:", font=("Arial", 10)).pack(side=tk.LEFT, padx=(10, 5))
+
+        self.project_version = PathInputWithPlaceholder(
+            top_frame,
+            placeholder="v1.0",
+            width=30
+        )
+        self.project_version.set_real_value(parsers.PROJ_VERSION)
+        self.project_version.pack(side=tk.LEFT, padx=5)
+
+        # Make version visually smaller
+        self.project_version.config(width=10)
+        
         # Scrollable frame setup
         container = tk.Frame(self.root)
         container.pack(pady=10, padx=10, fill='both', expand=True)
@@ -207,7 +234,17 @@ class InputsGUI:
     
     def submit_data(self):
         results = []
-        runOnce = True
+        
+        project_name = self.project_name.get().strip()
+        project_version = self.project_version.get().strip()
+
+        if project_name == "" or project_name == self.project_name.placeholder:
+            project_name = ""
+        
+        if project_version == "" or project_version == self.project_version.placeholder:
+            project_version = ""
+        self.results_project_name = project_name
+        self.results_project_version = project_version
 
         for row_frame, path_entry, scanner_dropdown, version_entry in self.entries:
             path = path_entry.get().strip()

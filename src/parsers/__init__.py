@@ -2,6 +2,10 @@
 PROG_NAME = 'Static Analysis Results Parser'
 VERSION = '2.2.0'
 
+# Project Info
+PROJ_NAME = ""
+PROJ_VERSION = ""
+
 # Control Flag Names
 FLAG_CATEGORY_MAPPING = 'Category Mappings'
 FLAG_PREFLIGHT_RULES = 'Preflight Rules'
