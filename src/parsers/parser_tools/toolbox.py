@@ -367,6 +367,8 @@ def get_all_previews(inputs):
 def print_user_inputs_template():
     s = """{{
     "$schema": "schemas/user_inputs.schema.json",
+    "project_name": "example_proj",
+    "project_version": "v1.0",
     "main": [
         {{
             "scanner": "CPPCheck",

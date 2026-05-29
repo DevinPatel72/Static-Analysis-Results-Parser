@@ -76,7 +76,7 @@ class Report:
         labels = list(self.counts.keys())
 
         fig = Figure(
-            figsize=(8, 6),
+            figsize=(10, 6),
             dpi=100,
             constrained_layout=True
         )
@@ -87,16 +87,20 @@ class Report:
 
         wedges, texts, autotexts = ax.pie(
             findings,
-            labels=labels,
             autopct=lambda pct: (
                 f"{pct:.1f}%\n({int(round(pct/100 * sum(findings)))})"
             ),
             startangle=90,
             explode=explode,
-            pctdistance=0.82,
-            textprops={
-                "fontsize": 10
-            }
+            labeldistance=1.3, # Move labels outward
+            pctdistance=0.85, # Move percentages inward
+        )
+
+        ax.legend(
+            wedges,
+            labels,
+            loc="center left",
+            bbox_to_anchor=(0.82, 0.5)
         )
 
         # Donut center
@@ -343,54 +347,6 @@ class Report:
 
             info_label.bind("<Enter>", show_tooltip)
             info_label.bind("<Leave>", hide_tooltip)
-
-        # =========================
-        # Better Looking Pie Chart
-        # =========================
-
-        findings = [i[0] for i in self.counts.values()]
-        labels = list(self.counts.keys())
-
-        fig = Figure(
-            figsize=(8, 6),
-            dpi=100,
-            constrained_layout=True
-        )
-
-        ax = fig.add_subplot(111)
-
-        explode = [0.03] * len(findings)
-
-        wedges, texts, autotexts = ax.pie(
-            findings,
-            labels=labels,
-            autopct=lambda pct: (
-                f"{pct:.1f}%\n({int(round(pct/100 * sum(findings)))})"
-            ),
-            startangle=90,
-            explode=explode,
-            pctdistance=0.82,
-            textprops={
-                "fontsize": 10
-            }
-        )
-
-        # Donut center
-        centre_circle = plt.Circle(
-            (0, 0),
-            0.60,
-            fc="white"
-        )
-
-        ax.add_artist(centre_circle)
-
-        ax.set_title(
-            " ".join(part for part in [PROJ_NAME, PROJ_VERSION, "Findings"] if part.strip()),
-            fontsize=16,
-            pad=20
-        )
-
-        ax.axis("equal")
 
         # =========================
         # Center Chart In Window
