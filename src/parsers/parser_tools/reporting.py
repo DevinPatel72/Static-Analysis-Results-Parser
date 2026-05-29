@@ -1,12 +1,14 @@
 # reporting.py
 
+import os
 import logging
 from .toolbox import console
 
 _plotlib_enabled = False
 
 try:
-    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+    from matplotlib.figure import Figure
     _plotlib_enabled = True
 except ImportError:
     _plotlib_enabled = False
@@ -35,7 +37,7 @@ class Report:
 
     def generate_report(self):
         global _plotlib_enabled
-        from parsers import GUI_MODE
+        from parsers import GUI_MODE, LOGS_DIR
         
         # Print CLI and log string here
         outstr = self._cli_table()
@@ -50,22 +52,283 @@ class Report:
             console("Unable to generate plot charts because matplotlib failed to import. Skipping plot charts for reporting.", "Import Error", type='error')
             return
         
+        
+        # Create chart figure
+        fig = self._build_chart()
+
+        # Always save PNG
+        fig.savefig(
+            os.path.join(LOGS_DIR, "parse_results.png"),
+            bbox_inches="tight"
+        )
+
+        # Only display GUI if enabled
+        if GUI_MODE:
+            self._gui_chart(fig)
+                    
+    def _build_chart(self):
         total_findings, total_errors = self._get_total()
 
         findings = [i[0] for i in self.counts.values()]
-        errors = [i[1] for i in self.counts.values()]
         labels = list(self.counts.keys())
-        
-        plt.pie(
+
+        fig = Figure(figsize=(6, 5), dpi=100)
+        ax = fig.add_subplot(111)
+
+        ax.pie(
             findings,
             labels=labels,
             autopct="%1.1f%%"
         )
-        plt.title("Parse Results")
-        plt.show()
+
+        ax.set_title("Parse Results")
+
+        return fig
     
-    def save_chart(self):
-        pass
+    def _gui_chart(self, fig):
+        import tkinter as tk
+
+        import matplotlib.pyplot as plt
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+        from matplotlib.figure import Figure
+
+        root = tk.Tk()
+
+        root.title("Parse Report")
+        root.geometry("900x800")
+        root.minsize(700, 600)
+
+        total_findings, total_errors = self._get_total()
+
+        # =========================
+        # Table
+        # =========================
+
+        table_container = tk.Frame(root)
+        table_container.pack(
+            pady=10
+        )
+
+        table_frame = tk.Frame(table_container)
+        table_frame.pack(anchor="center")
+
+        headers = ["Scanner", "Findings", "Percentage", "Errors"]
+
+        for col, text in enumerate(headers):
+            lbl = tk.Label(
+                table_frame,
+                text=text,
+                font=("TkDefaultFont", 10, "bold"),
+                padx=10,
+                pady=5
+            )
+
+            lbl.grid(
+                row=0,
+                column=col,
+                sticky="ew"
+            )
+
+        for row_index, (scanner, values) in enumerate(self.counts.items(), start=1):
+            findings_count = values[0]
+            errors_count = values[1]
+
+            percentage = (
+                (findings_count / total_findings) * 100
+                if total_findings > 0 else 0
+            )
+
+            # Scanner
+            tk.Label(
+                table_frame,
+                text=scanner,
+                padx=10,
+                pady=3,
+                anchor="w"
+            ).grid(
+                row=row_index,
+                column=0,
+                sticky="ew"
+            )
+
+            # Findings
+            tk.Label(
+                table_frame,
+                text=findings_count,
+                padx=10,
+                pady=3
+            ).grid(
+                row=row_index,
+                column=1,
+                sticky="ew"
+            )
+
+            # Percentage
+            tk.Label(
+                table_frame,
+                text=f"{percentage:.1f}%",
+                padx=10,
+                pady=3
+            ).grid(
+                row=row_index,
+                column=2,
+                sticky="ew"
+            )
+
+            # Errors
+            error_kwargs = {}
+
+            if errors_count > 0:
+                error_kwargs = {
+                    "fg": "red",
+                    "font": ("TkDefaultFont", 10, "bold")
+                }
+
+            tk.Label(
+                table_frame,
+                text=errors_count,
+                padx=10,
+                pady=3,
+                **error_kwargs
+            ).grid(
+                row=row_index,
+                column=3,
+                sticky="ew"
+            )
+
+        # =========================
+        # Total Row
+        # =========================
+
+        total_row = len(self.counts) + 1
+
+        bold_font = ("TkDefaultFont", 10, "bold")
+
+        tk.Label(
+            table_frame,
+            text="Total",
+            font=bold_font,
+            padx=10,
+            pady=6
+        ).grid(
+            row=total_row,
+            column=0,
+            sticky="ew"
+        )
+
+        tk.Label(
+            table_frame,
+            text=total_findings,
+            font=bold_font,
+            padx=10,
+            pady=6
+        ).grid(
+            row=total_row,
+            column=1,
+            sticky="ew"
+        )
+
+        tk.Label(
+            table_frame,
+            text="100.0%",
+            font=bold_font,
+            padx=10,
+            pady=6
+        ).grid(
+            row=total_row,
+            column=2,
+            sticky="ew"
+        )
+
+        total_error_kwargs = {
+            "font": bold_font
+        }
+
+        if total_errors > 0:
+            total_error_kwargs["fg"] = "red"
+
+        tk.Label(
+            table_frame,
+            text=total_errors,
+            padx=10,
+            pady=6,
+            **total_error_kwargs
+        ).grid(
+            row=total_row,
+            column=3,
+            sticky="ew"
+        )
+
+        # =========================
+        # Better Looking Pie Chart
+        # =========================
+
+        findings = [i[0] for i in self.counts.values()]
+        labels = list(self.counts.keys())
+
+        fig = Figure(
+            figsize=(8, 6),
+            dpi=100,
+            constrained_layout=True
+        )
+
+        ax = fig.add_subplot(111)
+
+        explode = [0.03] * len(findings)
+
+        wedges, texts, autotexts = ax.pie(
+            findings,
+            labels=labels,
+            autopct="%1.1f%%",
+            startangle=90,
+            explode=explode,
+            pctdistance=0.82,
+            textprops={
+                "fontsize": 10
+            }
+        )
+
+        # Donut center
+        centre_circle = plt.Circle(
+            (0, 0),
+            0.60,
+            fc="white"
+        )
+
+        ax.add_artist(centre_circle)
+
+        ax.set_title(
+            "Parse Results",
+            fontsize=16,
+            pad=20
+        )
+
+        ax.axis("equal")
+
+        # =========================
+        # Center Chart In Window
+        # =========================
+
+        chart_frame = tk.Frame(root)
+        chart_frame.pack(
+            fill="both",
+            expand=True,
+            pady=(0, 10)
+        )
+
+        canvas = FigureCanvasTkAgg(
+            fig,
+            master=chart_frame
+        )
+
+        canvas.draw()
+
+        canvas.get_tk_widget().pack(
+            anchor="center",
+            expand=True
+        )
+
+        root.mainloop()
     
     def _cli_table(self):
         _max_key_len = max([len(k) for k in self.counts.keys()])
@@ -78,7 +341,7 @@ class Report:
         total_errors = self.get_total_errors()
         for k, v in self.counts.items():
             # Findings count
-            percentage = f"{(v[0] / total_findings)*100:.1f}%"
+            percentage = f"{(v[0] / total_findings)*100:.1f}%" if total_findings != 0 else "0.0%"
             space = ' '*(_max_key_len-len(k))
             outstr += f"{k}:{space}\t{str(v[0]).rjust(_max_val_len)}\t\t{percentage.rjust(6)}"
             

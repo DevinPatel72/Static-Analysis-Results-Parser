@@ -233,6 +233,8 @@ def main():
     
     parser_writer.close_writer()
     
+    report.generate_report()
+    
     if report.get_total_errors() > 0:
         console(f"Errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
         
