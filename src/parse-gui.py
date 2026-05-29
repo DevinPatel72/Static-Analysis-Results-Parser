@@ -234,7 +234,7 @@ def main():
     parser_writer.close_writer()
     
     if report.get_total_errors() > 0:
-        console(f"{report.get_total_errors()} errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
+        console(f"Errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
         
     
     logger.info(f"Parsing complete!\nSuccessfully parsed {report.get_total_findings()} findings")

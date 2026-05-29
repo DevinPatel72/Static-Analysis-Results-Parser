@@ -464,7 +464,7 @@ def main():
     print(f"\nParsing complete!\nSuccessfully parsed {report.get_total_findings()} findings")
     
     if report.get_total_errors() > 0:
-        print(f"{report.get_total_errors()} errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")
+        print(f"Errors have been detected while parsing files. Please see logfile \"{logfile}\" for more details.")
 
 
 if __name__ == "__main__":
