@@ -1484,6 +1484,24 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '125'}
         ),
         PRule(
+            rule_id = "gnatsas_duplicate_branches",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"gnatsas", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"duplicate branches", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1041'}
+        ),
+        PRule(
+            rule_id = "gnatsas_precondition",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"gnatsas", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"precondition", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '628'}
+        ),
+        PRule(
             rule_id = "gnatsas_precondition_conditional_raise",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -1491,6 +1509,35 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"precondition <conditional raise>", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '628'}
+        ),
+        PRule(
+            rule_id = "gnatsas_precondition_initialized",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"gnatsas", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"precondition", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.MESSAGE.value, pattern=r"requires (.*?) to be initialized", strictness=Strictness.REGEX, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '457'}
+        ),
+        PRule(
+            rule_id = "gnatsas_suspicious_precondition",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"gnatsas", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"suspicious precondition", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '628'}
+        ),
+        PRule(
+            rule_id = "gnatsas_unconditional_raise",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"gnatsas", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"raise exception", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.MESSAGE.value, pattern=r"unconditional raise", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '460'}
         ),
         PRule(
             rule_id = "jshint_bad_assignment",
