@@ -1,7 +1,7 @@
 # Static Analysis Results Parser
 
 ## Description
-The Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel or CSV file. Inputs can be entered via GUI or [json input](#configure-bulk-inputs). [Preflight override rules](#configure-preflight) can be defined in the config directory.
+The Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel or CSV file.
 
 ### Accepted Inputs:
 -  SARP:        `.xlsx` or `.csv`
@@ -61,10 +61,11 @@ $ pip install pyinstaller openpyxl matplotlib
 Then execute the build script.
 
 
-## Configure Bulk Inputs
-A user-writable config file can be created to quickly pass inputs in bulk.
-To generate this config file, run the parser once against valid input and check the config folder for "user_inputs.json."
-If any loaded data is changed in the GUI, "user_inputs.json" will be overwritten with the new data.
+## Configure CLI Inputs
+A user-writable config file `user_inputs.json` can be created to pass inputs via command-line.
+A template can be obtained by passing the `--example-template` switch in the CLI.
+This config file is also auto-generated whenever the GUI is executed, and subsequent runs will query to load previous data if  `user_inputs.json` exists.
+Note that if any loaded data is changed in the GUI, `user_inputs.json` will be overwritten with the new data.
 
 ## Configure CWE Mappings
 SARP allows configurable CWE mappings for scanners that do not output CWE data. A basic set of mappings are provided,
