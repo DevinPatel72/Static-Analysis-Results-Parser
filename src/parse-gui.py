@@ -134,7 +134,7 @@ def main():
 
         rulebuildergui = RuleBuilderGUI(parsers.prules)
         
-        if rulebuildergui.result is not None and len(rulebuildergui.result) > 0:
+        if rulebuildergui.result is not None and len(rulebuildergui.result) >= 0:
             parsers.prules = rulebuildergui.result
         
         if rulebuildergui.enable_default_rules is not None:
