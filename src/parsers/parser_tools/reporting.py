@@ -2,7 +2,10 @@
 
 import os
 import logging
+import traceback
 from .toolbox import console
+
+logger = logging.getLogger(__name__)
 
 _plotlib_enabled = False
 
@@ -12,8 +15,8 @@ try:
     _plotlib_enabled = True
 except ImportError:
     _plotlib_enabled = False
+    logger.error(traceback.format_exc())
 
-logger = logging.getLogger(__name__)
 
 class Report:
     """
@@ -49,7 +52,7 @@ class Report:
         
         # Create pie charts
         if not _plotlib_enabled:
-            console("Unable to generate plot charts because matplotlib failed to import. Skipping plot charts for reporting.", "Import Error", type='error')
+            console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", type='error')
             return
         
         
