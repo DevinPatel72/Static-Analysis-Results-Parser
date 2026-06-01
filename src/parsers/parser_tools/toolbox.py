@@ -365,7 +365,12 @@ def get_all_previews(inputs):
     return previews
 
 def print_user_inputs_template():
-    s = """{{
+    flags = ""
+    for f in InputDictKeys.FLAGS.value:
+        flags += f'        "{f}": [true|false],\n'
+    flags = flags.rstrip(',\n')
+    
+    s = f"""{{
     "$schema": "schemas/user_inputs.schema.json",
     "project_name": "example_proj",
     "project_version": "v1.0",
@@ -391,10 +396,7 @@ def print_user_inputs_template():
     ],
     "outfile": "path/to/outfile.[xlsx|csv]",
     "flags": {{
-        "{}": [true|false],
-        "{}": [true|false],
-        "{}": [true|false],
-        "{}": [true|false]
+{flags}
     }}
-}}""".format(parsers.FLAG_CATEGORY_MAPPING, parsers.FLAG_DUPE_SCAN_CONSOLIDATION, parsers.FLAG_PREFLIGHT_RULES, parsers.FLAG_DEFAULT_PREFLIGHT_RULES)
+}}"""
     print(s)
