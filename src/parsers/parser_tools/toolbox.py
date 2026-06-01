@@ -399,4 +399,4 @@ def print_user_inputs_template():
 {flags}
     }}
 }}"""
-    print(s)
+    print(s, end='')
