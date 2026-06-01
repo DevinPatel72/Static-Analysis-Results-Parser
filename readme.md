@@ -62,7 +62,7 @@ Then execute the build script.
 
 
 ## Configure CLI Inputs
-A user-writable config file `user_inputs.json` can be created to pass inputs via command-line.
+A user-writable config file `user_inputs.json` must be created to pass inputs via command-line.
 A template can be obtained by passing the `--example-template` switch in the CLI.
 This config file is also auto-generated whenever the GUI is executed, and subsequent runs will query to load previous data if  `user_inputs.json` exists.
 Note that if any loaded data is changed in the GUI, `user_inputs.json` will be overwritten with the new data.
