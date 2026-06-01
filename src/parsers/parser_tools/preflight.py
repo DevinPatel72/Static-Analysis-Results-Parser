@@ -60,9 +60,6 @@ def load_prules():
 def save_prules(prules):
     from parsers import PREFLIGHT_DIR
     
-    if len(prules) < 0:
-        return
-    
     data_path = os.path.join(PREFLIGHT_DIR, 'preflight_rules.py')
     
     prules.sort(key=lambda rule: int(rule.precedence))
