@@ -321,14 +321,14 @@ def main():
     control_flags = {}
     
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
-    argparser.add_argument('-v', '--version', action='store_true', help='Prints software version and exits')
+    argparser.add_argument('-v', '--version', action='store_true', help='Print software version and exit')
     argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.CONFIG_DIR, "user_inputs.json"), help="Path to user inputs JSON file. By default looks for 'user_inputs.json' in config directory.")
     argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
-    argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Checks current 'user_inputs.json' file for validity and report any errors without parsing.")
-    argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Prints current input configuration from the user inputs JSON file pointed to by the 'inputs' option.")
+    argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Check current 'user_inputs.json' file for validity and report any errors without parsing.")
+    argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Print current input configuration from the user inputs JSON file pointed to by the 'inputs' option.")
     argparser.add_argument('-pn', '--project-name', dest="projectname", help="Name of the project")
     argparser.add_argument('-pv', '--project-version', dest="projectversion", help="Version of the project")
-    argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Prints a template of what a user inputs JSON file should contain.")
+    argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print a template of what a user inputs JSON file should contain.")
     
     args = argparser.parse_args()
     
