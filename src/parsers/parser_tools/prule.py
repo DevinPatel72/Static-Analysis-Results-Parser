@@ -3,6 +3,7 @@
 from enum import Enum
 import fnmatch
 import re
+from .toolbox import Fieldnames
 
 # Implementation for a rule expression tree
 
@@ -65,7 +66,7 @@ class Condition:
     def __str__(self):
         return (
             f'Condition('
-            f'fieldname={self.fieldname!r}, '
+            f'fieldname=Fieldnames.{Fieldnames(self.fieldname).name}.value, '
             f'pattern={self.pattern!r}, '
             f'strictness=Strictness.{self.strictness.name}, '
             f'case_sensitive={self.case_sensitive}'
