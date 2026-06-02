@@ -126,11 +126,10 @@ class Report:
         return fig
     
     def _gui_chart(self, fig):
-        from parsers import PROJ_NAME, PROJ_VERSION, LOGFILE
+        from parsers import LOGFILE
         import tkinter as tk
 
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-        from matplotlib.figure import Figure
 
         root = tk.Tk()
 
