@@ -10,9 +10,9 @@ from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, console, loa
 import parsers
 from parsers import PROG_NAME, VERSION
 from parsers import *
-from parsers.parser_tools.reporting import Report
 from parsers.parser_tools import parser_writer, preflight
 import parsers.parser_tools.progressbar as progressbar
+from parsers.parser_tools.begin_parse import begin
 
 parsers.GUI_MODE = True
 progressbar.DISABLE_PROGRESS_BAR = True
@@ -143,8 +143,6 @@ def main():
             control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = True
         
         if rulebuildergui.result is None and rulebuildergui.enable_default_rules is None:
-            # Alert that execution is stopped
-            console("No parsing was done.", title="Program terminated", type='info')
             sys.exit(0)
     else:
         parsers.prules = []
@@ -174,82 +172,23 @@ def main():
     preflight.save_prules(parsers.prules)
     
     # Load the mapping if true
-    if control_flags[FLAG_CATEGORY_MAPPING]:
+    if control_flags[InputDictKeys.OVERRIDE_VULN_MAPPING.value]:
         parsers.cwe_categories = load_config_cwe_category_mappings()
-        
+
     # Init the outfile
     if parser_outfile.lower().endswith('.csv'):
         force_csv = True
     else:
         force_csv = False
     parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
-
+    
     # Put SRM in the back
     for i, inp in enumerate(parser_inputs, start=0):
         if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in parsers.srm_keywords):
             parser_inputs.append(parser_inputs.pop(i))
             break
-        
-    # Init report object
-    report = Report(scanners=[i[InputDictKeys.SCANNER.value] for i in parser_inputs])
-
-    # Parse the inputs
-    for entry in parser_inputs:
-        fpath = entry[InputDictKeys.PATH.value]
-        scanner = entry[InputDictKeys.SCANNER.value]
-        substr = entry[InputDictKeys.REMOVE.value]
-        prepend = entry[InputDictKeys.PREPEND.value]
-        
-        
-        scan_match = scanner.lower().replace(' ', '')
-        path = os.path.realpath(fpath)
-        
-        t_finding_count = 0
-        t_err_count = 0
-        if any(s in scan_match for s in parsers.aio_keywords):
-            t_finding_count, t_err_count = aio.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.xmarx_keywords):
-            t_finding_count, t_err_count = checkmarx.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.coverity_keywords):
-            t_finding_count, t_err_count = coverity.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            t_finding_count, t_err_count = cppcheck.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.depcheck_keywords):
-            t_finding_count, t_err_count = owasp_depcheck.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.eslint_keywords):
-            t_finding_count, t_err_count = eslint.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.manualcve_keywords):
-            t_finding_count, t_err_count = manual_cve.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            t_finding_count, t_err_count = gnatsas.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.fortify_keywords):
-            t_finding_count, t_err_count = fortify.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            t_finding_count, t_err_count = pragmatic.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.pylint_keywords):
-            t_finding_count, t_err_count = pylint.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.semgrep_keywords):
-            t_finding_count, t_err_count = semgrep.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.sigasi_keywords):
-            t_finding_count, t_err_count = sigasi.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.srm_keywords):
-            t_finding_count, t_err_count = srm.parse(path, scanner, substr, prepend)
-        else:
-            logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
-            t_finding_count = 0
-            t_err_count = 1
-        
-        report.counts[scanner][0] += t_finding_count
-        report.counts[scanner][1] += t_err_count
     
-    parser_writer.close_writer()
-    
-    report.generate_report()
-    
-    # if report.get_total_errors() > 0:
-    #     console(f"Errors have been detected while parsing files.\nPlease see logfile \"{logfile}\" for more details.", 'Errors Detected', 'warning')
-        
-    #console(f"Parsing Complete!\nSuccessfully parsed {report.get_total_findings()} findings.", PROG_NAME, 'info')
+    begin(parser_inputs)
     
     
 
@@ -266,9 +205,13 @@ if __name__ == "__main__":
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        console(f"Uncaught exception caused the program to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error")
+        console(f"Uncaught exception caused SARP to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error")
         logger.error("\n" + traceback.format_exc())
         exitcode = 1
     finally:
+        if parsers.progress_queue is not None:
+            parsers.progress_queue.put({
+                "type": "stop"
+            })
         logger.info(f"Program terminated with exit code {exitcode}")
         sys.exit(exitcode)
