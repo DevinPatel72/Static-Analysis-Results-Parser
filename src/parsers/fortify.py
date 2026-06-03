@@ -18,7 +18,7 @@ def path_preview(fpath):
     # Parse the input file
     try:
         # Create a temporary directory to extract files
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as temp_dir:
+        with tempfile.TemporaryDirectory() as temp_dir:
             # Extract the FPR archive
             with zipfile.ZipFile(fpath, 'r') as zip_ref:
                 zip_ref.extractall(temp_dir)
@@ -66,7 +66,7 @@ def parse(fpath, scanner, substr, prepend):
     total_vulnerabilities = 0
     
     # Create a temporary directory to extract files
-    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # Extract the FPR archive
         with zipfile.ZipFile(fpath, 'r') as zip_ref:
             zip_ref.extractall(temp_dir)
@@ -296,7 +296,7 @@ def parse(fpath, scanner, substr, prepend):
 
 def check_fvdl(fpath):
     # Create a temporary directory to extract files
-    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # Extract the FPR archive
         with zipfile.ZipFile(fpath, 'r') as zip_ref:
             zip_ref.extractall(temp_dir)
