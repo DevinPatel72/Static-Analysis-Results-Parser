@@ -436,7 +436,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n\nProgram terminated by user...")
         logger.info("Program terminated by user...")
-        exitcode = 0
+        exitcode = 6
     except PermissionError:
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2

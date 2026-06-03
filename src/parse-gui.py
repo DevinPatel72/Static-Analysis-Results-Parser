@@ -200,7 +200,7 @@ if __name__ == "__main__":
         exitcode = se.code
     except KeyboardInterrupt:
         logger.info("Program terminated by user...")
-        sys.exit(0)
+        exitcode = 6
     except PermissionError:
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
