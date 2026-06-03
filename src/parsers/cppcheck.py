@@ -29,7 +29,8 @@ def path_preview(fpath):
 def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
-    # Count errors encountered while running
+    # Count findings and errors encountered while running
+    finding_count = 0
     err_count = 0
     
     # Parse the XML file
@@ -41,14 +42,13 @@ def parse(fpath, scanner, substr, prepend):
     total_entries = len(errors.findall('error'))
     if total_entries <= 0:
         logger.error("No entries found in the XML file. Skipping cppcheck parsing.")
-        return err_count + 1
+        return finding_count, err_count + 1
     
     scanner_version = root.find('cppcheck').get('version')
     scanner = f"CppCheck {scanner_version}"
     
     # Keep track of error number for debug
     error_num = 0
-    finding_count = 0
     total_errors = len(errors.findall('error'))
     
     # Output filtered CppCheck findings here

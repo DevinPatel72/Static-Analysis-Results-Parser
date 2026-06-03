@@ -55,13 +55,13 @@ def parse(fpath, scanner, substr, prepend):
                 data = {'findings': [row for row in reader]}
             else:
                 logger.error(f"Unsupported file type for semgrep results: {fpath}")
-                return err_count + 1
+                return finding_count, err_count + 1
     except json.JSONDecodeError:
         logger.error(f"Invalid JSON format: {fpath}")
-        return err_count + 1
+        return finding_count, err_count + 1
     except Exception:
         logger.error(f"Unable to read file: {fpath}")
-        return err_count + 1
+        return finding_count, err_count + 1
     
     # Get meta information
     scanner_version = data.get('semgrep_version', '')

@@ -25,7 +25,8 @@ def path_preview(fpath):
 def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
-    # Count errors encountered while running
+    # Count findings and errors encountered while running
+    finding_count = 0
     err_count = 0
 
     # Open json in read
@@ -34,11 +35,10 @@ def parse(fpath, scanner, substr, prepend):
             data = json.load(f)
     except:
         logger.error(f"File \'{fpath}\' failed to open:\n{traceback.format_exc()}")
-        return err_count + 1
+        return finding_count, err_count + 1
     
     # Keep track of issue number for debug
     issue_num = 0
-    finding_count = 0
     total_issues = len(data)
     
     # Loop through every issue in json

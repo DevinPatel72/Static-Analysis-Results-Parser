@@ -45,7 +45,7 @@ def parse(fpath, scanner, substr, prepend):
             data = json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
         logger.error(f"[ERROR] Invalid JSON format: {fpath}")
-        return err_count + 1
+        return finding_count, err_count + 1
     
     issues = data['issues']
     
