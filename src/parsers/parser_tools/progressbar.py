@@ -30,9 +30,9 @@ def progress_bar(iteration, total, prefix='', suffix='', decimals=2, length=50, 
     if total == 0:
         total = 1
     
-    # Iteration check at every 50th division of the total amount
+    # Iteration check at every 47th division of the total amount
     if total != _old_total:
-        _modulo = (total // 50) if (total // 50) > 0 else 1
+        _modulo = (total // 47) if (total // 47) > 0 else 1
         _old_total = total
 
     if iteration < total and iteration % _modulo != 0:
