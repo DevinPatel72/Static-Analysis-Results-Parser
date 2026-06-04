@@ -1,5 +1,11 @@
 # Change Log
 
+## [Version 2.4.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.4.0) (2026-06-04)
+- New feature: Added a progress bar to the GUI so SARP doesn't appear to hang, freeze, or quit once parsing begins.
+- Fixed bug where an empty preflight ruleset in the GUI will be ignored and still use previously loaded rules.
+- Fixed bug where an empty preflight ruleset in the GUI didn't overwrite the rule config file.
+- Fixed bug where certain error conditions in some parsers will result in a crash.
+
 ## [Version 2.3.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.3.0) (2026-05-29)
 - New feature: Added finding reports to GUI and CLI. A chart graphic is displayed in the GUI executable but is always saved to the `logs` directory regardless of GUI or CLI.
 - Added ability to specify project name and version
