@@ -25,7 +25,8 @@ def path_preview(fpath):
 def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
-    # Count errors encountered while running
+    # Count findings and errors encountered while running
+    finding_count = 0
     err_count = 0
 
     # Open json in read
@@ -34,11 +35,10 @@ def parse(fpath, scanner, substr, prepend):
             data = json.load(f)
     except:
         logger.error(f"File \'{fpath}\' failed to open:\n{traceback.format_exc()}")
-        return err_count + 1
+        return finding_count, err_count + 1
     
     # Keep track of issue number for debug
     issue_num = 0
-    finding_count = 0
     total_issues = 0
     
     # Find total number of issues
@@ -124,7 +124,7 @@ def load_eslint_cdata():
         with open(os.path.join(MAPPINGS_DIR, 'eslint_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console("Unable to load Eslint CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')
+        console("Unable to load Eslint CWE mappings: Invalid JSON format\nSARP will continue without CWE mappings.", "Config Error", type='error')
         return {"__eslint_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
 
 def get_eslint_cdata(rule_id, default=''):

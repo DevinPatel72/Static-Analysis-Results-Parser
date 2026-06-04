@@ -45,7 +45,7 @@ def parse(fpath, scanner, substr, prepend):
             data = json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
         logger.error(f"[ERROR] Invalid JSON format: {fpath}")
-        return err_count + 1
+        return finding_count, err_count + 1
     
     issues = data['issues']
     
@@ -134,7 +134,7 @@ def load_sigasi_cdata():
         with open(os.path.join(MAPPINGS_DIR, 'sigasi_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console("Unable to load Sigasi CWE mappings: Invalid JSON format\nThe program will continue without CWE mappings.", "Config Error", type='error')
+        console("Unable to load Sigasi CWE mappings: Invalid JSON format\nSARP will continue without CWE mappings.", "Config Error", type='error')
         return {"__sigasi_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
 
 def get_sigasi_cdata(rule_id, rule_type, default=''):

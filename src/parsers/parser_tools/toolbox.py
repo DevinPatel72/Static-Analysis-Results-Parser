@@ -83,12 +83,20 @@ def validate_path_and_scanner(fpath, scanner):
     # Alert for large file size for CLI
     if not FILE_SIZE_WARNED_ONCE and os.path.isfile(fpath) and get_file_size_mb(fpath) > LARGE_FILE_THRESHOLD_MB:
         FILE_SIZE_WARNED_ONCE = True
-        console("A large input file has been detected. Processing times may be fairly long, so the program will appear to freeze or hang.", title='Large File Detected', type='warning')
+        if parsers.GUI_MODE:
+            _end = " If SARP takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
+        else:
+            _end = ""
+        console("A large input file has been detected. Processing times may be fairly long, so SARP will appear to freeze or hang." + _end, title='Large File Detected', type='warning')
     
     # Alert for fortify fpr files
     if not FORTIFY_FILE_WARNED_ONCE and os.path.isfile(fpath) and fpath.endswith('.fpr'):
         FORTIFY_FILE_WARNED_ONCE = True
-        console("A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so the program will appear to freeze or hang.", title='FPR File Detected', type='warning')
+        if parsers.GUI_MODE:
+            _end = " If SARP takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
+        else:
+            _end = ""
+        console("A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so SARP will appear to freeze or hang." + _end, title='FPR File Detected', type='warning')
 
     # Checkmarx inputs
     if any(s in scan_match for s in parsers.xmarx_keywords) and os.path.exists(fpath):
@@ -158,7 +166,7 @@ def load_config_cwe_category_mappings():
         with open(os.path.join(parsers.MAPPINGS_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console("Unable to load MITRE CWE Category Mappings: Invalid JSON format\nThe program will continue without CWE category mappings.", "Config Error", type='error')
+        console("Unable to load MITRE CWE Category Mappings: Invalid JSON format\nSARP will continue without CWE category mappings.", "Config Error", type='error')
         return {}
 
 def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):

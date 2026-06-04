@@ -206,4 +206,6 @@ def close_writer():
     if not GUI_MODE and elapsed_time >= 0:
         print()
     
+    logger.info(f"Output saved to {__filepath}")
     __filepath = None
+    

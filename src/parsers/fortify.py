@@ -60,10 +60,10 @@ def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Count errors encountered while running
+    finding_count = 0
     err_count = 0
     vulnerability_num = 0
     total_vulnerabilities = 0
-    finding_count = 0
     
     # Create a temporary directory to extract files
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -75,7 +75,7 @@ def parse(fpath, scanner, substr, prepend):
         fvdl_path = os.path.join(temp_dir, "audit.fvdl")
         if not os.path.exists(fvdl_path):
             logger.error("audit.fvdl not found in the provided FPR file. Skipping fortify parsing.")
-            return err_count + 1
+            return finding_count, err_count + 1
 
         # Parse the audit.fvdl file
         tree = ET.parse(fvdl_path)
@@ -86,7 +86,7 @@ def parse(fpath, scanner, substr, prepend):
         total_vulnerabilities = len(root.findall('.//ns:Vulnerability', namespace))
         if total_vulnerabilities <= 0:
             logger.error(f"No vulnerabilities found in the FPR file \"{fpath}\". Skipping the file.")
-            return err_count + 1
+            return finding_count, err_count + 1
 
         # Extract base path for source files
         source_base_path_elem = root.find('.//ns:SourceBasePath', namespace)
