@@ -116,7 +116,7 @@ def run_parsers(parser_inputs):
         _report.counts[scanner][1] += t_err_count
         
         if parsers.GUI_MODE:
-            time.sleep(0.3)
+            time.sleep(0.2)
     
     parser_writer.close_writer()
 
