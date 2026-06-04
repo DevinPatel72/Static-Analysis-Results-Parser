@@ -115,6 +115,28 @@ class Report:
 
         ax.add_artist(centre_circle)
 
+        # Total in center
+        ax.text(
+            0,
+            0.065,
+            f"Total",
+            ha="center",
+            va="center",
+            fontsize=14,
+            fontweight="bold"
+        )
+        
+        # Second line of text with the actual total
+        ax.text(
+            0,
+            -0.065,
+            str(self.get_total_findings()),
+            ha="center",
+            va="center",
+            fontsize=14,
+            fontweight="bold"
+        )
+
         ax.set_title(
             " ".join(part for part in [PROJ_NAME, PROJ_VERSION, "Findings"] if part.strip()),
             fontsize=16,
