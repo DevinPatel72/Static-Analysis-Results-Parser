@@ -170,7 +170,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, 
                                         Fieldnames.VALIDATOR_COMMENT.value:'',
                                         Fieldnames.ID.value:id,
                                         Fieldnames.TYPE.value:query,
-                                        Fieldnames.PATH.value:path,
+                                        Fieldnames.PATH.value:dest_path,
                                         Fieldnames.LINE.value:dest_line,
                                         Fieldnames.SYMBOL.value:row['Name'],
                                         Fieldnames.MESSAGE.value:trace,
@@ -275,7 +275,10 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
                             if int(node_id) == 1:
                                 symbol = t_name
                             
-                            # Update t_line to be dest line if it exists and is a number
+                            # Update t_path and t_line to be dest path/line if it exists and is a number
+                            if t_path is not None and len(str(t_path)) > 0:
+                                path = t_path
+                            
                             if t_line is not None and len(str(t_line)) > 0 and str(t_line).isdigit():
                                 line = int(t_line)
                             
