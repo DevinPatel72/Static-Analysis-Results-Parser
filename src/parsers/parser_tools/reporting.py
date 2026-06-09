@@ -88,11 +88,17 @@ class Report:
 
         explode = [0.03] * len(findings)
 
+        def make_autopct(values):
+            def autopct(pct):
+                value = int(round(pct / 100 * sum(findings)))
+                if value == 0:
+                    return ""
+                return f"{pct:.1f}%\n({value})"
+            return autopct
+
         wedges, texts, autotexts = ax.pie(
             findings,
-            autopct=lambda pct: (
-                f"{pct:.1f}%\n({int(round(pct/100 * sum(findings)))})"
-            ),
+            autopct=make_autopct(findings),
             startangle=90,
             explode=explode,
             labeldistance=1.3, # Move labels outward
