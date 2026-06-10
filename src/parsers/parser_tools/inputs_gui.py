@@ -101,7 +101,7 @@ class InputsGUI:
 
         self.project_name = PathInputWithPlaceholder(
             top_frame,
-            placeholder="Project name...",
+            placeholder="Project name",
             width=45
         )
         self.project_name.set_real_value(parsers.PROJ_NAME)
