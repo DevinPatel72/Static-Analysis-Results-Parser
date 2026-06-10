@@ -29,7 +29,7 @@ def progress_bar(iteration, total, prefix='', suffix='', decimals=2, length=50, 
     if total == 0:
         l_total = 1
     else:
-        l_total = l_total
+        l_total = total
     
     # Iteration check at every 47th division of the total amount
     if l_total != _old_total:
