@@ -28,14 +28,16 @@ def progress_bar(iteration, total, prefix='', suffix='', decimals=2, length=50, 
     
     # Zero check
     if total == 0:
-        total = 1
+        l_total = 1
+    else:
+        l_total = l_total
     
     # Iteration check at every 47th division of the total amount
-    if total != _old_total:
-        _modulo = (total // 47) if (total // 47) > 0 else 1
-        _old_total = total
+    if l_total != _old_total:
+        _modulo = (l_total // 47) if (l_total // 47) > 0 else 1
+        _old_total = l_total
 
-    if iteration < total and iteration % _modulo != 0:
+    if iteration < l_total and iteration % _modulo != 0:
         return
     
     # If GUI mode, send message to loading screen
@@ -43,15 +45,15 @@ def progress_bar(iteration, total, prefix='', suffix='', decimals=2, length=50, 
         parsers.progress_queue.put({
             "type": "progress",
             "status": prefix.strip(),
-            "percent": (iteration / total) * 100
+            "percent": (iteration / l_total) * 100
         })
     # If CLI mode, print if progress bar is not disabled
     elif not DISABLE_PROGRESS_BAR:
-        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-        filled_length = int(length * iteration // total)
+        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(l_total)))
+        filled_length = int(length * iteration // l_total)
         bar = fill * filled_length + unfill * (length - filled_length)
         print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=print_end)
 
         # Print new line on complete
-        if iteration >= total:
+        if iteration >= l_total:
             print()
