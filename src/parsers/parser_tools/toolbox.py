@@ -215,6 +215,9 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         # All is green, set flags equal to control_flags
         control_flags = user_inputs['flags']
         
+        # Set inputs path global for export
+        parsers.INPUTS_PATH = inputs_path
+        
         # Completed parsing
         return parser_inputs, parser_outfile, control_flags
 
@@ -277,7 +280,6 @@ def check_CWE_category(cwe, count=0):
         return cwe, count
 
 def export_config(inputs, outfile, control_flags):
-    inputs_path = os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')
     out_dict = {"$schema": "schemas/user_inputs.schema.json",
                 'project_name': parsers.PROJ_NAME,
                 'project_version': parsers.PROJ_VERSION,
@@ -285,7 +287,7 @@ def export_config(inputs, outfile, control_flags):
                 'outfile': outfile,
                 'flags': control_flags}
     
-    with open(inputs_path, 'w', encoding='utf-8-sig') as uout:
+    with open(parsers.INPUTS_PATH, 'w', encoding='utf-8-sig') as uout:
         json.dump(out_dict, uout, indent=4)
 
 

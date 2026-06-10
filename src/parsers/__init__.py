@@ -53,6 +53,7 @@ LOGFILE = 'temp.log'
 CONFIG_DIR = 'config'
 MAPPINGS_DIR = 'mappings'
 PREFLIGHT_DIR = 'preflight'
+INPUTS_PATH = 'config/user_inputs.json'
 
 # CWE Category Mappings
 cwe_categories = {}
