@@ -22,7 +22,6 @@ def progress_bar(iteration, total, prefix='', suffix='', decimals=2, length=50, 
     :param fill: Bar fill character (Str)
     :param unfill: Bar empty character (Str)
     :param print_end: End character (e.g. "\r", "\r\n") (Str)
-    :param scanner: Scanner representing the progress bar
     """
     global _modulo, _old_total
     
