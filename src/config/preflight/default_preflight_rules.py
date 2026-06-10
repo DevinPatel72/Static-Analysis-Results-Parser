@@ -9,6 +9,24 @@ from parsers.parser_tools.toolbox import Fieldnames
 
 DEFAULT_PRULES = [
         PRule(
+            rule_id = "checkmarx_buffer_size_literal",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"checkmarx", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Buffer Size Literal", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '789'}
+        ),
+        PRule(
+            rule_id = "checkmarx_buffer_size_literal_condition",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"checkmarx", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Buffer Size Literal Condition", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '129'}
+        ),
+        PRule(
             rule_id = "checkmarx_empty_methods",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -18,6 +36,43 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '1071', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
+            rule_id = "checkmarx_insufficient_random_values",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"checkmarx", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Use of Insufficiently Random Values", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '338'}
+        ),
+        PRule(
+            rule_id = "checkmarx_goto_statement",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"checkmarx", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"GOTO Statement", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1075'}
+        ),
+        PRule(
+            rule_id = "checkmarx_methods_without_returntype",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"checkmarx", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Methods Without ReturnType", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
+        ),
+        PRule(
+            rule_id = "checkmarx_public_variable_not_final",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"checkmarx", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Exposure of Resource to Wrong Sphere", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCORING_BASIS.value, pattern=r"493", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.CONFIDENCE.value: 'Info', Fieldnames.VALIDATOR_COMMENT.value: 'Checkmarx blindly marks struct variables as public attributes not marked final'}
+        ),
+        PRule(
             rule_id = "checkmarx_trufflehog_highentropy_strings",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -25,6 +80,15 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"TruffleHog HighEntropy Strings", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '331'}
+        ),
+        PRule(
+            rule_id = "checkmarx_weak_randomness",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"checkmarx", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Weak Randomness Biased Random Sample", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '340'}
         ),
         PRule(
             rule_id = "coverity_a_bit_shift_operation_has_a_shift_amount_which_is_too_large_or_has_a_negative_value",
@@ -90,7 +154,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"An expression with no side-effect or unintended effect indicates a possible logic flaw", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "coverity_assignment_of_a_variable_or_expression_to_itself_has_no_effect",
@@ -99,7 +163,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Assignment of a variable or expression to itself has no effect", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "coverity_comparing_two_pointers_not_into_the_same_object",
@@ -210,13 +274,22 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '787'}
         ),
         PRule(
+            rule_id = "coverity_parse_error",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A parse error caused a", strictness=Strictness.CONTAINS, case_sensitive=False)
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
             rule_id = "coverity_parse_warning",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A parse warning from the Coverity parser may indicate a bug, or poor coding practice", strictness=Strictness.EXACT, case_sensitive=False)
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1076'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "coverity_user_definitions_for_at_least_one_but_not_all_special_functions",
@@ -304,7 +377,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Function parameter assignment has no external effect", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_baseclassvaralsodefinedinclass",
@@ -597,7 +670,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Duplicate expression for condition and assignment", strictness=Strictness.EXACT, case_sensitive=False),
                     ])
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_duplicateCondition",
@@ -612,7 +685,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Duplicate if condition", strictness=Strictness.EXACT, case_sensitive=False),
                     ])
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_duplinheritedmember",
@@ -956,7 +1029,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant assignment of Variable to itself", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_redundantcondition",
@@ -971,7 +1044,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant condition: part of a conditional negates the need for the other part", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_redundantifremove",
@@ -986,7 +1059,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant checking of STL container element existence before removing it", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_redundantinitialization",
@@ -998,7 +1071,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantInitialization", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_redundantpointerop",
@@ -1010,7 +1083,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantPointerOp", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_returnbyreference",
@@ -1049,7 +1122,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant assignment of ", strictness=Strictness.STARTSWITH, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_shadowvariable",
@@ -1354,7 +1427,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uselessAssignmentArg", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_uselessassignmentarg",
@@ -1369,7 +1442,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uselessAssignmentPtrArg", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_uselesscallssubstr",
@@ -1384,7 +1457,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Ineffective call of function 'substr'", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_uselessOverride",
@@ -1396,7 +1469,7 @@ DEFAULT_PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uselessOverride", strictness=Strictness.EXACT, case_sensitive=False)
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_usestlalgorithm",
@@ -1645,7 +1718,7 @@ DEFAULT_PRULES = [
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Unnecessary \"else\" after ", strictness=Strictness.STARTSWITH, case_sensitive=False),
                         ]),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "pylint_too_few",
@@ -1678,7 +1751,7 @@ DEFAULT_PRULES = [
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Unnecessary ", strictness=Strictness.STARTSWITH, case_sensitive=False),
                         ]),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "pylint_useless",
@@ -1693,6 +1766,6 @@ DEFAULT_PRULES = [
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Useless ", strictness=Strictness.STARTSWITH, case_sensitive=False),
                         ]),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         )
 ]
