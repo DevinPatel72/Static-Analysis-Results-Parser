@@ -80,8 +80,11 @@ class PathInputWithPlaceholder(tk.Entry):
             self['fg'] = self.placeholder_color
 
 class InputsGUI:
-    def __init__(self, inputs={}):
-        self.results = inputs
+    def __init__(self, inputs=None):
+        if inputs is None:
+            self.results = {}
+        else:
+            self.results = inputs
         self.cleanexit = False
         self.root = tk.Tk()
         self.root.title(WINDOW_TITLE)
@@ -171,9 +174,14 @@ class InputsGUI:
         # Execute GUI
         self.root.mainloop()
 
-    def add_entry(self, entry={}):
+    def add_entry(self, p_entry=None):
         row_frame = tk.Frame(self.entry_frame)
         row_frame.pack(fill='x', pady=2)
+        
+        if p_entry is None:
+            entry = {}
+        else:
+            entry = p_entry
 
         # Scanner dropdown (Combobox)
         scanner_dropdown_placeholder = self._select_scanner(entry[InputDictKeys.SCANNER.value]) if len(entry) > 0 else 'Select Scanner...'
@@ -451,9 +459,12 @@ class AdjustPathsGUI:
         self.root.destroy()
 
 class OutfileFlagsGUI:
-    def __init__(self, outfile="", control_flags={}):
+    def __init__(self, outfile="", control_flags=None):
         self.initial_outfile = outfile
-        self.initial_flags = control_flags
+        if control_flags is None:
+            self.initial_flags = {}
+        else:
+            self.initial_flags = control_flags
         self.results = {}
         self.cleanexit = False
         
