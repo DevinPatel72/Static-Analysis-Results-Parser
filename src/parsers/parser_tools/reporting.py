@@ -154,14 +154,14 @@ class Report:
         return fig
     
     def _gui_chart(self, fig):
-        from parsers import LOGFILE
+        from parsers import PROG_NAME, VERSION, LOGFILE
         import tkinter as tk
 
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
         root = tk.Tk()
 
-        root.title("Parse Report")
+        root.title(f"{PROG_NAME} Report")
         root.geometry("900x800")
         root.minsize(700, 600)
 
@@ -400,6 +400,10 @@ class Report:
             anchor="center",
             expand=True
         )
+        
+        # Version text
+        version_label = tk.Label(root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
+        version_label.pack(side="bottom", pady=5)
 
         root.mainloop()
     
