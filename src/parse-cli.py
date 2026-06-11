@@ -35,6 +35,7 @@ parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
 parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
 parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
 parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
+parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
 
 # Set log paths
 parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
@@ -322,7 +323,7 @@ def main():
     
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument('-v', '--version', action='store_true', help='Print software version and exit')
-    argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.CONFIG_DIR, "user_inputs.json"), help="Path to user inputs JSON file. By default looks for 'user_inputs.json' in config directory.")
+    argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.INPUTS_DIR, "user_inputs.json"), help="Path to user inputs JSON file. By default looks for 'user_inputs.json' in config directory.")
     argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Check the user inputs JSON file pointed to by the 'inputs' option for validity, report any errors, then exit.")
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Print current input configuration from the user inputs JSON file pointed to by the 'inputs' option then exit.")

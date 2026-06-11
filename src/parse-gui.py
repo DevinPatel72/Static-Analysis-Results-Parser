@@ -36,6 +36,7 @@ parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
 parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
 parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
 parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
+parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
 
 # Set log paths
 parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
@@ -73,7 +74,7 @@ def main():
     control_flags = {}
     
     # Ask user if they wish to load configuration data from file
-    if os.path.isfile(os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')):
+    if os.path.isfile(os.path.join(parsers.INPUTS_DIR, 'user_inputs.json')):
         
         yesnogui = YesNoGUI("A user inputs file has been detected.\nWould you like to load this data?")
         uinput = yesnogui.result
@@ -83,7 +84,7 @@ def main():
         
         # Load inputs from config file
         if uinput:
-            rv = load_config_user_inputs(os.path.join(parsers.CONFIG_DIR, 'user_inputs.json'))
+            rv = load_config_user_inputs(os.path.join(parsers.INPUTS_DIR, 'user_inputs.json'))
             if isinstance(rv, str):
                 if "Config file \'user_inputs.json\' not found." != rv:
                     logger.warning(f"{rv}")
