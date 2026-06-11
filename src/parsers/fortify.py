@@ -258,7 +258,7 @@ def parse(fpath, scanner, substr, prepend):
                 
                 # If the type is a Memory Leak, change the line number to the one defined by replacement definition "FirstTraceLocation.line"
                 if vulnerability_type == 'Memory Leak':
-                    line = replacement_defs.get('FirstTraceLocation.line', '')
+                    line = replacement_defs.get('FirstTraceLocation.line', str(line))
                 
                 # Combine vulnerability type and subtype
                 if vulnerability_subtype is not None and len(vulnerability_subtype) > 0:
