@@ -43,6 +43,14 @@ class InputDictKeys(Enum):
     def __str__(self):
         return self.value
 
+class InputSchemaKeys(Enum):
+    SCHEMA = "$schema"
+    PROJ_NAME = "project_name"
+    PROJ_VERSION = "project_version"
+    MAIN = "main"
+    OUTFILE = "outfile"
+    FLAGS = "flags"
+
 class Fieldnames(Enum):
     SCORING_BASIS = 'Scoring Basis'
     CONFIDENCE = 'Confidence'
@@ -280,12 +288,12 @@ def check_CWE_category(cwe, count=0):
         return cwe, count
 
 def export_config(inputs, outfile, control_flags):
-    out_dict = {"$schema": "schemas/user_inputs.schema.json",
-                'project_name': parsers.PROJ_NAME,
-                'project_version': parsers.PROJ_VERSION,
-                'main': inputs,
-                'outfile': outfile,
-                'flags': control_flags}
+    out_dict = {InputSchemaKeys.SCHEMA.value: "schemas/user_inputs.schema.json",
+                InputSchemaKeys.PROJ_NAME.value: parsers.PROJ_NAME,
+                InputSchemaKeys.PROJ_VERSION.value: parsers.PROJ_VERSION,
+                InputSchemaKeys.MAIN.value: inputs,
+                InputSchemaKeys.OUTFILE.value: outfile,
+                InputSchemaKeys.FLAGS.value: control_flags}
     
     with open(parsers.INPUTS_PATH, 'w', encoding='utf-8-sig') as uout:
         json.dump(out_dict, uout, indent=4)

@@ -5,6 +5,7 @@ import os
 import sys
 import traceback
 from parsers.parser_tools.inputs_gui import YesNoGUI, InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
+from parsers.parser_tools.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.preflight_gui import RuleBuilderGUI
 from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
 import parsers
@@ -72,6 +73,11 @@ def main():
     parser_inputs = []
     parser_outfile = ""
     control_flags = {}
+    
+    # DEBUG
+    select_input = JsonInputPreviewGUI()
+    
+    sys.exit(0)
     
     # Ask user if they wish to load configuration data from file
     if os.path.isfile(os.path.join(parsers.INPUTS_DIR, 'user_inputs.json')):
