@@ -60,7 +60,7 @@ class Report:
         fig = self._build_chart()
 
         # Always save PNG
-        fname = "_".join(part for part in [PROJ_NAME.replace(' ', '_'), PROJ_VERSION.replace(' ', '_'), "Findings.png"] if part.strip())
+        fname = "_".join(part for part in [PROJ_NAME.replace(' ', '_'), PROJ_VERSION.replace(' ', '_'), "Findings.png"] if len(part.strip()) > 0)
         outpath = os.path.join(LOGS_DIR, fname)
         fig.savefig(
             outpath,
