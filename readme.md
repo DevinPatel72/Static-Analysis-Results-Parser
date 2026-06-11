@@ -1,7 +1,7 @@
 # Static Analysis Results Parser
 
 ## Description
-The Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel or CSV file.
+Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel or CSV file.
 
 ### Accepted Inputs:
 -  SARP:        `.xlsx` or `.csv`
