@@ -86,6 +86,7 @@ def parse(fpath, scanner, substr, prepend):
                                     Fieldnames.LINE.value:'',
                                     Fieldnames.SYMBOL.value:row['DependencyName'],
                                     Fieldnames.MESSAGE.value:row['Vulnerability'],
+                                    Fieldnames.TRACE.value:'',
                                     Fieldnames.TOOL_CWE.value:tool_cwe,
                                     Fieldnames.TOOL.value:'',
                                     Fieldnames.SCANNER.value:'MANUAL',

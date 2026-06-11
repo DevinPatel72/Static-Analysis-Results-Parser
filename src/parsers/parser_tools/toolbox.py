@@ -55,6 +55,7 @@ class Fieldnames(Enum):
     LINE = 'Line'
     TYPE = 'Type'
     MESSAGE = 'Message'
+    TRACE = 'Trace'
     SYMBOL = 'Symbol'
     TOOL_CWE = 'Tool CWE'
     TOOL = 'Tool'
@@ -62,7 +63,7 @@ class Fieldnames(Enum):
     LANGUAGE = 'Language'
     SEVERITY = 'Tool Severity'
     
-    HEADERS = [SCORING_BASIS, CONFIDENCE, MATURITY, MITIGATION, PROPOSED_MITIGATION, VALIDATOR_COMMENT, ID, PATH, LINE, TYPE, MESSAGE, SYMBOL, TOOL_CWE, TOOL, SCANNER, LANGUAGE, SEVERITY]
+    HEADERS = [SCORING_BASIS, CONFIDENCE, MATURITY, MITIGATION, PROPOSED_MITIGATION, VALIDATOR_COMMENT, ID, PATH, LINE, TYPE, MESSAGE, TRACE, SYMBOL, TOOL_CWE, TOOL, SCANNER, LANGUAGE, SEVERITY]
     EDITABLE_HEADERS = [SCORING_BASIS, CONFIDENCE, MATURITY, MITIGATION, PROPOSED_MITIGATION, VALIDATOR_COMMENT]
     DEFAULT_CONF = 'To Verify'
     DUPLICATE_CONF = 'DUPLICATE'
@@ -280,7 +281,7 @@ def check_CWE_category(cwe, count=0):
         return cwe, count
 
 def export_config(inputs, outfile, control_flags):
-    out_dict = {"$schema": "schemas/user_inputs.schema.json",
+    out_dict = {"$schema": "../schemas/user_inputs.schema.json",
                 'project_name': parsers.PROJ_NAME,
                 'project_version': parsers.PROJ_VERSION,
                 'main': inputs,

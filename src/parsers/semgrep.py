@@ -117,9 +117,11 @@ def parse(fpath, scanner, substr, prepend):
             
             # Get end line as a trace if it is different than start line
             if int(finding['start_line']) != int(finding['end_line']):
-                message += f"\nTrace:\n<Start> {path}:{finding['start_line']}\n<End> {path}:{finding['end_line']}"
+                trace = f"1) {path}:{finding['start_line']}\n2) {path}:{finding['end_line']}"
+            else:
+                trace = ''
             
-            preimage = f"{path}{line}{check_id}{message}"
+            preimage = f"{path}{line}{check_id}{message}{trace}"
             id = idgenerator.hash(preimage)
 
             # Write row to outfile
@@ -135,6 +137,7 @@ def parse(fpath, scanner, substr, prepend):
                                 Fieldnames.LINE.value:line,
                                 Fieldnames.SYMBOL.value:'',
                                 Fieldnames.MESSAGE.value:message,
+                                Fieldnames.TRACE.value:trace,
                                 Fieldnames.TOOL_CWE.value:tool_cwe,
                                 Fieldnames.TOOL.value:'',
                                 Fieldnames.SCANNER.value:scanner,

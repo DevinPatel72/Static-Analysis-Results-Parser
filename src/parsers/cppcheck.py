@@ -102,9 +102,9 @@ def parse(fpath, scanner, substr, prepend):
             line = int(line) if str(line).isdigit() else line
             
             # Generate trace and append to message if it is greater than one
+            trace = ""
             locations = error.findall('location')
             if len(locations) > 1:
-                message += "\nTrace:\n"
                 for i, location in enumerate(locations[::-1], start=1):
                     t_path = location.get('file', '')
                     t_line = location.get('line', '')
@@ -112,13 +112,13 @@ def parse(fpath, scanner, substr, prepend):
                     
                     t_path = t_path.replace(substr, "", 1)
                     t_path = os.path.join(prepend, t_path).replace('\\', '/')
-                    message += f"{i}) {t_path}:{t_line}"
-                    message += f": {t_info}\n" if len(t_info) > 0 else "\n"
-            message = message.strip()
+                    trace += f"{i}) {t_path}:{t_line}"
+                    trace += f": {t_info}\n" if len(t_info) > 0 else "\n"
+            trace = trace.strip()
                     
             
             # Generate ID for Coverity finding (concat Path, Line, Scanner, and Message)
-            preimage = f"{path}{line}{message}{tool_cwe}"
+            preimage = f"{path}{line}{message}{trace}{tool_cwe}"
             id = idgenerator.hash(preimage)
             #id = "CPP{:04}".format(finding_count+1)
 
@@ -135,6 +135,7 @@ def parse(fpath, scanner, substr, prepend):
                                 Fieldnames.LINE.value:line,
                                 Fieldnames.SYMBOL.value:symbol,
                                 Fieldnames.MESSAGE.value:message,
+                                Fieldnames.TRACE.value:trace,
                                 Fieldnames.TOOL_CWE.value:tool_cwe,
                                 Fieldnames.TOOL.value:'',
                                 Fieldnames.SCANNER.value:scanner,

@@ -51,6 +51,7 @@ def parse(fpath, scanner, substr, prepend):
             else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
             
             # Perform cwe overrides if user requests
+            subcategoryShortDescription = issue['checkerProperties']['subcategoryShortDescription']
             subcategoryLongDescription = issue['checkerProperties']['subcategoryLongDescription']
                 
             # Find the main events
@@ -122,11 +123,12 @@ def parse(fpath, scanner, substr, prepend):
                                 Fieldnames.PROPOSED_MITIGATION.value:'',
                                 Fieldnames.VALIDATOR_COMMENT.value:'',
                                 Fieldnames.ID.value:id,
-                                Fieldnames.TYPE.value:subcategoryLongDescription,
+                                Fieldnames.TYPE.value:subcategoryShortDescription,
                                 Fieldnames.PATH.value:path,
                                 Fieldnames.LINE.value:line,
                                 Fieldnames.SYMBOL.value:issue['functionDisplayName'],
-                                Fieldnames.MESSAGE.value:eventDesc,
+                                Fieldnames.MESSAGE.value:subcategoryLongDescription,
+                                Fieldnames.TRACE.value:eventDesc,
                                 Fieldnames.TOOL_CWE.value:tool_cwe,
                                 Fieldnames.TOOL.value:'',
                                 Fieldnames.SCANNER.value:scanner,

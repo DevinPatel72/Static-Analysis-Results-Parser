@@ -102,7 +102,7 @@ def search_row(tuples, skip_ids='', match_once=False):
                     try:
                         matches.append(int(keyword) == lookup)
                     except ValueError:
-                        logger.error(f"Invalid search lookup. Expected integer input, got string \"{keyword}\"")
+                        logger.error(f"Invalid search lookup. Expected integer input for \"{lookup}\", got string keyword \"{keyword}\"")
                         matches.append(False)
                         break
                 

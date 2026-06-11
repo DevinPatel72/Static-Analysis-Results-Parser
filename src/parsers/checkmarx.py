@@ -159,7 +159,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, 
                 id = idgenerator.hash(preimage)
                 #id = "CX{:04}".format(finding_count+1)
                 
-                trace = f"Trace:\n<Source> {path}:{line}: {row['Name']}\n<Dest> {dest_path}:{dest_line}: {row['DestName']}"
+                trace = f"1) {path}:{line}: {row['Name']}\n2) {dest_path}:{dest_line}: {row['DestName']}"
                 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
@@ -173,7 +173,8 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, 
                                         Fieldnames.PATH.value:dest_path,
                                         Fieldnames.LINE.value:dest_line,
                                         Fieldnames.SYMBOL.value:row['Name'],
-                                        Fieldnames.MESSAGE.value:trace,
+                                        Fieldnames.MESSAGE.value:'',
+                                        Fieldnames.TRACE.value:trace,
                                         Fieldnames.TOOL_CWE.value: tool_cwe,
                                         Fieldnames.TOOL.value:'',
                                         Fieldnames.SCANNER.value:scanner,
@@ -261,7 +262,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
                     if path_nodes is None or len(path_nodes) <= 0:
                         trace = ''
                     else:
-                        trace = 'Trace:\n'
+                        trace = ''
                         for node in path_nodes:
                             node_id = node.findtext('NodeId', '')
                             t_path = node.findtext('FileName', '')
@@ -302,7 +303,8 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
                                             Fieldnames.PATH.value:path,
                                             Fieldnames.LINE.value:line,
                                             Fieldnames.SYMBOL.value:symbol,
-                                            Fieldnames.MESSAGE.value:trace,
+                                            Fieldnames.MESSAGE.value:'',
+                                            Fieldnames.TRACE.value:trace,
                                             Fieldnames.TOOL_CWE.value: tool_cwe,
                                             Fieldnames.TOOL.value:query_path.split('\\')[-1],
                                             Fieldnames.SCANNER.value:scanner,

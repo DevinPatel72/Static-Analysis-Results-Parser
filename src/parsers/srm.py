@@ -124,6 +124,7 @@ def _parse_csv(fpath, substr, prepend, scanner):
                                     Fieldnames.LINE.value:line,
                                     Fieldnames.SYMBOL.value:'',
                                     Fieldnames.MESSAGE.value:'',
+                                    Fieldnames.TRACE.value:'',
                                     Fieldnames.TOOL_CWE.value:tool_cwe,
                                     Fieldnames.TOOL.value:row['Tool'],
                                     Fieldnames.SCANNER.value:scanner,
@@ -241,16 +242,14 @@ def _parse_xml(fpath, substr, prepend, scanner):
                 finding_type = rule.get('name', '')
                     
                 # Get the description
-                trace = result.findtext('description', '')
+                message = result.findtext('description', '').strip()
                 
                 # Get trace if dataflow tag exists
+                trace = ''
                 dataflow = result.find('dataflows/dataflow')
                 if dataflow is not None:
                     nodes = dataflow.findall('node')
                     if nodes is not None and len(nodes) > 0:
-                        trace = trace+'\n' if len(trace) > 0 else trace
-                        trace += 'Trace:\n'
-                        
                         # Cap length to 8 entries
                         if len(nodes) > 8:
                             iteratable = nodes[:3] + ['...'] + nodes[-5:]
@@ -292,7 +291,8 @@ def _parse_xml(fpath, substr, prepend, scanner):
                                     Fieldnames.PATH.value:path,
                                     Fieldnames.LINE.value:line,
                                     Fieldnames.SYMBOL.value:'',
-                                    Fieldnames.MESSAGE.value:trace,
+                                    Fieldnames.MESSAGE.value:message,
+                                    Fieldnames.TRACE.value:trace,
                                     Fieldnames.TOOL_CWE.value:tool_cwe,
                                     Fieldnames.TOOL.value:tool_name,
                                     Fieldnames.SCANNER.value:scanner,

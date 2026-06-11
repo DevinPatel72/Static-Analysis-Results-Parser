@@ -125,13 +125,12 @@ def _parse_sarif(fpath, scanner, substr, prepend):
                        tool = m.group(1)
                        break
             
-            # Message
+            # Message + Trace
             message = result['message']['text']
+            trace = ""
             if 'codeFlows' in result.keys() and 'threadFlows' in result['codeFlows'][0]:
                 threadflow = result['codeFlows'][0]['threadFlows'][0]
                 if len(threadflow['locations']) > 1:
-                    message += '\nTrace:\n'
-                    
                     # If more than 8 locations, take first 3 and last 5
                     gap_dist = 0
                     if len(threadflow['locations']) > 8:
@@ -145,7 +144,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
                     activate_gap_add = False
                     for i, loc in enumerate(locations, start=1):
                         if isinstance(loc, str) and loc == '...':
-                            message += '...\n'
+                            trace += '...\n'
                             activate_gap_add = True
                             continue
                         
@@ -161,12 +160,12 @@ def _parse_sarif(fpath, scanner, substr, prepend):
                         t_line = int(t_line) if t_line.isdigit() else t_line
                         
                         k = i+gap_dist if activate_gap_add else i
-                        message += f"{k}) {t_path}:{t_line}: {loc['location']['message'].get('text', '')}".rstrip(': ') + '\n'
-            message = message.strip()
+                        trace += f"{k}) {t_path}:{t_line}: {loc['location']['message'].get('text', '')}".rstrip(': ') + '\n'
+            trace = trace.strip()
             
             
             # Generate ID for Coverity finding (concat Path, Line, Scanner, and Message)
-            preimage = f"{path}{line}{t}{message}"
+            preimage = f"{path}{line}{t}{message}{trace}"
             id = idgenerator.hash(preimage)
             #id = "GS{:04}".format(finding_count+1)
 
@@ -183,6 +182,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
                                 Fieldnames.LINE.value:line,
                                 Fieldnames.SYMBOL.value:symbol,
                                 Fieldnames.MESSAGE.value:message,
+                                Fieldnames.TRACE.value:trace,
                                 Fieldnames.TOOL_CWE.value:tool_cwe,
                                 Fieldnames.TOOL.value:tool,
                                 Fieldnames.SCANNER.value:scanner,
@@ -259,6 +259,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                                     Fieldnames.LINE.value:line,
                                     Fieldnames.SYMBOL.value:row['subp'],
                                     Fieldnames.MESSAGE.value:row['message'],
+                                    Fieldnames.TRACE.value:'',
                                     Fieldnames.TOOL_CWE.value:tool_cwe,
                                     Fieldnames.TOOL.value:row['tool'],
                                     Fieldnames.SCANNER.value:scanner,

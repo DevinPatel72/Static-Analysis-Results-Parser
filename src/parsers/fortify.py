@@ -94,6 +94,7 @@ def parse(fpath, scanner, substr, prepend):
 
         # Extract vulnerability data
         for vulnerability in root.findall('.//ns:Vulnerability', namespace):
+            symbol = ''
             try:
                 vulnerability_num += 1
                 progress_bar(vulnerability_num, total_vulnerabilities, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
@@ -173,8 +174,15 @@ def parse(fpath, scanner, substr, prepend):
                         # Break when done
                         break
 
+                # Set symbol to be function context
+                context_node = vulnerability.find("./ns:AnalysisInfo/ns:Unified/ns:Context/ns:Function", namespace)
+                if context_node is not None:
+                    symbol = context_node.get('name', '')
+                else:
+                    symbol = ''
+                
                 # Walk through the trace entries and compile a string
-                trace = '\nTrace:\n'
+                trace = ''
                 unified_node_pool = root.findall("ns:UnifiedNodePool/ns:Node", namespace)
                 
                 for i, entry in enumerate(events, start=1):
@@ -208,10 +216,23 @@ def parse(fpath, scanner, substr, prepend):
                     t_path = os.path.join(source_base_path, t_path) if len(t_path) > 0 and len(source_base_path) > 0 else t_path
                     t_path = t_path.replace(substr, "", 1)
                     t_path = os.path.join(prepend, t_path).replace('\\', '/')
-                    trace += f"{i}) {t_path}:{t_line}\n" if len(t_path) + len(t_line) > 0 else f"{i})\n"
+                    
+                    # Get any facts
+                    fact = ''
+                    facts_info = entry.findall("./ns:Node/ns:Knowledge/ns:Fact", namespace)
+                    if facts_info is not None and len(facts_info) > 0:
+                        for t_fact in facts_info:
+                            if t_fact.get('primary', '') == 'true':
+                                fact = str(t_fact.text)
+                                break
+                        if len(fact) <= 0:
+                            fact = str(facts_info[-1].text)
+                    trace += f"{i}) {t_path}:{t_line}" if (len(t_path) + len(t_line)) > 0 else f"{i})\n"
+                    if (len(t_path) + len(t_line)) > 0:
+                        trace += f": {fact}\n" if len(fact) > 0 else "\n"
                 # End of trace loop
                 
-                # On the last entry, add the fact information
+                # On the last entry, add all the fact information
                 facts_info = last_entry_info.findall("./ns:Node/ns:Knowledge/ns:Fact", namespace)
                 if facts_info is not None and len(facts_info) > 0:
                     trace += "Facts:\n"
@@ -254,7 +275,7 @@ def parse(fpath, scanner, substr, prepend):
                 lang = resolve_lang(os.path.splitext(path)[1])
                 
                 # Generate ID for Fortify finding
-                preimage = f"{path}{line}{vulnerability_type}{description}"
+                preimage = f"{path}{line}{vulnerability_type}{description}{trace}"
                 id = idgenerator.hash(preimage)
                 #id = "FORT{:04}".format(finding_count+1)
 
@@ -269,8 +290,9 @@ def parse(fpath, scanner, substr, prepend):
                                     Fieldnames.TYPE.value:vulnerability_type,
                                     Fieldnames.PATH.value:path,
                                     Fieldnames.LINE.value:line,
-                                    Fieldnames.SYMBOL.value:trace,
+                                    Fieldnames.SYMBOL.value:symbol,
                                     Fieldnames.MESSAGE.value:description,
+                                    Fieldnames.TRACE.value:trace,
                                     Fieldnames.TOOL_CWE.value:tool_cwe,
                                     Fieldnames.TOOL.value:analyzer,
                                     Fieldnames.SCANNER.value:scanner,

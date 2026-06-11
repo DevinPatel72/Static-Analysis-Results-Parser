@@ -74,6 +74,7 @@ def parse(fpath, scanner, substr, prepend):
                                     Fieldnames.LINE.value:line,
                                     Fieldnames.SYMBOL.value:'',
                                     Fieldnames.MESSAGE.value:row['Comments'],
+                                    Fieldnames.TRACE.value:'',
                                     Fieldnames.TOOL_CWE.value:tool_cwe,
                                     Fieldnames.TOOL.value:'',
                                     Fieldnames.SCANNER.value:row['Tool'],
