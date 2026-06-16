@@ -178,7 +178,7 @@ def load_config_cwe_category_mappings():
         return {}
 
 def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
-    # Check if there are inputs in user_inputs.json
+    # Check if there are inputs in the inputs file
     if os.path.isfile(inputs_path):
         try:
             with open(inputs_path, 'r', encoding='utf-8-sig') as uin:
@@ -192,11 +192,11 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         
         # Attempt to parse the main inputs
         if 'main' not in user_inputs.keys() and len(user_inputs['main']) <= 0:
-            return "Error in parsing config file \'user_inputs.json\'. No inputs defined in \"main\"."
+            return f"Error in parsing config file \'{inputs_path}\'. No inputs defined in \"main\"."
         
         # Check if each input contains the right keys
         if not all([all([sorted(list(inp.keys())) == sorted(InputDictKeys.INPUTS.value)]) for inp in user_inputs['main']]):
-            return "Error in parsing config file \'user_inputs.json\'. Invalid keys detected in \"main\". All of the following keys (and only these keys) must be defined: {}.".format(", ".join(InputDictKeys.INPUTS.value))
+            return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid keys detected in \"main\". All of the following keys (and only these keys) must be defined: {}.".format(", ".join(InputDictKeys.INPUTS.value))
 
         # All is green, set main equal to parser_inputs
         parser_inputs = user_inputs['main']
@@ -216,7 +216,7 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         if 'flags' in user_inputs.keys():
             for k in user_inputs['flags'].keys():
                 if k not in InputDictKeys.FLAGS.value:
-                    return "Error in parsing config file \'user_inputs.json\'. Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join(InputDictKeys.FLAGS.value))
+                    return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join(InputDictKeys.FLAGS.value))
         else:
             control_flags = {}
 

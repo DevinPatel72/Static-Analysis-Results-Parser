@@ -323,7 +323,7 @@ def main():
     
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument('-v', '--version', action='store_true', help='Print software version and exit')
-    argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.INPUTS_DIR, "user_inputs.json"), help="Path to user inputs JSON file. By default looks for 'user_inputs.json' in config directory.")
+    argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.INPUTS_DIR, "user_inputs.json"), help="User inputs JSON file. An absolute path or just the base name can be passed. By default looks for 'user_inputs.json' in config/inputs directory.")
     argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Check the user inputs JSON file pointed to by the 'inputs' option for validity, report any errors, then exit.")
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Print current input configuration from the user inputs JSON file pointed to by the 'inputs' option then exit.")
@@ -343,8 +343,15 @@ def main():
         print_user_inputs_template()
         sys.exit(0)
     
+    # Adjust inputs path according to whether it is a basename or a path
+    if not ('/' in args.inputs or '\\' in args.inputs):
+        fname = args.inputs + '.json' if not args.inputs.endswith('.json') else args.inputs
+        inp_path = os.path.join(parsers.INPUTS_DIR, fname)
+    else:
+        inp_path = args.inputs
+    
     # Load inputs from config file
-    rv = load_config_user_inputs(args.inputs, default_outfile="sarp_output.xlsx")
+    rv = load_config_user_inputs(inp_path, default_outfile="sarp_output.xlsx")
     if isinstance(rv, str):
         logger.critical(f"Unable to open inputs: {rv}")
         sys.exit(3)
