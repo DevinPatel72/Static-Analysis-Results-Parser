@@ -30,6 +30,8 @@ class JsonInputPreviewGUI:
         self.root.attributes("-topmost", True)
         self.root.update()
         self.root.attributes("-topmost", False)
+        
+        self.selected_file_var = tk.StringVar(value="")
 
         self._build_gui()
         self._load_json_files()
@@ -87,34 +89,63 @@ class JsonInputPreviewGUI:
         # Left Panel - File List
         # =====================================================
 
-        left_frame = ttk.Frame(container)
-
-        left_frame.pack(
+        self.left_frame = ttk.Frame(container)
+        self.left_frame.pack(
             side=tk.LEFT,
             fill=tk.Y,
             padx=(0, 10)
         )
+        self.left_frame.pack_propagate(False)
 
         ttk.Label(
-            left_frame,
-            text="User Inputs"
+            self.left_frame,
+            text="User Inputs",
+            font=self.section_header_font
         ).pack(anchor="w")
 
-        self.file_tree = ttk.Treeview(
-            left_frame,
-            columns=(),
-            show="tree",
-            height=30
+        self.selected_file_var = tk.StringVar(value="")
+
+        self.file_selection_canvas = tk.Canvas(
+            self.left_frame,
+            highlightthickness=0
         )
 
-        self.file_tree.pack(
-            fill=tk.Y,
+        scrollbar = ttk.Scrollbar(
+            self.left_frame,
+            orient=tk.VERTICAL,
+            command=self.file_selection_canvas.yview
+        )
+
+        self.file_selection_frame = ttk.Frame(
+            self.file_selection_canvas
+        )
+
+        self.file_selection_frame.bind(
+            "<Configure>",
+            lambda e: self.file_selection_canvas.configure(
+                scrollregion=self.file_selection_canvas.bbox("all")
+            )
+        )
+
+        self.file_selection_canvas.create_window(
+            (0, 0),
+            window=self.file_selection_frame,
+            anchor="nw"
+        )
+
+        self.file_selection_canvas.configure(
+            yscrollcommand=scrollbar.set
+        )
+
+        self.file_selection_canvas.pack(
+            side=tk.LEFT,
+            fill=tk.BOTH,
             expand=True
         )
 
-        self.file_tree.bind(
-            "<<TreeviewSelect>>",
-            self._on_file_selected
+        scrollbar.pack(
+            side=tk.RIGHT,
+            fill=tk.Y
         )
 
         # =====================================================
@@ -136,11 +167,6 @@ class JsonInputPreviewGUI:
         ).pack(anchor="w")
 
         self.controls_frame = ttk.Frame(right_frame)
-
-        small_button_font = (
-            "Arial",
-            8
-        )
 
         ttk.Button(
             self.controls_frame,
@@ -230,12 +256,8 @@ class JsonInputPreviewGUI:
         )
     
     def _submit(self):
-        selected = self.get_selected_file()
+        self.results = self.selected_file_var.get()
 
-        if not selected:
-            return
-
-        self.results = selected
         self.cleanexit = True
 
         self.root.destroy()
@@ -254,16 +276,54 @@ class JsonInputPreviewGUI:
 
     def _load_json_files(self):
         self.project_files.clear()
+        file_list = sorted(os.listdir(self.json_folder))
 
-        for item in self.file_tree.get_children():
-            self.file_tree.delete(item)
+        for child in self.file_selection_frame.winfo_children():
+            child.destroy()
 
         if not os.path.isdir(self.json_folder):
             return
+        
+        font = tkfont.nametofont("TkDefaultFont")
 
-        for filename in sorted(
-            os.listdir(self.json_folder)
-        ):
+        max_width = max(
+            (
+                font.measure(name)
+                for name in file_list
+            ),
+            default=150
+        )
+        
+        desired_width = min(
+            max(
+                150,
+                max_width + 40
+            ),
+            350
+        )
+
+        self.left_frame.configure(
+            width=desired_width
+        )
+        
+        # Blank file
+        radio = ttk.Radiobutton(
+            self.file_selection_frame,
+            text="<New Project>",
+            variable=self.selected_file_var,
+            value="",
+            command=lambda fp="": self._load_preview_from_path(fp)
+        )
+
+        radio.pack(
+            anchor="w",
+            fill=tk.X,
+            padx=2,
+            pady=1
+        )
+
+        # User inputs files
+        for filename in file_list:
             if not filename.lower().endswith(
                 ".json"
             ):
@@ -278,31 +338,34 @@ class JsonInputPreviewGUI:
                 filename
             ] = full_path
 
-            self.file_tree.insert(
-                "",
-                tk.END,
-                iid=filename,
-                text=filename
+            radio = ttk.Radiobutton(
+                self.file_selection_frame,
+                text=filename,
+                variable=self.selected_file_var,
+                value=full_path,
+                command=lambda fp=full_path: self._load_preview_from_path(fp)
             )
 
-    def _on_file_selected(self, event):
-        selection = self.file_tree.selection()
-
-        if not selection:
-            return
-
-        filename = selection[0]
-        filepath = self.project_files[filename]
-
+            radio.pack(
+                anchor="w",
+                fill=tk.X,
+                padx=2,
+                pady=1
+            )
+    
+    def _load_preview_from_path(self, filepath):
         try:
-            with open(
-                filepath,
-                "r",
-                encoding="utf-8-sig"
-            ) as fp:
-                data = json.load(fp)
+            if len(filepath) > 0:
+                with open(
+                    filepath,
+                    "r",
+                    encoding="utf-8-sig"
+                ) as fp:
+                    data = json.load(fp)
 
-            self._populate_preview(data)
+                self._populate_preview(data)
+            else:
+                self._populate_preview(None)
 
         except Exception as ex:
             self.controls_frame.pack_forget()
@@ -313,10 +376,7 @@ class JsonInputPreviewGUI:
 
             ttk.Label(
                 self.preview_content,
-                text=(
-                    "Failed to load JSON file:\n\n"
-                    f"{ex}"
-                )
+                text=f"Failed to load JSON file:\n\n{ex}"
             ).pack(anchor="w")
 
     def _create_scanner_section(
@@ -487,6 +547,9 @@ class JsonInputPreviewGUI:
 
         for child in self.preview_content.winfo_children():
             child.destroy()
+            
+        if data is None:
+            return
 
         row = ttk.Frame(self.preview_content)
         row.pack(anchor="w", fill=tk.X)
@@ -653,18 +716,6 @@ class JsonInputPreviewGUI:
             ).pack(
                 side=tk.LEFT
             )
-
-    def get_selected_file(self):
-        selection = self.file_tree.selection()
-
-        if not selection:
-            return None
-
-        filename = selection[0]
-
-        return self.project_files.get(
-            filename
-        )
 
     def _show_tooltip(self, widget, text):
         if hasattr(self, "_tooltip") and self._tooltip:

@@ -76,39 +76,22 @@ def main():
     
     # DEBUG
     select_input = JsonInputPreviewGUI()
-    
+        
+    # Load inputs from config file
     if select_input.cleanexit and select_input.results is not None:
-        print(select_input.results)
-        sys.exit(0)
-    else:
-        sys.exit(0)
-    
-    # Ask user if they wish to load configuration data from file
-    if os.path.isfile(os.path.join(parsers.INPUTS_DIR, 'user_inputs.json')):
-        
-        yesnogui = YesNoGUI("A user inputs file has been detected.\nWould you like to load this data?")
-        uinput = yesnogui.result
-        
-        if uinput is None:
-            sys.exit(0)
-        
-        # Load inputs from config file
-        if uinput:
-            rv = load_config_user_inputs(os.path.join(parsers.INPUTS_DIR, 'user_inputs.json'))
-            if isinstance(rv, str):
-                if "Config file \'user_inputs.json\' not found." != rv:
-                    logger.warning(f"{rv}")
-                    console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning")
-                parser_inputs = []
-                parser_outfile = ""
-                control_flags = {}
-            else:
-                parser_inputs, parser_outfile, control_flags = rv
-        # Else empty input
-        else:
+        rv = load_config_user_inputs(select_input.results)
+        if isinstance(rv, str):
+            if f"Config file {select_input.results} not found." != rv:
+                logger.warning(f"{rv}")
+                console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning")
             parser_inputs = []
             parser_outfile = ""
             control_flags = {}
+        else:
+            parser_inputs, parser_outfile, control_flags = rv
+    # Else exit
+    else:
+        sys.exit(0)
         
     # Check inputs format
     if len(parser_inputs) > 0:
