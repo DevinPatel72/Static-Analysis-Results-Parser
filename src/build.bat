@@ -32,8 +32,6 @@ Rem Clean
         rmdir /s /q "%%d"
     )
 
-    Rem Delete user inputs
-    Rem del config\user_inputs.json
     endlocal
     
     IF "%1"=="clean" (
@@ -81,8 +79,9 @@ Rem Build
     Rem Copy dist contents to new directory
     robocopy dist "%BIN_DIR%" /E /NFL /NDL /NJH /NJS /W:0 /R:0
 
-    Rem Delete the user_inputs.json and preflight_rules.py
-    del "%BIN_DIR%\config\user_inputs*.json"
+    Rem Delete the user inputs files and preflight_rules.py
+    del /f /q "%BIN_DIR%\config\inputs\*"
+    for /d %%d in ("%OUTPUT_DIR%\*") do rd /s /q "%%d"
     del "%BIN_DIR%\config\preflight\preflight_rules.py"
 
     Rem Clean the build files

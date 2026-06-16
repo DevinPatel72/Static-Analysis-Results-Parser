@@ -5,6 +5,7 @@ import os
 import sys
 import traceback
 from parsers.parser_tools.inputs_gui import YesNoGUI, InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
+from parsers.parser_tools.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.preflight_gui import RuleBuilderGUI
 from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
 import parsers
@@ -36,6 +37,7 @@ parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
 parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
 parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
 parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
+parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
 
 # Set log paths
 parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
@@ -72,20 +74,15 @@ def main():
     parser_outfile = ""
     control_flags = {}
     
-    # Ask user if they wish to load configuration data from file
-    if os.path.isfile(os.path.join(parsers.CONFIG_DIR, 'user_inputs.json')):
-        
-        yesnogui = YesNoGUI("A user inputs file has been detected.\nWould you like to load this data?")
-        uinput = yesnogui.result
-        
-        if uinput is None:
-            sys.exit(0)
+    # Load inputs if there are any
+    if len(os.listdir(parsers.INPUTS_DIR)) > 0:
+        select_input = JsonInputPreviewGUI()
         
         # Load inputs from config file
-        if uinput:
-            rv = load_config_user_inputs(os.path.join(parsers.CONFIG_DIR, 'user_inputs.json'))
+        if select_input.cleanexit and select_input.results is not None:
+            rv = load_config_user_inputs(select_input.results)
             if isinstance(rv, str):
-                if "Config file \'user_inputs.json\' not found." != rv:
+                if f"Config file {select_input.results} not found." != rv:
                     logger.warning(f"{rv}")
                     console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning")
                 parser_inputs = []
@@ -93,11 +90,9 @@ def main():
                 control_flags = {}
             else:
                 parser_inputs, parser_outfile, control_flags = rv
-        # Else empty input
+        # Else exit
         else:
-            parser_inputs = []
-            parser_outfile = ""
-            control_flags = {}
+            sys.exit(0)
         
     # Check inputs format
     if len(parser_inputs) > 0:

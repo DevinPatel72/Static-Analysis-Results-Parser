@@ -43,6 +43,14 @@ class InputDictKeys(Enum):
     def __str__(self):
         return self.value
 
+class InputSchemaKeys(Enum):
+    SCHEMA = "$schema"
+    PROJ_NAME = "project_name"
+    PROJ_VERSION = "project_version"
+    MAIN = "main"
+    OUTFILE = "outfile"
+    FLAGS = "flags"
+
 class Fieldnames(Enum):
     SCORING_BASIS = 'Scoring Basis'
     CONFIDENCE = 'Confidence'
@@ -171,7 +179,7 @@ def load_config_cwe_category_mappings():
         return {}
 
 def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
-    # Check if there are inputs in user_inputs.json
+    # Check if there are inputs in the inputs file
     if os.path.isfile(inputs_path):
         try:
             with open(inputs_path, 'r', encoding='utf-8-sig') as uin:
@@ -185,11 +193,11 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         
         # Attempt to parse the main inputs
         if 'main' not in user_inputs.keys() and len(user_inputs['main']) <= 0:
-            return "Error in parsing config file \'user_inputs.json\'. No inputs defined in \"main\"."
+            return f"Error in parsing config file \'{inputs_path}\'. No inputs defined in \"main\"."
         
         # Check if each input contains the right keys
         if not all([all([sorted(list(inp.keys())) == sorted(InputDictKeys.INPUTS.value)]) for inp in user_inputs['main']]):
-            return "Error in parsing config file \'user_inputs.json\'. Invalid keys detected in \"main\". All of the following keys (and only these keys) must be defined: {}.".format(", ".join(InputDictKeys.INPUTS.value))
+            return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid keys detected in \"main\". All of the following keys (and only these keys) must be defined: {}.".format(", ".join(InputDictKeys.INPUTS.value))
 
         # All is green, set main equal to parser_inputs
         parser_inputs = user_inputs['main']
@@ -209,7 +217,7 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         if 'flags' in user_inputs.keys():
             for k in user_inputs['flags'].keys():
                 if k not in InputDictKeys.FLAGS.value:
-                    return "Error in parsing config file \'user_inputs.json\'. Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join(InputDictKeys.FLAGS.value))
+                    return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join(InputDictKeys.FLAGS.value))
         else:
             control_flags = {}
 
@@ -281,12 +289,26 @@ def check_CWE_category(cwe, count=0):
         return cwe, count
 
 def export_config(inputs, outfile, control_flags):
-    out_dict = {"$schema": "schemas/user_inputs.schema.json",
-                'project_name': parsers.PROJ_NAME,
-                'project_version': parsers.PROJ_VERSION,
-                'main': inputs,
-                'outfile': outfile,
-                'flags': control_flags}
+    out_dict = {InputSchemaKeys.SCHEMA.value: "../schemas/user_inputs.schema.json",
+                InputSchemaKeys.PROJ_NAME.value: parsers.PROJ_NAME,
+                InputSchemaKeys.PROJ_VERSION.value: parsers.PROJ_VERSION,
+                InputSchemaKeys.MAIN.value: inputs,
+                InputSchemaKeys.OUTFILE.value: outfile,
+                InputSchemaKeys.FLAGS.value: control_flags}
+    
+    # Set up output path
+    if len(parsers.INPUTS_PATH) <= 0:
+        basename = "_".join(part for part in [parsers.PROJ_NAME.replace(' ', '_'), parsers.PROJ_VERSION.replace(' ', '_')] if len(part.strip()) > 0)
+        # Add -# to basename if file exists
+        if os.path.isfile(os.path.join(parsers.INPUTS_DIR, basename+'.json')):
+            i = 1
+            while True:
+                if os.path.isfile(os.path.join(parsers.INPUTS_DIR, basename+f'-{i}.json')):
+                    i += 1
+                else: break
+            basename += f'-{i}'
+                
+        parsers.INPUTS_PATH = os.path.join(parsers.INPUTS_DIR, basename+'.json')
     
     with open(parsers.INPUTS_PATH, 'w', encoding='utf-8-sig') as uout:
         json.dump(out_dict, uout, indent=4)
@@ -382,7 +404,7 @@ def print_user_inputs_template():
     flags = flags.rstrip(',\n')
     
     s = f"""{{
-    "$schema": "schemas/user_inputs.schema.json",
+    "$schema": "../schemas/user_inputs.schema.json",
     "project_name": "example_proj",
     "project_version": "v1.0",
     "main": [
@@ -410,4 +432,4 @@ def print_user_inputs_template():
 {flags}
     }}
 }}"""
-    print(s, end='')
+    print(s, sep='', end='')
