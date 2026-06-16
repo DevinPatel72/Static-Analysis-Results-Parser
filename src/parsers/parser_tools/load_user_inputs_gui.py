@@ -41,6 +41,17 @@ class JsonInputPreviewGUI:
             self.root,
             padding=10
         )
+        self.section_header_font = tkfont.Font(
+            family="Arial",
+            size=12,
+            weight="bold"
+        )
+
+        self.scanner_header_font = tkfont.Font(
+            family="Arial",
+            size=10,
+            weight="bold"
+        )
         container.pack(
             fill=tk.BOTH,
             expand=True
@@ -91,14 +102,18 @@ class JsonInputPreviewGUI:
             expand=True
         )
 
-        ttk.Label(
+        tk.Label(
             right_frame,
-            text="Preview"
-        ).pack(
-            anchor="w"
-        )
+            text="Preview",
+            font=self.section_header_font
+        ).pack(anchor="w")
 
         self.controls_frame = ttk.Frame(right_frame)
+
+        small_button_font = (
+            "Arial",
+            8
+        )
 
         ttk.Button(
             self.controls_frame,
@@ -116,10 +131,20 @@ class JsonInputPreviewGUI:
         ).pack(
             side=tk.LEFT
         )
+        
+        for child in self.controls_frame.winfo_children():
+            try:
+                child.configure(width=12)
+            except:
+                pass
 
         self.preview_canvas = tk.Canvas(
             right_frame,
             highlightthickness=0
+        )
+        self.preview_canvas.bind(
+            "<Configure>",
+            self._update_wraplengths
         )
 
         preview_scrollbar = ttk.Scrollbar(
@@ -162,37 +187,26 @@ class JsonInputPreviewGUI:
 
         # Mouse wheel support
 
-        self.preview_canvas.bind(
-            "<Enter>",
-            lambda e: self.preview_canvas.bind_all(
-                "<MouseWheel>",
-                self._on_mousewheel
-            )
+        self.root.bind_all(
+            "<MouseWheel>",
+            self._on_mousewheel
         )
 
-        self.preview_canvas.bind(
-            "<Leave>",
-            lambda e: self.preview_canvas.unbind_all(
-                "<MouseWheel>"
-            )
-        )
-
-        self.preview_canvas.bind(
+        self.root.bind_all(
             "<Button-4>",
-            lambda e: self.preview_canvas.yview_scroll(
-                -1,
-                "units"
-            )
+            lambda e: self.preview_canvas.yview_scroll(-1, "units")
         )
 
-        self.preview_canvas.bind(
+        self.root.bind_all(
             "<Button-5>",
-            lambda e: self.preview_canvas.yview_scroll(
-                1,
-                "units"
-            )
+            lambda e: self.preview_canvas.yview_scroll(1, "units")
         )
 
+    def _update_wraplengths(self, event):
+        self.current_wraplength = max(
+            400,
+            event.width - 250
+        )
 
     def _on_mousewheel(self, event):
         self.preview_canvas.yview_scroll(
@@ -293,9 +307,7 @@ class JsonInputPreviewGUI:
             section_frame
         )
 
-        header_font = tkfont.Font(
-            weight="bold"
-        )
+        header_font = self.scanner_header_font
 
         header_label = tk.Label(
             section_frame,
@@ -376,11 +388,18 @@ class JsonInputPreviewGUI:
                 side=tk.LEFT
             )
 
-            ttk.Label(
+            self._create_copyable_label(
                 row,
-                text=str(value)
+                value,
+                wraplength=getattr(
+                            self,
+                            "current_wraplength",
+                            700
+                        )
             ).pack(
-                side=tk.LEFT
+                side=tk.LEFT,
+                fill=tk.X,
+                expand=True
             )
 
         self.scanner_sections.append(
@@ -431,26 +450,44 @@ class JsonInputPreviewGUI:
         for child in self.preview_content.winfo_children():
             child.destroy()
 
-        ttk.Label(
-            self.preview_content,
-            text=(
-                f"Project Name: "
-                f"{data.get(InputSchemaKeys.PROJ_NAME.value, '<missing>')}"
-            )
-        ).pack(
-            anchor="w",
-            pady=(0, 2)
-        )
+        row = ttk.Frame(self.preview_content)
+        row.pack(anchor="w", fill=tk.X)
 
         ttk.Label(
-            self.preview_content,
-            text=(
-                f"Project Version: "
-                f"{data.get(InputSchemaKeys.PROJ_VERSION.value, '<missing>')}"
+            row,
+            text="Project Name:"
+        ).pack(side=tk.LEFT)
+
+        self._create_copyable_label(
+            row,
+            data.get(
+                InputSchemaKeys.PROJ_NAME.value,
+                "<missing>"
             )
         ).pack(
-            anchor="w",
-            pady=(0, 10)
+            side=tk.LEFT,
+            fill=tk.X,
+            expand=True
+        )
+
+        row = ttk.Frame(self.preview_content)
+        row.pack(anchor="w", fill=tk.X)
+
+        ttk.Label(
+            row,
+            text="Project Version:"
+        ).pack(side=tk.LEFT)
+
+        self._create_copyable_label(
+            row,
+            data.get(
+                InputSchemaKeys.PROJ_VERSION.value,
+                "<missing>"
+            )
+        ).pack(
+            side=tk.LEFT,
+            fill=tk.X,
+            expand=True
         )
 
         ttk.Separator(
@@ -461,9 +498,10 @@ class JsonInputPreviewGUI:
             pady=5
         )
 
-        ttk.Label(
+        tk.Label(
             self.preview_content,
-            text="Scanner Inputs"
+            text="Scanner Inputs",
+            font=self.section_header_font
         ).pack(
             anchor="w"
         )
@@ -496,15 +534,35 @@ class JsonInputPreviewGUI:
             pady=5
         )
 
-        ttk.Label(
-            self.preview_content,
-            text=(
-                f"Output File: "
-                f"{data.get(InputSchemaKeys.OUTFILE.value, '<missing>')}"
-            )
-        ).pack(
+        row = ttk.Frame(self.preview_content)
+
+        row.pack(
             anchor="w",
+            fill=tk.X,
             pady=5
+        )
+
+        tk.Label(
+            row,
+            text="Output File:",
+            font=self.section_header_font
+        ).pack(side=tk.LEFT)
+
+        self._create_copyable_label(
+            row,
+            data.get(
+                InputSchemaKeys.OUTFILE.value,
+                "<missing>"
+            ),
+            wraplength=getattr(
+                            self,
+                            "current_wraplength",
+                            700
+                        )
+        ).pack(
+            side=tk.LEFT,
+            fill=tk.X,
+            expand=True
         )
 
         ttk.Separator(
@@ -515,11 +573,10 @@ class JsonInputPreviewGUI:
             pady=5
         )
 
-        ttk.Label(
+        tk.Label(
             self.preview_content,
-            text="Flags"
-        ).pack(
-            anchor="w"
+            text="Flags",
+            font=self.section_header_font
         )
 
         flags = data.get(
@@ -571,3 +628,99 @@ class JsonInputPreviewGUI:
             filename
         )
 
+    def _show_tooltip(self, widget, text):
+        if hasattr(self, "_tooltip") and self._tooltip:
+            self._tooltip.destroy()
+
+        self._tooltip = tk.Toplevel(widget)
+        self._tooltip.wm_overrideredirect(True)
+
+        x = widget.winfo_rootx() + 15
+        y = widget.winfo_rooty() + widget.winfo_height() + 5
+
+        self._tooltip.geometry(f"+{x}+{y}")
+
+        tk.Label(
+            self._tooltip,
+            text=text,
+            bg="#ffffe0",
+            relief="solid",
+            borderwidth=1,
+            padx=5,
+            pady=2
+        ).pack()
+
+    def _hide_tooltip(self, event=None):
+        if hasattr(self, "_tooltip") and self._tooltip:
+            self._tooltip.destroy()
+            self._tooltip = None
+    
+    def _schedule_tooltip(self, widget, text):
+        self._tooltip_after_id = self.root.after(
+            300,
+            lambda: self._show_tooltip(widget, text)
+        )
+
+    def _cancel_tooltip(self, event=None):
+        if hasattr(self, "_tooltip_after_id") and self._tooltip_after_id:
+            self.root.after_cancel(self._tooltip_after_id)
+            self._tooltip_after_id = None
+
+        self._hide_tooltip()
+
+    def _copy_to_clipboard(self, value, label=None):
+        self.root.clipboard_clear()
+        self.root.clipboard_append(str(value))
+        self.root.update()
+        if label:
+            original_text = label.cget("text")
+            original_fg = label.cget("fg")
+
+            label.config(
+                text=value,
+                fg="blue"
+            )
+
+            self.root.after(
+                100,
+                lambda: label.config(
+                    text=original_text,
+                    fg=original_fg
+                )
+            )
+
+    def _create_copyable_label(
+        self,
+        parent,
+        text,
+        wraplength=700
+    ):
+        label = tk.Label(
+            parent,
+            text=str(text),
+            fg="black",
+            cursor="hand2",
+            justify="left",
+            anchor="w",
+            wraplength=wraplength
+        )
+
+        label.bind(
+            "<Button-1>",
+            lambda e, v=text: self._copy_to_clipboard(v, label)
+        )
+
+        label.bind(
+            "<Enter>",
+            lambda e: self._schedule_tooltip(
+                label,
+                "Click to copy to clipboard"
+            )
+        )
+
+        label.bind(
+            "<Leave>",
+            self._cancel_tooltip
+        )
+
+        return label
