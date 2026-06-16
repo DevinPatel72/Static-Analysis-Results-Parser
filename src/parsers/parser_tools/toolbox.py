@@ -310,6 +310,9 @@ def export_config(inputs, outfile, control_flags):
                 
         parsers.INPUTS_PATH = os.path.join(parsers.INPUTS_DIR, basename+'.json')
     
+    # Check if inputs dir exists, then create it if it doesn't
+    os.makedirs(parsers.INPUTS_DIR, exist_ok=True)
+    
     with open(parsers.INPUTS_PATH, 'w', encoding='utf-8-sig') as uout:
         json.dump(out_dict, uout, indent=4)
 
