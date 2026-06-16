@@ -288,12 +288,26 @@ def check_CWE_category(cwe, count=0):
         return cwe, count
 
 def export_config(inputs, outfile, control_flags):
-    out_dict = {InputSchemaKeys.SCHEMA.value: "schemas/user_inputs.schema.json",
+    out_dict = {InputSchemaKeys.SCHEMA.value: "../schemas/user_inputs.schema.json",
                 InputSchemaKeys.PROJ_NAME.value: parsers.PROJ_NAME,
                 InputSchemaKeys.PROJ_VERSION.value: parsers.PROJ_VERSION,
                 InputSchemaKeys.MAIN.value: inputs,
                 InputSchemaKeys.OUTFILE.value: outfile,
                 InputSchemaKeys.FLAGS.value: control_flags}
+    
+    # Set up output path
+    if len(parsers.INPUTS_PATH) <= 0:
+        basename = "_".join(part for part in [parsers.PROJ_NAME.replace(' ', '_'), parsers.PROJ_VERSION.replace(' ', '_')] if len(part.strip()) > 0)
+        # Add -# to basename if file exists
+        if os.path.isfile(os.path.join(parsers.INPUTS_DIR, basename+'.json')):
+            i = 1
+            while True:
+                if os.path.isfile(os.path.join(parsers.INPUTS_DIR, basename+f'-{i}.json')):
+                    i += 1
+                else: break
+            basename += f'-{i}'
+                
+        parsers.INPUTS_PATH = os.path.join(parsers.INPUTS_DIR, basename+'.json')
     
     with open(parsers.INPUTS_PATH, 'w', encoding='utf-8-sig') as uout:
         json.dump(out_dict, uout, indent=4)
@@ -389,7 +403,7 @@ def print_user_inputs_template():
     flags = flags.rstrip(',\n')
     
     s = f"""{{
-    "$schema": "schemas/user_inputs.schema.json",
+    "$schema": "../schemas/user_inputs.schema.json",
     "project_name": "example_proj",
     "project_version": "v1.0",
     "main": [
@@ -417,4 +431,4 @@ def print_user_inputs_template():
 {flags}
     }}
 }}"""
-    print(s, end='')
+    print(s, sep='', end='')

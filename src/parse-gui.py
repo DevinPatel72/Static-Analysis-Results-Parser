@@ -74,24 +74,25 @@ def main():
     parser_outfile = ""
     control_flags = {}
     
-    # DEBUG
-    select_input = JsonInputPreviewGUI()
+    # Load inputs if there are any
+    if len(os.listdir(parsers.INPUTS_DIR)) > 0:
+        select_input = JsonInputPreviewGUI()
         
-    # Load inputs from config file
-    if select_input.cleanexit and select_input.results is not None:
-        rv = load_config_user_inputs(select_input.results)
-        if isinstance(rv, str):
-            if f"Config file {select_input.results} not found." != rv:
-                logger.warning(f"{rv}")
-                console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning")
-            parser_inputs = []
-            parser_outfile = ""
-            control_flags = {}
+        # Load inputs from config file
+        if select_input.cleanexit and select_input.results is not None:
+            rv = load_config_user_inputs(select_input.results)
+            if isinstance(rv, str):
+                if f"Config file {select_input.results} not found." != rv:
+                    logger.warning(f"{rv}")
+                    console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning")
+                parser_inputs = []
+                parser_outfile = ""
+                control_flags = {}
+            else:
+                parser_inputs, parser_outfile, control_flags = rv
+        # Else exit
         else:
-            parser_inputs, parser_outfile, control_flags = rv
-    # Else exit
-    else:
-        sys.exit(0)
+            sys.exit(0)
         
     # Check inputs format
     if len(parser_inputs) > 0:

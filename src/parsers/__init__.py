@@ -54,7 +54,7 @@ CONFIG_DIR = 'config'
 MAPPINGS_DIR = 'mappings'
 PREFLIGHT_DIR = 'preflight'
 INPUTS_DIR = 'inputs'
-INPUTS_PATH = 'user_inputs.json'
+INPUTS_PATH = ''
 
 # CWE Category Mappings
 cwe_categories = {}
