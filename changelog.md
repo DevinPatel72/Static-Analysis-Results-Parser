@@ -1,5 +1,12 @@
 # Change Log
 
+## [Version 2.5.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.5.0) (2026-06-16)
+- Created a new header for Trace instead of appending it to the Message or Symbol columns. This will include DestPath/DestLine values for certain scanners.
+- Added a GUI window to select existing user inputs, if available.
+- Updated CLI so that -i input does not overwrite existing inputs files.
+- Removed finding total from donut chart if a scanner outputs 0 findings to prevent clutter
+- Fixed bug where line number may be omitted in Memory Leak findings from Fortify
+
 ## [Version 2.4.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.4.0) (2026-06-04)
 - New feature: Added a progress bar to the GUI so SARP doesn't appear to hang, freeze, or quit once parsing begins.
 - Fixed bug where an empty preflight ruleset in the GUI will be ignored and still use previously loaded rules.
