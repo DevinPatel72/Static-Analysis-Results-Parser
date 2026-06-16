@@ -41,7 +41,6 @@ is_text() {
 clean() {
     rm -rf "$BIN_DIR"
     mkdir -p "$BIN_DIR"
-    #rm -f config/user_inputs.json
     clean_build_files
 }
 
@@ -90,7 +89,7 @@ mkdir -p "$BIN_DIR"
 cp -r dist/. "$BIN_DIR/"
 
 # Delete the user_inputs.json and preflight_rules.py
-rm "$BIN_DIR/config/user_inputs*.json"
+find "$BIN_DIR/config/inputs" -mindepth 1 -delete
 rm "$BIN_DIR/config/preflight/preflight_rules.py"
 
 # Cleanup build files
