@@ -21,6 +21,11 @@ class JsonInputPreviewGUI:
         self.root = tk.Tk()
         self.root.title(PROG_NAME)
         self.root.geometry("1300x500")
+        
+        self.root.protocol(
+            "WM_DELETE_WINDOW",
+            self._on_close
+        )
 
         self.root.attributes("-topmost", True)
         self.root.update()
@@ -31,11 +36,33 @@ class JsonInputPreviewGUI:
 
         self.root.mainloop()
 
+    def _on_close(self):
+        self.cleanexit = False
+        self.results = None
+        self.root.destroy()
+
     def _build_gui(self):
         
         # Version text
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
-        version_label.pack(side="bottom", pady=5)
+        version_label.pack(side=tk.BOTTOM, pady=5)
+        
+        # Submit button
+        button_frame = ttk.Frame(self.root)
+        button_frame.pack(
+            side=tk.BOTTOM,
+            fill=tk.X,
+            padx=10,
+            pady=10
+        )
+
+        ttk.Button(
+            button_frame,
+            text="Submit",
+            command=self._submit
+        ).pack(
+            side=tk.BOTTOM
+        )
         
         container = ttk.Frame(
             self.root,
@@ -201,6 +228,17 @@ class JsonInputPreviewGUI:
             "<Button-5>",
             lambda e: self.preview_canvas.yview_scroll(1, "units")
         )
+    
+    def _submit(self):
+        selected = self.get_selected_file()
+
+        if not selected:
+            return
+
+        self.results = selected
+        self.cleanexit = True
+
+        self.root.destroy()
 
     def _update_wraplengths(self, event):
         self.current_wraplength = max(

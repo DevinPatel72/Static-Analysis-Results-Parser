@@ -77,7 +77,11 @@ def main():
     # DEBUG
     select_input = JsonInputPreviewGUI()
     
-    sys.exit(0)
+    if select_input.cleanexit and select_input.results is not None:
+        print(select_input.results)
+        sys.exit(0)
+    else:
+        sys.exit(0)
     
     # Ask user if they wish to load configuration data from file
     if os.path.isfile(os.path.join(parsers.INPUTS_DIR, 'user_inputs.json')):
