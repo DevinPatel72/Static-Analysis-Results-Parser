@@ -300,7 +300,10 @@ def export_config(inputs, outfile, control_flags):
     
     # Set up output path
     if len(parsers.INPUTS_PATH) <= 0:
-        basename = "_".join(part for part in [parsers.PROJ_NAME.replace(' ', '_'), parsers.PROJ_VERSION.replace(' ', '_')] if len(part.strip()) > 0)
+        if len(parsers.PROJ_NAME) <= 0:
+            basename = parsers.PROG_NAME.lower().replace(" ", "_")
+        else:
+            basename = "_".join(part for part in [parsers.PROJ_NAME.replace(' ', '_'), parsers.PROJ_VERSION.replace(' ', '_')] if len(part.strip()) > 0)
         # Add -# to basename if file exists
         if os.path.isfile(os.path.join(parsers.INPUTS_DIR, basename+'.json')):
             i = 1

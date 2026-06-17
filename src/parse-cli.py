@@ -76,8 +76,8 @@ def main():
     
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument('-v', '--version', action='store_true', help='Print software version and exit')
-    argparser.add_argument('-i', '--input', action="append", nargs=2, metavar=("SCANNER", "FILE"), help="Short input. Only accepts scanner name and path to scanner file. Will be included along with a --file input if present.")
-    argparser.add_argument('-I', '--extended-input', action="append", dest="extended_input", nargs=4, metavar=("SCANNER", "FILE", "REMOVE", "PREPEND"), help="Extended input. Accepts scanner name, file path, path to remove, and path to prepend. Will be included along with a --file input if present.")
+    argparser.add_argument('-i', '--input', action="append", nargs=2, metavar=("SCANNER", "FILE"), help="Short input. Only accepts scanner name and path to scanner file. Will be included along with a --file input if present.\nExample: -i Fortify \"path/to/file.fpr\" -i Coverity \"path/to/file.json\"")
+    argparser.add_argument('-I', '--extended-input', action="append", dest="extended_input", nargs=4, metavar=("SCANNER", "FILE", "REMOVE", "PREPEND"), help="Extended input. Accepts scanner name, file path, path to remove, and path to prepend. Will be included along with a --file input if present.\nExample: -I Fortify \"path/to/file.fpr\" \"remove_from_path_value\" \"prepend_to_path_value\" -I Coverity \"path/to/file.json\" \"use_empty_quotes_for_blank\" \"\"")
     argparser.add_argument('-f', '--file', type=str, default="", help="User inputs JSON file. An absolute path or just the base name can be passed. By default looks for 'user_inputs.json' in config/inputs directory if no inputs are passed.")
     argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
     argparser.add_argument('-pn', '--project-name', dest="projectname", help="Name of the project")
