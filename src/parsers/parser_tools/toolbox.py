@@ -290,7 +290,7 @@ def check_CWE_category(cwe, count=0):
     else:
         return cwe, count
 
-def export_config(inputs, outfile, control_flags):
+def export_config(inputs, outfile, control_flags, ok_overwrite=False):
     out_dict = {InputSchemaKeys.SCHEMA.value: "../schemas/user_inputs.schema.json",
                 InputSchemaKeys.PROJ_NAME.value: parsers.PROJ_NAME,
                 InputSchemaKeys.PROJ_VERSION.value: parsers.PROJ_VERSION,
@@ -305,7 +305,7 @@ def export_config(inputs, outfile, control_flags):
         else:
             basename = "_".join(part for part in [parsers.PROJ_NAME.replace(' ', '_'), parsers.PROJ_VERSION.replace(' ', '_')] if len(part.strip()) > 0)
         # Add -# to basename if file exists
-        if os.path.isfile(os.path.join(parsers.INPUTS_DIR, basename+'.json')):
+        if not ok_overwrite and os.path.isfile(os.path.join(parsers.INPUTS_DIR, basename+'.json')):
             i = 1
             while True:
                 if os.path.isfile(os.path.join(parsers.INPUTS_DIR, basename+f'-{i}.json')):
