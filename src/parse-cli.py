@@ -103,6 +103,7 @@ def main():
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Check the user inputs JSON file pointed to by the 'inputs' option for validity, report any errors, then exit.")
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Print current input configuration from the user inputs JSON file pointed to by the 'inputs' option then exit.")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print a template of what a user inputs JSON file should contain.")
+    argparser.add_argument('--no-overwriting-inputs', dest="no_overwriting_inputs", action='store_true', help="Instead of overwriting a user inputs JSON file, SARP will create a copy.")
     
     args = argparser.parse_args()
     
@@ -201,7 +202,7 @@ def main():
     logger.info("\n".join(['    ' + l for l in s.split('\n')]))
     
     # Export parser inputs to config file for reruns
-    export_config(parser_inputs, parser_outfile, control_flags)
+    export_config(parser_inputs, parser_outfile, control_flags, no_overwrite=args.no_overwriting_inputs)
     
     print('\n{}\n'.format('#'*90))
     

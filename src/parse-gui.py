@@ -161,11 +161,8 @@ def main():
     logger.info("\n".join(['    ' + l for l in s.split('\n')]))
     
     # Export parser inputs to config file for reruns. If reading from a selected inputs file, overwrite it instead of creating a new file.
-    if select_input.results is not None and len(select_input.results) > 0:
-        ok_overwrite = True
-    else:
-        ok_overwrite = False
-    export_config(parser_inputs, parser_outfile, control_flags, ok_overwrite=ok_overwrite)
+    no_overwrite = not (select_input.results is not None and len(select_input.results) > 0)
+    export_config(parser_inputs, parser_outfile, control_flags, no_overwrite=no_overwrite)
     
     # Put control_flags into module variable
     parsers.control_flags = control_flags
