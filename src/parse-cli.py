@@ -139,8 +139,8 @@ def main():
     
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Check the user inputs JSON file pointed to by the 'inputs' option for validity, report any errors, then exit.")
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", metavar="INPUT_FILE", nargs='?', const=True, default=False, help="Print a list of available inputs in the \'inputs\' folder. If a file name or path is provided, instead print that file's contents.")
+    argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Writes all inputs to a config file. If a name is passed, config will be saved to the \'inputs\' folder under that name. If no name is passed, SARP will overwrite the --file input or create a new config file in \'inputs.\'")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print a template of what a user inputs JSON file should contain.")
-    argparser.add_argument('--no-overwriting-inputs', dest="no_overwriting_inputs", action='store_true', help="Instead of overwriting a user inputs JSON file, SARP will create a copy.")
     
     args = argparser.parse_args()
     
@@ -239,7 +239,11 @@ def main():
     print_inputs(parser_inputs, parser_outfile, control_flags)
     
     # Export parser inputs to config file for reruns
-    export_config(parser_inputs, parser_outfile, control_flags, no_overwrite=args.no_overwriting_inputs)
+    if args.save_config is not False:
+        if isinstance(args.save_config, str):
+            basename = args.save_config+'.json' if not args.save_config.endswith('.json') else args.save_config
+            parsers.INPUTS_PATH = os.path.join(parsers.INPUTS_DIR, basename)
+        export_config(parser_inputs, parser_outfile, control_flags)
     
     print('\n{}\n'.format('#'*90))
     
