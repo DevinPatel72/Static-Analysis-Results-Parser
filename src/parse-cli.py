@@ -63,6 +63,43 @@ if find_spec('openpyxl') is None:
     # Handled in parser_writer.py
 
 ################################
+# Functions
+################################
+
+def print_inputs(parser_inputs, parser_outfile, control_flags):
+    if len(parsers.PROJ_NAME) > 0:
+        s = f"\nConfiguration for " + " ".join([part for part in [parsers.PROJ_NAME, parsers.PROJ_VERSION]]) + ":\n"
+    else:
+        s = "\nConfiguration:\n"
+    for i, inp in enumerate(parser_inputs, 1):
+        s += f"{i})  Scanner: {inp[InputDictKeys.SCANNER.value]}\n    Path: {inp[InputDictKeys.PATH.value]}\n    Path substring to delete: {inp[InputDictKeys.REMOVE.value]}\n    Path substring to prepend: {inp[InputDictKeys.PREPEND.value]}\n"
+    s += f"\nWriting to file: {parser_outfile}\n"
+    s += "\nParser Switches:\n"
+    s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in control_flags.items()]).strip('\n')
+    print(s)
+    
+    # Log the configuration
+    logger.info("\n".join(['    ' + l for l in s.split('\n')]))
+
+def print_inputs_file_list():
+    for i in sorted(os.listdir(parsers.INPUTS_DIR),
+                        key=lambda s: ( # Lambda function for natural key sort
+                        (m := __import__("re").match(r"^(.*?)(?:-(\d+))?(\.[^.]+)$", s))[1].lower(),
+                        0 if m[2] is None else 1,
+                        int(m[2] or 0)
+    )):
+        print(i.replace('.json', ''))
+
+def print_inputs_file_contents(fpath):
+    rv = load_config_user_inputs(fpath)
+    if isinstance(rv, str):
+        logger.critical(f"Unable to open inputs: {rv}")
+        sys.exit(3)
+    else:
+        parser_inputs, parser_outfile, control_flags = rv
+        print_inputs(parser_inputs, parser_outfile, control_flags)
+
+################################
 # Main
 ################################
 
@@ -101,7 +138,7 @@ def main():
             )
     
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Check the user inputs JSON file pointed to by the 'inputs' option for validity, report any errors, then exit.")
-    argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Print current input configuration from the user inputs JSON file pointed to by the 'inputs' option then exit.")
+    argparser.add_argument('-l', '--list-inputs', dest="listinputs", metavar="INPUT_FILE", nargs='?', const=True, default=False, help="Print a list of available inputs in the \'inputs\' folder. If a file name or path is provided, instead print that file's contents.")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print a template of what a user inputs JSON file should contain.")
     argparser.add_argument('--no-overwriting-inputs', dest="no_overwriting_inputs", action='store_true', help="Instead of overwriting a user inputs JSON file, SARP will create a copy.")
     
@@ -115,6 +152,21 @@ def main():
     # Print user inputs template
     if args.exampletemplate:
         print_user_inputs_template()
+        sys.exit(0)
+    
+    # Print list of input files
+    if args.listinputs is True:
+        print_inputs_file_list()
+        sys.exit(0)
+    
+    # Print input file contents
+    if isinstance(args.listinputs, str):
+        if not ('/' in args.listinputs or '\\' in args.listinputs):
+            fname = args.listinputs + '.json' if not args.listinputs.endswith('.json') else args.listinputs
+            fpath = os.path.join(parsers.INPUTS_DIR, fname)
+        else:
+            fpath = args.listinputs
+        print_inputs_file_contents(fpath)
         sys.exit(0)
     
     # Control flags
@@ -184,22 +236,7 @@ def main():
         sys.exit(0)
 
     # Output confirmation
-    if len(parsers.PROJ_NAME) > 0:
-        s = f"\nConfiguration for " + " ".join([part for part in [parsers.PROJ_NAME, parsers.PROJ_VERSION]]) + ":\n"
-    else:
-        s = "\nConfiguration:\n"
-    for i, inp in enumerate(parser_inputs, 1):
-        s += f"{i})  Scanner: {inp[InputDictKeys.SCANNER.value]}\n    Path: {inp[InputDictKeys.PATH.value]}\n    Path substring to delete: {inp[InputDictKeys.REMOVE.value]}\n    Path substring to prepend: {inp[InputDictKeys.PREPEND.value]}\n"
-    s += f"\nWriting to file: {parser_outfile}\n"
-    s += "\nParser Switches:\n"
-    s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in control_flags.items()]).strip('\n')
-    print(s)
-    
-    if args.listinputs:
-        sys.exit(0)
-    
-    # Log the configuration
-    logger.info("\n".join(['    ' + l for l in s.split('\n')]))
+    print_inputs(parser_inputs, parser_outfile, control_flags)
     
     # Export parser inputs to config file for reruns
     export_config(parser_inputs, parser_outfile, control_flags, no_overwrite=args.no_overwriting_inputs)
