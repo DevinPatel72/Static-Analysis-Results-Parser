@@ -4,10 +4,10 @@
 import os
 import sys
 import traceback
-from parsers.parser_tools.inputs_gui import YesNoGUI, InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
+from parsers.parser_tools.inputs_gui import InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
 from parsers.parser_tools.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.preflight_gui import RuleBuilderGUI
-from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
 import parsers
 from parsers import PROG_NAME, VERSION
 from parsers import *
@@ -120,9 +120,9 @@ def main():
     
     parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
     control_flags = {
-        FLAG_CATEGORY_MAPPING: outfile_flags_gui.results[InputDictKeys.OVERRIDE_VULN_MAPPING.value],
-        FLAG_DUPE_SCAN_CONSOLIDATION: outfile_flags_gui.results[InputDictKeys.DUPE_SCAN_CONSOLIDATION.value],
-        FLAG_PREFLIGHT_RULES: outfile_flags_gui.results[InputDictKeys.PREFLIGHT_RULES.value],
+        FLAG_CATEGORY_MAPPING: outfile_flags_gui.results[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag],
+        FLAG_DUPE_SCAN_CONSOLIDATION: outfile_flags_gui.results[InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag],
+        FLAG_PREFLIGHT_RULES: outfile_flags_gui.results[InputConfigFlags.PREFLIGHT_RULES.flag],
     }
     
     # If the checkbox was enabled, ask if user wants to edit the preflight rules
@@ -170,7 +170,7 @@ def main():
     preflight.save_prules(parsers.prules)
     
     # Load the mapping if true
-    if control_flags[InputDictKeys.OVERRIDE_VULN_MAPPING.value]:
+    if control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
         parsers.cwe_categories = load_config_cwe_category_mappings()
 
     # Init the outfile

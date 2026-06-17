@@ -6,7 +6,7 @@ import os
 import logging
 import traceback
 import importlib
-from .toolbox import Fieldnames, InputDictKeys
+from .toolbox import Fieldnames, InputConfigFlags
 from .progressbar import progress_bar,SPACE
 import parsers
 
@@ -103,7 +103,7 @@ def apply_prules(data):
                         row[fieldname] = replacement[fieldname]
     
     for i, row in enumerate(data, start=1):
-        progress_bar(i, len(data), prefix=InputDictKeys.PREFLIGHT_RULES.value.rjust(SPACE))
+        progress_bar(i, len(data), prefix=InputConfigFlags.PREFLIGHT_RULES.flag.rjust(SPACE))
         
         # Default prules first
         if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:

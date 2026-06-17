@@ -10,7 +10,7 @@ import traceback
 import parsers
 from parsers import *
 from parsers.parser_tools import parser_writer, preflight
-from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template
 from parsers.parser_tools.begin_parse import begin
 
 # Configure root path and important dirs of script
@@ -76,12 +76,32 @@ def main():
     
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument('-v', '--version', action='store_true', help='Print software version and exit')
-    argparser.add_argument('-i', '--inputs', type=str, default=os.path.join(parsers.INPUTS_DIR, "user_inputs.json"), help="User inputs JSON file. An absolute path or just the base name can be passed. By default looks for 'user_inputs.json' in config/inputs directory.")
+    argparser.add_argument('-i', '--input', action="append", nargs=2, metavar=("SCANNER", "FILE"), help="Short input. Only accepts scanner name and path to scanner file. Will be included along with a --file input if present.")
+    argparser.add_argument('-I', '--extended-input', action="append", dest="extended_input", nargs=4, metavar=("SCANNER", "FILE", "REMOVE", "PREPEND"), help="Extended input. Accepts scanner name, file path, path to remove, and path to prepend. Will be included along with a --file input if present.")
+    argparser.add_argument('-f', '--file', type=str, default="", help="User inputs JSON file. An absolute path or just the base name can be passed. By default looks for 'user_inputs.json' in config/inputs directory if no inputs are passed.")
     argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
-    argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Check the user inputs JSON file pointed to by the 'inputs' option for validity, report any errors, then exit.")
-    argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Print current input configuration from the user inputs JSON file pointed to by the 'inputs' option then exit.")
     argparser.add_argument('-pn', '--project-name', dest="projectname", help="Name of the project")
     argparser.add_argument('-pv', '--project-version', dest="projectversion", help="Version of the project")
+    
+    for f in InputConfigFlags:
+        # Default value is True
+        if f.default:
+            argparser.add_argument(
+                f"--no-{f.flag.lower().replace(' ', '-')}",
+                dest=f.flag.lower().replace(' ', '-'),
+                action="store_false",
+                help=f"Disables {f.flag}. Is overridden by --file input."
+            )
+        else:
+            argparser.add_argument(
+                f"--{f.flag.lower().replace(' ', '-')}",
+                dest=f.flag.lower().replace(' ', '-'),
+                action="store_true",
+                help=f"Enable {f.flag}. Is overridden by --file input."
+            )
+    
+    argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Check the user inputs JSON file pointed to by the 'inputs' option for validity, report any errors, then exit.")
+    argparser.add_argument('-l', '--list-inputs', dest="listinputs", action='store_true', help="Print current input configuration from the user inputs JSON file pointed to by the 'inputs' option then exit.")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print a template of what a user inputs JSON file should contain.")
     
     args = argparser.parse_args()
@@ -96,29 +116,55 @@ def main():
         print_user_inputs_template()
         sys.exit(0)
     
-    # Adjust inputs path according to whether it is a basename or a path
-    if not ('/' in args.inputs or '\\' in args.inputs):
-        fname = args.inputs + '.json' if not args.inputs.endswith('.json') else args.inputs
-        inp_path = os.path.join(parsers.INPUTS_DIR, fname)
+    # Control flags
+    control_flags = {f.flag: getattr(args, f.flag.lower().replace(' ', '-')) for f in InputConfigFlags}
+    
+    # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default user_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
+    if len(args.file) > 0:
+        # Adjust inputs path according to whether it is a basename or a path
+        if not ('/' in args.file or '\\' in args.file):
+            fname = args.file + '.json' if not args.file.endswith('.json') else args.file
+            inp_path = os.path.join(parsers.INPUTS_DIR, fname)
+        else:
+            inp_path = args.file
+    elif args.input is None and args.extended_input is None:
+        inp_path = os.path.join(parsers.INPUTS_DIR, "user_inputs.json")
     else:
-        inp_path = args.inputs
+        inp_path = ""
     
     # Load inputs from config file
-    rv = load_config_user_inputs(inp_path, default_outfile="sarp_output.xlsx")
+    rv = load_config_user_inputs(inp_path, default_outfile="sarp_output.xlsx", default_control_flags=control_flags)
     if isinstance(rv, str):
         logger.critical(f"Unable to open inputs: {rv}")
         sys.exit(3)
     else:
         parser_inputs, parser_outfile, control_flags = rv
     
+    # Override outfile if the arg was passed
     if args.out is not None and len(args.out) > 0:
         parser_outfile = args.out
     
-    # Project name + version
+    # Override Project name + version if those args were passed
     if args.projectname is not None and len(args.projectname) > 0:
         parsers.PROJ_NAME = args.projectname
     if args.projectversion is not None and len(args.projectversion) > 0:
         parsers.PROJ_VERSION = args.projectversion
+        
+    # Command line inputs
+    if args.input is not None:
+        for inp in args.input:
+            parser_inputs.append({InputDictKeys.SCANNER.value: inp[0],
+                                InputDictKeys.PATH.value: inp[1],
+                                InputDictKeys.REMOVE.value: "",
+                                InputDictKeys.PREPEND.value: "",
+            })
+    if args.extended_input is not None:
+        for inp in args.extended_input:
+            parser_inputs.append({InputDictKeys.SCANNER.value: inp[0],
+                                InputDictKeys.PATH.value: inp[1],
+                                InputDictKeys.REMOVE.value: inp[2],
+                                InputDictKeys.PREPEND.value: inp[3],
+            })
         
     # Check inputs format
     if len(parser_inputs) > 0:
@@ -132,8 +178,8 @@ def main():
         elif not rv:
             sys.exit(2)
     else:
-        logger.info("No inputs defined. Terminating script...")
-        print("No inputs defined. Terminating script...")
+        logger.info("No inputs defined. Terminating SARP...")
+        print("No inputs defined. Terminating SARP...")
         sys.exit(0)
 
     # Output confirmation
@@ -169,7 +215,7 @@ def main():
         parsers.prules = []
         
     # Load the mapping if true
-    if control_flags[InputDictKeys.OVERRIDE_VULN_MAPPING.value]:
+    if control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
         parsers.cwe_categories = load_config_cwe_category_mappings()
 
     # Init the outfile

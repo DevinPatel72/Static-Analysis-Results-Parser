@@ -9,7 +9,7 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
 from .. import PROG_NAME, VERSION
-from .toolbox import InputDictKeys, InputSchemaKeys, validate_path_and_scanner, get_all_previews, generate_preview
+from .toolbox import InputDictKeys, InputConfigFlags, InputSchemaKeys, validate_path_and_scanner, get_all_previews, generate_preview
 
 # Constants
 WINDOW_LENGTH = 900
@@ -299,10 +299,10 @@ class JsonInputPreviewGUI:
             {}
         )
 
-        for flag_name in InputDictKeys.FLAGS.value:
+        for f in InputConfigFlags:
             lines.append(
-                f"{flag_name}: "
-                f"{flags.get(flag_name, False)}"
+                f"{f.flag}: "
+                f"{flags.get(f.flag, False)}"
             )
 
         return "\n".join(lines)
@@ -730,9 +730,9 @@ class OutfileFlagsGUI:
         browse_btn.pack(side="left")
 
         # ─── Checkboxes for Flags ─────────────────────────────
-        mapping_val = self.initial_flags.get(InputDictKeys.OVERRIDE_VULN_MAPPING.value, InputDictKeys.OVERRIDE_VULN_MAPPING_DEFVAL.value)
-        dedupe_val = self.initial_flags.get(InputDictKeys.DUPE_SCAN_CONSOLIDATION.value, InputDictKeys.DUPE_SCAN_CONSOLIDATION_DEFVAL.value)
-        pr_val = self.initial_flags.get(InputDictKeys.PREFLIGHT_RULES.value, InputDictKeys.PREFLIGHT_RULES_DEFVAL.value)
+        mapping_val = self.initial_flags.get(InputConfigFlags.OVERRIDE_VULN_MAPPING.flag, InputConfigFlags.OVERRIDE_VULN_MAPPING.default)
+        dedupe_val = self.initial_flags.get(InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag, InputConfigFlags.DUPE_SCAN_CONSOLIDATION.default)
+        pr_val = self.initial_flags.get(InputConfigFlags.PREFLIGHT_RULES.flag, InputConfigFlags.PREFLIGHT_RULES.default)
         self.enable_category_mapping = tk.BooleanVar(value=mapping_val)
         self.enable_dupe_scan_consolidation = tk.BooleanVar(value=dedupe_val)
         self.enable_preflight_rules = tk.BooleanVar(value=pr_val)
@@ -802,9 +802,9 @@ class OutfileFlagsGUI:
 
         self.results = {
             InputDictKeys.OUTFILE.value: output_path,
-            InputDictKeys.DUPE_SCAN_CONSOLIDATION.value: self.enable_dupe_scan_consolidation.get(),
-            InputDictKeys.PREFLIGHT_RULES.value: self.enable_preflight_rules.get(),
-            InputDictKeys.OVERRIDE_VULN_MAPPING.value: self.enable_category_mapping.get()
+            InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag: self.enable_dupe_scan_consolidation.get(),
+            InputConfigFlags.PREFLIGHT_RULES.flag: self.enable_preflight_rules.get(),
+            InputConfigFlags.OVERRIDE_VULN_MAPPING.flag: self.enable_category_mapping.get()
         }
 
         self.cleanexit = True

@@ -8,7 +8,7 @@ from tkinter import ttk
 import tkinter.font as tkfont
 
 from .. import PROG_NAME, VERSION
-from .toolbox import InputDictKeys, InputSchemaKeys
+from .toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags
 
 class JsonInputPreviewGUI:
     def __init__(self):
@@ -685,10 +685,10 @@ class JsonInputPreviewGUI:
             {}
         )
 
-        for flag_name in InputDictKeys.FLAGS.value:
+        for f in InputConfigFlags:
             value = bool(
                 flags.get(
-                    flag_name,
+                    f.flag,
                     False
                 )
             )
@@ -704,7 +704,7 @@ class JsonInputPreviewGUI:
 
             ttk.Label(
                 row,
-                text=f"{flag_name}: "
+                text=f"{f.flag}: "
             ).pack(
                 side=tk.LEFT
             )

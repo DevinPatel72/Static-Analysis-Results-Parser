@@ -27,21 +27,18 @@ class InputDictKeys(Enum):
     PREPEND = 'prepend'
     REMOVE = 'remove'
     OUTFILE = 'outfile'
-    OVERRIDE_VULN_MAPPING = parsers.FLAG_CATEGORY_MAPPING
-    PREFLIGHT_RULES = parsers.FLAG_PREFLIGHT_RULES
-    DEFAULT_PREFLIGHT_RULES = parsers.FLAG_DEFAULT_PREFLIGHT_RULES
-    DUPE_SCAN_CONSOLIDATION = parsers.FLAG_DUPE_SCAN_CONSOLIDATION
-    
-    OVERRIDE_VULN_MAPPING_DEFVAL = True
-    PREFLIGHT_RULES_DEFVAL = True
-    DEFAULT_PREFLIGHT_RULES_DEFVAL = True
-    DUPE_SCAN_CONSOLIDATION_DEFVAL = False
     
     INPUTS = [PATH, SCANNER, PREPEND, REMOVE]
-    FLAGS = [OVERRIDE_VULN_MAPPING, PREFLIGHT_RULES, DEFAULT_PREFLIGHT_RULES, DUPE_SCAN_CONSOLIDATION]
-    
-    def __str__(self):
-        return self.value
+
+class InputConfigFlags(Enum):
+    OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True)
+    PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True)
+    DEFAULT_PREFLIGHT_RULES = (parsers.FLAG_DEFAULT_PREFLIGHT_RULES, True)
+    DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False)
+
+    def __init__(self, flag, default):
+        self.flag = flag
+        self.default = default
 
 class InputSchemaKeys(Enum):
     SCHEMA = "$schema"
@@ -178,8 +175,13 @@ def load_config_cwe_category_mappings():
         console("Unable to load MITRE CWE Category Mappings: Invalid JSON format\nSARP will continue without CWE category mappings.", "Config Error", type='error')
         return {}
 
-def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
+def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx", default_control_flags=None):
     # Check if there are inputs in the inputs file
+    if len(inputs_path) <= 0:
+        if default_control_flags is not None: 
+            return [], default_outfile, default_control_flags
+        else:
+            return [], default_outfile, {}
     if os.path.isfile(inputs_path):
         try:
             with open(inputs_path, 'r', encoding='utf-8-sig') as uin:
@@ -216,8 +218,8 @@ def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx"):
         # Check for control flags
         if 'flags' in user_inputs.keys():
             for k in user_inputs['flags'].keys():
-                if k not in InputDictKeys.FLAGS.value:
-                    return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join(InputDictKeys.FLAGS.value))
+                if k not in [f.flag for f in InputConfigFlags]:
+                    return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join([f.flag for f in InputConfigFlags]))
         else:
             control_flags = {}
 
@@ -253,15 +255,15 @@ def check_input_format(inputs, outfile, flags):
     
     # Check control flags
     for k, v in flags.items():
-        if k not in InputDictKeys.FLAGS.value:
-            console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {InputDictKeys.FLAGS.value}", title='Invalid Config Input', type='error')
+        if k not in [f.flag for f in InputConfigFlags]:
+            console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {[f.flag for f in InputConfigFlags]}", title='Invalid Config Input', type='error')
             success = False
         if not isinstance(v, bool):
             console(f"Invalid data type for control flag \"{k}\". Please ensure all values are boolean types.", title='Invalid Config Input', type='error')
             success = False
     
     # Check if all control flags are present
-    missing = [f"\'{f}\'" for f in InputDictKeys.FLAGS.value if f not in flags.keys()]
+    missing = [f"\'{f}\'" for f in [t_f.flag for t_f in InputConfigFlags] if f not in flags.keys()]
     if len(missing) > 0 and not parsers.GUI_MODE:
         console(f"Missing control flag{'s' if len(missing) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', type='error')
         success = False
@@ -275,7 +277,7 @@ def check_all_CWEs(data):
     for i, row in enumerate(data, start=1):
         # Control flag check
         if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING]:
-            progress_bar(i, len(data), prefix=InputDictKeys.OVERRIDE_VULN_MAPPING.value.rjust(SPACE))
+            progress_bar(i, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(SPACE))
             row[Fieldnames.SCORING_BASIS.value], count = check_CWE_category(row[Fieldnames.SCORING_BASIS.value], count)
         
         # Turn CWE into int if capable
@@ -399,7 +401,7 @@ def get_all_previews(inputs):
 
 def print_user_inputs_template():
     flags = ""
-    for f in InputDictKeys.FLAGS.value:
+    for f in [f.flag for f in InputConfigFlags]:
         flags += f'        "{f}": [true|false],\n'
     flags = flags.rstrip(',\n')
     

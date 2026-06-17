@@ -3,7 +3,7 @@
 import re
 import logging
 import parsers
-from .toolbox import Fieldnames, InputDictKeys
+from .toolbox import Fieldnames, InputConfigFlags
 from .progressbar import progress_bar,SPACE
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def dupe_scan_consolidation(data):
     # Perform dupe searching
     dupe_count = 0
     for i, row in enumerate(data, start=1):
-        progress_bar(i, len(data), prefix=InputDictKeys.DUPE_SCAN_CONSOLIDATION.value.rjust(SPACE))
+        progress_bar(i, len(data), prefix=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag.rjust(SPACE))
         
         # Check to see if this is already a duplicate row or if it is designated as a canon row
         if (row[Fieldnames.CONFIDENCE.value].lower() == Fieldnames.DUPLICATE_CONF.value.lower()):
