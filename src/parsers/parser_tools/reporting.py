@@ -2,10 +2,7 @@
 
 import os
 import logging
-import traceback
 from .toolbox import console
-
-logger = logging.getLogger(__name__)
 
 _plotlib_enabled = False
 
@@ -13,10 +10,10 @@ try:
     import matplotlib.pyplot as plt
     from matplotlib.figure import Figure
     _plotlib_enabled = True
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     _plotlib_enabled = False
-    logger.error(traceback.format_exc())
 
+logger = logging.getLogger(__name__)
 
 class Report:
     """

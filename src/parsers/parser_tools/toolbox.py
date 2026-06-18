@@ -11,7 +11,7 @@ __excel_enabled = False
 try:
     import openpyxl
     __excel_enabled = True
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     __excel_enabled = False
 
 

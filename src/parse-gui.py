@@ -68,6 +68,11 @@ if find_spec('openpyxl') is None:
     logger.warning('Module \'openpyxl\' not found, defaulting output to CSV.')
     # Handled in parser_writer.py
 
+# Check if matplotlib is installed. Logged here to ensure correct placement in log file
+if find_spec('matplotlib') is None:
+    logger.warning('Module \'matplotlib\' not found, SARP will skip chart reporting.')
+    # Handled in reporting.py
+
 ################################
 # Main
 ################################
