@@ -1,6 +1,6 @@
 # Version String
 PROG_NAME = 'Static Analysis Results Parser'
-VERSION = '2.5.0'
+VERSION = '3.0.0'
 
 # Project Info
 PROJ_NAME = ""
