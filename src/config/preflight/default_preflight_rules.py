@@ -1142,6 +1142,18 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '1109', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
+            rule_id = "cppcheck_static_function",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"staticFunction", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info', Fieldnames.VALIDATOR_COMMENT.value: 'Because the function is only called within the file it is defined in, CPPCheck recommends declaring the function as static to prevent external linking. This is a performance and semantic benefit.'}
+        ),
+        PRule(
             rule_id = "cppcheck_stlcstrassignment",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
