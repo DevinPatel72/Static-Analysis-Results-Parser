@@ -20,14 +20,14 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 -  SRM:         `.xml` (preferred) or `.csv`
 
 
-## Execute using executables
+## Execute Using Executables
 
 **Requirements:**
 - Ensure the config folder is in the same directory as the executables.
 - No external dependencies are required to execute the executables.
 
 
-## Execute using interpreter
+## Execute Using Interpreter
 
 **Dependencies:**
 
@@ -46,7 +46,7 @@ $ python3 parse-gui.py
 ```
 
 
-## Build instructions
+## Build Instructions
 
 **Requirements:**
 
