@@ -132,14 +132,16 @@ def main():
                 f"--no-{f.flag.lower().replace(' ', '-')}",
                 dest=f.flag.lower().replace(' ', '-'),
                 action="store_false",
-                help=f"Disable {f.flag}. Ignored when configured through a `--file` input."
+                default=None,
+                help=f"Disable {f.flag}. Overrides the flag value specified in a `--file`."
             )
         else:
             argparser.add_argument(
                 f"--{f.flag.lower().replace(' ', '-')}",
                 dest=f.flag.lower().replace(' ', '-'),
                 action="store_true",
-                help=f"Enable {f.flag}. Ignored when configured through a `--file` input."
+                default=None,
+                help=f"Enable {f.flag}. Overrides the flag value specified in a `--file`."
             )
     
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Validate the user inputs JSON file specified by `--file`, report any errors, and exit.")
@@ -173,9 +175,6 @@ def main():
             fpath = args.listinputs
         print_inputs_file_contents(fpath)
         sys.exit(0)
-    
-    # Control flags
-    control_flags = {f.flag: getattr(args, f.flag.lower().replace(' ', '-')) for f in InputConfigFlags}
     
     # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default user_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
     if len(args.file) > 0:
@@ -223,7 +222,17 @@ def main():
                                 InputDictKeys.REMOVE.value: inp[2],
                                 InputDictKeys.PREPEND.value: inp[3],
             })
+    
+    # Control flags
+    for f in InputConfigFlags:
+        # Fill in any empty control flags with default value
+        if f.flag not in control_flags.keys():
+            control_flags[f.flag] = f.default
         
+        # Check if argument was passed and overwrite what is there
+        if (value := getattr(args, f.flag.lower().replace(' ', '-'))) is not None:
+            control_flags[f.flag] = value
+    
     # Check inputs format
     if len(parser_inputs) > 0:
         # Dedupe parser_inputs
