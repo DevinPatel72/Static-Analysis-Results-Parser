@@ -62,6 +62,11 @@ if find_spec('openpyxl') is None:
     logger.warning('Module \'openpyxl\' not found, defaulting output to CSV.')
     # Handled in parser_writer.py
 
+# Check if matplotlib is installed. Logged here to ensure correct placement in log file
+if find_spec('matplotlib') is None:
+    logger.warning('Module \'matplotlib\' not found, SARP will skip chart reporting.')
+    # Handled in reporting.py
+
 ################################
 # Functions
 ################################
@@ -113,12 +118,12 @@ def main():
     
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument('-v', '--version', action='store_true', help='Print software version and exit')
-    argparser.add_argument('-i', '--input', action="append", nargs=2, metavar=("SCANNER", "FILE"), help="Short input. Only accepts scanner name and path to scanner file. Will be included along with a --file input if present.\nExample: -i Fortify \"path/to/file.fpr\" -i Coverity \"path/to/file.json\"")
-    argparser.add_argument('-I', '--extended-input', action="append", dest="extended_input", nargs=4, metavar=("SCANNER", "FILE", "REMOVE", "PREPEND"), help="Extended input. Accepts scanner name, file path, path to remove, and path to prepend. Will be included along with a --file input if present.\nExample: -I Fortify \"path/to/file.fpr\" \"remove_from_path_value\" \"prepend_to_path_value\" -I Coverity \"path/to/file.json\" \"use_empty_quotes_for_blank\" \"\"")
-    argparser.add_argument('-f', '--file', type=str, default="", help="User inputs JSON file. An absolute path or just the base name can be passed. By default looks for 'user_inputs.json' in config/inputs directory if no inputs are passed.")
-    argparser.add_argument('-o', '--out', type=str, help='Output file path. This option will override what is set in the inputs file, or choose the current directory by default.')
-    argparser.add_argument('-pn', '--project-name', dest="projectname", help="Name of the project")
-    argparser.add_argument('-pv', '--project-version', dest="projectversion", help="Version of the project")
+    argparser.add_argument('-i', '--input', action="append", nargs=2, metavar=("SCANNER", "FILE"), help="Add a scanner input using a scanner name and a path to the corresponding results file. Can be specified multiple times. Used in addition to a `--file` input if present.\nExample: -i Fortify \"path/to/file.fpr\" -i Coverity \"path/to/file.json\"")
+    argparser.add_argument('-I', '--extended-input', action="append", dest="extended_input", nargs=4, metavar=("SCANNER", "FILE", "REMOVE", "PREPEND"), help="Add a scanner input with path transformation settings. Accepts scanner name, file path, path prefix to remove, and path prefix to prepend. Can be specified multiple times. Used in addition to a `--file` input if present.\nExample: -I Fortify \"path/to/file.fpr\" \"remove_from_path_value\" \"prepend_to_path_value\" -I Coverity \"path/to/file.json\" \"use_empty_quotes_for_blank\" \"\"")
+    argparser.add_argument('-f', '--file', type=str, default="", help="Load a user inputs JSON configuration file. Accepts either an absolute path or a filename located in the `config/inputs` directory. Defaults to `config/inputs/user_inputs.json` if no input options are specified.")
+    argparser.add_argument('-o', '--out', type=str, help='Output file path. Overrides the output path specified in a `--file` input. If not specified, the current working directory is used.')
+    argparser.add_argument('-pn', '--project-name', dest="projectname", help="Specify the project name to include in generated reports.")
+    argparser.add_argument('-pv', '--project-version', dest="projectversion", help="Specify the project version to include in generated reports.")
     
     for f in InputConfigFlags:
         # Default value is True
@@ -127,20 +132,20 @@ def main():
                 f"--no-{f.flag.lower().replace(' ', '-')}",
                 dest=f.flag.lower().replace(' ', '-'),
                 action="store_false",
-                help=f"Disables {f.flag}. Is overridden by --file input."
+                help=f"Disable {f.flag}. Ignored when configured through a `--file` input."
             )
         else:
             argparser.add_argument(
                 f"--{f.flag.lower().replace(' ', '-')}",
                 dest=f.flag.lower().replace(' ', '-'),
                 action="store_true",
-                help=f"Enable {f.flag}. Is overridden by --file input."
+                help=f"Enable {f.flag}. Ignored when configured through a `--file` input."
             )
     
-    argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Check the user inputs JSON file pointed to by the 'inputs' option for validity, report any errors, then exit.")
-    argparser.add_argument('-l', '--list-inputs', dest="listinputs", metavar="INPUT_FILE", nargs='?', const=True, default=False, help="Print a list of available inputs in the \'inputs\' folder. If a file name or path is provided, instead print that file's contents.")
-    argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Writes all inputs to a config file. If a name is passed, config will be saved to the \'inputs\' folder under that name. If no name is passed, SARP will overwrite the --file input or create a new config file in \'inputs.\'")
-    argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print a template of what a user inputs JSON file should contain.")
+    argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Validate the user inputs JSON file specified by `--file`, report any errors, and exit.")
+    argparser.add_argument('-l', '--list-inputs', dest="listinputs", metavar="CONFIG_FILE", nargs='?', const=True, default=False, help="List available input config files in the `inputs` directory. If `CONFIG_FILE` (file name or path) is provided, display that file's contents instead.")
+    argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new configuration file.")
+    argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print an example user inputs JSON template and exit.")
     
     args = argparser.parse_args()
     

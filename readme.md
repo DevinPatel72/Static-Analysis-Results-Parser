@@ -61,15 +61,42 @@ $ pip install pyinstaller openpyxl matplotlib
 Then execute the build script.
 
 
-## Configure CLI Inputs
-A JSON config file must be created to pass inputs via command-line.
-A template can be obtained by passing the `--example-template` switch in the CLI.
-This config file is also auto-generated whenever the GUI is executed, and subsequent runs will query to load previous data if any inputs files exist.
+## Command Line Options
+
+| Inputs                                                                             | Description                                                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-pn`<br>`--project-name PROJECTNAME`                                              | Specify the project name to include in generated reports.                                                                                                                                                                         |
+| `-pv`<br>`--project-version PROJECTVERSION`                                        | Specify the project version to include in generated reports.                                                                                                                                                                      |
+| `-i`<br>`--input SCANNER FILE`                                                     | Add a scanner input using a scanner name and a path to the corresponding results file. Can be specified multiple times. Used in addition to a `--file` input if present.                                                          |
+| `-I`<br>`--extended-input SCANNER FILE REMOVE PREPEND`                             | Add a scanner input with path transformation settings. Accepts scanner name, file path, path prefix to remove, and path prefix to prepend. Can be specified multiple times. Used in addition to a `--file` input if present.      |
+| `-f`<br>`--file FILE`                                                              | Load a user inputs JSON configuration file. Accepts either an absolute path or a filename located in the `config/inputs` directory. Defaults to `config/inputs/user_inputs.json` if no input options are specified.               |
+| `-o`<br>`--out OUT`                                                                | Output file path. Overrides the output path specified in a `--file` input. If not specified, the current working directory is used.                                                                                               |
+
+| Control Flags                                                                      | Description                                                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--no-category-mappings`                                                           | Disable Category Mappings. Ignored when configured through a `--file` input.                                                                                                                                                      |
+| `--no-preflight-rules`                                                             | Disable all Preflight Rules. Ignored when configured through a `--file` input.                                                                                                                                                    |
+| `--no-default-preflight-rules`                                                     | Disable the built-in Default Preflight Rules. Ignored when configured through a `--file` input.                                                                                                                                   |
+| `--duplicate-scanner-consolidation`                                                | Enable Duplicate Scanner Consolidation. Ignored when configured through a `--file` input.                                                                                                                                         |
+
+| Options                                                                            | Description                                                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-h`<br>`--help`                                                                   | Display help information and exit.                                                                                                                                                                                                |
+| `-v`<br>`--version`                                                                | Print the software version and exit.                                                                                                                                                                                              |
+| `--example-template`                                                               | Print an example user inputs JSON template and exit.                                                                                                                                                                              |
+| `-c`<br>`--check-inputs`                                                           | Validate the user inputs JSON file specified by `--file`, report any errors, and exit.                                                                                                                                            |
+| `-l`<br>`--list-inputs [CONFIG_FILE]`                                              | List available input config files in the `config/inputs` directory. If `CONFIG_FILE` (file name or path) is provided, display that file's contents .                                                                              |
+| `-s`<br>`--save-config [SAVE_NAME]`                                                | Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `config/inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new config file.    |
+
+## Input Configuration File
+A JSON configuration file can be created to store and pass SARP inputs.
+A template can be obtained by passing the `--example-template` switch in the command line.
+Any inputs passed via command line can be saved with the `--save-config` option.
+This config file is auto-generated whenever the SARP GUI begins parsing. 
 Note that if any loaded data is changed in the GUI, that input file will be overwritten with the new data.
 
 ## Configure CWE Mappings
-SARP allows configurable CWE mappings for scanners that do not output CWE data. A basic set of mappings are provided,
-but users are able to edit and share them if they wish.
+SARP allows configurable CWE mappings for scanners that do not output CWE data. A basic set of mappings are provided, but users are able to edit them in the `config/mappings` directory.
 
 ## Configure Preflight
 SARP can perform user-defined overrides on any of the output fields using rule expressions and extended matching techniques.
