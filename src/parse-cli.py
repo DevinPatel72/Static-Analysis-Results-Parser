@@ -10,7 +10,7 @@ import traceback
 import parsers
 from parsers import *
 from parsers.parser_tools import parser_writer, preflight
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs
 from parsers.parser_tools.begin_parse import begin
 
 # Configure root path and important dirs of script
@@ -226,6 +226,9 @@ def main():
         
     # Check inputs format
     if len(parser_inputs) > 0:
+        # Dedupe parser_inputs
+        parser_inputs = dedupe_parser_inputs(parser_inputs)
+        
         # Return value is true for success
         rv = check_input_format(parser_inputs, parser_outfile, control_flags)
         
@@ -271,12 +274,6 @@ def main():
     else:
         force_csv = False
     parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
-    
-    # Put SRM in the back
-    for i, inp in enumerate(parser_inputs, start=0):
-        if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in parsers.srm_keywords):
-            parser_inputs.append(parser_inputs.pop(i))
-            break
     
     begin(parser_inputs)
 

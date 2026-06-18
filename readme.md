@@ -92,6 +92,7 @@ Then execute the build script.
 A JSON configuration file can be created to store and pass SARP inputs.
 A template can be obtained by passing the `--example-template` switch in the command line.
 Any inputs passed via command line can be saved with the `--save-config` option.
+Note that any input configurations in a file that are identical will be pruned to one unique config entry.
 This config file is auto-generated whenever the SARP GUI begins parsing. 
 Note that if any loaded data is changed in the GUI, that input file will be overwritten with the new data.
 

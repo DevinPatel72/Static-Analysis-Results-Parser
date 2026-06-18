@@ -324,6 +324,7 @@ class InputsGUI:
         else:
             self.results = inputs
         self.cleanexit = False
+        self.dupe_detected_submit_again = False
         self.root = tk.Tk()
         self.root.title(WINDOW_TITLE)
         self.root.geometry(f"{WINDOW_LENGTH}x{WINDOW_HEIGHT}")
@@ -524,6 +525,18 @@ class InputsGUI:
                 InputDictKeys.PATH.value: path,
                 InputDictKeys.SCANNER.value: scanner
             })
+        
+        # Detect duplicate entries
+        seen = set()
+        for d in results:
+            key = tuple(d[k] for k in d.keys())
+
+            if key in seen and not self.dupe_detected_submit_again:
+                messagebox.showerror("Invalid Input", "Duplicate input entries detected. If this is intentional, submit again.")
+                self.dupe_detected_submit_again = True
+                return
+
+            seen.add(key)
         
         # Results successful, destroy window and exit
         for result in results:

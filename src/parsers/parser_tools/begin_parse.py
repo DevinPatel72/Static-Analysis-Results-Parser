@@ -20,6 +20,12 @@ _report = None
 def begin(parser_inputs):
     global _report
     
+    # Put SRM in the back
+    for i, inp in enumerate(parser_inputs, start=0):
+        if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in parsers.srm_keywords):
+            parser_inputs.append(parser_inputs.pop(i))
+            break
+    
     # Init report object
     _report = Report(scanners=[i[InputDictKeys.SCANNER.value] for i in parser_inputs])
     

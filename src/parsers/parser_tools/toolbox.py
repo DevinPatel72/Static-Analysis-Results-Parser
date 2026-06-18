@@ -270,6 +270,18 @@ def check_input_format(inputs, outfile, flags):
 
     return success
 
+def dedupe_parser_inputs(p_inputs):
+    if len(p_inputs) <= 0:
+        return p_inputs
+    
+    # Dedupe main scanner inputs
+    seen = set()
+    inputs = [
+        d for d in p_inputs
+        if (key := tuple(d[k] for k in d.keys())) not in seen and not seen.add(key)
+    ]
+    return inputs
+
 def check_all_CWEs(data):
     count = 0
     

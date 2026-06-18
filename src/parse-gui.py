@@ -7,7 +7,7 @@ import traceback
 from parsers.parser_tools.inputs_gui import InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
 from parsers.parser_tools.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.preflight_gui import RuleBuilderGUI
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, dedupe_parser_inputs
 import parsers
 from parsers import PROG_NAME, VERSION
 from parsers import *
@@ -101,7 +101,10 @@ def main():
         # Else exit
         else:
             sys.exit(0)
-        
+    
+    # Dedupe parser_inputs
+    parser_inputs = dedupe_parser_inputs(parser_inputs)
+    
     # Check inputs format
     if len(parser_inputs) > 0:
         check_input_format(parser_inputs, parser_outfile, control_flags)
@@ -185,12 +188,6 @@ def main():
     else:
         force_csv = False
     parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
-    
-    # Put SRM in the back
-    for i, inp in enumerate(parser_inputs, start=0):
-        if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in parsers.srm_keywords):
-            parser_inputs.append(parser_inputs.pop(i))
-            break
     
     begin(parser_inputs)
     
