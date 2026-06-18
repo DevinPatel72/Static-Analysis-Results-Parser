@@ -86,7 +86,7 @@ Then execute the build script.
 | `--example-template`                                                               | Print an example user inputs JSON template and exit.                                                                                                                                                                              |
 | `-c`<br>`--check-inputs`                                                           | Validate the user inputs JSON file specified by `--file`, report any errors, and exit.                                                                                                                                            |
 | `-l`<br>`--list-inputs [CONFIG_FILE]`                                              | List available input config files in the `config/inputs` directory. If `CONFIG_FILE` (file name or path) is provided, display that file's contents .                                                                              |
-| `-s`<br>`--save-config [SAVE_NAME]`                                                | Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `config/inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new config file.    |
+| `-s`<br>`--save-config [SAVE_NAME]`                                                | Save the current command line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `config/inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new config file.    |
 
 ## Input Configuration File
 A JSON configuration file can be created to store and pass SARP inputs.
