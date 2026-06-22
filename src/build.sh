@@ -12,11 +12,14 @@ fi
 osName="${osName^,,}"
 osArch=$(uname -m)
 
-# Get SARP version
+# Get software acronym
+name=$(head -n 5 "$SCRIPT_DIR/parsers/__init__.py" | grep "^PROG_NAME_ABBR" | cut -d= -f2 | tr -d " '")
+
+# Get software version
 ver=$(head -n 5 "$SCRIPT_DIR/parsers/__init__.py" | grep "^VERSION" | cut -d= -f2 | tr -d " '")
 
 # Create Bin Dir
-BIN_DIR="../bin/SARP_v${ver}_${osName}_${osArch}"
+BIN_DIR="../bin/${name}_v${ver}_${osName}_${osArch}"
 
 # Function to check if file is text
 is_text() {

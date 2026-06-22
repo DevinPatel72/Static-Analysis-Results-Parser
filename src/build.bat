@@ -1,6 +1,15 @@
 @ECHO OFF
 
-Rem Get SARP version
+Rem Get software acronym
+for /f "tokens=2 delims==" %%A in ('findstr /b "PROG_NAME_ABBR" "%~dp0parsers\__init__.py"') do (
+    set "name=%%~A"
+)
+
+:: Trim spaces and quotes
+set "name=%name: =%"
+set "name=%name:'=%"
+
+Rem Get software version
 for /f "tokens=2 delims==" %%A in ('findstr /b "VERSION" "%~dp0parsers\__init__.py"') do (
     set "ver=%%~A"
 )
@@ -18,7 +27,7 @@ if defined PROCESSOR_ARCHITEW6432 (
     set "arch=x86"
 )
 
-set "BIN_DIR=..\bin\SARP_v%ver%_windows_%arch%"
+set "BIN_DIR=..\bin\%name%_v%ver%_windows_%arch%"
 
 Rem Clean
 :clean
