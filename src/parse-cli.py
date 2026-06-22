@@ -64,7 +64,7 @@ if find_spec('openpyxl') is None:
 
 # Check if matplotlib is installed. Logged here to ensure correct placement in log file
 if find_spec('matplotlib') is None:
-    logger.warning('Module \'matplotlib\' not found, SARP will skip chart reporting.')
+    logger.warning(f'Module \'matplotlib\' not found, {parsers.PROG_NAME_ABBR} will skip chart reporting.')
     # Handled in reporting.py
 
 ################################
@@ -120,7 +120,7 @@ def main():
     argparser.add_argument('-v', '--version', action='store_true', help='Print software version and exit')
     argparser.add_argument('-i', '--input', action="append", nargs=2, metavar=("SCANNER", "FILE"), help="Add a scanner input using a scanner name and a path to the corresponding results file. Can be specified multiple times. Used in addition to a `--file` input if present.\nExample: -i Fortify \"path/to/file.fpr\" -i Coverity \"path/to/file.json\"")
     argparser.add_argument('-I', '--extended-input', action="append", dest="extended_input", nargs=4, metavar=("SCANNER", "FILE", "REMOVE", "PREPEND"), help="Add a scanner input with path transformation settings. Accepts scanner name, file path, path prefix to remove, and path prefix to prepend. Can be specified multiple times. Used in addition to a `--file` input if present.\nExample: -I Fortify \"path/to/file.fpr\" \"remove_from_path_value\" \"prepend_to_path_value\" -I Coverity \"path/to/file.json\" \"use_empty_quotes_for_blank\" \"\"")
-    argparser.add_argument('-f', '--file', type=str, default="", help="Load a user inputs JSON configuration file. Accepts either an absolute path or a filename located in the `config/inputs` directory. Defaults to `config/inputs/user_inputs.json` if no input options are specified.")
+    argparser.add_argument('-f', '--file', type=str, default="", help="Load a user inputs JSON configuration file. Accepts either an absolute path or a filename located in the `config/inputs` directory. Defaults to `config/inputs/{}_inputs.json` if no input options are specified.".format(parsers.PROG_NAME_ABBR.lower()))
     argparser.add_argument('-o', '--out', type=str, help='Output file path. Overrides the output path specified in a `--file` input. If not specified, the current working directory is used.')
     argparser.add_argument('-pn', '--project-name', dest="projectname", help="Specify the project name to include in generated reports.")
     argparser.add_argument('-pv', '--project-version', dest="projectversion", help="Specify the project version to include in generated reports.")
@@ -176,7 +176,7 @@ def main():
         print_inputs_file_contents(fpath)
         sys.exit(0)
     
-    # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default user_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
+    # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default <PROG_NAME_ABBR>_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
     if len(args.file) > 0:
         # Adjust inputs path according to whether it is a basename or a path
         if not ('/' in args.file or '\\' in args.file):
@@ -185,12 +185,12 @@ def main():
         else:
             inp_path = args.file
     elif args.input is None and args.extended_input is None:
-        inp_path = os.path.join(parsers.INPUTS_DIR, "user_inputs.json")
+        inp_path = os.path.join(parsers.INPUTS_DIR, parsers.PROG_NAME_ABBR.lower()+'_inputs.json')
     else:
         inp_path = ""
     
     # Load inputs from config file
-    rv = load_config_user_inputs(inp_path, default_outfile="sarp_output.xlsx", default_control_flags=control_flags)
+    rv = load_config_user_inputs(inp_path, default_outfile=f"{parsers.PROG_NAME_ABBR.lower()}_output.xlsx", default_control_flags=control_flags)
     if isinstance(rv, str):
         logger.critical(f"Unable to open inputs: {rv}")
         sys.exit(3)
@@ -248,8 +248,8 @@ def main():
         elif not rv:
             sys.exit(2)
     else:
-        logger.info("No inputs defined. Terminating SARP...")
-        print("No inputs defined. Terminating SARP...")
+        logger.info(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...")
+        print(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...")
         sys.exit(0)
 
     # Output confirmation
@@ -301,7 +301,7 @@ if __name__ == "__main__":
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        logger.critical("Uncaught exception caused SARP to crash. Exception trace has been output to the logfile.")
+        logger.critical(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash. Exception trace has been output to the logfile.")
         logger.error("\n" + traceback.format_exc())
         exitcode = 1
     finally:

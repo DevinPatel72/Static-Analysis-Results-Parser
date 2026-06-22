@@ -327,14 +327,14 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
 # End of _parse_xml
 
 def load_checkmarx_cdata():
-    from . import MAPPINGS_DIR
+    from . import PROG_NAME_ABBR, MAPPINGS_DIR
     import json
     
     try:
         with open(os.path.join(MAPPINGS_DIR, 'checkmarx_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console("Unable to load Checkmarx CWE mappings: Invalid JSON format\nSARP will continue without CWE mappings.", "Config Error", type='error')
+        console(f"Unable to load Checkmarx CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", type='error')
         return [0]
     
 def get_checkmarx_cdata(query, lang, default=''):

@@ -552,7 +552,7 @@ class InputsGUI:
     def _select_scanner(self, scanner):
         scan_match = scanner.lower().replace(' ', '')
         if any(s in scan_match for s in parsers.aio_keywords):
-            return 'SARP'
+            return parsers.PROG_NAME_ABBR
         elif any(s in scan_match for s in parsers.xmarx_keywords):
             return 'Checkmarx'
         elif any(s in scan_match for s in parsers.coverity_keywords):

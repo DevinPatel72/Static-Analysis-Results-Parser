@@ -119,13 +119,13 @@ def parse(fpath, scanner, substr, prepend):
 
 def load_eslint_cdata():
     # Loads eslint cdata info from config dir
-    from . import MAPPINGS_DIR
+    from . import PROG_NAME_ABBR, MAPPINGS_DIR
     
     try:
         with open(os.path.join(MAPPINGS_DIR, 'eslint_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console("Unable to load Eslint CWE mappings: Invalid JSON format\nSARP will continue without CWE mappings.", "Config Error", type='error')
+        console(f"Unable to load Eslint CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", type='error')
         return {"__eslint_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
 
 def get_eslint_cdata(rule_id, default=''):

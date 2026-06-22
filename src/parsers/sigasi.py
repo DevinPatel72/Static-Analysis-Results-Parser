@@ -129,13 +129,13 @@ def parse(fpath, scanner, substr, prepend):
 # End of parse
 
 def load_sigasi_cdata():
-    from . import MAPPINGS_DIR
+    from . import PROG_NAME_ABBR, MAPPINGS_DIR
     
     try:
         with open(os.path.join(MAPPINGS_DIR, 'sigasi_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console("Unable to load Sigasi CWE mappings: Invalid JSON format\nSARP will continue without CWE mappings.", "Config Error", type='error')
+        console(f"Unable to load Sigasi CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", type='error')
         return {"__sigasi_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
 
 def get_sigasi_cdata(rule_id, rule_type, default=''):

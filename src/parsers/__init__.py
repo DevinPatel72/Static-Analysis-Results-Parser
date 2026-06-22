@@ -1,5 +1,6 @@
 # Version String
 PROG_NAME = 'Static Analysis Results Parser'
+PROG_NAME_ABBR = 'SARP'
 VERSION = '2.6.1'
 
 # Project Info
@@ -16,7 +17,7 @@ FLAG_DUPE_SCAN_CONSOLIDATION = 'Duplicate Scanner Consolidation'
 GUI_MODE = False
 
 # List of scanners for the GUI dropdown
-LIST_OF_SCANNERS = ["Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "GNAT SAS", "NVD CVEs", "OWASP Dependency Check", "Pragmatic", "Pylint", "SARP", "Semgrep", "Sigasi", "SRM"]
+LIST_OF_SCANNERS = ["Checkmarx", "Coverity", "CPPCheck", "ESLint", "Fortify", "GNAT SAS", "NVD CVEs", "OWASP Dependency Check", "Pragmatic", "Pylint", PROG_NAME_ABBR, "Semgrep", "Sigasi", "SRM"]
 
 # Preflight Rules
 prules = []

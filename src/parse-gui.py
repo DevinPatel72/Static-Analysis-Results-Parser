@@ -70,7 +70,7 @@ if find_spec('openpyxl') is None:
 
 # Check if matplotlib is installed. Logged here to ensure correct placement in log file
 if find_spec('matplotlib') is None:
-    logger.warning('Module \'matplotlib\' not found, SARP will skip chart reporting.')
+    logger.warning(f'Module \'matplotlib\' not found, {parsers.PROG_NAME_ABBR} will skip chart reporting.')
     # Handled in reporting.py
 
 ################################
@@ -206,7 +206,7 @@ if __name__ == "__main__":
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        console(f"Uncaught exception caused SARP to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error")
+        console(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error")
         logger.error("\n" + traceback.format_exc())
         exitcode = 1
     finally:

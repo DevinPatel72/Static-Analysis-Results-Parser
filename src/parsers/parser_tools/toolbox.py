@@ -90,19 +90,19 @@ def validate_path_and_scanner(fpath, scanner):
     if not FILE_SIZE_WARNED_ONCE and os.path.isfile(fpath) and get_file_size_mb(fpath) > LARGE_FILE_THRESHOLD_MB:
         FILE_SIZE_WARNED_ONCE = True
         if parsers.GUI_MODE:
-            _end = " If SARP takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
+            _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
         else:
             _end = ""
-        console("A large input file has been detected. Processing times may be fairly long, so SARP will appear to freeze or hang." + _end, title='Large File Detected', type='warning')
+        console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', type='warning')
     
     # Alert for fortify fpr files
     if not FORTIFY_FILE_WARNED_ONCE and os.path.isfile(fpath) and fpath.endswith('.fpr'):
         FORTIFY_FILE_WARNED_ONCE = True
         if parsers.GUI_MODE:
-            _end = " If SARP takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
+            _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
         else:
             _end = ""
-        console("A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so SARP will appear to freeze or hang." + _end, title='FPR File Detected', type='warning')
+        console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', type='warning')
 
     # Checkmarx inputs
     if any(s in scan_match for s in parsers.xmarx_keywords) and os.path.exists(fpath):
@@ -172,10 +172,10 @@ def load_config_cwe_category_mappings():
         with open(os.path.join(parsers.MAPPINGS_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console("Unable to load MITRE CWE Category Mappings: Invalid JSON format\nSARP will continue without CWE category mappings.", "Config Error", type='error')
+        console(f"Unable to load MITRE CWE Category Mappings: Invalid JSON format\n{parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", type='error')
         return {}
 
-def load_config_user_inputs(inputs_path, default_outfile="sarp_output.xlsx", default_control_flags=None):
+def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_control_flags=None):
     # Check if there are inputs in the inputs file
     if len(inputs_path) <= 0:
         if default_control_flags is not None: 
@@ -313,7 +313,7 @@ def export_config(inputs, outfile, control_flags, no_overwrite=False):
     # Set up output path
     if no_overwrite or len(parsers.INPUTS_PATH) <= 0:
         if len(parsers.PROJ_NAME) <= 0:
-            basename = parsers.PROG_NAME.lower().replace(" ", "_")
+            basename = parsers.PROG_NAME_ABBR.lower()+'_inputs'
         else:
             basename = "_".join(part for part in [parsers.PROJ_NAME.replace(' ', '_'), parsers.PROJ_VERSION.replace(' ', '_')] if len(part.strip()) > 0)
         # Add -# to basename if file exists
