@@ -13,7 +13,7 @@ osName="${osName^,,}"
 osArch=$(uname -m)
 
 # Get SARP version
-ver=$(head -n 3 "$SCRIPT_DIR/parsers/__init__.py" | grep "^VERSION" | cut -d= -f2 | tr -d " '")
+ver=$(head -n 5 "$SCRIPT_DIR/parsers/__init__.py" | grep "^VERSION" | cut -d= -f2 | tr -d " '")
 
 # Create Bin Dir
 BIN_DIR="../bin/SARP_v${ver}_${osName}_${osArch}"
