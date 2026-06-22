@@ -160,6 +160,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, 
                 #id = "CX{:04}".format(finding_count+1)
                 
                 trace = f"1) {path}:{line}: {row['Name']}\n2) {dest_path}:{dest_line}: {row['DestName']}"
+                message = "{} - {}:{}: {}".format(query, dest_path, dest_line, row['DestName'])
                 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
@@ -173,7 +174,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, 
                                         Fieldnames.PATH.value:dest_path,
                                         Fieldnames.LINE.value:dest_line,
                                         Fieldnames.SYMBOL.value:row['Name'],
-                                        Fieldnames.MESSAGE.value:'',
+                                        Fieldnames.MESSAGE.value:message,
                                         Fieldnames.TRACE.value:trace,
                                         Fieldnames.TOOL_CWE.value: tool_cwe,
                                         Fieldnames.TOOL.value:'',
@@ -256,6 +257,9 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
                     # Get symbol when parsing PathNode
                     symbol = ''
                     
+                    # Set message to the last entry of trace
+                    message = ''
+                    
                     # Loop through all the PathNode tags to generate trace
                     path_nodes = result.findall('.//PathNode')
                     
@@ -284,6 +288,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
                                 line = int(t_line)
                             
                             trace += f"{node_id}) {t_path}:{t_line}: {t_name}\n"
+                        message = "{} - {}:{}: {}".format(query_name, path_nodes[-1].findtext('FileName', ''), path_nodes[-1].findtext('Line', ''), path_nodes[-1].findtext('Name', ''))
                         trace = trace.strip()
                             
                     
@@ -303,7 +308,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
                                             Fieldnames.PATH.value:path,
                                             Fieldnames.LINE.value:line,
                                             Fieldnames.SYMBOL.value:symbol,
-                                            Fieldnames.MESSAGE.value:'',
+                                            Fieldnames.MESSAGE.value:message,
                                             Fieldnames.TRACE.value:trace,
                                             Fieldnames.TOOL_CWE.value: tool_cwe,
                                             Fieldnames.TOOL.value:query_path.split('\\')[-1],
