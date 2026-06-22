@@ -1,6 +1,9 @@
 # Change Log
 
-## [Version 2.6.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.6.0) (2026-06-18)
+## [Version 2.6.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.6.1) (2026-06-22)
+- Reworked Checkmarx parser to always output a Message value for both XML and CSV inputs
+
+## [Version 2.6.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/2.6.0) (2026-06-18)
 - Added ability to pass inputs via command line, so a JSON file is no longer required. See the [ReadMe](readme.md#command-line-options) for a full list.
 - Added more command line options to manage input config files.
 
