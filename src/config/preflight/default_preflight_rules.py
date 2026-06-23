@@ -1287,6 +1287,7 @@ DEFAULT_PRULES = [
                     ConditionGroup(operator="OR", conditions=[
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uninitMemberVar", strictness=Strictness.EXACT, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Member variable uninitialized in constructor", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"uninitMemberVarNoCtor", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '457'}
