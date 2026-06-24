@@ -37,24 +37,35 @@ def path_preview(fpath):
             source_base_path_elem = root.find('.//ns:SourceBasePath', namespace)
             source_base_path = source_base_path_elem.text if source_base_path_elem is not None and source_base_path_elem.text is not None else ""
             
-            # Extract path from first finding
+            # Extract path from first finding with a path
+            path = ''
             try:
-                vulnerability = root.find('.//ns:Vulnerability', namespace)
-                entries = vulnerability.findall('./ns:AnalysisInfo/ns:Unified/ns:Trace/ns:Primary/ns:Entry', namespace)
-                if len(entries) <= 0:
-                    class_id = vulnerability.find('./ns:ClassInfo/ns:ClassID', namespace).text
-                    return f"No entries found for vulnerability \"{class_id}\""
-                last_entry = entries[-1]
-                srcLocation = last_entry.find("./ns:Node/ns:SourceLocation", namespace)
-                file_path = srcLocation.get('path')
-                path = os.path.join(source_base_path, file_path) if len(source_base_path) > 0 else file_path
+                vulnerabilities = root.findall('.//ns:Vulnerability', namespace)
+                if vulnerabilities is None or len(vulnerabilities) <= 0:
+                    logger.warning(f'No findings in Fortify file \'{fpath}\'')
+                    return "[ERROR] No findings found. See logfile for details.."
+                for vulnerability in vulnerabilities:
+                    entries = vulnerability.findall('./ns:AnalysisInfo/ns:Unified/ns:Trace/ns:Primary/ns:Entry', namespace)
+                    if len(entries) <= 0:
+                        continue
+                    last_entry = entries[-1]
+                    srcLocation = last_entry.find("./ns:Node/ns:SourceLocation", namespace)
+                    file_path = srcLocation.get('path', '')
+                    if len(file_path) > 0:
+                        path = os.path.join(source_base_path, file_path) if len(source_base_path) > 0 else file_path
+                        break
             except:
-                logger.error("Unable to load preview.\n" + traceback.print_exc())
+                logger.error("Unable to load preview.\n" + traceback.format_exc())
                 return "[ERROR] Unable to load preview. See log file for details."
             
+            if len(path) <= 0:
+                logger.warning(f'Could not find a defined path in Fortify file \'{fpath}\'')
+                return f"[ERROR] No paths found. See logfile for details.."
+    
             return path
     except Exception:
-        return f"[ERROR] {traceback.print_exc()}"
+        logger.error("Unable to load preview.\n" + traceback.format_exc())
+        return "[ERROR] Unable to load preview. See log file for details."
 
 def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
