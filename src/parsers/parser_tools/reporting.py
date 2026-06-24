@@ -52,7 +52,6 @@ class Report:
             console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", type='error')
             return
         
-        
         # Create chart figure
         fig = self._build_chart()
 
@@ -82,6 +81,12 @@ class Report:
         )
 
         ax = fig.add_subplot(111)
+        
+        ax.set_title(
+            " ".join(part for part in [PROJ_NAME, PROJ_VERSION, "Findings"] if part.strip()),
+            fontsize=16,
+            pad=20
+        )
 
         explode = [0.03] * len(findings)
 
@@ -92,15 +97,36 @@ class Report:
                     return ""
                 return f"{pct:.1f}%\n({value})"
             return autopct
+        
+        if sum(findings) <= 0:
+            from matplotlib.patches import Circle
+            ax.clear()
+            ax.set_axis_off()
 
-        wedges, texts, autotexts = ax.pie(
-            findings,
-            autopct=make_autopct(findings),
-            startangle=90,
-            explode=explode,
-            labeldistance=1.3, # Move labels outward
-            pctdistance=0.85, # Move percentages inward
-        )
+            circle = Circle((0, 0), 1, fill=False)
+            ax.add_patch(circle)
+
+            ax.text(
+                0,
+                0,
+                "No Findings",
+                ha="center",
+                va="center",
+            )
+
+            ax.set_xlim(-1.1, 1.1)
+            ax.set_ylim(-1.1, 1.1)
+            ax.set_aspect("equal")
+            return fig
+        else:
+            wedges, texts, autotexts = ax.pie(
+                findings,
+                autopct=make_autopct(findings),
+                startangle=90,
+                explode=explode,
+                labeldistance=1.3, # Move labels outward
+                pctdistance=0.85, # Move percentages inward
+            )
 
         ax.legend(
             wedges,
@@ -138,12 +164,6 @@ class Report:
             va="center",
             fontsize=14,
             fontweight="bold"
-        )
-
-        ax.set_title(
-            " ".join(part for part in [PROJ_NAME, PROJ_VERSION, "Findings"] if part.strip()),
-            fontsize=16,
-            pad=20
         )
 
         ax.axis("equal")
