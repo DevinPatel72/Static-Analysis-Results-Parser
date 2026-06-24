@@ -158,15 +158,6 @@ def validate_path_and_scanner(fpath, scanner):
         else:
             _end = ""
         console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', type='warning')
-    
-    # Alert for fortify fpr files
-    if not FORTIFY_FILE_WARNED_ONCE and os.path.isfile(fpath) and fpath.endswith('.fpr'):
-        FORTIFY_FILE_WARNED_ONCE = True
-        if parsers.GUI_MODE:
-            _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
-        else:
-            _end = ""
-        console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', type='warning')
 
     # Checkmarx inputs
     if any(s in scan_match for s in Scanners.CHECKMARX.keywords) and os.path.exists(fpath):
@@ -197,23 +188,43 @@ def validate_path_and_scanner(fpath, scanner):
         
         if not all(h in Fieldnames.HEADERS.value for h in headers):
             # Doesn't match any expected headers
-            return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match the following format:\n    {Fieldnames.HEADERS.value}\n"
+            return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match the following format:\n    {Fieldnames.HEADERS.value}"
 
-    # All other inputs
-    elif os.path.isfile(fpath):
+    # Fortify inputs
+    elif any(s in scan_match for s in Scanners.FORTIFY.keywords) and os.path.isfile(fpath):
+        # Check file extension
         ext = os.path.splitext(fpath)[1]
+        if ext not in Scanners.FORTIFY.valid_ext:
+            return f"File extension \'{ext}\' not supported for {scanner} input"
         
-        
-        if ext not in Scanners.all_valid_ext():
-            return f"File extension \'{ext}\' not supported for {scanner} input\n"
+        # Alert for fortify fpr files
+        if not FORTIFY_FILE_WARNED_ONCE and os.path.isfile(fpath) and fpath.endswith('.fpr'):
+            FORTIFY_FILE_WARNED_ONCE = True
+            if parsers.GUI_MODE:
+                _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
+            else:
+                _end = ""
+            console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', type='warning')
         
         # For fortify inputs, check if the audit.fvdl file is present in the fpr archive
         if any(s in scan_match for s in Scanners.FORTIFY.keywords) and not parsers.fortify.check_fvdl(fpath):
             return "The specified Fortify FPR archive does not contain an \'audit.fvdl\' file. The archive may be corrupted or the scanner output is invalid."
 
+    # All other inputs
+    elif os.path.isfile(fpath):
+        
+        selected_scanner = select_scanner(scanner)
+        if selected_scanner is None:
+            return f"Scanner \'{scanner}\' not supported."
+        else:
+            # Check valid extensions
+            ext = os.path.splitext(fpath)[1] 
+            if ext not in selected_scanner.valid_ext:
+                return f"File extension \'{ext}\' not supported for {scanner} input"
+
     # If it is not a file, input is invalid
     else:
-        return "Invalid {} input, path does not exist: {}\n".format(scanner, fpath)
+        return "Invalid {} input, path does not exist: {}".format(scanner, fpath)
     
     # All checks pass
     return "TRUE"
