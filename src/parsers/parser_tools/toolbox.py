@@ -171,8 +171,8 @@ def validate_path_and_scanner(fpath, scanner):
     # Checkmarx inputs
     if any(s in scan_match for s in Scanners.CHECKMARX.keywords) and os.path.exists(fpath):
         if os.path.isdir(fpath):
-            # Check if directory contains at least one csv file
-            if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (file.endswith('.csv') or file.endswith('.xml'))]) <= 0):
+            # Check if directory contains at least one xml or csv file
+            if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (os.path.splitext(fpath)[1] in Scanners.CHECKMARX.valid_ext)]) <= 0):
                 return "No CSV or XML files in the specified directory \'{}\'".format(fpath)
         else:
             return "Checkmarx input must be a directory, not a file"
@@ -181,7 +181,7 @@ def validate_path_and_scanner(fpath, scanner):
     elif any(s in scan_match for s in Scanners.SARP.keywords) and os.path.isfile(fpath):
         # Check file extension
         ext = os.path.splitext(fpath)[1]
-        if ext not in ['.csv', '.xlsx']:
+        if ext not in Scanners.SARP.valid_ext:
             return f"File extension \'{ext}\' not supported for {scanner} input"
         
         # Diverge depending on .xlsx or .csv
@@ -202,6 +202,8 @@ def validate_path_and_scanner(fpath, scanner):
     # All other inputs
     elif os.path.isfile(fpath):
         ext = os.path.splitext(fpath)[1]
+        
+        
         if ext not in Scanners.all_valid_ext():
             return f"File extension \'{ext}\' not supported for {scanner} input\n"
         
@@ -440,23 +442,28 @@ def get_all_previews(inputs):
         scanner = inp[InputDictKeys.SCANNER.value]
         preview = ''
     
-        scan_match = scanner.lower().replace(' ', '')
         fp = os.path.realpath(fpath)
-        scanner_not_found = True
-            
-        for scanner_enum in Scanners:
-            if any(s in scan_match for s in scanner_enum.keywords):
-                # Import corresponding module and parse
-                module = importlib.import_module(scanner_enum.module)
-                preview = module.path_preview(fp)
-                scanner_not_found = False
-                break
-        if scanner_not_found:
+        
+        selected_scanner = select_scanner(scanner)
+        if selected_scanner is None:
             preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
+        else:
+            module = importlib.import_module(selected_scanner.module)
+            preview = module.path_preview(fp)
 
         previews[fpath] = preview
     
     return previews
+
+def select_scanner(scanner):
+    # Returns enum corresponding to scanner text, else returns None
+    scan_match = scanner.lower().replace(' ', '')
+    
+    for scanner_enum in Scanners:
+        if any(s in scan_match for s in scanner_enum.keywords):
+            return scanner_enum
+    return None
+    
 
 def print_user_inputs_template():
     flags = ""

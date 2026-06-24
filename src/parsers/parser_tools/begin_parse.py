@@ -9,7 +9,7 @@ import importlib
 import parsers
 from parsers import *
 from . import parser_writer
-from .toolbox import InputDictKeys, Scanners
+from .toolbox import InputDictKeys, Scanners, select_scanner
 from .loading_screen import LoadingWindow
 from .reporting import Report
 
@@ -81,25 +81,21 @@ def run_parsers(parser_inputs):
                 "percent": 0
             })
         
-        scan_match = scanner.lower().replace(' ', '')
         path = os.path.realpath(fpath)
         
         t_finding_count = 0
         t_err_count = 0
-        scanner_not_found = True
         
-        for scanner_enum in Scanners:
-            if any(s in scan_match for s in scanner_enum.keywords):
-                # Import corresponding module and parse
-                module = importlib.import_module(scanner_enum.module)
-                t_finding_count, t_err_count = module.parse(path, scanner, substr, prepend)
-                scanner_not_found = False
-                break
-        
-        if scanner_not_found:
+        selected_scanner = select_scanner(scanner)
+        if selected_scanner is None:
+            # Scanner not supported
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             t_finding_count = 0
             t_err_count = 1
+        else:
+            # Import corresponding module and parse
+            module = importlib.import_module(selected_scanner.module)
+            t_finding_count, t_err_count = module.parse(path, scanner, substr, prepend)
         
         _report.counts[scanner][0] += t_finding_count
         _report.counts[scanner][1] += t_err_count

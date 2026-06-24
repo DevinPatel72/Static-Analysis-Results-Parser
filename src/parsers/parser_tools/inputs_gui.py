@@ -9,7 +9,7 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
 from .. import PROG_NAME, VERSION
-from .toolbox import InputDictKeys, InputConfigFlags, InputSchemaKeys, Scanners, validate_path_and_scanner, get_all_previews, generate_preview
+from .toolbox import InputDictKeys, InputConfigFlags, InputSchemaKeys, Scanners, validate_path_and_scanner, get_all_previews, generate_preview, select_scanner
 
 # Constants
 WINDOW_LENGTH = 900
@@ -550,13 +550,12 @@ class InputsGUI:
         self.root.destroy()
     
     def _select_scanner(self, scanner):
-        scan_match = scanner.lower().replace(' ', '')
-        
-        for scanner_enum in Scanners:
-            if any(s in scan_match for s in scanner_enum.keywords):
-                return scanner_enum.sname
-        
-        return 'Select Scanner...'
+        # Wrapper that actually calls the select_scanner function in toolbox.py
+        selected_scanner = select_scanner(scanner)
+        if selected_scanner is None:
+            return 'Select Scanner...'
+        else:
+            return selected_scanner.sname
 
 
 class AdjustPathsGUI:
