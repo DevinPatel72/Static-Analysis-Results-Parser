@@ -148,6 +148,7 @@ def main():
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", metavar="CONFIG_FILE", nargs='?', const=True, default=False, help="List available input config files in the `inputs` directory. If `CONFIG_FILE` (file name or path) is provided, display that file's contents instead.")
     argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new configuration file.")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print an example user inputs JSON template and exit.")
+    argparser.add_argument('--disable-progressbar', dest="disableprogressbar", action='store_true', help="Disables progress bar in CLI for faster performance.")
     
     args = argparser.parse_args()
     
@@ -222,6 +223,10 @@ def main():
                                 InputDictKeys.REMOVE.value: inp[2],
                                 InputDictKeys.PREPEND.value: inp[3],
             })
+    
+    if args.disableprogressbar is not None and args.disableprogressbar:
+        from parsers.parser_tools import progressbar
+        progressbar.DISABLE_PROGRESS_BAR = True
     
     # Control flags
     for f in InputConfigFlags:
