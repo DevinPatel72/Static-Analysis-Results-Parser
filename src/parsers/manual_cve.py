@@ -11,6 +11,10 @@ from .parser_tools.toolbox import Fieldnames
 
 logger = logging.getLogger(__name__)
 
+def path_preview(fpath):
+    # No preview available
+    return 'No preview available for NVD CVEs'
+
 def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     

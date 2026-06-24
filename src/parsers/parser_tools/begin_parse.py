@@ -5,10 +5,11 @@ import sys
 import time
 import logging
 import threading
+import importlib
 import parsers
 from parsers import *
 from . import parser_writer
-from .toolbox import InputDictKeys
+from .toolbox import InputDictKeys, Scanners
 from .loading_screen import LoadingWindow
 from .reporting import Report
 
@@ -22,7 +23,7 @@ def begin(parser_inputs):
     
     # Put SRM in the back
     for i, inp in enumerate(parser_inputs, start=0):
-        if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in parsers.srm_keywords):
+        if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in Scanners.SRM.keywords):
             parser_inputs.append(parser_inputs.pop(i))
             break
     
@@ -85,35 +86,17 @@ def run_parsers(parser_inputs):
         
         t_finding_count = 0
         t_err_count = 0
-        if any(s in scan_match for s in parsers.aio_keywords):
-            t_finding_count, t_err_count = aio.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.xmarx_keywords):
-            t_finding_count, t_err_count = checkmarx.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.coverity_keywords):
-            t_finding_count, t_err_count = coverity.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            t_finding_count, t_err_count = cppcheck.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.depcheck_keywords):
-            t_finding_count, t_err_count = owasp_depcheck.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.eslint_keywords):
-            t_finding_count, t_err_count = eslint.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.manualcve_keywords):
-            t_finding_count, t_err_count = manual_cve.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            t_finding_count, t_err_count = gnatsas.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.fortify_keywords):
-            t_finding_count, t_err_count = fortify.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            t_finding_count, t_err_count = pragmatic.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.pylint_keywords):
-            t_finding_count, t_err_count = pylint.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.semgrep_keywords):
-            t_finding_count, t_err_count = semgrep.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.sigasi_keywords):
-            t_finding_count, t_err_count = sigasi.parse(path, scanner, substr, prepend)
-        elif any(s in scan_match for s in parsers.srm_keywords):
-            t_finding_count, t_err_count = srm.parse(path, scanner, substr, prepend)
-        else:
+        scanner_not_found = True
+        
+        for scanner_enum in Scanners:
+            if any(s in scan_match for s in scanner_enum.keywords):
+                # Import corresponding module and parse
+                module = importlib.import_module(scanner_enum.module)
+                t_finding_count, t_err_count = module.parse(path, scanner, substr, prepend)
+                scanner_not_found = False
+                break
+        
+        if scanner_not_found:
             logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
             t_finding_count = 0
             t_err_count = 1

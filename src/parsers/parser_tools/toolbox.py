@@ -3,6 +3,7 @@
 import os
 import logging
 import json
+import importlib
 from enum import Enum
 from .progressbar import progress_bar,SPACE
 import parsers
@@ -28,7 +29,9 @@ class InputDictKeys(Enum):
     REMOVE = 'remove'
     OUTFILE = 'outfile'
     
-    INPUTS = [PATH, SCANNER, PREPEND, REMOVE]
+    @classmethod
+    def inputs(cls):
+        return [cls.PATH.value, cls.SCANNER.value, cls.PREPEND.value, cls.REMOVE.value]
 
 class InputConfigFlags(Enum):
     OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True)
@@ -39,6 +42,10 @@ class InputConfigFlags(Enum):
     def __init__(self, flag, default):
         self.flag = flag
         self.default = default
+    
+    @classmethod
+    def all_flags(cls):
+        return [f.flag for f in cls]
 
 class InputSchemaKeys(Enum):
     SCHEMA = "$schema"
@@ -79,11 +86,68 @@ class Fieldnames(Enum):
     def __str__(self):
         return self.value
 
+class Scanners(Enum):
+    # ( NAME, KEYWORDS, VALID_EXTENSIONS, parsers_module )
+    SARP = (parsers.PROG_NAME_ABBR,
+            ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser'],
+            ('.xlsx', '.csv'),
+            'parsers.aio')
+    CHECKMARX = ('Checkmarx',
+                 ['checkmarx', 'xmarx'],
+                 ('.xml', '.csv'),
+                 'parsers.checkmarx')
+    CPPCHECK = ('CPPCheck', ['cppcheck'], ('.xml',), 'parsers.cppcheck')
+    COVERITY = ('Coverity', ['coverity'], ('.json',), 'parsers.coverity')
+    ESLINT = ('ESLint', ['eslint'], ('.json',), 'parsers.eslint')
+    FORTIFY = ('Fortify', ['fortify', 'fortifysca'], ('.fpr',), 'parsers.fortify')
+    GNATSAS = ('GNAT SAS', ['gnatsas', 'codepeer'], ('.json', '.csv'), 'parsers.gnatsas')
+    NVD_CVE = ('NVD CVE',
+               ['cve', 'manualcve', 'manualnvd', 'nvd'],
+               ('.csv',),
+               'parsers.manual_cve')
+    DEP_CHECK = ('OWASP Dependency Check',
+                 ['dependencycheck', 'depcheck', 'owasp', 'owaspdependencycheck', 'owaspdepcheck'],
+                 ('.json', '.csv'),
+                 'parsers.owasp_depcheck')
+    PRAGMATIC = ('Pragmatic', ['pragmatic'], ('.csv',), 'parsers.pragmatic')
+    PYLINT = ('Pylint', ['pylint'], ('.json',), 'parsers.pylint')
+    SEMGREP = ('Semgrep', ['semgrep'], ('.json', '.csv'), 'parsers.semgrep')
+    SIGASI = ('Sigasi',
+              ['sigasi', 'vhdl', 'verilog', 'systemverilog'],
+              ('.json',),
+              'parsers.sigasi')
+    SRM = ('Software Risk Manager',
+           ['srm', 'softwareriskmanager', 'codedx'],
+           ('.xml', '.csv'),
+           'parsers.srm')
+
+    def __init__(self, sname, keywords, valid_ext, module):
+        self.sname = sname
+        self.keywords = keywords
+        self.valid_ext = valid_ext
+        self.module = module
+    
+    @classmethod
+    def all_names(cls):
+        return [scanner.sname for scanner in cls]
+    
+    @classmethod
+    def all_keywords(cls):
+        return set([keyword
+                    for scanner in cls
+                    for keyword in scanner.keywords])
+    
+    @classmethod
+    def all_valid_ext(cls):
+        return set([valid_ext
+                    for scanner in cls
+                    for valid_ext in scanner.valid_ext])
+
 def validate_path_and_scanner(fpath, scanner):
     global __excel_enabled, FILE_SIZE_WARNED_ONCE, FORTIFY_FILE_WARNED_ONCE
     scan_match = scanner.lower().replace(' ', '')
     
-    if not any(s in scan_match for s in parsers.scanner_keywords):
+    if not any(s in scan_match for s in Scanners.all_keywords()):
         return "{} does not currently support input from {}. A list of acceptable scanners and their file types is in the readme.txt file.".format(parsers.PROG_NAME, scanner)
     
     # Alert for large file size for CLI
@@ -105,7 +169,7 @@ def validate_path_and_scanner(fpath, scanner):
         console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', type='warning')
 
     # Checkmarx inputs
-    if any(s in scan_match for s in parsers.xmarx_keywords) and os.path.exists(fpath):
+    if any(s in scan_match for s in Scanners.CHECKMARX.keywords) and os.path.exists(fpath):
         if os.path.isdir(fpath):
             # Check if directory contains at least one csv file
             if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (file.endswith('.csv') or file.endswith('.xml'))]) <= 0):
@@ -114,7 +178,7 @@ def validate_path_and_scanner(fpath, scanner):
             return "Checkmarx input must be a directory, not a file"
     
     # AIO parser inputs
-    elif any(s in scan_match for s in parsers.aio_keywords) and os.path.isfile(fpath):
+    elif any(s in scan_match for s in Scanners.SARP.keywords) and os.path.isfile(fpath):
         # Check file extension
         ext = os.path.splitext(fpath)[1]
         if ext not in ['.csv', '.xlsx']:
@@ -138,11 +202,11 @@ def validate_path_and_scanner(fpath, scanner):
     # All other inputs
     elif os.path.isfile(fpath):
         ext = os.path.splitext(fpath)[1]
-        if ext not in parsers.valid_extensions:
+        if ext not in Scanners.all_valid_ext():
             return f"File extension \'{ext}\' not supported for {scanner} input\n"
         
         # For fortify inputs, check if the audit.fvdl file is present in the fpr archive
-        if any(s in scan_match for s in parsers.fortify_keywords) and not parsers.fortify.check_fvdl(fpath):
+        if any(s in scan_match for s in Scanners.FORTIFY.keywords) and not parsers.fortify.check_fvdl(fpath):
             return "The specified Fortify FPR archive does not contain an \'audit.fvdl\' file. The archive may be corrupted or the scanner output is invalid."
 
     # If it is not a file, input is invalid
@@ -198,8 +262,8 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
             return f"Error in parsing config file \'{inputs_path}\'. No inputs defined in \"main\"."
         
         # Check if each input contains the right keys
-        if not all([all([sorted(list(inp.keys())) == sorted(InputDictKeys.INPUTS.value)]) for inp in user_inputs['main']]):
-            return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid keys detected in \"main\". All of the following keys (and only these keys) must be defined: {}.".format(", ".join(InputDictKeys.INPUTS.value))
+        if not all([all([sorted(list(inp.keys())) == sorted(InputDictKeys.inputs())]) for inp in user_inputs['main']]):
+            return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid keys detected in \"main\". All of the following keys (and only these keys) must be defined: {}.".format(", ".join(InputDictKeys.inputs()))
 
         # All is green, set main equal to parser_inputs
         parser_inputs = user_inputs['main']
@@ -378,36 +442,16 @@ def get_all_previews(inputs):
     
         scan_match = scanner.lower().replace(' ', '')
         fp = os.path.realpath(fpath)
-        
-        if any(s in scan_match for s in parsers.aio_keywords):
-            preview = parsers.aio.path_preview(fp)
-        elif any(s in scan_match for s in parsers.xmarx_keywords):
-            preview = parsers.checkmarx.path_preview(fp)
-        elif any(s in scan_match for s in parsers.coverity_keywords):
-            preview = parsers.coverity.path_preview(fp)
-        elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            preview = parsers.cppcheck.path_preview(fp)
-        elif any(s in scan_match for s in parsers.manualcve_keywords):
-            preview = 'No preview available for NVD CVEs'
-        elif any(s in scan_match for s in parsers.depcheck_keywords):
-            preview = parsers.owasp_depcheck.path_preview(fp)
-        elif any(s in scan_match for s in parsers.eslint_keywords):
-            preview = parsers.eslint.path_preview(fp)
-        elif any(s in scan_match for s in parsers.fortify_keywords):
-            preview = parsers.fortify.path_preview(fp)
-        elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            preview = parsers.gnatsas.path_preview(fp)
-        elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            preview = parsers.pragmatic.path_preview(fp)
-        elif any(s in scan_match for s in parsers.pylint_keywords):
-            preview = parsers.pylint.path_preview(fp)
-        elif any(s in scan_match for s in parsers.semgrep_keywords):
-            preview = parsers.semgrep.path_preview(fp)
-        elif any(s in scan_match for s in parsers.sigasi_keywords):
-            preview = parsers.sigasi.path_preview(fp)
-        elif any(s in scan_match for s in parsers.srm_keywords):
-            preview = parsers.srm.path_preview(fp)
-        else:
+        scanner_not_found = True
+            
+        for scanner_enum in Scanners:
+            if any(s in scan_match for s in scanner_enum.keywords):
+                # Import corresponding module and parse
+                module = importlib.import_module(scanner_enum.module)
+                preview = module.path_preview(fp)
+                scanner_not_found = False
+                break
+        if scanner_not_found:
             preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
 
         previews[fpath] = preview

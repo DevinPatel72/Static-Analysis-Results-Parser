@@ -9,7 +9,7 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
 from .. import PROG_NAME, VERSION
-from .toolbox import InputDictKeys, InputConfigFlags, InputSchemaKeys, validate_path_and_scanner, get_all_previews, generate_preview
+from .toolbox import InputDictKeys, InputConfigFlags, InputSchemaKeys, Scanners, validate_path_and_scanner, get_all_previews, generate_preview
 
 # Constants
 WINDOW_LENGTH = 900
@@ -424,7 +424,7 @@ class InputsGUI:
 
         # Scanner dropdown (Combobox)
         scanner_dropdown_placeholder = self._select_scanner(entry[InputDictKeys.SCANNER.value]) if len(entry) > 0 else 'Select Scanner...'
-        scanners = sorted(parsers.LIST_OF_SCANNERS, key=str.lower)
+        scanners = Scanners.all_names()
         scanner_dropdown = ttk.Combobox(row_frame, values=scanners, width=max([len(i) for i in scanners])+3, state='readonly')
         scanner_dropdown.set(scanner_dropdown_placeholder) # Set to current entry or placeholder
         scanner_dropdown.pack(side=tk.LEFT, padx=5)
@@ -551,36 +551,12 @@ class InputsGUI:
     
     def _select_scanner(self, scanner):
         scan_match = scanner.lower().replace(' ', '')
-        if any(s in scan_match for s in parsers.aio_keywords):
-            return parsers.PROG_NAME_ABBR
-        elif any(s in scan_match for s in parsers.xmarx_keywords):
-            return 'Checkmarx'
-        elif any(s in scan_match for s in parsers.coverity_keywords):
-            return 'Coverity'
-        elif any(s in scan_match for s in parsers.cppcheck_keywords):
-            return 'CPPCheck'
-        elif any(s in scan_match for s in parsers.manualcve_keywords):
-            return 'NVD CVEs'
-        elif any(s in scan_match for s in parsers.depcheck_keywords):
-            return 'OWASP Dependency Check'
-        elif any(s in scan_match for s in parsers.eslint_keywords):
-            return 'ESLint'
-        elif any(s in scan_match for s in parsers.fortify_keywords):
-            return 'Fortify'
-        elif any(s in scan_match for s in parsers.gnatsas_keywords):
-            return 'GNAT SAS'
-        elif any(s in scan_match for s in parsers.pragmatic_keywords):
-            return 'Pragmatic'
-        elif any(s in scan_match for s in parsers.pylint_keywords):
-            return 'Pylint'
-        elif any(s in scan_match for s in parsers.semgrep_keywords):
-            return 'Semgrep'
-        elif any(s in scan_match for s in parsers.sigasi_keywords):
-            return 'Sigasi'
-        elif any(s in scan_match for s in parsers.srm_keywords):
-            return 'SRM'
-        else:
-            return 'Select Scanner...'
+        
+        for scanner_enum in Scanners:
+            if any(s in scan_match for s in scanner_enum.keywords):
+                return scanner_enum.sname
+        
+        return 'Select Scanner...'
 
 
 class AdjustPathsGUI:
