@@ -428,7 +428,7 @@ class Report:
         _max_key_len = max([len(k) for k in self.counts.keys()])
         _max_val_len = max([len(str(v[0])) for v in self.counts.values()])
         
-        outstr = "\nScanner{}\tFindings\tPercentage\tErrors".format(' '*(_max_key_len-len("Findings")-1))
+        outstr = "\nScanner{}\tFindings\tPercentage\tErrors".format(' '*(max(_max_key_len-len("Findings")-1, 4)))
         outstr += "\n—————————————————————————————————————————————————————————————\n"
         
         total_findings = self.get_total_findings()
