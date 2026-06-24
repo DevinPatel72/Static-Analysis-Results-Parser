@@ -83,6 +83,7 @@ def main():
     control_flags = {}
     
     # Load inputs if there are any
+    select_input = None
     if len(os.listdir(parsers.INPUTS_DIR)) > 0:
         select_input = JsonInputPreviewGUI()
         
@@ -169,7 +170,9 @@ def main():
     logger.info("\n".join(['    ' + l for l in s.split('\n')]))
     
     # Export parser inputs to config file for reruns. If reading from a selected inputs file, overwrite it instead of creating a new file.
-    no_overwrite = not (select_input.results is not None and len(select_input.results) > 0)
+    if select_input is None:
+        no_overwrite = False
+    else: no_overwrite = not (select_input.results is not None and len(select_input.results) > 0)
     export_config(parser_inputs, parser_outfile, control_flags, no_overwrite=no_overwrite)
     
     # Put control_flags into module variable
