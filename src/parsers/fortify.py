@@ -96,7 +96,7 @@ def parse(fpath, scanner, substr, prepend):
         # Check if there are vulnerabilities to read
         total_vulnerabilities = len(root.findall('.//ns:Vulnerability', namespace))
         if total_vulnerabilities <= 0:
-            logger.error(f"No vulnerabilities found in the FPR file \"{fpath}\". Skipping the file.")
+            logger.warning(f"No vulnerabilities found in the FPR file \"{fpath}\". Skipping the file.")
             return finding_count, err_count + 1
 
         # Extract base path for source files
