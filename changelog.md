@@ -10,10 +10,12 @@
 
 ## [Version 2.6.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.6.1) (2026-06-22)
 - Reworked Checkmarx parser to always output a Message value for both XML and CSV inputs
+- Release executables have been removed because they contain a critical bug.
 
 ## [Version 2.6.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/2.6.0) (2026-06-18)
 - Added ability to pass inputs via command line, so a JSON file is no longer required. See the [ReadMe](readme.md#command-line-options) for a full list.
 - Added more command line options to manage input config files.
+- Release executables have been removed because they contain a critical bug.
 
 ## [Version 2.5.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.5.0) (2026-06-16)
 - Created a new header for Trace instead of appending it to the Message or Symbol columns. This will include DestPath/DestLine values for certain scanners.
