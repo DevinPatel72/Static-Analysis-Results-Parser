@@ -1,6 +1,7 @@
 # Change Log
 
 ## [Version 2.6.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.6.2) (2026-06-24)
+- Fixed bug introduced in 2.6.0 where GUI will crash prior to parsing results.
 - Added file extension validation for each scanner input
 - Added CLI option to disable progress bar
 - Fixed bug in Fortify path preview to improve clarity for error reporting
