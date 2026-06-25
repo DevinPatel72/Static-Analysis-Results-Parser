@@ -259,6 +259,7 @@ def main():
 
     # Output confirmation
     print_inputs(parser_inputs, parser_outfile, control_flags)
+    print('\n{}\n'.format('#'*100))
     
     # Export parser inputs to config file for reruns
     if args.save_config is not False:
@@ -272,8 +273,6 @@ def main():
             else:
                 parsers.INPUTS_PATH = outfile_name
         export_config(parser_inputs, parser_outfile, control_flags)
-    
-    print('\n{}\n'.format('#'*90))
     
     # Put control_flags into module variable
     parsers.control_flags = control_flags
