@@ -1570,6 +1570,15 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '125'}
         ),
         PRule(
+            rule_id = "fortify_out_of_bounds_read_off_by_one",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"fortify", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Off-by-One", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '193'}
+        ),
+        PRule(
             rule_id = "gnatsas_duplicate_branches",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
