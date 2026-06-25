@@ -1,6 +1,7 @@
 # Change Log
 
 ## [Version 2.6.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.6.2) (2026-06-24)
+- Fixed bug introduced in 2.6.0 where GUI will crash prior to parsing results.
 - Added file extension validation for each scanner input
 - Added CLI option to disable progress bar
 - Fixed bug in Fortify path preview to improve clarity for error reporting
@@ -8,9 +9,11 @@
 - Fixed finding counts alignment in the CLI table for when finding counts are all 3 digits
 
 ## [Version 2.6.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.6.1) (2026-06-22)
+- ***Release executables have been removed because they contain a critical bug.***
 - Reworked Checkmarx parser to always output a Message value for both XML and CSV inputs
 
 ## [Version 2.6.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/2.6.0) (2026-06-18)
+- ***Release executables have been removed because they contain a critical bug.***
 - Added ability to pass inputs via command line, so a JSON file is no longer required. See the [ReadMe](readme.md#command-line-options) for a full list.
 - Added more command line options to manage input config files.
 
