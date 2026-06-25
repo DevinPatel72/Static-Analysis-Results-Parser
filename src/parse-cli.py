@@ -263,8 +263,14 @@ def main():
     # Export parser inputs to config file for reruns
     if args.save_config is not False:
         if isinstance(args.save_config, str):
-            basename = args.save_config+'.json' if not args.save_config.endswith('.json') else args.save_config
-            parsers.INPUTS_PATH = os.path.join(parsers.INPUTS_DIR, basename)
+            outfile_name = args.save_config+'.json' if not args.save_config.endswith('.json') else args.save_config
+            # Check if it is a path
+            if not ('/' in outfile_name or '\\' in outfile_name):
+                # Truncate name if longer than 255 characters
+                outfile_name = outfile_name[:251]+'.json' if len(outfile_name) > 255 else outfile_name
+                parsers.INPUTS_PATH = os.path.join(parsers.INPUTS_DIR, outfile_name)
+            else:
+                parsers.INPUTS_PATH = outfile_name
         export_config(parser_inputs, parser_outfile, control_flags)
     
     print('\n{}\n'.format('#'*90))
