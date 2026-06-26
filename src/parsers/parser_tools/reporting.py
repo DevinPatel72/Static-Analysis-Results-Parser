@@ -436,7 +436,7 @@ class Report:
         for k, v in self.counts.items():
             # Findings count
             percentage = f"{(v[0] / total_findings)*100:.1f}%" if total_findings != 0 else "0.0%"
-            space = ' '*(_max_key_len-len(k))
+            space = ' '*(max(_max_key_len-len(k), 4))
             outstr += f"{k}:{space}\t{str(v[0]).rjust(_max_val_len)}\t\t{percentage.rjust(6)}"
             
             # Error count
@@ -444,7 +444,7 @@ class Report:
             outstr += '\n'
         
         # Calculate total
-        space = ' '*(_max_key_len-len("Total")+1)
+        space = ' '*(max(_max_key_len-len("Total")+1, 4))
         outstr += f"\nTotal:{space}\t{str(total_findings).rjust(_max_val_len)}\t\t{'100.0%'.rjust(6)}"
         total_errors = self.get_total_errors()
         outstr += f"\t\t{total_errors}"
