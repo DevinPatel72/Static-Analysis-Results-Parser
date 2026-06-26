@@ -92,6 +92,7 @@ class Scanners(Enum):
             ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser'],
             ('.xlsx', '.csv'),
             'parsers.aio')
+    SARIF = ('SARIF', ['sarif'], ('.json',), 'parsers.sarif')
     CHECKMARX = ('Checkmarx',
                  ['checkmarx', 'xmarx'],
                  ('.xml', '.csv'),
