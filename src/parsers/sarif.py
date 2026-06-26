@@ -33,6 +33,8 @@ def parse(fpath=None, scanner=None, substr=None, prepend=None, p_sarif_data=None
             with open(fpath, mode='r', encoding='utf-8-sig') as r:
                 sarif_data = json.load(r)
             logger.info(f"Parsing {scanner} - {fpath}")
+        else:
+            logger.info("Parsing SARIF data to Excel/CSV format")
     except:
         logger.error(f"File \'{fpath}\' failed to open:\n{traceback.format_exc()}")
         return finding_count, err_count + 1
