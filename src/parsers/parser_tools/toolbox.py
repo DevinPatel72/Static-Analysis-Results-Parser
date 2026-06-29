@@ -86,46 +86,166 @@ class Fieldnames(Enum):
     def __str__(self):
         return self.value
 
+# Identity dict for sarif inputs
+__sarif_mapping_identity = {"error": "error", "warning": "warning", "note": "note", "none": "none"}
+
 class Scanners(Enum):
-    # ( NAME, KEYWORDS, VALID_EXTENSIONS, parsers_module )
+    # ( NAME,
+    #   KEYWORDS,
+    #   VALID_EXTENSIONS,
+    #   SEVERITY_MAP {"tool_severity": "sarif_level", ...},
+    #   parsers_module )
+    
+    # Valid SARIF severity strings ('level'): ["error", "warning", "note", "none"]
     SARP = (parsers.PROG_NAME_ABBR,
             ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser'],
             ('.xlsx', '.csv'),
+            __sarif_mapping_identity,
             'parsers.aio')
-    SARIF = ('SARIF', ['sarif'], ('.json',), 'parsers.sarif')
+    SARIF = ('SARIF',
+            ['sarif'],
+            ('.json',),
+            __sarif_mapping_identity,
+            'parsers.sarif')
     CHECKMARX = ('Checkmarx',
                  ['checkmarx', 'xmarx'],
                  ('.xml', '.csv'),
+                 {
+                    "critical": "error",
+                    "high": "error",
+                    "medium": "warning",
+                    "low": "note",
+                    "information": "note"
+                 },
                  'parsers.checkmarx')
-    CPPCHECK = ('CPPCheck', ['cppcheck'], ('.xml',), 'parsers.cppcheck')
-    COVERITY = ('Coverity', ['coverity'], ('.json',), 'parsers.coverity')
-    ESLINT = ('ESLint', ['eslint'], ('.json',), 'parsers.eslint')
-    FORTIFY = ('Fortify', ['fortify', 'fortifysca'], ('.fpr',), 'parsers.fortify')
-    GNATSAS = ('GNAT SAS', ['gnatsas', 'codepeer'], ('.json', '.csv'), 'parsers.gnatsas')
+    CPPCHECK = ('CPPCheck',
+                ['cppcheck'],
+                ('.xml',),
+                {
+                    "error": "error",
+                    "warning": "warning",
+                    "style": "note",
+                    "performance": "note",
+                    "portability": "note",
+                    "information": "note",
+                    "debug": "none"
+                },
+                'parsers.cppcheck')
+    COVERITY = ('Coverity',
+                ['coverity'],
+                ('.json',),
+                {
+                    "high": "error",
+                    "medium": "warning",
+                    "low": "note",
+                    "audit": "note"
+                },
+                'parsers.coverity')
+    ESLINT = ('ESLint',
+                ['eslint'],
+                ('.json',),
+                {
+                    "0": "note",
+                    "off": "note",
+                    "1": "warning",
+                    "2": "error"
+                },
+                'parsers.eslint')
+    FORTIFY = ('Fortify',
+                ['fortify', 'fortifysca'],
+                ('.fpr',),
+                {
+                    "0.0": "note",
+                    "1.0": "note",
+                    "2.0": "note",
+                    "3.0": "warning",
+                    "4.0": "error",
+                    "5.0": "error",
+                    "0.0 (info)": "note",
+                    "1.0 (info)": "note",
+                    "2.0 (low)": "note",
+                    "3.0 (medium)": "warning",
+                    "4.0 (high)": "error",
+                    "5.0 (critical)": "error"
+                },
+                'parsers.fortify')
+    GNATSAS = ('GNAT SAS',
+                ['gnatsas', 'codepeer'],
+                ('.json', '.csv'),
+                __sarif_mapping_identity | {
+                    "high": "error",
+                    "medium": "warning",
+                    "low": "note",
+                    "info": "note"
+                },
+                'parsers.gnatsas')
     NVD_CVE = ('NVD CVE',
                ['cve', 'manualcve', 'manualnvd', 'nvd'],
                ('.csv',),
+               __sarif_mapping_identity,
                'parsers.manual_cve')
     DEP_CHECK = ('OWASP Dependency Check',
-                 ['dependencycheck', 'depcheck', 'owasp', 'owaspdependencycheck', 'owaspdepcheck'],
-                 ('.json', '.csv'),
-                 'parsers.owasp_depcheck')
-    PRAGMATIC = ('Pragmatic', ['pragmatic'], ('.csv',), 'parsers.pragmatic')
-    PYLINT = ('Pylint', ['pylint'], ('.json',), 'parsers.pylint')
-    SEMGREP = ('Semgrep', ['semgrep'], ('.json', '.csv'), 'parsers.semgrep')
+                ['dependencycheck', 'depcheck', 'owasp', 'owaspdependencycheck', 'owaspdepcheck'],
+                ('.json', '.csv'),
+                {
+                    "none": "none",
+                    "low": "note",
+                    "medium": "warning",
+                    "high": "error",
+                    "critical": "error"
+                },
+                'parsers.owasp_depcheck')
+    PRAGMATIC = ('Pragmatic',
+                ['pragmatic'],
+                ('.csv',),
+                {}, # Leave empty
+                'parsers.pragmatic')
+    PYLINT = ('Pylint',
+                ['pylint'],
+                ('.json',),
+                {
+                    "fatal": "error",
+                    "error": "error",
+                    "warning": "warning",
+                    "refactor": "note",
+                    "convention": "note",
+                    "info": "note"
+                },
+                'parsers.pylint')
+    SEMGREP = ('Semgrep',
+                ['semgrep'],
+                ('.json', '.csv'),
+                {
+                    "low": "note",
+                    "medium": "warning",
+                    "high": "error",
+                    "critical": "error",
+                    "info": "note",
+                    "warning": "warning",
+                    "error": "error"
+                },
+                'parsers.semgrep')
     SIGASI = ('Sigasi',
               ['sigasi', 'vhdl', 'verilog', 'systemverilog'],
               ('.json',),
+              {
+                  "note": "note",
+                  "warning": "warning",
+                  "error": "error",
+                  "failure": "note"
+              },
               'parsers.sigasi')
     SRM = ('Software Risk Manager',
            ['srm', 'softwareriskmanager', 'codedx'],
            ('.xml', '.csv'),
+           {}, # Leave empty
            'parsers.srm')
 
-    def __init__(self, sname, keywords, valid_ext, module):
+    def __init__(self, sname, keywords, valid_ext, severity_map, module):
         self.sname = sname
         self.keywords = keywords
         self.valid_ext = valid_ext
+        self.severity_map = severity_map
         self.module = module
     
     @classmethod
@@ -164,7 +284,7 @@ def validate_path_and_scanner(fpath, scanner):
     if any(s in scan_match for s in Scanners.CHECKMARX.keywords) and os.path.exists(fpath):
         if os.path.isdir(fpath):
             # Check if directory contains at least one xml or csv file
-            if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (os.path.splitext(fpath)[1] in Scanners.CHECKMARX.valid_ext)]) <= 0):
+            if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (os.path.splitext(file)[1] in Scanners.CHECKMARX.valid_ext)]) <= 0):
                 return "No CSV or XML files in the specified directory \'{}\'".format(fpath)
         else:
             return "Checkmarx input must be a directory, not a file"

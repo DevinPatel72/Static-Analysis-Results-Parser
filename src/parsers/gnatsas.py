@@ -264,7 +264,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                                     Fieldnames.TOOL.value:row['tool'],
                                     Fieldnames.SCANNER.value:scanner,
                                     Fieldnames.LANGUAGE.value:'ada',
-                                    Fieldnames.SEVERITY.value:''
+                                    Fieldnames.SEVERITY.value:row['ranking']
                                 })
                 finding_count += 1
             except Exception:
