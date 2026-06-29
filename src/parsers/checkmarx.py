@@ -155,7 +155,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, 
                 #dest_info = f"Destination: {row['DestFileName']}:{row['DestLine']}: \"{row['DestName']}\""
             
                 # Generate ID for finding
-                preimage = f"{path}{row['Line']}{row['Name']}{query}{tool_cwe}{dest_path}{row['DestLine']}{row['DestName']}"
+                preimage = '\0'.join((path, row['Line'], row['Name'], query, tool_cwe, dest_path, row['DestLine'], row['DestName']))
                 id = idgenerator.hash(preimage)
                 #id = "CX{:04}".format(finding_count+1)
                 
@@ -293,7 +293,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
                             
                     
                     # Generate ID for finding
-                    preimage = f"{path}{line}{query_name}{tool_cwe}{trace}"
+                    preimage = '\0'.join((path, line, query_name, tool_cwe, trace))
                     id = idgenerator.hash(preimage)
                     
                     # Write row to outfile

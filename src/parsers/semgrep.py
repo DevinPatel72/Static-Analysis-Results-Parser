@@ -121,7 +121,7 @@ def parse(fpath, scanner, substr, prepend):
             else:
                 trace = ''
             
-            preimage = f"{path}{line}{check_id}{message}{trace}"
+            preimage = '\0'.join((path, line, check_id, message, trace))
             id = idgenerator.hash(preimage)
 
             # Write row to outfile

@@ -118,7 +118,7 @@ def parse(fpath, scanner, substr, prepend):
                     
             
             # Generate ID for Coverity finding (concat Path, Line, Scanner, and Message)
-            preimage = f"{path}{line}{message}{trace}{tool_cwe}"
+            preimage = '\0'.join((path, line, message, trace, tool_cwe))
             id = idgenerator.hash(preimage)
             #id = "CPP{:04}".format(finding_count+1)
 
