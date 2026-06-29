@@ -1,23 +1,26 @@
 # Static Analysis Results Parser
 
 ## Description
-Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel or CSV file.
+Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel, SARIF, or CSV file.
 
-### Accepted Inputs:
--  SARP:        `.xlsx` or `.csv`
--  Checkmarx:   Directory of `.xml` (preferred) or `.csv` files (Single directory, no recursion)
--  CppCheck:    `.xml`
--  Coverity:    `.json`
--  OWASP Dependency Check: `.json` or `.csv`
--  ESLint:      `.json`
--  Fortify:     `.fpr`
--  Gnat SAS:    `.json (aka SARIF format)` (preferred) or `.csv`
--  NVD CVE:     `.csv` (See [Batch-NVD-CVE](https://github.com/DevinPatel72/Batch-NVD-Query))
--  Pragmatic:   `.csv`
--  Pylint:      `.json`
--  Semgrep:     `.json` (preferred) or `.csv`
--  Sigasi:      `.json`
--  SRM:         `.xml` (preferred) or `.csv`
+### Accepted Inputs
+| Scanner                   | Results File Extension                                                           |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| SARP                      | `.xlsx`, `.json`, `.csv`                                                         |
+| SARIF                     | `.json`                                                                          |
+| Checkmarx                 | Directory of `.xml` (preferred) or `.csv` files (Single directory, no recursion) |
+| CppCheck                  | `.xml`                                                                           |
+| Coverity                  | `.json`                                                                          |
+| OWASP Dependency Check    | `.json`, `.csv`                                                                  |
+| ESLint                    | `.json`                                                                          |
+| Fortify                   | `.fpr`                                                                           |
+| Gnat SAS                  | `.json (aka SARIF format)` (preferred), `.csv`                                   |
+| NVD CVE                   | `.csv` (See [Batch-NVD-CVE](https://github.com/DevinPatel72/Batch-NVD-Query))    |
+| Pragmatic                 | `.csv`                                                                           |
+| Pylint                    | `.json`                                                                          |
+| Semgrep                   | `.json` (preferred), `.csv`                                                      |
+| Sigasi                    | `.json`                                                                          |
+| SRM                       | `.xml` (preferred), `.csv`                                                       |
 
 
 ## Execute Using Executables
@@ -87,6 +90,7 @@ Then execute the build script.
 | `-l`<br>`--list-inputs [CONFIG_FILE]`                                              | List available input config files in the `config/inputs` directory. If `CONFIG_FILE` (file name or path) is provided, display that file's contents.                                                                               |
 | `-s`<br>`--save-config [SAVE_NAME]`                                                | Save the current command line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `config/inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new config file.    |
 | `--example-template`                                                               | Print an example user inputs JSON template and exit.                                                                                                                                                                              |
+| `--format [FORMAT]`                                                                | Format of output file. `FORMAT` can be EXCEL, SARIF, or CSV.                                                                                                                                                                      |
 | `--disable-progressbar`                                                            | Disables progress bar for faster performance.                                                                                                                                                                                     |
 
 ## Input Configuration File
