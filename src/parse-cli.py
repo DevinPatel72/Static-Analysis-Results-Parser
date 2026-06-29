@@ -288,11 +288,9 @@ def main():
         parsers.cwe_categories = load_config_cwe_category_mappings()
 
     # Init the outfile
-    if parser_outfile.lower().endswith('.csv'):
-        force_csv = True
-    else:
-        force_csv = False
-    parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
+    force_csv = parser_outfile.lower().endswith('.csv')
+    force_sarif = parser_outfile.lower().endswith('.json')
+    parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv, force_sarif=force_sarif)
     
     begin(parser_inputs)
 

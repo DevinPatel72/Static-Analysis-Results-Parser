@@ -22,6 +22,9 @@ def path_preview(fpath):
 
 # This function converts a SARIF data structure to an Excel one
 def parse(fpath, scanner, substr, prepend):
+    from parsers import PROG_NAME_ABBR
+    console(f"{PROG_NAME_ABBR} cannot currently parse SARIF results. Skipping SARIF input.", "SARIF not supported", type='warning')
+    return 0, 0
     sarif_data = None
     excel_data = []
     

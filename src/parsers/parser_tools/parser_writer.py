@@ -3,13 +3,16 @@
 import os
 import csv
 import time
+import json
 import logging
+from parsers import sarif
 from .toolbox import check_all_CWEs, format_time
 from .preflight import apply_prules
 from .dupe_scan_consolidation import dupe_scan_consolidation
 
 logger = logging.getLogger(__name__)
 __excel_enabled = False
+__export_sarif = False
 
 try:
     import openpyxl
@@ -22,11 +25,12 @@ __parser_data = []
 __excel_workbook = None
 __fieldnames = None
 
-def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
-    global __filepath, __excel_workbook, __fieldnames, __excel_enabled
+def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force_sarif=False):
+    global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __export_sarif
     from parsers import GUI_MODE
     
     __fieldnames = fieldnames
+    __export_sarif = force_sarif
     
     # Track time for outfile holding
     elapsed_time = -1
@@ -37,10 +41,12 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
     while True:
         # Attempt to open file
         try:
-            if __excel_enabled:
+            if __export_sarif:
+                if os.path.splitext(outfile)[1] != '.json':
+                    outfile = os.path.splitext(outfile)[0] + '.json'
+            elif __excel_enabled:
                 if os.path.splitext(outfile)[1] != '.xlsx':
                     outfile = os.path.splitext(outfile)[0] + '.xlsx'
-                __filepath = outfile
                 __excel_workbook = openpyxl.Workbook()
                 temp = __excel_workbook.active
                 temp.title = sheet_name
@@ -48,7 +54,7 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False):
             else:
                 if os.path.splitext(outfile)[1] != '.csv':
                     outfile = os.path.splitext(outfile)[0] + '.csv'
-                __filepath = outfile
+            __filepath = outfile
             break
         except PermissionError:
             if GUI_MODE:
@@ -157,7 +163,7 @@ def update_row(id, updates, skip_ids='', match_once=False):
     return updated_rows_count
 
 def close_writer():
-    global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __parser_data
+    global __filepath, __excel_workbook, __export_sarif, __fieldnames, __excel_enabled, __parser_data
     from parsers import GUI_MODE
     
     # Track time for outfile holding
@@ -179,7 +185,24 @@ def close_writer():
         
         # Write out parser data to file
         if __filepath is not None:
-            if __excel_enabled:
+            if __export_sarif:
+                while True:
+                    try:
+                        with open(__filepath, 'w', encoding='utf-8-sig') as out:
+                            json.dump(sarif.rows_to_sarif(__parser_data), out, indent=4)
+                        break
+                    except PermissionError:
+                        if GUI_MODE:
+                            from tkinter import messagebox
+                            messagebox.showerror("Unable to open file", f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
+                        else:
+                            if elapsed_time < 0:
+                                print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
+                                elapsed_time = 0
+                            print('Waiting: ' + format_time(elapsed_time), end='\r')
+                            time.sleep(1)
+                            elapsed_time += 1
+            elif __excel_enabled:
                 while True:
                     try:
                         temp = __excel_workbook.active
