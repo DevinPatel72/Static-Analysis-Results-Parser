@@ -23,6 +23,9 @@ default_prules = []
 # Control Flags
 control_flags = []
 
+# CWE Category Mappings
+cwe_categories = {}
+
 # Important Paths (overwritten by parse.py)
 EXE_ROOT_DIR = '.'
 LOGS_DIR = 'logs'
@@ -32,9 +35,6 @@ MAPPINGS_DIR = 'mappings'
 PREFLIGHT_DIR = 'preflight'
 INPUTS_DIR = 'inputs'
 INPUTS_PATH = ''
-
-# CWE Category Mappings
-cwe_categories = {}
 
 # Multithreading globals
 progress_queue = None

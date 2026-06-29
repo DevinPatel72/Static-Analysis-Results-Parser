@@ -18,9 +18,13 @@ except (ImportError, ModuleNotFoundError):
 logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
+    global __excel_enabled
     # Parse the input file
     try:
-        if __excel_enabled:
+        # SARIF input - Get first result
+        if fpath.endswith('.json'):
+            pass
+        elif __excel_enabled:
             workbook = openpyxl.load_workbook(fpath)
             sheet = workbook[workbook.sheetnames[0]]
             
@@ -45,6 +49,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend):
+    global __excel_enabled
     logger.info(f"Parsing {scanner} - {fpath}")
     
     # Keep track of row number and errors

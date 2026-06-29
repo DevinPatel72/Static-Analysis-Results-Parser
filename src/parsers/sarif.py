@@ -48,24 +48,42 @@ def parse(fpath, scanner, substr, prepend):
     
 # Converts list of dictionaries to SARIF format
 def rows_to_sarif(data):
+    # Get list of scanners
+    runs = {}
+    
     # Prep the results and rules
-    results = []
-    rules = {}
     for row in data:
-        selected_scanner = select_scanner(row[Fieldnames.SCANNER.value])
+        scanner = row[Fieldnames.SCANNER.value]
+        selected_scanner = select_scanner(scanner)
         if selected_scanner == Scanners.SRM:
             selected_scanner = select_scanner(row[Fieldnames.TOOL.value])
-            
+        
+        if scanner not in runs:
+            runs[scanner] = {
+                "tool": {
+                    "driver": {
+                        "name": scanner,
+                        "rules": []
+                    }
+                },
+                "results": [],
+                "_rules": {}
+            }
+        
+        run = runs[scanner]
+        
         # Get rule
         rule_id = row[Fieldnames.TYPE.value]
-        if rule_id not in rules:
-            rules[rule_id] = {
+        if rule_id not in run['_rules']:
+            rule = {
                 "id": rule_id,
                 "name": rule_id,
                 "shortDescription": {
                     "text": rule_id
                 }
             }
+            run['_rules'][rule_id] = rule
+            run["tool"]["driver"]["rules"].append(rule)
 
         # Get result
         result = {
@@ -157,20 +175,15 @@ def rows_to_sarif(data):
             result['properties']['cwe'] = row[Fieldnames.SCORING_BASIS.value]
             result['properties']['tool_cwe'] = row[Fieldnames.TOOL_CWE.value]
 
-        results.append(result)
+        run["results"].append(result)
+
+    for run in runs.values():
+        del run['_rules']
 
     sarif = {
         "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
         "version": "2.1.0",
-        "runs": [{
-            "tool": {
-                "driver": {
-                    "name": row[Fieldnames.SCANNER.value],
-                    "rules": list(rules.values())
-                }
-            },
-            "results": results
-        }]
+        "runs": list(runs.values())
     }
     
     return sarif
