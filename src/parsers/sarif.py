@@ -45,39 +45,111 @@ def parse(fpath, scanner, substr, prepend):
     
 # Converts list of dictionaries to SARIF format
 def rows_to_sarif(data):
+    # Prep the results and rules
     results = []
+    rules = {}
     for row in data:
         selected_scanner = select_scanner(row[Fieldnames.SCANNER.value])
         if selected_scanner == Scanners.SRM:
             selected_scanner = select_scanner(row[Fieldnames.TOOL.value])
+            
+        # Get rule
+        rule_id = row[Fieldnames.TYPE.value]
+        if rule_id not in rules:
+            rules[rule_id] = {
+                "id": rule_id,
+                "name": rule_id,
+                "shortDescription": {
+                    "text": rule_id
+                }
+            }
 
+        # Get result
         result = {
-            "ruleId": row[Fieldnames.TYPE.value],
+            "ruleId": rule_id,
             "message": {
                 "text": row[Fieldnames.MESSAGE.value]
             },
             "locations": [{
                 "physicalLocation": {
                     "artifactLocation": {
-                        "uri": path
+                        "uri": row[Fieldnames.PATH.value]
                     },
                     "region": {
-                        "startLine": line
+                        "startLine": row[Fieldnames.LINE.value]
                     }
                 }
             }],
             "partialFingerprints": {
-                "findingId": id
+                "findingId": row[Fieldnames.ID.value]
             },
             "properties": {
-                "cwe": tool_cwe,
-                "language": "python"
+                Fieldnames.CONFIDENCE.value.lower(): row[Fieldnames.CONFIDENCE.value],
+                Fieldnames.MATURITY.value.lower().replace(' ', '_'): row[Fieldnames.MATURITY.value],
+                Fieldnames.MITIGATION.value.lower().replace(' ', '_'): row[Fieldnames.MITIGATION.value],
+                Fieldnames.PROPOSED_MITIGATION.value.lower().replace(' ', '_'): row[Fieldnames.PROPOSED_MITIGATION.value],
+                Fieldnames.VALIDATOR_COMMENT.value.lower().replace(' ', '_'): row[Fieldnames.VALIDATOR_COMMENT.value],
+                Fieldnames.LANGUAGE.value.lower().replace(' ', '_'): row[Fieldnames.LANGUAGE.value],
+                Fieldnames.SCANNER.value.lower().replace(' ', '_'): row[Fieldnames.SCANNER.value],
+                Fieldnames.SYMBOL.value.lower().replace(' ', '_'): row[Fieldnames.SYMBOL.value]
             }
         }
         
         severity = _severity_remap(row[Fieldnames.SEVERITY.value], selected_scanner)
         if len(severity) > 0:
             result['level'] = severity
+        
+        # Trace
+        if len(row[Fieldnames.TRACE.value]) > 0:
+            trace = row[Fieldnames.TRACE.value].strip().split('\n')
+            locations = []
+            for t in trace:
+                t = t.strip()
+                if len(t) <= 0:
+                    continue
+                
+                items = t[1:].lstrip(") ").split(":")
+                path = items[0] if len(items) > 0 else ""
+                line = items[1] if len(items) > 1 else ""
+                msg = ":".join(items[2:]) if len(items) > 2 else ""
+                
+                # Creation location object
+                location = {}
+
+                if len(msg) > 0:
+                    location["message"] = {"text": msg}
+
+                if len(path) > 0:
+                    location["physicalLocation"] = {
+                        "artifactLocation": {
+                            "uri": path
+                        }
+                    }
+
+                    if len(line) > 0:
+                        location["physicalLocation"]["region"] = {
+                            "startLine": int(line) if str(line).isdigit() else line
+                        }
+
+                locations.append({
+                    "location": location
+                })
+            
+            if len(locations) > 0:
+                result["codeFlows"] = [{
+                    "threadFlows": [{
+                        "locations": locations
+                    }]
+                }]
+        
+        # Scanner-specific properties
+        if selected_scanner in [Scanners.DEP_CHECK, Scanners.NVD_CVE]:
+            result['properties']['cve'] = row[Fieldnames.SCORING_BASIS.value]
+            result['properties']['tool_cwe'] = row[Fieldnames.TOOL_CWE.value]
+        # Remaining scanners
+        else:
+            result['properties']['cwe'] = row[Fieldnames.SCORING_BASIS.value]
+            result['properties']['tool_cwe'] = row[Fieldnames.TOOL_CWE.value]
 
         results.append(result)
 
@@ -87,11 +159,13 @@ def rows_to_sarif(data):
         "runs": [{
             "tool": {
                 "driver": {
-                    "name": scanner,
-                    "rules": rules
+                    "name": row[Fieldnames.SCANNER.value],
+                    "rules": list(rules.values())
                 }
             },
             "results": results
         }]
-    }    
+    }
+    
+    return sarif
     
