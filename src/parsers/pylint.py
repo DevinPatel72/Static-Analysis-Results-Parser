@@ -70,7 +70,7 @@ def parse(fpath, scanner, substr, prepend):
             line = int(issue['line']) if str(issue['line']).isdigit() else issue['line']
             
             # Generate ID for finding (concat Path, Line, Scanner, and Message)
-            preimage = f"{path}{issue['line']}{message}"
+            preimage = '\0'.join(str(p) for p in (path, issue['line'], message) if len(str(p)) > 0)
             id = idgenerator.hash(preimage)
             #id = "PYL{:04}".format(finding_count+1)
 

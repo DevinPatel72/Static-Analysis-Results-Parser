@@ -149,6 +149,7 @@ def main():
     argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new configuration file.")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print an example user inputs JSON template and exit.")
     argparser.add_argument('--disable-progressbar', dest="disableprogressbar", action='store_true', help="Disables progress bar in CLI for faster performance.")
+    argparser.add_argument('--format', dest="format", type=str, default="excel", help="Format of output file. Valid options are EXCEL, SARIF, or CSV.")
     
     args = argparser.parse_args()
     
@@ -201,6 +202,20 @@ def main():
     # Override outfile if the arg was passed
     if args.out is not None and len(args.out) > 0:
         parser_outfile = args.out
+    
+    # Change format if defined
+    if args.format is not None and len(args.format) > 0:
+        if args.format.lower() not in ['excel', 'sarif', 'csv']:
+            logger.error(f"Unsupported format {args.format}. Options are EXCEL, SARIF, or CSV.")
+            sys.exit(6)
+
+        match args.format.lower().strip():
+            case 'excel':
+                parser_outfile = os.path.splitext(parser_outfile)[0] + '.xlsx'
+            case 'sarif':
+                parser_outfile = os.path.splitext(parser_outfile)[0] + '.json'
+            case 'csv':
+                parser_outfile = os.path.splitext(parser_outfile)[0] + '.csv'
     
     # Override Project name + version if those args were passed
     if args.projectname is not None and len(args.projectname) > 0:
@@ -264,14 +279,14 @@ def main():
     # Export parser inputs to config file for reruns
     if args.save_config is not False:
         if isinstance(args.save_config, str):
-            outfile_name = args.save_config+'.json' if not args.save_config.endswith('.json') else args.save_config
+            save_filename = args.save_config+'.json' if not args.save_config.endswith('.json') else args.save_config
             # Check if it is a path
-            if not ('/' in outfile_name or '\\' in outfile_name):
+            if not ('/' in save_filename or '\\' in save_filename):
                 # Truncate name if longer than 255 characters
-                outfile_name = outfile_name[:251]+'.json' if len(outfile_name) > 255 else outfile_name
-                parsers.INPUTS_PATH = os.path.join(parsers.INPUTS_DIR, outfile_name)
+                save_filename = save_filename[:251]+'.json' if len(save_filename) > 255 else save_filename
+                parsers.INPUTS_PATH = os.path.join(parsers.INPUTS_DIR, save_filename)
             else:
-                parsers.INPUTS_PATH = outfile_name
+                parsers.INPUTS_PATH = save_filename
         export_config(parser_inputs, parser_outfile, control_flags)
     
     # Put control_flags into module variable
@@ -288,11 +303,9 @@ def main():
         parsers.cwe_categories = load_config_cwe_category_mappings()
 
     # Init the outfile
-    if parser_outfile.lower().endswith('.csv'):
-        force_csv = True
-    else:
-        force_csv = False
-    parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv)
+    force_csv = parser_outfile.lower().endswith('.csv')
+    force_sarif = parser_outfile.lower().endswith('.json')
+    parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv, force_sarif=force_sarif)
     
     begin(parser_inputs)
 

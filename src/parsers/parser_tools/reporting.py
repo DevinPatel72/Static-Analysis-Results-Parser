@@ -427,8 +427,15 @@ class Report:
     def _cli_table(self):
         _max_key_len = max([len(k) for k in self.counts.keys()])
         _max_val_len = max([len(str(v[0])) for v in self.counts.values()])
+        print(_max_key_len, _max_val_len)
         
-        outstr = "\nScanner{}\tFindings\tPercentage\tErrors".format(' '*(max(_max_key_len-len("Findings")-1, 4)))
+        if _max_key_len <= 10 or _max_val_len <= 3:
+            _pad = 4
+        else:
+            _pad = 0
+        print(_pad)
+        
+        outstr = "\nScanner{}\tFindings\tPercentage\tErrors".format(' '*(max(_max_key_len-len("Findings")-1, _pad)))
         outstr += "\n—————————————————————————————————————————————————————————————\n"
         
         total_findings = self.get_total_findings()
@@ -436,7 +443,7 @@ class Report:
         for k, v in self.counts.items():
             # Findings count
             percentage = f"{(v[0] / total_findings)*100:.1f}%" if total_findings != 0 else "0.0%"
-            space = ' '*(max(_max_key_len-len(k), 4))
+            space = ' '*(max(_max_key_len-len(k), _pad))
             outstr += f"{k}:{space}\t{str(v[0]).rjust(_max_val_len)}\t\t{percentage.rjust(6)}"
             
             # Error count
@@ -444,7 +451,7 @@ class Report:
             outstr += '\n'
         
         # Calculate total
-        space = ' '*(max(_max_key_len-len("Total")+1, 4))
+        space = ' '*(max(_max_key_len-len("Total")+1, _pad))
         outstr += f"\nTotal:{space}\t{str(total_findings).rjust(_max_val_len)}\t\t{'100.0%'.rjust(6)}"
         total_errors = self.get_total_errors()
         outstr += f"\t\t{total_errors}"

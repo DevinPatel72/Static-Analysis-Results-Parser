@@ -165,7 +165,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
             
             
             # Generate ID for Coverity finding (concat Path, Line, Scanner, and Message)
-            preimage = f"{path}{line}{t}{message}{trace}"
+            preimage = '\0'.join(str(p) for p in (path, line, t, message, trace) if len(str(p)) > 0)
             id = idgenerator.hash(preimage)
             #id = "GS{:04}".format(finding_count+1)
 
@@ -242,7 +242,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 line = int(row['line']) if str(row['line']).isdigit() else row['line']
                 
                 # Generate ID for Coverity finding (concat Path, Line, Scanner, and Message)
-                preimage = f"{path}{line}{t}{row['message']}"
+                preimage = '\0'.join(str(p) for p in (path, line, t, row['message']) if len(str(p)) > 0)
                 id = idgenerator.hash(preimage)
                 #id = "GS{:04}".format(finding_count+1)
 
@@ -264,7 +264,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                                     Fieldnames.TOOL.value:row['tool'],
                                     Fieldnames.SCANNER.value:scanner,
                                     Fieldnames.LANGUAGE.value:'ada',
-                                    Fieldnames.SEVERITY.value:''
+                                    Fieldnames.SEVERITY.value:row['ranking']
                                 })
                 finding_count += 1
             except Exception:

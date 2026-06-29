@@ -86,45 +86,166 @@ class Fieldnames(Enum):
     def __str__(self):
         return self.value
 
+# Identity dict for sarif inputs
+_sarif_mapping_identity = {"error": "error", "warning": "warning", "note": "note", "none": "none"}
+
 class Scanners(Enum):
-    # ( NAME, KEYWORDS, VALID_EXTENSIONS, parsers_module )
+    # ( NAME,
+    #   KEYWORDS,
+    #   VALID_EXTENSIONS,
+    #   SEVERITY_MAP {"tool_severity": "sarif_level", ...},
+    #   parsers_module )
+    
+    # Valid SARIF severity strings ('level'): ["error", "warning", "note", "none"]
     SARP = (parsers.PROG_NAME_ABBR,
             ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser'],
-            ('.xlsx', '.csv'),
+            ('.xlsx', '.csv', '.json'),
+            _sarif_mapping_identity,
             'parsers.aio')
+    SARIF = ('SARIF',
+            ['sarif'],
+            ('.json',),
+            _sarif_mapping_identity,
+            'parsers.sarif')
     CHECKMARX = ('Checkmarx',
                  ['checkmarx', 'xmarx'],
                  ('.xml', '.csv'),
+                 {
+                    "critical": "error",
+                    "high": "error",
+                    "medium": "warning",
+                    "low": "note",
+                    "information": "note"
+                 },
                  'parsers.checkmarx')
-    CPPCHECK = ('CPPCheck', ['cppcheck'], ('.xml',), 'parsers.cppcheck')
-    COVERITY = ('Coverity', ['coverity'], ('.json',), 'parsers.coverity')
-    ESLINT = ('ESLint', ['eslint'], ('.json',), 'parsers.eslint')
-    FORTIFY = ('Fortify', ['fortify', 'fortifysca'], ('.fpr',), 'parsers.fortify')
-    GNATSAS = ('GNAT SAS', ['gnatsas', 'codepeer'], ('.json', '.csv'), 'parsers.gnatsas')
+    CPPCHECK = ('CPPCheck',
+                ['cppcheck'],
+                ('.xml',),
+                {
+                    "error": "error",
+                    "warning": "warning",
+                    "style": "note",
+                    "performance": "note",
+                    "portability": "note",
+                    "information": "note",
+                    "debug": "none"
+                },
+                'parsers.cppcheck')
+    COVERITY = ('Coverity',
+                ['coverity'],
+                ('.json',),
+                {
+                    "high": "error",
+                    "medium": "warning",
+                    "low": "note",
+                    "audit": "note"
+                },
+                'parsers.coverity')
+    ESLINT = ('ESLint',
+                ['eslint'],
+                ('.json',),
+                {
+                    "0": "note",
+                    "off": "note",
+                    "1": "warning",
+                    "2": "error"
+                },
+                'parsers.eslint')
+    FORTIFY = ('Fortify',
+                ['fortify', 'fortifysca'],
+                ('.fpr',),
+                {
+                    "0.0": "note",
+                    "1.0": "note",
+                    "2.0": "note",
+                    "3.0": "warning",
+                    "4.0": "error",
+                    "5.0": "error",
+                    "0.0 (info)": "note",
+                    "1.0 (info)": "note",
+                    "2.0 (low)": "note",
+                    "3.0 (medium)": "warning",
+                    "4.0 (high)": "error",
+                    "5.0 (critical)": "error"
+                },
+                'parsers.fortify')
+    GNATSAS = ('GNAT SAS',
+                ['gnatsas', 'codepeer'],
+                ('.json', '.csv'),
+                _sarif_mapping_identity | {
+                    "high": "error",
+                    "medium": "warning",
+                    "low": "note",
+                    "info": "note"
+                },
+                'parsers.gnatsas')
     NVD_CVE = ('NVD CVE',
                ['cve', 'manualcve', 'manualnvd', 'nvd'],
                ('.csv',),
+               _sarif_mapping_identity,
                'parsers.manual_cve')
     DEP_CHECK = ('OWASP Dependency Check',
-                 ['dependencycheck', 'depcheck', 'owasp', 'owaspdependencycheck', 'owaspdepcheck'],
-                 ('.json', '.csv'),
-                 'parsers.owasp_depcheck')
-    PRAGMATIC = ('Pragmatic', ['pragmatic'], ('.csv',), 'parsers.pragmatic')
-    PYLINT = ('Pylint', ['pylint'], ('.json',), 'parsers.pylint')
-    SEMGREP = ('Semgrep', ['semgrep'], ('.json', '.csv'), 'parsers.semgrep')
+                ['dependencycheck', 'depcheck', 'owasp', 'owaspdependencycheck', 'owaspdepcheck'],
+                ('.json', '.csv'),
+                {
+                    "none": "none",
+                    "low": "note",
+                    "medium": "warning",
+                    "high": "error",
+                    "critical": "error"
+                },
+                'parsers.owasp_depcheck')
+    PRAGMATIC = ('Pragmatic',
+                ['pragmatic'],
+                ('.csv',),
+                {}, # Leave empty
+                'parsers.pragmatic')
+    PYLINT = ('Pylint',
+                ['pylint'],
+                ('.json',),
+                {
+                    "fatal": "error",
+                    "error": "error",
+                    "warning": "warning",
+                    "refactor": "note",
+                    "convention": "note",
+                    "info": "note"
+                },
+                'parsers.pylint')
+    SEMGREP = ('Semgrep',
+                ['semgrep'],
+                ('.json', '.csv'),
+                {
+                    "low": "note",
+                    "medium": "warning",
+                    "high": "error",
+                    "critical": "error",
+                    "info": "note",
+                    "warning": "warning",
+                    "error": "error"
+                },
+                'parsers.semgrep')
     SIGASI = ('Sigasi',
               ['sigasi', 'vhdl', 'verilog', 'systemverilog'],
               ('.json',),
+              {
+                  "note": "note",
+                  "warning": "warning",
+                  "error": "error",
+                  "failure": "note"
+              },
               'parsers.sigasi')
     SRM = ('Software Risk Manager',
            ['srm', 'softwareriskmanager', 'codedx'],
            ('.xml', '.csv'),
+           {}, # Leave empty
            'parsers.srm')
 
-    def __init__(self, sname, keywords, valid_ext, module):
+    def __init__(self, sname, keywords, valid_ext, severity_map, module):
         self.sname = sname
         self.keywords = keywords
         self.valid_ext = valid_ext
+        self.severity_map = severity_map
         self.module = module
     
     @classmethod
@@ -175,18 +296,22 @@ def validate_path_and_scanner(fpath, scanner):
         if ext not in Scanners.SARP.valid_ext:
             return f"File extension \'{ext}\' not supported for {scanner} input"
         
-        # Diverge depending on .xlsx or .csv
+        # Diverge depending on .xlsx, .json, or .csv
         if __excel_enabled and ext == '.xlsx':
             # Excel - Extract headers
             workbook = openpyxl.load_workbook(fpath)
             sheet = workbook[workbook.sheetnames[0]]
             headers = [cell.value for cell in sheet[1]]
+        # SARIF format
+        elif ext == '.json':
+            headers = [] # Unable to read headers since they are different in a SARIF file
         else:
             # CSV - Extract headers
             with open(fpath, 'r', encoding='utf-8-sig') as f:
                 headers = f.readline().strip().split(',')
         
-        if not all(h in Fieldnames.HEADERS.value for h in headers):
+        # Check headers
+        if len(headers) > 0 and not all(h in Fieldnames.HEADERS.value for h in headers):
             # Doesn't match any expected headers
             return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match the following format:\n    {Fieldnames.HEADERS.value}"
 
@@ -238,8 +363,9 @@ def validate_outfile(outfile):
     if ('\\' in outfile or '/' in outfile) and not os.path.isdir(os.path.dirname(outfile)):
         return "Parent directory of outfile does not exist"
 
-    if not (outfile.endswith('.xlsx') ^ outfile.endswith('.csv')):
-        return "Outfile must end with either '.xslx' or '.csv'"
+    ext = os.path.splitext(outfile)[1]
+    if ext not in Scanners.SARP.valid_ext:
+        return f"Outfile must end with one of the following extensions: {Scanners.SARP.valid_ext}"
     
     return "TRUE"
 

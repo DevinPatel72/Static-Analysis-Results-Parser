@@ -44,8 +44,8 @@
     },
     "outfile": {
       "type": "string",
-      "pattern": ".*\\.(xlsx|csv)$",
-      "description": "Output file path (.xlsx or .csv only)"
+      "pattern": ".*\\.(xlsx|csv|json)$",
+      "description": "Output file path (.xlsx, .json, or .csv only)"
     },
     "flags": {
       "type": "object",

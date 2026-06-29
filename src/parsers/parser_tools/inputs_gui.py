@@ -763,7 +763,7 @@ class OutfileFlagsGUI:
         file_path = filedialog.asksaveasfilename(
             title="Select Output File",
             defaultextension=".xlsx",
-            filetypes=[("Excel Workbook", "*.xlsx"), ("CSV Files", "*.csv")]
+            filetypes=[("Excel Workbook", "*.xlsx"), ("SARIF", "*.json"), ("CSV Files", "*.csv")]
         )
         if file_path:
             self.output_path.set(file_path)

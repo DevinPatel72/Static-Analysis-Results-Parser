@@ -121,7 +121,7 @@ def _parse_json(fpath, scanner, substr, prepend):
                 message = vuln.get('description', '')
                 
                 # Generate ID for Fortify finding (concat CVE, CWE, Path, Scanner, and Vulnerability)
-                preimage = f"{cve}{path}{message}"
+                preimage = '\0'.join(str(p) for p in (cve, path, message) if len(str(p)) > 0)
                 id = idgenerator.hash(preimage)
                 #id = "DEP{:04}".format(finding_count+1)
                 
@@ -233,7 +233,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 lang = resolve_lang(os.path.splitext(path)[1])
                 
                 # Generate ID for Fortify finding (concat CVE, CWE, Path, Scanner, and Vulnerability)
-                preimage = f"{cve}{path}{row['Vulnerability']}"
+                preimage = '\0'.join(str(p) for p in (cve, path, row['Vulnerability']) if len(str(p)) > 0)
                 id = idgenerator.hash(preimage)
                 #id = "DEP{:04}".format(finding_count+1)
                 

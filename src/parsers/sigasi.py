@@ -95,7 +95,7 @@ def parse(fpath, scanner, substr, prepend):
                 tool_cwe = '(blank)'
             else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
             
-            preimage = f"{path}{line}{issue_code}{description}"
+            preimage = '\0'.join(str(p) for p in (path, line, issue_code, description) if len(str(p)) > 0)
             id = idgenerator.hash(preimage)
 
             # Write row to outfile

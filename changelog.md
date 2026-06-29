@@ -1,5 +1,9 @@
 # Change Log
 
+## [Version 3.0.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v3.0.0) (2026-06-29)
+- Included support for importing and exporting SARIF format
+- Added command-line option to explicitly set output file format
+
 ## [Version 2.6.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.6.2) (2026-06-24)
 - Fixed bug introduced in 2.6.0 where GUI will crash prior to parsing results.
 - Added file extension validation for each scanner input

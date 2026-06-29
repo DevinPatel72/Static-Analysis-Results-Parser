@@ -57,7 +57,7 @@ def parse(fpath, scanner, substr, prepend):
                 line = int(row['Line']) if str(row['Line']).isdigit() else row['Line']
                 
                 # Generate ID for Coverity finding (concat Path, Line, Scanner, and Message)
-                preimage = f"{path}{row['Line']}{row['Comments']}{tool_cwe}"
+                preimage = '\0'.join(str(p) for p in (path, row['Line'], row['Comments'], tool_cwe) if len(str(p)) > 0)
                 id = idgenerator.hash(preimage)
                 #id = "PRG{:04}".format(finding_count+1)
 

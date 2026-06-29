@@ -246,11 +246,11 @@ def parse(fpath, scanner, substr, prepend):
                 # On the last entry, add all the fact information
                 facts_info = last_entry_info.findall("./ns:Node/ns:Knowledge/ns:Fact", namespace)
                 if facts_info is not None and len(facts_info) > 0:
-                    trace += "Facts:\n"
+                    description += "Facts:\n"
                     for i, fact in enumerate(facts_info, start=1):
-                        trace += f"{i}) {fact.text}\n"
+                        description += f"{i}) {fact.text}\n"
                 
-                trace = trace.strip()
+                description = description.strip()
 
                 # Map rule ID to CWE
                 cwe = ''
@@ -286,7 +286,7 @@ def parse(fpath, scanner, substr, prepend):
                 lang = resolve_lang(os.path.splitext(path)[1])
                 
                 # Generate ID for Fortify finding
-                preimage = f"{path}{line}{vulnerability_type}{description}{trace}"
+                preimage = '\0'.join(str(p) for p in (path, line, vulnerability_type, description, trace) if len(str(p)) > 0)
                 id = idgenerator.hash(preimage)
                 #id = "FORT{:04}".format(finding_count+1)
 
