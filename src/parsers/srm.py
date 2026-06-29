@@ -107,7 +107,7 @@ def _parse_csv(fpath, substr, prepend, scanner):
                 line = int(row['Line']) if str(row['Line']).isdigit() else row['Line']
                 
                 # Generate ID for finding (concat Path, Line, Scanner, and Type)
-                preimage = '\0'.join((path, row['Line'], row['Type'], tool_cwe))
+                preimage = '\0'.join(str(p) for p in (path, row['Line'], row['Type'], tool_cwe) if len(str(p)) > 0)
                 id = idgenerator.hash(preimage)
                 #id = "SRM{:04}".format(finding_count+1)
 
@@ -276,7 +276,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
                 
                 # The SHA256 ID from the result is a duplicate across multiple findings, so use our own generated ID
                 if len(id) <= 0:
-                    preimage = '\0'.join((path, line, finding_type, tool_cwe))
+                    preimage = '\0'.join(str(p) for p in (path, line, finding_type, tool_cwe) if len(str(p)) > 0)
                     id = idgenerator.hash(preimage)
 
                 # Write row to outfile

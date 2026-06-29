@@ -84,7 +84,7 @@ def parse(fpath, scanner, substr, prepend):
                 line = int(message['line']) if str(message['line']).isdigit() else message['line']
                 
                 # Generate ID for finding (concat Path, Line, RuleID, and Message)
-                preimage = '\0'.join((path, message['line'], rule_id, message['message']))
+                preimage = '\0'.join(str(p) for p in (path, message['line'], rule_id, message['message']) if len(str(p)) > 0)
                 id = idgenerator.hash(preimage)
                 #id = "ESL{:04}".format(finding_count+1)
 

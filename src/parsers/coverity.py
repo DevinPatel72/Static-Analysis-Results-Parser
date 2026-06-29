@@ -111,7 +111,7 @@ def parse(fpath, scanner, substr, prepend):
             line = int(issue['mainEventLineNumber']) if str(issue['mainEventLineNumber']).isdigit() else issue['mainEventLineNumber']
 
             # Generate ID for Coverity finding (concat Path, Line, Scanner, and Message)
-            preimage = '\0'.join((path, issue['mainEventLineNumber'], eventDesc, tool_cwe))
+            preimage = '\0'.join(str(p) for p in (path, issue['mainEventLineNumber'], eventDesc, tool_cwe) if len(str(p)) > 0)
             id = idgenerator.hash(preimage)
             #id = "COV{:04}".format(finding_count+1)
             

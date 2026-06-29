@@ -286,7 +286,7 @@ def parse(fpath, scanner, substr, prepend):
                 lang = resolve_lang(os.path.splitext(path)[1])
                 
                 # Generate ID for Fortify finding
-                preimage = '\0'.join((path, line, vulnerability_type, description, trace))
+                preimage = '\0'.join(str(p) for p in (path, line, vulnerability_type, description, trace) if len(str(p)) > 0)
                 id = idgenerator.hash(preimage)
                 #id = "FORT{:04}".format(finding_count+1)
 

@@ -149,6 +149,7 @@ def main():
     argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new configuration file.")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print an example user inputs JSON template and exit.")
     argparser.add_argument('--disable-progressbar', dest="disableprogressbar", action='store_true', help="Disables progress bar in CLI for faster performance.")
+    argparser.add_argument('--format', dest="format", type=str, default="excel", help="Format of output file. Valid options are EXCEL, SARIF, or CSV.")
     
     args = argparser.parse_args()
     
@@ -201,6 +202,20 @@ def main():
     # Override outfile if the arg was passed
     if args.out is not None and len(args.out) > 0:
         parser_outfile = args.out
+    
+    # Change format if defined
+    if args.format is not None and len(args.format) > 0:
+        if args.format.lower() not in ['excel', 'sarif', 'csv']:
+            logger.error(f"Unsupported format {args.format}. Options are EXCEL, SARIF, or CSV.")
+            sys.exit(6)
+
+        match args.format.lower().strip():
+            case 'excel':
+                parser_outfile = os.path.splitext(parser_outfile)[0] + '.xlsx'
+            case 'sarif':
+                parser_outfile = os.path.splitext(parser_outfile)[0] + '.json'
+            case 'csv':
+                parser_outfile = os.path.splitext(parser_outfile)[0] + '.csv'
     
     # Override Project name + version if those args were passed
     if args.projectname is not None and len(args.projectname) > 0:
