@@ -163,7 +163,7 @@ def validate_path_and_scanner(fpath, scanner):
     if any(s in scan_match for s in Scanners.CHECKMARX.keywords) and os.path.exists(fpath):
         if os.path.isdir(fpath):
             # Check if directory contains at least one xml or csv file
-            if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (os.path.splitext(fpath)[1] in Scanners.CHECKMARX.valid_ext)]) <= 0):
+            if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (os.path.splitext(file)[1] in Scanners.CHECKMARX.valid_ext)]) <= 0):
                 return "No CSV or XML files in the specified directory \'{}\'".format(fpath)
         else:
             return "Checkmarx input must be a directory, not a file"
