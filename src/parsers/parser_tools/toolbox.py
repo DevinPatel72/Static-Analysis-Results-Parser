@@ -87,7 +87,7 @@ class Fieldnames(Enum):
         return self.value
 
 # Identity dict for sarif inputs
-__sarif_mapping_identity = {"error": "error", "warning": "warning", "note": "note", "none": "none"}
+_sarif_mapping_identity = {"error": "error", "warning": "warning", "note": "note", "none": "none"}
 
 class Scanners(Enum):
     # ( NAME,
@@ -99,13 +99,13 @@ class Scanners(Enum):
     # Valid SARIF severity strings ('level'): ["error", "warning", "note", "none"]
     SARP = (parsers.PROG_NAME_ABBR,
             ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser'],
-            ('.xlsx', '.csv'),
-            __sarif_mapping_identity,
+            ('.xlsx', '.csv', '.json'),
+            _sarif_mapping_identity,
             'parsers.aio')
     SARIF = ('SARIF',
             ['sarif'],
             ('.json',),
-            __sarif_mapping_identity,
+            _sarif_mapping_identity,
             'parsers.sarif')
     CHECKMARX = ('Checkmarx',
                  ['checkmarx', 'xmarx'],
@@ -172,7 +172,7 @@ class Scanners(Enum):
     GNATSAS = ('GNAT SAS',
                 ['gnatsas', 'codepeer'],
                 ('.json', '.csv'),
-                __sarif_mapping_identity | {
+                _sarif_mapping_identity | {
                     "high": "error",
                     "medium": "warning",
                     "low": "note",
@@ -182,7 +182,7 @@ class Scanners(Enum):
     NVD_CVE = ('NVD CVE',
                ['cve', 'manualcve', 'manualnvd', 'nvd'],
                ('.csv',),
-               __sarif_mapping_identity,
+               _sarif_mapping_identity,
                'parsers.manual_cve')
     DEP_CHECK = ('OWASP Dependency Check',
                 ['dependencycheck', 'depcheck', 'owasp', 'owaspdependencycheck', 'owaspdepcheck'],
@@ -296,18 +296,22 @@ def validate_path_and_scanner(fpath, scanner):
         if ext not in Scanners.SARP.valid_ext:
             return f"File extension \'{ext}\' not supported for {scanner} input"
         
-        # Diverge depending on .xlsx or .csv
+        # Diverge depending on .xlsx, .json, or .csv
         if __excel_enabled and ext == '.xlsx':
             # Excel - Extract headers
             workbook = openpyxl.load_workbook(fpath)
             sheet = workbook[workbook.sheetnames[0]]
             headers = [cell.value for cell in sheet[1]]
+        # SARIF format
+        elif ext == '.json':
+            headers = [] # Unable to read headers since they are different in a SARIF file
         else:
             # CSV - Extract headers
             with open(fpath, 'r', encoding='utf-8-sig') as f:
                 headers = f.readline().strip().split(',')
         
-        if not all(h in Fieldnames.HEADERS.value for h in headers):
+        # Check headers
+        if len(headers) > 0 and not all(h in Fieldnames.HEADERS.value for h in headers):
             # Doesn't match any expected headers
             return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match the following format:\n    {Fieldnames.HEADERS.value}"
 
@@ -359,8 +363,9 @@ def validate_outfile(outfile):
     if ('\\' in outfile or '/' in outfile) and not os.path.isdir(os.path.dirname(outfile)):
         return "Parent directory of outfile does not exist"
 
-    if not (outfile.endswith('.xlsx') ^ outfile.endswith('.csv')):
-        return "Outfile must end with either '.xslx' or '.csv'"
+    ext = os.path.splitext(outfile)[1]
+    if ext not in Scanners.SARP.valid_ext:
+        return f"Outfile must end with one of the following extensions: {Scanners.SARP.valid_ext}"
     
     return "TRUE"
 

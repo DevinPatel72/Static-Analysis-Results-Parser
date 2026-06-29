@@ -64,7 +64,7 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
                 if elapsed_time < 0:
                     print(f"\n[ERROR]  Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
                     elapsed_time = 0
-                print('Waiting: ' + format_time(elapsed_time), end='\r')
+                print('Waiting for unlock: ' + format_time(elapsed_time), end='\r')
                 time.sleep(1)
                 elapsed_time += 1
     if not GUI_MODE and elapsed_time >= 0:
@@ -189,7 +189,7 @@ def close_writer():
                 while True:
                     try:
                         with open(__filepath, 'w', encoding='utf-8-sig') as out:
-                            json.dump(sarif.rows_to_sarif(__parser_data), out, indent=4)
+                            json.dump(sarif.rows_to_sarif(__parser_data), out, indent=2)
                         break
                     except PermissionError:
                         if GUI_MODE:
@@ -199,7 +199,7 @@ def close_writer():
                             if elapsed_time < 0:
                                 print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
                                 elapsed_time = 0
-                            print('Waiting: ' + format_time(elapsed_time), end='\r')
+                            print('Waiting for unlock: ' + format_time(elapsed_time), end='\r')
                             time.sleep(1)
                             elapsed_time += 1
             elif __excel_enabled:
@@ -217,7 +217,7 @@ def close_writer():
                             if elapsed_time < 0:
                                 print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
                                 elapsed_time = 0
-                            print('Waiting: ' + format_time(elapsed_time), end='\r')
+                            print('Waiting for unlock: ' + format_time(elapsed_time), end='\r')
                             time.sleep(1)
                             elapsed_time += 1
             else:

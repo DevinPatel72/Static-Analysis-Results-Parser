@@ -1,6 +1,6 @@
 # sarif.py
 
-import os
+import re
 import logging
 import traceback
 import json
@@ -111,16 +111,19 @@ def rows_to_sarif(data):
                 if len(t) <= 0:
                     continue
                 
-                items = t[1:].lstrip(") ").split(":")
-                path = items[0] if len(items) > 0 else ""
-                line = items[1] if len(items) > 1 else ""
-                msg = ":".join(items[2:]) if len(items) > 2 else ""
+                # Extract path, line, and message from trace entry
+                if (m := re.match(r"^\d+\) (.*?):(\d+)(?::(.*))?$", t)):
+                    path = m.group(1)
+                    line = int(m.group(2))
+                    msg = m.group(3) if m.group(3) is not None else ""
+                else:
+                    path = line = msg = ""
                 
                 # Creation location object
                 location = {}
 
                 if len(msg) > 0:
-                    location["message"] = {"text": msg}
+                    location["message"] = {"text": msg.strip()}
 
                 if len(path) > 0:
                     location["physicalLocation"] = {
@@ -129,7 +132,7 @@ def rows_to_sarif(data):
                         }
                     }
 
-                    if len(line) > 0:
+                    if isinstance(line, int) or len(line) > 0:
                         location["physicalLocation"]["region"] = {
                             "startLine": int(line) if str(line).isdigit() else line
                         }
