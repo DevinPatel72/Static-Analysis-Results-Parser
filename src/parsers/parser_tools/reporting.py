@@ -427,13 +427,11 @@ class Report:
     def _cli_table(self):
         _max_key_len = max([len(k) for k in self.counts.keys()])
         _max_val_len = max([len(str(v[0])) for v in self.counts.values()])
-        print(_max_key_len, _max_val_len)
         
         if _max_key_len <= 10 or _max_val_len <= 3:
             _pad = 4
         else:
             _pad = 0
-        print(_pad)
         
         outstr = "\nScanner{}\tFindings\tPercentage\tErrors".format(' '*(max(_max_key_len-len("Findings")-1, _pad)))
         outstr += "\n—————————————————————————————————————————————————————————————\n"
