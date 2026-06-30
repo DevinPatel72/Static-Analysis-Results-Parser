@@ -5,6 +5,7 @@ import re
 import logging
 import traceback
 import json
+import parsers
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames, Scanners, select_scanner, console
@@ -233,15 +234,16 @@ def rows_to_sarif(data):
                 "findingId": row[Fieldnames.ID.value]
             },
             "properties": {
+                Fieldnames.LANGUAGE.value.lower().replace(' ', '_'): row[Fieldnames.LANGUAGE.value],
+                Fieldnames.SYMBOL.value.lower().replace(' ', '_'): row[Fieldnames.SYMBOL.value],
+                Fieldnames.SEVERITY.value.lower().replace(' ', '_'): row[Fieldnames.SEVERITY.value]
+            } | ({
                 Fieldnames.CONFIDENCE.value.lower(): row[Fieldnames.CONFIDENCE.value],
                 Fieldnames.MATURITY.value.lower().replace(' ', '_'): row[Fieldnames.MATURITY.value],
                 Fieldnames.MITIGATION.value.lower().replace(' ', '_'): row[Fieldnames.MITIGATION.value],
                 Fieldnames.PROPOSED_MITIGATION.value.lower().replace(' ', '_'): row[Fieldnames.PROPOSED_MITIGATION.value],
-                Fieldnames.VALIDATOR_COMMENT.value.lower().replace(' ', '_'): row[Fieldnames.VALIDATOR_COMMENT.value],
-                Fieldnames.LANGUAGE.value.lower().replace(' ', '_'): row[Fieldnames.LANGUAGE.value],
-                Fieldnames.SYMBOL.value.lower().replace(' ', '_'): row[Fieldnames.SYMBOL.value],
-                Fieldnames.SEVERITY.value.lower().replace(' ', '_'): row[Fieldnames.SEVERITY.value]
-            }
+                Fieldnames.VALIDATOR_COMMENT.value.lower().replace(' ', '_'): row[Fieldnames.VALIDATOR_COMMENT.value]
+            } if parsers.control_flags[parsers.FLAG_SARIF_STITCH_PROPERTIES] else {}) 
         }
         
         severity = _severity_remap(row[Fieldnames.SEVERITY.value], selected_scanner)

@@ -128,11 +128,9 @@ def main():
         sys.exit(0)
     
     parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
-    control_flags = {
-        FLAG_CATEGORY_MAPPING: outfile_flags_gui.results[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag],
-        FLAG_DUPE_SCAN_CONSOLIDATION: outfile_flags_gui.results[InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag],
-        FLAG_PREFLIGHT_RULES: outfile_flags_gui.results[InputConfigFlags.PREFLIGHT_RULES.flag],
-    }
+    control_flags = {f.flag: outfile_flags_gui.results[f.flag]
+                     for f in InputConfigFlags
+                     if f._module_visibility == 'OutfileFlagsGUI'}
     
     # If the checkbox was enabled, ask if user wants to edit the preflight rules
     if control_flags[FLAG_PREFLIGHT_RULES]:

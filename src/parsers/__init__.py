@@ -12,7 +12,7 @@ FLAG_CATEGORY_MAPPING = 'Category Mappings'
 FLAG_PREFLIGHT_RULES = 'Preflight Rules'
 FLAG_DEFAULT_PREFLIGHT_RULES = 'Default Preflight Rules'
 FLAG_DUPE_SCAN_CONSOLIDATION = 'Duplicate Scanner Consolidation'
-FLAG_SARIF_CVSS_METADATA = 'SARIF STITCH Properties'
+FLAG_SARIF_STITCH_PROPERTIES = 'SARIF STITCH Properties'
 
 # Set GUI mode to enable/disable messageboxes
 GUI_MODE = False
