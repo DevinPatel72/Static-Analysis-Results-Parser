@@ -13,7 +13,7 @@ from .toolbox import InputDictKeys, InputConfigFlags, InputSchemaKeys, Scanners,
 
 # Constants
 WINDOW_LENGTH = 900
-WINDOW_HEIGHT = 500
+WINDOW_HEIGHT = 525
 WINDOW_TITLE = PROG_NAME
 
 class YesNoGUI:
@@ -91,7 +91,7 @@ class JsonInputPreviewGUI:
 
         self.root = tk.Tk()
         self.root.title(WINDOW_TITLE)
-        self.root.geometry(f"{WINDOW_LENGTH+400}x{WINDOW_HEIGHT}")
+        self.root.geometry(f"{WINDOW_LENGTH+400}x{WINDOW_HEIGHT + (25*len(InputConfigFlags))}")
 
         self.root.attributes("-topmost", True)
         self.root.update()
@@ -696,7 +696,7 @@ class OutfileFlagsGUI:
         
         self.root = tk.Tk()
         self.root.title(WINDOW_TITLE)
-        self.root.geometry(f"{500}x{300}")
+        self.root.geometry(f"{550}x{200 + (25*len(InputConfigFlags))}")
         self.root.attributes('-topmost', True)
         self.root.update()
         self.root.attributes('-topmost', False)
@@ -718,36 +718,23 @@ class OutfileFlagsGUI:
         browse_btn.pack(side="left")
 
         # ─── Checkboxes for Flags ─────────────────────────────
-        mapping_val = self.initial_flags.get(InputConfigFlags.OVERRIDE_VULN_MAPPING.flag, InputConfigFlags.OVERRIDE_VULN_MAPPING.default)
-        dedupe_val = self.initial_flags.get(InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag, InputConfigFlags.DUPE_SCAN_CONSOLIDATION.default)
-        pr_val = self.initial_flags.get(InputConfigFlags.PREFLIGHT_RULES.flag, InputConfigFlags.PREFLIGHT_RULES.default)
-        self.enable_category_mapping = tk.BooleanVar(value=mapping_val)
-        self.enable_dupe_scan_consolidation = tk.BooleanVar(value=dedupe_val)
-        self.enable_preflight_rules = tk.BooleanVar(value=pr_val)
-
         checkbox_frame = tk.LabelFrame(self.root, text="Output Flags", padx=10, pady=10)
         checkbox_frame.pack(padx=10, pady=10, fill="both", expand=True)
+        
+        self.flag_bool_vars = {}
+        for f in InputConfigFlags:
+            # Skip flags not meant for this window
+            if f._module_visibility != 'OutfileFlagsGUI':
+                continue
+            
+            self.flag_bool_vars[f.flag] = tk.BooleanVar(value=self.initial_flags.get(f.flag, f.default))
 
-        self.add_checkbox_with_tooltip(
-            checkbox_frame,
-            "Enable CWE Category Mappings",
-            self.enable_category_mapping,
-            "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers."
-        )
-        
-        self.add_checkbox_with_tooltip(
-            checkbox_frame,
-            "Enable Duplicate Scanner Consolidation",
-            self.enable_dupe_scan_consolidation,
-            "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner."
-        )
-        
-        self.add_checkbox_with_tooltip(
-            checkbox_frame,
-            "Enable Preflight Rules",
-            self.enable_preflight_rules,
-            "If enabled, this will change final output values according to user-defined rules."
-        )
+            self.add_checkbox_with_tooltip(
+                checkbox_frame,
+                f"Enable {f.flag}",
+                self.flag_bool_vars[f.flag],
+                f.description
+            )
 
         # ─── Submit Button ─────────────────────────────
         submit_btn = tk.Button(self.root, text="Submit", command=self.submit)
@@ -784,15 +771,13 @@ class OutfileFlagsGUI:
         output_path = self.output_path.get().strip()
         ext = os.path.splitext(output_path.lower())[1]
         
-        if ext not in ['.xlsx', '.csv']:
-            messagebox.showerror("Invalid File", "The output file must be an .xlsx or .csv file.")
+        if ext not in Scanners.SARP.valid_ext:
+            messagebox.showerror("Invalid File", f"The output file must end with one of the following: {Scanners.SARP.valid_ext}")
             return
 
-        self.results = {
-            InputDictKeys.OUTFILE.value: output_path,
-            InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag: self.enable_dupe_scan_consolidation.get(),
-            InputConfigFlags.PREFLIGHT_RULES.flag: self.enable_preflight_rules.get(),
-            InputConfigFlags.OVERRIDE_VULN_MAPPING.flag: self.enable_category_mapping.get()
+        self.results = { InputDictKeys.OUTFILE.value: output_path } | {
+            f.flag: self.flag_bool_vars[f.flag].get() for f in InputConfigFlags
+            if f._module_visibility == 'OutfileFlagsGUI'
         }
 
         self.cleanexit = True

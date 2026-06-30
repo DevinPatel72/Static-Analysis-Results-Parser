@@ -1,6 +1,6 @@
 # Change Log
 
-## [Version 3.0.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v3.0.0) (2026-06-29)
+## [Version 2.7.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.7.0) (2026-06-29)
 - Included support for importing and exporting SARIF format
 - Added command-line option to explicitly set output file format
 

@@ -70,6 +70,10 @@
         "Default Preflight Rules": {
           "type": "boolean",
           "description": "If enabled, changes final output values according to a default profile of rules. Only activated if \"Preflight Rules\" flag is also true."
+        },
+        "SARIF STITCH Properties": {
+          "type": "boolean",
+          "description": "By default, SARIF format will output without CVSS properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true."
         }
       },
       "additionalProperties": false
