@@ -8,20 +8,21 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 | ------------------------- | -------------------------------------------------------------------------------- |
 | SARP                      | `.xlsx`, `.sarif`, `.csv`                                                        |
 | SARIF                     | `.sarif`                                                                         |
-| Checkmarx                 | Directory of `.xml` (preferred) or `.csv` files (Single directory, no recursion) |
+| Checkmarx                 | Directory of `.xml`\*\* or `.csv` files (Single directory, no recursion)         |
 | CppCheck                  | `.xml`                                                                           |
 | Coverity                  | `.json`                                                                          |
 | OWASP Dependency Check    | `.json`, `.csv`                                                                  |
 | ESLint                    | `.json`                                                                          |
 | Fortify                   | `.fpr`                                                                           |
-| Gnat SAS                  | `.sarif` (preferred), `.csv`                                                     |
+| Gnat SAS                  | `.sarif`\*\*, `.csv`                                                             |
 | NVD CVE                   | `.csv` (See [Batch-NVD-CVE](https://github.com/DevinPatel72/Batch-NVD-Query))    |
 | Pragmatic                 | `.csv`                                                                           |
 | Pylint                    | `.json`                                                                          |
-| Semgrep                   | `.json` (preferred), `.csv`                                                      |
+| Semgrep                   | `.json`\*\*, `.csv`                                                              |
 | Sigasi                    | `.json`                                                                          |
-| SRM                       | `.xml` (preferred), `.csv`                                                       |
+| SRM                       | `.xml`\*\*, `.csv`                                                               |
 
+\*\* This format is preferred because it provides the most complete set of information for parsing.
 
 ## Execute Using Executables
 
