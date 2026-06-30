@@ -111,7 +111,7 @@ def main():
         check_input_format(parser_inputs, parser_outfile, control_flags)
     
     # Skip all the GUI steps if Execute button is selected
-    if not select_input.execute_now:
+    if select_input is not None and not select_input.execute_now:
         inputs_gui = InputsGUI(parser_inputs)
         if not inputs_gui.cleanexit or (inputs_gui.results is None or len(inputs_gui.results) <= 0):
             sys.exit(0)
