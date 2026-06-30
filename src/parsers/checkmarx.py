@@ -14,68 +14,45 @@ checkmarx_cdata = []
 
 def path_preview(fpath):
     # Parse the input file
-    for file in os.listdir(fpath):
-        try:
-            # Check if XML or CSV
-            if file.endswith('.xml'):
-                # Parse the XML file
-                tree = ET.parse(os.path.join(fpath, file))
-                root = tree.getroot()
-                preview = root.findtext('.//FileName', '')
-                if len(preview) <= 0: continue
-                else: return preview # Immediately return valid value
-            elif file.endswith('.csv'):
-                with open(os.path.join(fpath, file), "r", encoding='utf-8-sig') as read_obj:
-                    csv_reader = csv.DictReader(read_obj)
-                    first_row = next(csv_reader)
-                    cell_preview = first_row['SrcFileName']
-                    return cell_preview # Immediately return valid value
-                
-        except StopIteration:
-            continue # Thrown by next() once a file is done iterating (i.e., it has no data)
-        
-        except Exception as e:
-            return f"[ERROR] {e}" # Immediately return unknown exception message
+    try:
+        # Check if XML or CSV
+        if fpath.endswith('.xml'):
+            # Parse the XML file
+            tree = ET.parse(os.path.join(fpath, fpath))
+            root = tree.getroot()
+            preview = root.findtext('.//FileName', '')
+            if len(preview) > 0:
+                return preview # Immediately return valid value
+        elif fpath.endswith('.csv'):
+            with open(os.path.join(fpath, fpath), "r", encoding='utf-8-sig') as read_obj:
+                csv_reader = csv.DictReader(read_obj)
+                for row in csv_reader:
+                    cell_preview = row.get('DestFileName', '')
+                    if len(cell_preview) > 0:
+                        return cell_preview # Immediately return valid value
+    
+    except Exception as e:
+        return f"[ERROR] {e}" # Immediately return unknown exception message
     
     # No data, return error message
-    return f"[ERROR] No data found in Checkmarx directory \'{fpath}\'"
+    return f"[ERROR] No data found in Checkmarx file \'{fpath}\'"
 
 def parse(fpath, scanner, substr, prepend):
     logger.info(f"Parsing {scanner} - {fpath}")
     
-    # Count errors encountered while running
-    err_count = 0
-        
-    # Keep track of row number for progressbar
-    i = 0
+    # Count findings and errors
     finding_count = 0
+    err_count = 0
     
     total_findings = _get_total(fpath)
     
-    # Loop through directory
-    for filename in os.listdir(fpath):
-        # Check if the file is a csv
-        if os.path.splitext(filename)[1] not in ['.xml', '.csv']:
-            logger.info(f"Skipping \"{filename}\", not an xml or csv file")
-            continue
-        
-        # Create full path with directory and filename
-        f = os.path.join(fpath, filename)
-        
-        # Parse the file
-        if f.endswith('.xml'):
-            t_i, t_finding_count, t_err_count = _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, fpath, scanner)
-            i = t_i
-            finding_count = t_finding_count
-            err_count = t_err_count
-        elif f.endswith('.csv'):
-            t_i, t_finding_count, t_err_count = _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, fpath, scanner)
-            i = t_i
-            finding_count = t_finding_count
-            err_count = t_err_count
-        else:
-            logger.error(f"File {fpath} is not an XML or CSV.")
-            continue
+    # Parse the file
+    if fpath.endswith('.xml'):
+        finding_count, err_count = _parse_xml(fpath, substr, prepend, total_findings, scanner)
+    elif fpath.endswith('.csv'):
+        finding_count, err_count = _parse_csv(fpath, substr, prepend, total_findings, scanner)
+    else:
+        logger.error(f"File {fpath} is not an XML or CSV.")
         
         
     logger.info(f"Successfully processed {finding_count} findings")
@@ -86,32 +63,32 @@ def parse(fpath, scanner, substr, prepend):
 def _get_total(path):
     finding_count = 0
     
-    for filename in os.listdir(path):
-        if os.path.splitext(filename)[1] not in ['.xml', '.csv']:
-            continue
-        f = os.path.join(path, filename)
-        if f.endswith('.csv'):
-            with open(f, mode='r', encoding='utf-8-sig') as read_obj:
-                finding_count += len([row[list(row.keys())[0]] for row in csv.DictReader(read_obj)])
-        else:
-            tree = ET.parse(f)
-            root = tree.getroot()
-            queries = root.findall('Query')
-            if queries is None or len(queries) <= 0:
+    if path.endswith('.csv'):
+        with open(path, mode='r', encoding='utf-8-sig') as read_obj:
+            finding_count = len([row[list(row.keys())[0]] for row in csv.DictReader(read_obj)])
+    else:
+        tree = ET.parse(path)
+        root = tree.getroot()
+        queries = root.findall('Query')
+        if queries is None or len(queries) <= 0:
+            return finding_count
+        
+        for query in queries:
+            results = query.findall('Result')
+            if results is None:
                 continue
-            
-            for query in queries:
-                results = query.findall('Result')
-                if results is None:
-                    continue
-                else:
-                    finding_count += len(results)
+            else:
+                finding_count += len(results)
     return finding_count
 # End of _get_total
 
-def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, fpath, scanner):
+def _parse_csv(fpath, substr, prepend, total_findings, scanner):
+    # Counts
+    finding_count = 0
+    err_count = 0
+    
     # Open csv in read
-    with open(f, mode='r', encoding='utf-8-sig') as read_obj:
+    with open(fpath, mode='r', encoding='utf-8-sig') as read_obj:
         csv_dict_reader = csv.DictReader(read_obj)
         
         # Keep track of row number for debug
@@ -121,8 +98,7 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, 
         for row in csv_dict_reader:
             row_num += 1
             try:
-                i+=1
-                progress_bar(i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
         
                 # row variable is a dictionary that represents a row in csv
                 lang = row['QueryPath'].split('\\')[0]
@@ -187,12 +163,17 @@ def _parse_csv(f, i, finding_count, err_count, substr, prepend, total_findings, 
             except Exception:
                 logger.error(f"Row {row_num} of \'{fpath}\': {traceback.format_exc()}")
                 err_count += 1
-    return i, finding_count, err_count
+    return finding_count, err_count
 # End of _parse_csv
 
-def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, fpath, scanner):
+def _parse_xml(fpath, substr, prepend, total_findings, scanner):
+    # Counts
+    i = 0
+    finding_count = 0
+    err_count = 0
+    
     # Extract XML
-    tree = ET.parse(f)
+    tree = ET.parse(fpath)
     root = tree.getroot()
     
     # Gather meta information
@@ -203,7 +184,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
     # Checkmarx is organized via query ('Type'), so iterate through all queries
     queries = root.findall('Query')
     if queries is None or len(queries) <= 0:
-        return i, finding_count, err_count
+        return finding_count, err_count
     
     for query in queries:
         try:
@@ -323,7 +304,7 @@ def _parse_xml(f, i, finding_count, err_count, substr, prepend, total_findings, 
         except Exception:
             logger.error(f"Error detected in Query ID {query_id} in \'{fpath}\': {traceback.format_exc()}")
             err_count += 1
-    return i, finding_count, err_count
+    return finding_count, err_count
 # End of _parse_xml
 
 def load_checkmarx_cdata():

@@ -8,7 +8,7 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 | ------------------------- | -------------------------------------------------------------------------------- |
 | SARP                      | `.xlsx`, `.sarif`, `.csv`                                                        |
 | SARIF                     | `.sarif`                                                                         |
-| Checkmarx                 | Directory of `.xml`\*\* or `.csv` files (Single directory, no recursion)         |
+| Checkmarx                 | `.xml`\*\*, `.csv`                                                               |
 | CppCheck                  | `.xml`                                                                           |
 | Coverity                  | `.json`                                                                          |
 | OWASP Dependency Check    | `.json`, `.csv`                                                                  |

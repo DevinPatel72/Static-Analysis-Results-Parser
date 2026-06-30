@@ -282,15 +282,6 @@ def validate_path_and_scanner(fpath, scanner):
         else:
             _end = ""
         console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', type='warning')
-
-    # Checkmarx inputs
-    if any(s in scan_match for s in Scanners.CHECKMARX.keywords) and os.path.exists(fpath):
-        if os.path.isdir(fpath):
-            # Check if directory contains at least one xml or csv file
-            if len(os.listdir(fpath)) <= 0 or (len([file for file in os.listdir(fpath) if (os.path.splitext(file)[1] in Scanners.CHECKMARX.valid_ext)]) <= 0):
-                return "No CSV or XML files in the specified directory \'{}\'".format(fpath)
-        else:
-            return "Checkmarx input must be a directory, not a file"
     
     # AIO parser inputs
     elif any(s in scan_match for s in Scanners.SARP.keywords) and os.path.isfile(fpath):

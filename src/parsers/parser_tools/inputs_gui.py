@@ -478,12 +478,7 @@ class InputsGUI:
             messagebox.showinfo("Select a scanner", "Please select a scanner before browsing for a file.")
             return
         
-        # If checkmarx, use askdirectory
-        if scanner == 'Checkmarx':
-            path = filedialog.askdirectory(title="Select a directory")
-        # Else do regular
-        else:
-            path = filedialog.askopenfilename(title="Select a file")
+        path = filedialog.askopenfilename(title="Select a file")
             
         if path:
             existing_paths = [e.get() for _, e, _, _ in self.entries if e != entry_widget]
