@@ -114,7 +114,7 @@ def main():
     parser_outfile = ""
     control_flags = {}
     
-    help_description = "This software will parse a list of scanner output files and collect them into one Excel or CSV file."
+    help_description = "This software will parse a list of scanner output files and collect them into one Excel, SARIF, or CSV file."
     
     argparser = argparse.ArgumentParser(description=help_description, formatter_class=argparse.RawTextHelpFormatter)
     argparser.add_argument('-v', '--version', action='store_true', help='Print software version and exit')
