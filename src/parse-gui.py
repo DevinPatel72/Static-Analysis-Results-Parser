@@ -110,48 +110,50 @@ def main():
     if len(parser_inputs) > 0:
         check_input_format(parser_inputs, parser_outfile, control_flags)
     
-    inputs_gui = InputsGUI(parser_inputs)
-    if not inputs_gui.cleanexit or (inputs_gui.results is None or len(inputs_gui.results) <= 0):
-        sys.exit(0)
-        
-    parsers.PROJ_NAME = inputs_gui.results_project_name
-    parsers.PROJ_VERSION = inputs_gui.results_project_version
-    
-    adjust_paths_gui = AdjustPathsGUI(inputs_gui.results)
-    if not adjust_paths_gui.cleanexit or (adjust_paths_gui.results is None or len(adjust_paths_gui.results) <= 0):
-        sys.exit(0)
-    
-    parser_inputs = adjust_paths_gui.results
-    
-    outfile_flags_gui = OutfileFlagsGUI(parser_outfile, control_flags)
-    if not outfile_flags_gui.cleanexit or (outfile_flags_gui.results is None or len(outfile_flags_gui.results) <= 0):
-        sys.exit(0)
-    
-    parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
-    control_flags = {f.flag: outfile_flags_gui.results[f.flag]
-                     for f in InputConfigFlags
-                     if f._module_visibility == 'OutfileFlagsGUI'}
-    
-    # If the checkbox was enabled, ask if user wants to edit the preflight rules
-    if control_flags[FLAG_PREFLIGHT_RULES]:
-        # Load the preflight rules
-        preflight.load_prules()
-
-        rulebuildergui = RuleBuilderGUI(parsers.prules)
-        
-        if rulebuildergui.result is not None:
-            parsers.prules = rulebuildergui.result
-        
-        if rulebuildergui.enable_default_rules is not None:
-            control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = rulebuildergui.enable_default_rules
-        else:
-            control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = True
-        
-        if rulebuildergui.result is None and rulebuildergui.enable_default_rules is None:
+    # Skip all the GUI steps if Execute button is selected
+    if not select_input.execute_now:
+        inputs_gui = InputsGUI(parser_inputs)
+        if not inputs_gui.cleanexit or (inputs_gui.results is None or len(inputs_gui.results) <= 0):
             sys.exit(0)
-    else:
-        parsers.prules = []
-        control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = True
+            
+        parsers.PROJ_NAME = inputs_gui.results_project_name
+        parsers.PROJ_VERSION = inputs_gui.results_project_version
+        
+        adjust_paths_gui = AdjustPathsGUI(inputs_gui.results)
+        if not adjust_paths_gui.cleanexit or (adjust_paths_gui.results is None or len(adjust_paths_gui.results) <= 0):
+            sys.exit(0)
+        
+        parser_inputs = adjust_paths_gui.results
+        
+        outfile_flags_gui = OutfileFlagsGUI(parser_outfile, control_flags)
+        if not outfile_flags_gui.cleanexit or (outfile_flags_gui.results is None or len(outfile_flags_gui.results) <= 0):
+            sys.exit(0)
+        
+        parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
+        control_flags = {f.flag: outfile_flags_gui.results[f.flag]
+                        for f in InputConfigFlags
+                        if f._module_visibility == 'OutfileFlagsGUI'}
+        
+        # If the checkbox was enabled, ask if user wants to edit the preflight rules
+        if control_flags[FLAG_PREFLIGHT_RULES]:
+            # Load the preflight rules
+            preflight.load_prules()
+
+            rulebuildergui = RuleBuilderGUI(parsers.prules)
+            
+            if rulebuildergui.result is not None:
+                parsers.prules = rulebuildergui.result
+            
+            if rulebuildergui.enable_default_rules is not None:
+                control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = rulebuildergui.enable_default_rules
+            else:
+                control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = True
+            
+            if rulebuildergui.result is None and rulebuildergui.enable_default_rules is None:
+                sys.exit(0)
+        else:
+            parsers.prules = []
+            control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = True
     
     # Log the configuration
     s = "Reading from files:\n"

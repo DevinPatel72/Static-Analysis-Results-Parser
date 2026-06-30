@@ -14,6 +14,7 @@ class JsonInputPreviewGUI:
     def __init__(self):
         self.cleanexit = False
         self.results = None
+        self.execute_now = False
         self.json_folder = parsers.INPUTS_DIR
         self.project_files = {}
         self.scanner_sections = []
@@ -49,7 +50,7 @@ class JsonInputPreviewGUI:
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
         version_label.pack(side=tk.BOTTOM, pady=5)
         
-        # Submit button
+        # Submit buttons
         button_frame = ttk.Frame(self.root)
         button_frame.pack(
             side=tk.BOTTOM,
@@ -58,13 +59,28 @@ class JsonInputPreviewGUI:
             pady=10
         )
 
-        ttk.Button(
+        self.load_button = ttk.Button(
             button_frame,
-            text="Submit",
+            text="Load",
             command=self._submit
-        ).pack(
-            side=tk.BOTTOM
         )
+
+        self.submit_button = ttk.Button(
+            button_frame,
+            text="Load",
+            command=self._submit
+        )
+        self.submit_button.pack(side=tk.RIGHT)
+
+        self.submit_execute_button = ttk.Button(
+            button_frame,
+            text="Execute",
+            command=self._execute
+        )
+        
+        # Pack only if something is selected
+        self._set_execute_button_visible(False)
+
         
         container = ttk.Frame(
             self.root,
@@ -255,12 +271,25 @@ class JsonInputPreviewGUI:
             lambda e: self.preview_canvas.yview_scroll(1, "units")
         )
     
+    def _set_execute_button_visible(self, visible: bool):
+        if visible:
+            if not self.submit_execute_button.winfo_manager():
+                self.submit_execute_button.pack(
+                    side=tk.RIGHT,
+                    padx=(0, 5)
+                )
+        else:
+            if self.submit_execute_button.winfo_manager():
+                self.submit_execute_button.pack_forget()
+    
     def _submit(self):
         self.results = self.selected_file_var.get()
-
         self.cleanexit = True
-
         self.root.destroy()
+    
+    def _execute(self):
+        self.execute_now = True
+        self._submit()
 
     def _update_wraplengths(self, event):
         self.current_wraplength = max(
@@ -354,6 +383,7 @@ class JsonInputPreviewGUI:
             )
     
     def _load_preview_from_path(self, filepath):
+        self._set_execute_button_visible(bool(filepath))
         try:
             if len(filepath) > 0:
                 with open(
