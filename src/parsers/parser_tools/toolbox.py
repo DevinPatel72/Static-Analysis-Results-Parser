@@ -423,6 +423,11 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
         # All is green, set flags equal to control_flags
         control_flags = user_inputs['flags']
         
+        # Fill in empty flags with default values
+        for f in InputConfigFlags:
+            if f.flag not in control_flags.keys():
+                control_flags[f.flag] = f.default
+        
         # Set inputs path global for export
         parsers.INPUTS_PATH = inputs_path
         
