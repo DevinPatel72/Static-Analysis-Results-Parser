@@ -18,8 +18,23 @@ def _severity_remap(severity, scanner_type, default=''):
     return scanner_type.severity_map.get(str(severity).lower(), default)
 
 def path_preview(fpath):
-    # TODO No preview available for now
-    return 'No preview available for SARIF'
+    try:
+        # Get first result
+        with open(fpath, "r", encoding='utf-8-sig') as read_obj:
+            data = json.load(read_obj)
+        p = "[ERROR] No path found"
+        for run in data.get('runs', []):
+            for result in run.get('results', []):
+                for location in result.get('locations', []):
+                    try:
+                        p = location['physicalLocation']['artifactLocation']['uri']
+                        return p
+                    except KeyError:
+                        p = "[ERROR] No path found"
+                        continue
+        return p
+    except Exception as e:
+        return f"[ERROR] {e}"
 
 def _fetch_fingerprint(result):
     finding_id = ''
