@@ -174,7 +174,7 @@ class Scanners(Enum):
                 'parsers.fortify')
     GNATSAS = ('GNAT SAS',
                 ['gnatsas', 'codepeer'],
-                ('.json', '.csv'),
+                ('.sarif', '.json', '.csv'),
                 _sarif_mapping_identity | {
                     "high": "error",
                     "medium": "warning",
