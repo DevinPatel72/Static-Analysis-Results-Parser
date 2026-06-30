@@ -88,7 +88,7 @@ Rem Build
     Rem Copy dist contents to new directory
     robocopy dist "%BIN_DIR%" /E /NFL /NDL /NJH /NJS /W:0 /R:0
 
-    Rem Delete the user inputs files and preflight_rules.py
+    Rem Delete the inputs files and preflight_rules.py
     del /f /q "%BIN_DIR%\config\inputs\*"
     del "%BIN_DIR%\config\preflight\preflight_rules.py"
 

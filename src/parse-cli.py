@@ -120,7 +120,7 @@ def main():
     argparser.add_argument('-v', '--version', action='store_true', help='Print software version and exit')
     argparser.add_argument('-i', '--input', action="append", nargs=2, metavar=("SCANNER", "FILE"), help="Add a scanner input using a scanner name and a path to the corresponding results file. Can be specified multiple times. Used in addition to a `--file` input if present.\nExample: -i Fortify \"path/to/file.fpr\" -i Coverity \"path/to/file.json\"")
     argparser.add_argument('-I', '--extended-input', action="append", dest="extended_input", nargs=4, metavar=("SCANNER", "FILE", "REMOVE", "PREPEND"), help="Add a scanner input with path transformation settings. Accepts scanner name, file path, path prefix to remove, and path prefix to prepend. Can be specified multiple times. Used in addition to a `--file` input if present.\nExample: -I Fortify \"path/to/file.fpr\" \"remove_from_path_value\" \"prepend_to_path_value\" -I Coverity \"path/to/file.json\" \"use_empty_quotes_for_blank\" \"\"")
-    argparser.add_argument('-f', '--file', type=str, default="", help="Load a user inputs JSON configuration file. Accepts either an absolute path or a filename located in the `config/inputs` directory. Defaults to `config/inputs/{}_inputs.json` if no input options are specified.".format(parsers.PROG_NAME_ABBR.lower()))
+    argparser.add_argument('-f', '--file', type=str, default="", help="Load an inputs JSON configuration file. Accepts either an absolute path or a filename located in the `config/inputs` directory. Defaults to `config/inputs/{}_inputs.json` if no input options are specified.".format(parsers.PROG_NAME_ABBR.lower()))
     argparser.add_argument('-o', '--out', type=str, help='Output file path. Overrides the output path specified in a `--file` input. If not specified, the current working directory is used.')
     argparser.add_argument('-pn', '--project-name', dest="projectname", help="Specify the project name to include in generated reports.")
     argparser.add_argument('-pv', '--project-version', dest="projectversion", help="Specify the project version to include in generated reports.")
@@ -144,12 +144,12 @@ def main():
                 help=f"Enable {f.flag}. Overrides the flag value specified in a `--file`."
             )
     
-    argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Validate the user inputs JSON file specified by `--file`, report any errors, and exit.")
+    argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Validate the inputs JSON file specified by `--file`, report any errors, and exit.")
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", metavar="CONFIG_FILE", nargs='?', const=True, default=False, help="List available input config files in the `inputs` directory. If `CONFIG_FILE` (file name or path) is provided, display that file's contents instead.")
     argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new configuration file.")
     argparser.add_argument('--format', dest="format", type=str, default="", help="Format of output file. Valid options are EXCEL, SARIF, or CSV.")
     argparser.add_argument('--include-cvss-properties', dest="include_cvss_properties", action='store_true', help="By default, SARIF format will output without CVSS properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, pass this option.")
-    argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print an example user inputs JSON template and exit.")
+    argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print an example inputs JSON template and exit.")
     argparser.add_argument('--disable-progressbar', dest="disableprogressbar", action='store_true', help="Disables progress bar in CLI for faster performance.")
     
     args = argparser.parse_args()
@@ -159,7 +159,7 @@ def main():
         print(f"{PROG_NAME} {VERSION}")
         sys.exit(0)
     
-    # Print user inputs template
+    # Print inputs template
     if args.exampletemplate:
         print_user_inputs_template()
         sys.exit(0)

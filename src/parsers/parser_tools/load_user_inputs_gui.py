@@ -115,7 +115,7 @@ class JsonInputPreviewGUI:
 
         ttk.Label(
             self.left_frame,
-            text="User Inputs",
+            text="Input Profiles",
             font=self.section_header_font
         ).pack(anchor="w")
 
@@ -351,7 +351,7 @@ class JsonInputPreviewGUI:
             pady=1
         )
 
-        # User inputs files
+        # SARP inputs files
         for filename in file_list:
             if not filename.lower().endswith(
                 ".json"

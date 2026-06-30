@@ -3,6 +3,7 @@
 ## [Version 2.7.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.7.0) (2026-06-29)
 - Included support for importing and exporting SARIF format
 - Added option to explicitly set output file format
+- Added GUI option to immediately execute an input profile instead of stepping through all input windows.
 
 ## [Version 2.6.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.6.2) (2026-06-24)
 - Fixed bug introduced in 2.6.0 where GUI will crash prior to parsing results.
