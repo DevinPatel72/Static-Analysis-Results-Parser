@@ -102,12 +102,12 @@ class Scanners(Enum):
     # Valid SARIF severity strings ('level'): ["error", "warning", "note", "none"]
     SARP = (parsers.PROG_NAME_ABBR,
             ['aio', 'allinone', 'all-in-one', 'allinoneparser', 'all-in-oneparser', 'sarp', 'saresultsparser', 'saresultparser', 'sarparser', 'sarparse', 'staticanalysisresultsparser'],
-            ('.xlsx', '.csv', '.json'),
+            ('.xlsx', '.csv', '.json', '.sarif'),
             _sarif_mapping_identity,
             'parsers.aio')
     SARIF = ('SARIF',
             ['sarif'],
-            ('.json',),
+            ('.sarif', '.json'),
             _sarif_mapping_identity,
             'parsers.sarif')
     CHECKMARX = ('Checkmarx',
@@ -299,14 +299,14 @@ def validate_path_and_scanner(fpath, scanner):
         if ext not in Scanners.SARP.valid_ext:
             return f"File extension \'{ext}\' not supported for {scanner} input"
         
-        # Diverge depending on .xlsx, .json, or .csv
+        # Diverge depending on .xlsx, .json, .sarif, or .csv
         if __excel_enabled and ext == '.xlsx':
             # Excel - Extract headers
             workbook = openpyxl.load_workbook(fpath)
             sheet = workbook[workbook.sheetnames[0]]
             headers = [cell.value for cell in sheet[1]]
         # SARIF format
-        elif ext == '.json':
+        elif ext == '.json' or ext == '.sarif':
             headers = [] # Unable to read headers since they are different in a SARIF file
         else:
             # CSV - Extract headers

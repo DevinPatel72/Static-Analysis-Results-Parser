@@ -16,6 +16,26 @@ WINDOW_LENGTH = 900
 WINDOW_HEIGHT = 525
 WINDOW_TITLE = PROG_NAME
 
+FORMAT_MAP = {
+    "Excel": {
+        "ext": ".xlsx",
+        "filetype": ("Excel Workbook", "*.xlsx"),
+    },
+    "SARIF": {
+        "ext": ".sarif",
+        "filetype": ("SARIF", "*.sarif"),
+    },
+    "CSV": {
+        "ext": ".csv",
+        "filetype": ("CSV Files", "*.csv"),
+    },
+}
+
+EXT_TO_FORMAT = {
+    v["ext"]: k
+    for k, v in FORMAT_MAP.items()
+}
+
 class YesNoGUI:
     def __init__(self, question="Do you want to continue?", windowsize=f"{WINDOW_LENGTH-400}x{WINDOW_HEIGHT-200}"):
         self.result = None
@@ -702,8 +722,10 @@ class OutfileFlagsGUI:
         self.root.attributes('-topmost', False)
 
         self.output_path = tk.StringVar()
+        self.output_format = tk.StringVar(value="Excel")
+        self._updating = False
 
-        # ─── File Path Selector ─────────────────────────────
+        # ─── File Path Selector and Format ────────────────────
         path_frame = tk.Frame(self.root)
         path_frame.pack(pady=15, padx=10, fill="x")
 
@@ -711,11 +733,27 @@ class OutfileFlagsGUI:
 
         path_entry = tk.Entry(path_frame, textvariable=self.output_path)
         path_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
-        path_entry.delete(0, tk.END)
-        path_entry.insert(0, self.initial_outfile)
+
+        self.output_path.set(self.initial_outfile)
+        fmt = EXT_TO_FORMAT.get(os.path.splitext(self.initial_outfile)[1].lower())
+        if fmt:
+            self.output_format.set(fmt)
+
+        format_box = tk.OptionMenu(
+            path_frame,
+            self.output_format,
+            *FORMAT_MAP.keys()
+        )
+        format_box.pack(side="left", padx=(0, 5))
 
         browse_btn = tk.Button(path_frame, text="Browse", command=self.browse_file)
         browse_btn.pack(side="left")
+        
+        
+        self.output_path.trace_add("write", self._path_changed)
+        self.output_format.trace_add("write", self._format_changed)
+
+        self._path_changed()
 
         # ─── Checkboxes for Flags ─────────────────────────────
         checkbox_frame = tk.LabelFrame(self.root, text="Output Flags", padx=10, pady=10)
@@ -747,11 +785,16 @@ class OutfileFlagsGUI:
         self.root.mainloop()
 
     def browse_file(self):
+        fmt = FORMAT_MAP[self.output_format.get()]
+
+        filetypes = [v["filetype"] for v in FORMAT_MAP.values()]
+
         file_path = filedialog.asksaveasfilename(
             title="Select Output File",
-            defaultextension=".xlsx",
-            filetypes=[("Excel Workbook", "*.xlsx"), ("SARIF", "*.json"), ("CSV Files", "*.csv")]
+            defaultextension=fmt["ext"],
+            filetypes=filetypes,
         )
+
         if file_path:
             self.output_path.set(file_path)
     
@@ -766,13 +809,49 @@ class OutfileFlagsGUI:
         q_label.pack(side="left", padx=5)
 
         ToolTip(q_label, tooltip_text)
+    
+    def _path_changed(self, *_):
+        if self._updating:
+            return
+
+        self._updating = True
+
+        _, ext = os.path.splitext(self.output_path.get())
+
+        fmt = EXT_TO_FORMAT.get(ext.lower())
+        if fmt:
+            self.output_format.set(fmt)
+
+        self._updating = False
+
+
+    def _format_changed(self, *_):
+        if self._updating:
+            return
+
+        self._updating = True
+
+        filename = self.output_path.get()
+        root, ext = os.path.splitext(filename)
+
+        new_ext = FORMAT_MAP[self.output_format.get()]["ext"]
+
+        if ext.lower() in EXT_TO_FORMAT:
+            self.output_path.set(root + new_ext)
+        elif filename:
+            self.output_path.set(filename + new_ext)
+
+        self._updating = False
 
     def submit(self):
         output_path = self.output_path.get().strip()
         ext = os.path.splitext(output_path.lower())[1]
         
-        if ext not in Scanners.SARP.valid_ext:
-            messagebox.showerror("Invalid File", f"The output file must end with one of the following: {Scanners.SARP.valid_ext}")
+        if ext not in EXT_TO_FORMAT:
+            messagebox.showerror(
+                "Invalid File",
+                f"Supported extensions: {', '.join(EXT_TO_FORMAT.keys())}"
+            )
             return
 
         self.results = { InputDictKeys.OUTFILE.value: output_path } | {

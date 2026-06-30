@@ -7,7 +7,7 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 | Scanner                   | Results File Extension                                                           |
 | ------------------------- | -------------------------------------------------------------------------------- |
 | SARP                      | `.xlsx`, `.json`, `.csv`                                                         |
-| SARIF                     | `.json`                                                                          |
+| SARIF                     | `.sarif`                                                                         |
 | Checkmarx                 | Directory of `.xml` (preferred) or `.csv` files (Single directory, no recursion) |
 | CppCheck                  | `.xml`                                                                           |
 | Coverity                  | `.json`                                                                          |

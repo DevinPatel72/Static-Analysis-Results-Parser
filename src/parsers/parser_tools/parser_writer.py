@@ -42,8 +42,8 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
         # Attempt to open file
         try:
             if __export_sarif:
-                if os.path.splitext(outfile)[1] != '.json':
-                    outfile = os.path.splitext(outfile)[0] + '.json'
+                if os.path.splitext(outfile)[1] != '.sarif':
+                    outfile = os.path.splitext(outfile)[0] + '.sarif'
             elif __excel_enabled:
                 if os.path.splitext(outfile)[1] != '.xlsx':
                     outfile = os.path.splitext(outfile)[0] + '.xlsx'
