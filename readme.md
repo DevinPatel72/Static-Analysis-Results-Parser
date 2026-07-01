@@ -3,26 +3,35 @@
 ## Description
 Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel, SARIF, or CSV file.
 
-### Accepted Inputs
-| Scanner                   | Results File Extension                                                           |
-| ------------------------- | -------------------------------------------------------------------------------- |
-| SARP                      | `.xlsx`, `.sarif`, `.csv`                                                        |
-| SARIF                     | `.sarif`                                                                         |
-| Checkmarx                 | `.xml`\*\*, `.csv`                                                               |
-| CppCheck                  | `.xml`                                                                           |
-| Coverity                  | `.json`                                                                          |
-| OWASP Dependency Check    | `.json`, `.csv`                                                                  |
-| ESLint                    | `.json`                                                                          |
-| Fortify                   | `.fpr`                                                                           |
-| Gnat SAS                  | `.sarif`\*\*, `.csv`                                                             |
-| NVD CVE                   | `.csv` (See [Batch-NVD-CVE](https://github.com/DevinPatel72/Batch-NVD-Query))    |
-| Pragmatic                 | `.csv`                                                                           |
-| Pylint                    | `.json`                                                                          |
-| Semgrep                   | `.json`\*\*, `.csv`                                                              |
-| Sigasi                    | `.json`                                                                          |
-| SRM                       | `.xml`\*\*, `.csv`                                                               |
+### Supported Scanners
+| Scanner                                                      | Results File Format    |
+| ------------------------------------------------------------ | ---------------------- |
+| SARP                                                         | Excel, SARIF, CSV      |
+| SARIF                                                        | SARIF                  |
+| Checkmarx                                                    | XML\*\*, CSV           |
+| CppCheck                                                     | XML                    |
+| Coverity                                                     | JSON                   |
+| OWASP Dependency Check                                       | JSON, CSV              |
+| ESLint                                                       | JSON                   |
+| Fortify                                                      | FPR                    |
+| Gnat SAS                                                     | SARIF\*\*, CSV         |
+| [NVD CVE](https://github.com/DevinPatel72/Batch-NVD-Query)   | CSV                    |
+| Pragmatic                                                    | CSV                    |
+| Pylint                                                       | JSON                   |
+| Semgrep                                                      | JSON\*\*, CSV          |
+| Sigasi                                                       | JSON                   |
+| SRM                                                          | XML\*\*, CSV           |
 
 \*\* This format is preferred because it provides the most complete set of information for parsing.
+
+### Features
+- Parses scan results from the supported scanners and input formats listed above.
+- Exports results to Excel workbooks, SARIF, or CSV.
+- Provides configurable path normalization.
+- Maps findings to corresponding Common Weakness Enumeration (CWE) entries.
+- Supports configurable filtering and mapping overrides through [Preflight](#configure-preflight).
+- Identifies duplicate findings within results produced by the same scanner.
+- Available as both a desktop application and a command-line interface.
 
 ## Execute Using Executables
 
@@ -113,12 +122,14 @@ SARP can perform user-defined overrides on any of the output fields using rule e
 Each rule contains a condition that attempts to match a Fieldname value to a user-defined pattern. If a match is found, the condition is resolved to true.
 
 Patterns can be matched according to the following techniques:
-- Exact (Will be case insensitive unless optioned otherwise)
+- Exact
 - Contains
 - StartsWith
 - EndsWith
-- Glob (Path Globbing, e.g. src/*\*/\*.cpp)
+- Path Globbing (e.g. src/*\*/\*.cpp)
 - Regular Expression
+
+**All matching techniques will be case insensitive unless optioned otherwise.**
 
 ### Chaining Condition Expressions
 Each rule can contain condition groups that apply a boolean operator to each of the conditions within the group.
