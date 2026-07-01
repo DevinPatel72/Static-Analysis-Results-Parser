@@ -21,4 +21,5 @@ pywin32-ctypes>=0.2.3
 requests>=2.34.2
 setuptools>=82.0.1
 six>=1.17.0
+truststore>=0.10.4
 urllib3>=2.7.0

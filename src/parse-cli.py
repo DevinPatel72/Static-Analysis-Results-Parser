@@ -8,9 +8,10 @@ import sys
 import argparse
 import traceback
 import parsers
+from update import check_version
 from parsers import *
 from parsers.parser_tools import parser_writer, preflight
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs, console
 from parsers.parser_tools.begin_parse import begin
 
 # Configure root path and important dirs of script
@@ -109,6 +110,10 @@ def print_inputs_file_contents(fpath):
 ################################
 
 def main():
+    # Check for updates first
+    rv = check_version(parsers.VERSION)
+    if rv is not None and isinstance(rv, str):
+        console(f'A more recent version is available. To upgrade to v{rv}, run the update executable.', 'New Version Available', type='info')
     
     parser_inputs = []
     parser_outfile = ""
@@ -265,14 +270,12 @@ def main():
         rv = check_input_format(parser_inputs, parser_outfile, control_flags)
         
         if rv and args.checkinputs:
-            logger.info("[PASS] Inputs are valid")
-            print("\n[PASS] Inputs are valid")
+            console("[PASS] Inputs are valid", 'Valid Inputs', type='info')
             sys.exit(0)
         elif not rv:
             sys.exit(2)
     else:
-        logger.info(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...")
-        print(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...")
+        console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...", 'No Inputs Defined', type='info')
         sys.exit(0)
 
     # Output confirmation

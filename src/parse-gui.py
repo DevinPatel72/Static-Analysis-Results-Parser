@@ -9,6 +9,7 @@ from parsers.parser_tools.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.preflight_gui import RuleBuilderGUI
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, dedupe_parser_inputs
 import parsers
+from update import check_version
 from parsers import PROG_NAME, VERSION
 from parsers import *
 from parsers.parser_tools import parser_writer, preflight
@@ -78,6 +79,11 @@ if find_spec('matplotlib') is None:
 ################################
 
 def main():
+    # Check for updates first
+    rv = check_version(parsers.VERSION)
+    if rv is not None and isinstance(rv, str):
+        console(f'A more recent version is available. To upgrade to v{rv}, run the update executable.', 'New Version Available', type='info')
+    
     parser_inputs = []
     parser_outfile = ""
     control_flags = {}
