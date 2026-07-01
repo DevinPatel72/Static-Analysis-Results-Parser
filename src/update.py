@@ -124,7 +124,9 @@ def get_platform():
             distro_id = info.get("ID", "").lower()
             distro_like = info.get("ID_LIKE", "").lower()
 
-            if distro_id in ("debian", "ubuntu", "linuxmint"):
+            if distro_id in ("ubuntu", "linuxmint"):
+                distro = "ubuntu"
+            elif distro_id in ("debian"):
                 distro = "debian"
             elif distro_id in ("rhel", "centos", "fedora", "rocky", "almalinux"):
                 distro = "redhat"
@@ -186,6 +188,17 @@ def extract_archive(path, destination):
             tf.extractall(destination)
     else:
         raise ValueError(f"Unsupported archive format: {path}")
+
+def split_archive_ext(filename):
+
+    if filename.endswith(".tar.gz"):
+        return filename[:-7], ".tar.gz"
+    elif filename.endswith(".tar.bz2"):
+        return filename[:-8], ".tar.bz2"
+    elif filename.endswith(".tar.xz"):
+        return filename[:-7], ".tar.xz"
+    else:
+        return os.path.splitext(filename)
     
 ################################
 # Main
@@ -200,11 +213,8 @@ def main():
         logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
     else:
         # Running as script
-        print("Cannot execute via interpreter.")
         sys.exit(1)
-        parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
-        logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
-
+        
     # Capitalized drive letter if on Windows
     drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
     if len(drive) > 0: drive = drive.upper()
@@ -287,7 +297,7 @@ def main():
             sys.exit(5)
         
         # Set up temp paths
-        t_base_path = os.path.join(temp_dir, os.path.splitext(asset_name)[0])
+        t_base_path = os.path.join(temp_dir, split_archive_ext(asset_name)[0])
         
         print('Installing files...', end='\r')
         try:
@@ -298,11 +308,7 @@ def main():
             print()
             sys.exit(5)
         
-        print('\nUpdate complete!')
-        
-        
-        
-
+    print('\nUpdate complete!')
 
 
 if __name__ == "__main__":
