@@ -3,7 +3,7 @@ from PyInstaller.utils.hooks import collect_submodules
 
 hiddenimports = (
     collect_submodules('parsers') +
-    ['tkinter', 'openpyxl', 'xml.etree.ElementTree', 'json', 'html', 'csv', 'fnmatch', 'matplotlib']
+    ['tkinter', 'openpyxl', 'xml.etree.ElementTree', 'json', 'html', 'csv', 'fnmatch', 'matplotlib', 'requests', 'urllib']
 )
 
 a = Analysis(

@@ -82,7 +82,7 @@ def main():
     # Check for updates first
     rv = check_version(parsers.VERSION)
     if rv is not None and isinstance(rv, str):
-        console(f'A more recent version is available. To upgrade to v{rv}, run the update executable.', 'New Version Available', type='info')
+        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', type='info', orig_name=__name__)
     
     parser_inputs = []
     parser_outfile = ""

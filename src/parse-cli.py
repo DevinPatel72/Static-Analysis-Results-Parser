@@ -110,10 +110,6 @@ def print_inputs_file_contents(fpath):
 ################################
 
 def main():
-    # Check for updates first
-    rv = check_version(parsers.VERSION)
-    if rv is not None and isinstance(rv, str):
-        console(f'A more recent version is available. To upgrade to v{rv}, run the update executable.', 'New Version Available', type='info')
     
     parser_inputs = []
     parser_outfile = ""
@@ -183,6 +179,11 @@ def main():
             fpath = args.listinputs
         print_inputs_file_contents(fpath)
         sys.exit(0)
+    
+    # Check for updates
+    rv = check_version(parsers.VERSION)
+    if rv is not None and isinstance(rv, str):
+        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', type='info')
     
     # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default <PROG_NAME_ABBR>_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
     if len(args.file) > 0:

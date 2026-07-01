@@ -10,56 +10,15 @@ import platform
 import tempfile
 import shutil
 import time
+import logging
 from urllib.parse import urlsplit, urlunsplit
 import parsers
-from parsers.parser_tools.toolbox import console
 
 # Configure CA trust
 truststore.inject_into_ssl()
 
-# Configure root path and important dirs of script
-if getattr(sys, 'frozen', False):
-    # Running as bundled executable
-    parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
-    logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
-else:
-    # Running as script
-    print("Cannot execute via interpreter.")
-    sys.exit(1)
-    parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
-    logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
-
-# Capitalized drive letter if on Windows
-drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
-if len(drive) > 0: drive = drive.upper()
-parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
-
-# Set import directories
-parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
-parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
-parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
-
-# Set inputs directory
-parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
-
-# Set log paths
-parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
-os.makedirs(parsers.LOGS_DIR, exist_ok=True)
-logfile = os.path.join(parsers.LOGS_DIR, logname)
-parsers.LOGFILE = logfile
-
-# Configure logger
-import logging
-logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
-consoleHandler = logging.StreamHandler()
-consoleHandler.setLevel(logging.CRITICAL)
-consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
-logging.getLogger().addHandler(consoleHandler)
+# This gets overwritten when executing main()
 logger = logging.getLogger(__name__)
-
-from datetime import datetime
-logger.info(f"{parsers.PROG_NAME} {parsers.VERSION}")
-logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
 ################################
@@ -71,6 +30,18 @@ releases = None
 ################################
 # Functions
 ################################
+
+def ask(prompt_text, default=True):
+    y = 'Y' if default else 'y'
+    n = 'N' if not default else 'n'
+    while True:
+        uinput = input(f"\n{prompt_text}\n({y}/{n}): ").strip().lower()
+        if len(uinput) == 0:
+            return default
+        elif uinput in ['y', 'yes', 'yuh', 'uh-huh']: return True
+        elif uinput in ['n', 'no', 'nah', 'nuh-uh']: return False
+        else:
+            print("\n[ERROR]  Invalid input. Please enter yes or no. (Leave blank for {})".format('\"yes\"' if default else '\"no\"'))
 
 def join_url(base, *segments):
     parts = urlsplit(base)
@@ -88,35 +59,47 @@ def version_key(version, parts=3):
 # Check repository for most recent version
 def check_version(current_version):
     global release_assets_json
-    
-    # Return None if no version can be obtained or the current version is most recent. Otherwise, return version string of the most recent release.
-    latest_url = join_url(parsers.REPO_BASE_URL, 'releases', 'latest')
-    latest_version = None
-    
-    # Fetch latest version string
+
+    latest_url = join_url(parsers.REPO_BASE_URL, "releases", "latest")
+    release_assets_json = None
+
     try:
-        response = requests.get(latest_url, timeout=(1,3)) # 1 second connect_timeout, 3 second read_timeout
+        # 1 second connect timeout, 3 second read timeout
+        response = requests.get(latest_url, timeout=(1, 3))
         response.raise_for_status()
 
         release = response.json()
         latest_version = release["tag_name"]
         release_assets_json = release
 
-    except requests.exceptions.RequestException as e:
-        console(f"Unable to retrieve latest release information: {e}", 'Invalid Request', type='warning')
-        latest_version = None
+    except requests.exceptions.ConnectTimeout:
+        logger.warning("Timed out while connecting to GitHub.")
+        return None
+
+    except requests.exceptions.ConnectionError:
+        logger.warning("Unable to connect to GitHub. Please check your network connection.")
+        return None
+
+    except requests.exceptions.ReadTimeout:
+        logger.warning("GitHub took too long to respond.")
+        return None
+
+    except requests.exceptions.HTTPError as e:
+        logger.warning("GitHub returned HTTP %d.", e.response.status_code)
+        return None
 
     except (ValueError, KeyError) as e:
-        console(f"Invalid release information received from GitHub: {e}", 'Invalid Request', type='warning')
-        latest_version = None
-    
-    if latest_version is not None:
-        if version_key(latest_version.lstrip('v')) > version_key(current_version):
-            return latest_version
-        else:
-            return None
-        
-    return latest_version
+        logger.warning("Invalid release information received from GitHub: %s", e)
+        return None
+
+    except requests.exceptions.RequestException as e:
+        logger.warning("Failed to check for updates: %s", e)
+        return None
+
+    if version_key(latest_version.lstrip("v")) > version_key(current_version):
+        return latest_version
+
+    return None
 
 def get_platform():
     system = platform.system()
@@ -209,11 +192,62 @@ def extract_archive(path, destination):
 ################################
 
 def main():
+    # Do all imports here instead of at the module level
+    # Configure root path and important dirs of script
+    if getattr(sys, 'frozen', False):
+        # Running as bundled executable
+        parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
+        logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
+    else:
+        # Running as script
+        print("Cannot execute via interpreter.")
+        sys.exit(1)
+        parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
+        logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
+
+    # Capitalized drive letter if on Windows
+    drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
+    if len(drive) > 0: drive = drive.upper()
+    parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
+
+    # Set import directories
+    parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
+    parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
+    parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
+
+    # Set inputs directory
+    parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
+
+    # Set log paths
+    parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
+    os.makedirs(parsers.LOGS_DIR, exist_ok=True)
+    logfile = os.path.join(parsers.LOGS_DIR, logname)
+    parsers.LOGFILE = logfile
+    
+    # Configure logger
+    logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setLevel(logging.CRITICAL)
+    consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
+    logging.getLogger().addHandler(consoleHandler)
+    logger = logging.getLogger(__name__)
+
+    from datetime import datetime
+    logger.info(f"{parsers.PROG_NAME} {parsers.VERSION}")
+    logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    
+    ################################################################################################################################################
+    
+    
     # Check for most recent release
     latest_version = check_version(parsers.VERSION)
     if latest_version is None or not isinstance(latest_version, str):
         print(f'You are on the most recent version of {parsers.PROG_NAME_ABBR}')
         sys.exit(0)
+    
+    # Query to continue update
+    print("A new version is available for {}: {} -> {}".format(parsers.PROG_NAME_ABBR), parsers.VERSION, latest_version.lstrip('v'))
+    ask("Would you like to update to version {}?".format(latest_version.lstrip('v')), default=False)
 
     # Get OS name and arch
     try:
@@ -289,5 +323,4 @@ if __name__ == "__main__":
         exitcode = 1
     finally:
         logger.info(f"Program terminated with exit code {exitcode}")
-        print()
         sys.exit(exitcode)

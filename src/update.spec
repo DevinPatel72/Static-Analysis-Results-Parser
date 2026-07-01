@@ -3,11 +3,11 @@ from PyInstaller.utils.hooks import collect_submodules
 
 hiddenimports = (
     collect_submodules('parsers') +
-    ['openpyxl', 'xml.etree.ElementTree', 'json', 'html', 'csv', 'fnmatch', 'matplotlib', 'requests', 'urllib']
+    ['requests', 'truststore', 'urllib']
 )
 
 a = Analysis(
-    ['parse-cli.py'],
+    ['update.py'],
     pathex=['.'],
     binaries=[],
     datas=[
@@ -29,7 +29,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='sarp',
+    name='update',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
