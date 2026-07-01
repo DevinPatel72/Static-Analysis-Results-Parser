@@ -246,8 +246,9 @@ def main():
         sys.exit(0)
     
     # Query to continue update
-    print("A new version is available for {}: {} -> {}".format(parsers.PROG_NAME_ABBR), parsers.VERSION, latest_version.lstrip('v'))
-    ask("Would you like to update to version {}?".format(latest_version.lstrip('v')), default=False)
+    print("A new version is available for {}: {} -> {}".format(parsers.PROG_NAME_ABBR, parsers.VERSION, latest_version.lstrip('v')))
+    if not ask("Would you like to update to version {}?".format(latest_version.lstrip('v')), default=False):
+        sys.exit(0)
 
     # Get OS name and arch
     try:
@@ -290,7 +291,7 @@ def main():
         
         print('Installing files...', end='\r')
         try:
-            shutil.copytree(t_base_path, parsers.EXE_ROOT_DIR, dirs_exist_ok=True)
+            shutil.copytree(t_base_path, parsers.EXE_ROOT_DIR, dirs_exist_ok=True, ignore=shutil.ignore_patterns(os.path.basename(sys.executable)))
             print('Installing files...Success')
         except Exception as e:
             logger.critical(f"fatal error: Installation failed: {e}")
