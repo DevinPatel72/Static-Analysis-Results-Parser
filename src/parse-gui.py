@@ -99,7 +99,7 @@ def main():
             if isinstance(rv, str):
                 if f"Config file {select_input.results} not found." != rv:
                     logger.warning(f"{rv}")
-                    console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning")
+                    console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning", orig_name=__name__)
                 parser_inputs = []
                 parser_outfile = ""
                 control_flags = {}
@@ -213,7 +213,7 @@ if __name__ == "__main__":
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        console(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error")
+        console(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error", orig_name=__name__)
         logger.error("\n" + traceback.format_exc())
         exitcode = 1
     finally:
