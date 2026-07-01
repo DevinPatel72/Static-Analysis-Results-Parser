@@ -23,7 +23,7 @@ else:
     parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
     logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
 
-# Captialized drive letter if on Windows
+# Capitalized drive letter if on Windows
 drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
 if len(drive) > 0: drive = drive.upper()
 parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
