@@ -135,7 +135,7 @@ def load_sigasi_cdata():
         with open(os.path.join(MAPPINGS_DIR, 'sigasi_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load Sigasi CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", type='error')
+        console(f"Unable to load Sigasi CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", type='error', orig_name=__name__)
         return {"__sigasi_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
 
 def get_sigasi_cdata(rule_id, rule_type, default=''):

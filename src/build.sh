@@ -73,6 +73,7 @@ fi
 # Build
 pyinstaller --clean parse-cli.spec
 pyinstaller --clean parse-gui.spec
+pyinstaller --clean update.spec
 
 # Copy config
 cp -r config dist/config

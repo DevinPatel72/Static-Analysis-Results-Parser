@@ -74,6 +74,7 @@ Rem Build
 :build
     pyinstaller --clean parse-cli.spec
     pyinstaller --clean parse-gui.spec
+    pyinstaller --clean update.spec
 
     Rem Copy config
     robocopy config dist\config /E /NFL /NDL /NJH /NJS /W:0 /R:0

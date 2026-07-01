@@ -9,6 +9,7 @@ from parsers.parser_tools.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.preflight_gui import RuleBuilderGUI
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, dedupe_parser_inputs
 import parsers
+from update import check_version
 from parsers import PROG_NAME, VERSION
 from parsers import *
 from parsers.parser_tools import parser_writer, preflight
@@ -28,7 +29,7 @@ else:
     parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
     logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
 
-# Captialized drive letter if on Windows
+# Capitalized drive letter if on Windows
 drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
 if len(drive) > 0: drive = drive.upper()
 parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
@@ -78,6 +79,11 @@ if find_spec('matplotlib') is None:
 ################################
 
 def main():
+    # Check for updates first
+    rv = check_version(parsers.VERSION)
+    if rv is not None and isinstance(rv, str):
+        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', type='info', orig_name=__name__)
+    
     parser_inputs = []
     parser_outfile = ""
     control_flags = {}
@@ -93,7 +99,7 @@ def main():
             if isinstance(rv, str):
                 if f"Config file {select_input.results} not found." != rv:
                     logger.warning(f"{rv}")
-                    console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning")
+                    console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning", orig_name=__name__)
                 parser_inputs = []
                 parser_outfile = ""
                 control_flags = {}
@@ -207,7 +213,7 @@ if __name__ == "__main__":
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        console(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error")
+        console(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error", orig_name=__name__)
         logger.error("\n" + traceback.format_exc())
         exitcode = 1
     finally:

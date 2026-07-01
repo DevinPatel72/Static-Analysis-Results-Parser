@@ -8,9 +8,10 @@ import sys
 import argparse
 import traceback
 import parsers
+from update import check_version
 from parsers import *
 from parsers.parser_tools import parser_writer, preflight
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs, console
 from parsers.parser_tools.begin_parse import begin
 
 # Configure root path and important dirs of script
@@ -23,7 +24,7 @@ else:
     parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
     logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
 
-# Captialized drive letter if on Windows
+# Capitalized drive letter if on Windows
 drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
 if len(drive) > 0: drive = drive.upper()
 parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
@@ -179,6 +180,11 @@ def main():
         print_inputs_file_contents(fpath)
         sys.exit(0)
     
+    # Check for updates
+    rv = check_version(parsers.VERSION)
+    if rv is not None and isinstance(rv, str):
+        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', type='info', orig_name=__name__)
+    
     # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default <PROG_NAME_ABBR>_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
     if len(args.file) > 0:
         # Adjust inputs path according to whether it is a basename or a path
@@ -265,14 +271,12 @@ def main():
         rv = check_input_format(parser_inputs, parser_outfile, control_flags)
         
         if rv and args.checkinputs:
-            logger.info("[PASS] Inputs are valid")
-            print("\n[PASS] Inputs are valid")
+            console("[PASS] Inputs are valid", 'Valid Inputs', type='info', orig_name=__name__)
             sys.exit(0)
         elif not rv:
             sys.exit(2)
     else:
-        logger.info(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...")
-        print(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...")
+        console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...", 'No Inputs Defined', type='info', orig_name=__name__)
         sys.exit(0)
 
     # Output confirmation
