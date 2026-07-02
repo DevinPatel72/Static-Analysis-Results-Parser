@@ -1,6 +1,6 @@
 # Change Log
 
-## [Version 2.8.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.8.0) (2026-07-01)
+## [Version 2.8.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.8.0) (2026-07-02)
 - Added an updater executable that checks for and installs new SARP releases
 
 ## [Version 2.7.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.7.0) (2026-06-30)
