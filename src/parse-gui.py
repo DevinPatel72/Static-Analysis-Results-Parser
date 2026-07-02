@@ -11,7 +11,6 @@ from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldn
 import parsers
 from update import check_version
 from parsers import PROG_NAME, VERSION
-from parsers import *
 from parsers.parser_tools import parser_writer, preflight
 import parsers.parser_tools.progressbar as progressbar
 from parsers.parser_tools.begin_parse import begin
@@ -141,7 +140,7 @@ def main():
                         if f._module_visibility == 'OutfileFlagsGUI'}
         
         # If the checkbox was enabled, ask if user wants to edit the preflight rules
-        if control_flags[FLAG_PREFLIGHT_RULES]:
+        if control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
             # Load the preflight rules
             preflight.load_prules()
 
@@ -151,15 +150,15 @@ def main():
                 parsers.prules = rulebuildergui.result
             
             if rulebuildergui.enable_default_rules is not None:
-                control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = rulebuildergui.enable_default_rules
+                control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag] = rulebuildergui.enable_default_rules
             else:
-                control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = True
+                control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag] = True
             
             if rulebuildergui.result is None and rulebuildergui.enable_default_rules is None:
                 sys.exit(0)
         else:
             parsers.prules = []
-            control_flags[FLAG_DEFAULT_PREFLIGHT_RULES] = True
+            control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag] = True
     
     # Log the configuration
     s = "Reading from files:\n"

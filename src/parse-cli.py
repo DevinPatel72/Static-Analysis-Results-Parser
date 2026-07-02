@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from parsers import PROG_NAME, VERSION
 
 # Imports
 import os
@@ -9,7 +8,7 @@ import argparse
 import traceback
 import parsers
 from update import check_version
-from parsers import *
+from parsers import PROG_NAME, VERSION
 from parsers.parser_tools import parser_writer, preflight
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs, console
 from parsers.parser_tools.begin_parse import begin
@@ -300,7 +299,7 @@ def main():
     parsers.control_flags = control_flags
     
     # Load preflight rules if true
-    if control_flags[FLAG_PREFLIGHT_RULES]:
+    if control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
         preflight.load_prules()
     else:
         parsers.prules = []

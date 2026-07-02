@@ -8,7 +8,7 @@ import json
 import parsers
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE,progress_bar
-from .parser_tools.toolbox import Fieldnames, Scanners, select_scanner
+from .parser_tools.toolbox import Fieldnames, InputConfigFlags, Scanners, select_scanner
 
 
 logger = logging.getLogger(__name__)
@@ -263,7 +263,7 @@ def rows_to_sarif(data):
                 Fieldnames.MITIGATION.value.lower().replace(' ', '_'): row[Fieldnames.MITIGATION.value],
                 Fieldnames.PROPOSED_MITIGATION.value.lower().replace(' ', '_'): row[Fieldnames.PROPOSED_MITIGATION.value],
                 Fieldnames.VALIDATOR_COMMENT.value.lower().replace(' ', '_'): row[Fieldnames.VALIDATOR_COMMENT.value]
-            } if parsers.control_flags[parsers.FLAG_SARIF_STITCH_PROPERTIES] else {}) 
+            } if parsers.control_flags[InputConfigFlags.SARIF_STITCH_PROPERTIES.flag] else {}) 
         }
         
         severity = _severity_remap(row[Fieldnames.SEVERITY.value], selected_scanner)

@@ -80,7 +80,7 @@ def save_prules(prules):
 def apply_prules(data):
     
     # Check control flag
-    if not parsers.control_flags[parsers.FLAG_PREFLIGHT_RULES]:
+    if not parsers.control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
         return
     
     # Ensure prules are sorted by precedence
@@ -106,11 +106,11 @@ def apply_prules(data):
         progress_bar(i, len(data), prefix=InputConfigFlags.PREFLIGHT_RULES.flag.rjust(SPACE))
         
         # Default prules first
-        if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
+        if parsers.control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag]:
             loop_rules(parsers.default_prules, row)
         loop_rules(parsers.prules, row)
     
-    if parsers.control_flags[parsers.FLAG_DEFAULT_PREFLIGHT_RULES]:
+    if parsers.control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag]:
         def_len = len(parsers.default_prules)
     else: def_len = 0
     logger.info(f"Preflight: Applied {len(parsers.prules)} user rules and {def_len} default rules")

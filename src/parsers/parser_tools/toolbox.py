@@ -38,7 +38,7 @@ class InputConfigFlags(Enum):
     PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, "If enabled, this will change final output values according to user-defined rules.", 'OutfileFlagsGUI')
     DEFAULT_PREFLIGHT_RULES = (parsers.FLAG_DEFAULT_PREFLIGHT_RULES, True, "If enabled, changes final output values according to a default profile of rules. Only activated if \"Preflight Rules\" flag is also true.", 'RuleBuilderGUI')
     DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False, "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner.", 'OutfileFlagsGUI')
-    SARIF_CVSS_METADATA = (parsers.FLAG_SARIF_STITCH_PROPERTIES, False, "By default, SARIF format will output without CVSS properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true.", 'OutfileFlagsGUI')
+    SARIF_STITCH_PROPERTIES = (parsers.FLAG_SARIF_STITCH_PROPERTIES, False, "By default, SARIF format will output without CVSS properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true.", 'OutfileFlagsGUI')
 
     def __init__(self, flag, default, description, module_visibility):
         self.flag = flag
@@ -490,7 +490,7 @@ def check_all_CWEs(data):
     # Check if cwe is in categories dict
     for i, row in enumerate(data, start=1):
         # Control flag check
-        if parsers.control_flags[parsers.FLAG_CATEGORY_MAPPING]:
+        if parsers.control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
             progress_bar(i, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(SPACE))
             row[Fieldnames.SCORING_BASIS.value], count = check_CWE_category(row[Fieldnames.SCORING_BASIS.value], count)
         

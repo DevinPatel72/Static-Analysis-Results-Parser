@@ -17,7 +17,7 @@ def _fix_scanner_name(scanner):
 def dupe_scan_consolidation(data):
     from .parser_writer import search_row, update_row
     
-    if not parsers.control_flags[parsers.FLAG_DUPE_SCAN_CONSOLIDATION]:
+    if not parsers.control_flags[InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag]:
         return -1
     
     # Perform dupe searching
