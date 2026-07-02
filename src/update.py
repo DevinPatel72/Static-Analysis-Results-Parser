@@ -204,6 +204,7 @@ def split_archive_ext(filename):
 ################################
 
 def main():
+    global logger
     # Do all imports here instead of at the module level
     # Configure root path and important dirs of script
     if getattr(sys, 'frozen', False):

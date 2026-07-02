@@ -70,16 +70,16 @@ if find_spec('matplotlib') is None:
 # Functions
 ################################
 
-def print_inputs(parser_inputs, parser_outfile, control_flags):
+def print_inputs(p_parser_inputs, p_parser_outfile, p_control_flags):
     if len(parsers.PROJ_NAME) > 0:
         s = f"\nConfiguration for " + " ".join([part for part in [parsers.PROJ_NAME, parsers.PROJ_VERSION]]) + ":\n"
     else:
         s = "\nConfiguration:\n"
-    for i, inp in enumerate(parser_inputs, 1):
+    for i, inp in enumerate(p_parser_inputs, 1):
         s += f"{i})  Scanner: {inp[InputDictKeys.SCANNER.value]}\n    Path: {inp[InputDictKeys.PATH.value]}\n    Path substring to delete: {inp[InputDictKeys.REMOVE.value]}\n    Path substring to prepend: {inp[InputDictKeys.PREPEND.value]}\n"
-    s += f"\nWriting to file: {parser_outfile}\n"
+    s += f"\nWriting to file: {p_parser_outfile}\n"
     s += "\nParser Switches:\n"
-    s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in control_flags.items()]).strip('\n')
+    s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in p_control_flags.items()]).strip('\n')
     print(s)
     
     # Log the configuration
@@ -100,8 +100,8 @@ def print_inputs_file_contents(fpath):
         logger.critical("Unable to open inputs: %s", rv)
         sys.exit(3)
     else:
-        parser_inputs, parser_outfile, control_flags = rv
-        print_inputs(parser_inputs, parser_outfile, control_flags)
+        t_parser_inputs, t_parser_outfile, t_control_flags = rv
+        print_inputs(t_parser_inputs, t_parser_outfile, t_control_flags)
 
 ################################
 # Main

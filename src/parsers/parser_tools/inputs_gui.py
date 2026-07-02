@@ -393,6 +393,14 @@ class AdjustPathsGUI:
         table_frame.grid_columnconfigure(1, weight=1)
         table_frame.grid_columnconfigure(2, weight=1)
         table_frame.grid_columnconfigure(3, weight=1)
+        
+        # Live update function
+        def update_preview(var1, var2, p, box):
+            r = generate_preview(self.previews[p], var1.get(), var2.get())
+            box.config(state='normal')
+            box.delete(0, tk.END)
+            box.insert(0, r)
+            box.config(state='readonly')
 
         # Add path editing row
         for idx, item in enumerate(self.previous_results, start=1):
@@ -424,14 +432,6 @@ class AdjustPathsGUI:
             table_frame.grid_columnconfigure(1, weight=1)
             table_frame.grid_columnconfigure(2, weight=1)
             table_frame.grid_columnconfigure(3, weight=1)
-
-            # Live update function
-            def update_preview(var1, var2, p, box):
-                r = generate_preview(self.previews[p], var1.get(), var2.get())
-                box.config(state='normal')
-                box.delete(0, tk.END)
-                box.insert(0, r)
-                box.config(state='readonly')
 
             remove_var.trace_add('write', lambda *args, v1=remove_var, v2=add_var, p=path, b=preview_box: update_preview(v1, v2, p, b))
             add_var.trace_add('write', lambda *args, v1=remove_var, v2=add_var, p=path, b=preview_box: update_preview(v1, v2, p, b))
