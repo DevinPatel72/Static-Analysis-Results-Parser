@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # Globals
 ################################
 
-releases = None
+release_assets_json = None
 
 ################################
 # Functions
