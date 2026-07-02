@@ -81,7 +81,7 @@ if find_spec('matplotlib') is None:
 def main():
     # Check for updates first
     rv = check_version(parsers.VERSION)
-    if rv is not None and isinstance(rv, str):
+    if rv is not None and isinstance(rv, str) and len(rv) > 0:
         console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', type='info', orig_name=__name__)
     
     parser_inputs = []
