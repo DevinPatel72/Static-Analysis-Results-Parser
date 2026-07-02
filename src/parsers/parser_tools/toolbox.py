@@ -45,7 +45,7 @@ class InputConfigFlags(Enum):
         self.flag = flag
         self.default = default
         self.description = description
-        self._module_visibility = module_visibility
+        self.module_visibility = module_visibility
     
     @classmethod
     def all_flags(cls):

@@ -523,7 +523,7 @@ class OutfileFlagsGUI:
         self.flag_bool_vars = {}
         for f in InputConfigFlags:
             # Skip flags not meant for this window
-            if f._module_visibility != 'OutfileFlagsGUI':
+            if f.module_visibility != 'OutfileFlagsGUI':
                 continue
             
             self.flag_bool_vars[f.flag] = tk.BooleanVar(value=self.initial_flags.get(f.flag, f.default))
@@ -617,7 +617,7 @@ class OutfileFlagsGUI:
 
         self.results = { InputDictKeys.OUTFILE.value: output_path } | {
             f.flag: self.flag_bool_vars[f.flag].get() for f in InputConfigFlags
-            if f._module_visibility == 'OutfileFlagsGUI'
+            if f.module_visibility == 'OutfileFlagsGUI'
         }
 
         self.cleanexit = True

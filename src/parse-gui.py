@@ -4,13 +4,12 @@
 import os
 import sys
 import traceback
+import parsers
 from parsers.parser_tools.inputs_gui import InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
 from parsers.parser_tools.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.preflight_gui import RuleBuilderGUI
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, dedupe_parser_inputs
-import parsers
 from update import check_version
-from parsers import PROG_NAME, VERSION
 from parsers.parser_tools import parser_writer, preflight
 import parsers.parser_tools.progressbar as progressbar
 from parsers.parser_tools.begin_parse import begin
@@ -58,7 +57,7 @@ logging.getLogger().addHandler(consoleHandler)
 logger = logging.getLogger(__name__)
 
 from datetime import datetime
-logger.info("%s %s", PROG_NAME, VERSION)
+logger.info("%s %s", parsers.PROG_NAME, parsers.VERSION)
 logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
@@ -137,7 +136,7 @@ def main():
         parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
         control_flags = {f.flag: outfile_flags_gui.results[f.flag]
                         for f in InputConfigFlags
-                        if f._module_visibility == 'OutfileFlagsGUI'}
+                        if f.module_visibility == 'OutfileFlagsGUI'}
         
         # If the checkbox was enabled, ask if user wants to edit the preflight rules
         if control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
