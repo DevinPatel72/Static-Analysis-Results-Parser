@@ -23,7 +23,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Count findings and errors encountered while running
     finding_count = 0
@@ -34,7 +34,7 @@ def parse(fpath, scanner, substr, prepend):
         with open(fpath, mode='r', encoding='utf-8-sig') as f:
             data = json.load(f)
     except:
-        logger.error(f"File \'{fpath}\' failed to open:\n{traceback.format_exc()}")
+        logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
         return finding_count, err_count + 1
     
     # Keep track of issue number for debug
@@ -96,10 +96,10 @@ def parse(fpath, scanner, substr, prepend):
                             })
             finding_count += 1
         except:
-            logger.error(f"Issue {issue_num} of \'{fpath}\':\n{traceback.format_exc()}")
+            logger.error("Issue %d of \'%s\':\n%s", issue_num, fpath, traceback.format_exc())
             err_count += 1
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous findings: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous findings: %d", err_count)
     return finding_count, err_count
 # End of parse
 

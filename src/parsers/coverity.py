@@ -19,7 +19,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
     
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Count findings and errors encountered while running
     finding_count = 0
@@ -30,7 +30,7 @@ def parse(fpath, scanner, substr, prepend):
         with open(fpath, mode='r', encoding='utf-8-sig') as f:
             data = json.load(f)
     except:
-        logger.error(f"File \'{fpath}\' failed to open:\n{traceback.format_exc()}")
+        logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
         return finding_count, err_count + 1
     
     # Keep track of issue number for debug
@@ -74,7 +74,7 @@ def parse(fpath, scanner, substr, prepend):
             elif len(mainEventsIdxs) > 1:
                 # If multiple main events, take first event, 2 events around the middle main events, and last 4 before last main event
                 from parsers import PROG_NAME_ABBR
-                logger.warning(f"This log message was left by the developer in case a Coverity finding produced multiple main events in the code trace. If you see this message, please alert the developer of {PROG_NAME_ABBR}.")
+                logger.warning("This log message was left by the developer in case a Coverity finding produced multiple main events in the code trace. If you see this message, please alert the developer of %s.", PROG_NAME_ABBR)
                 events.append(issue['events'][0])
                 events.append(['...'])
                 for idx in mainEventsIdxs[1:-1]:
@@ -87,7 +87,7 @@ def parse(fpath, scanner, substr, prepend):
             else:
                 # No main events, log the error and use all issues
                 events = issue['events']
-                logger.warning("Finding with mergekey {} has no main event. All events will be output, which may result in irregular formatting in the output csv.".format(issue['mergeKey']))
+                logger.warning("Finding with mergekey %s has no main event. All events will be output, which may result in irregular formatting in the output csv.", issue['mergeKey'])
                 err_count += 1
                 
             # Strip trailing ellipses if there are any
@@ -141,9 +141,9 @@ def parse(fpath, scanner, substr, prepend):
         except SystemExit as se:
             exit(se.code)
         except:
-            logger.error(f"Issue {issue_num} of \'{fpath}\':\n{traceback.format_exc()}")
+            logger.error("Issue %d of \'%s\':\n{traceback.format_exc()}", issue_num, fpath)
             err_count += 1
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous findings: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous findings: %d", err_count)
     return finding_count, err_count
 # End of parse

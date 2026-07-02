@@ -47,15 +47,15 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     if fpath.endswith('.csv'):
         finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
     else:
         finding_count, err_count = _parse_json(fpath, scanner, substr, prepend)
     
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous rows: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous rows: %d", err_count)
     return finding_count, err_count
 # End of parse
 
@@ -77,7 +77,7 @@ def _parse_json(fpath, scanner, substr, prepend):
             data = json.load(read_obj)
     except (FileNotFoundError, json.JSONDecodeError):
         err_count += 1
-        logger.error(f"Unable to parse input file \"{fpath}\". Ensure Dependency Check output the file as JSON or CSV.")
+        logger.error("Unable to parse input file \"%s\". Ensure Dependency Check output the file as JSON or CSV.", fpath)
         return finding_count, err_count
     
     
@@ -159,7 +159,7 @@ def _parse_json(fpath, scanner, substr, prepend):
                                 })
                 finding_count += 1
         except Exception:
-            logger.error(f"Dependency \"{dependency_name}\" with hash SHA256-{dependency_hash} in \'{fpath}\': {traceback.format_exc()}")
+            logger.error("Dependency \"%s\" with hash SHA256-%s in \'%s\': %s", dependency_name, dependency_hash, fpath, traceback.format_exc())
             err_count += 1
     return finding_count, err_count
 # End of _parse_json
@@ -249,7 +249,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 # Quick check to ensure CVE is actually a CVE since OWASP puts jquery errors in the data
                 if not (re.match(r'^CVE-\d{4}-\d+$', cve)):
                     err_count += 1
-                    logger.error(f"Row {row_num} of \'{fpath}\': Invalid CVE number. Please check \'{fpath}\' and the user overrides.")
+                    logger.error("Row %d of \'%s\': Invalid CVE number. Please check \'%s\' and the user overrides.", row_num, fpath, fpath)
 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
@@ -273,7 +273,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                                 })
                 finding_count += 1
             except Exception:
-                logger.error(f"Row {row_num} of \'{fpath}\': {traceback.format_exc()}")
+                logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
     return finding_count, err_count
 # End of _parse_csv

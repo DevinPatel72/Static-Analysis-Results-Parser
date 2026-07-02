@@ -170,7 +170,7 @@ def download_with_retries(url, path, retries=5, chunk_size=1024 * 1024, timeout=
 
             return  # success
 
-        except requests.RequestException as re:
+        except requests.RequestException:
             if attempt == retries - 1:
                 raise
             time.sleep(2 ** attempt)  # exponential backoff
@@ -242,7 +242,7 @@ def main():
     logger = logging.getLogger(__name__)
 
     from datetime import datetime
-    logger.info(f"{parsers.PROG_NAME} {parsers.VERSION}")
+    logger.info("%s %s", parsers.PROG_NAME, parsers.VERSION)
     logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     
     ################################################################################################################################################
@@ -267,7 +267,7 @@ def main():
     try:
         os_name, arch = get_current_platform()
     except RuntimeError as re:
-        logger.critical(f"fatal error: Cannot determining platform name: {re}")
+        logger.critical("fatal error: Cannot determining platform name: %s", re)
         sys.exit(4)
     
     # Get correct asset download url
@@ -288,7 +288,7 @@ def main():
             download_with_retries(download_url, download_path)
             print('Downloading files...Success')
         except Exception as e:
-            logger.critical(f"fatal error: Download for {asset_name} failed: {e}")
+            logger.critical("fatal error: Download for %s failed: %s", asset_name, e)
             print()
             sys.exit(5)
         
@@ -296,7 +296,7 @@ def main():
         try:
             extract_archive(download_path, temp_dir)
         except ValueError as ve:
-            logger.critical(f"fatal error: {ve}")
+            logger.critical("fatal error: %s", ve)
             sys.exit(5)
         
         # Set up temp paths
@@ -307,7 +307,7 @@ def main():
             shutil.copytree(t_base_path, parsers.EXE_ROOT_DIR, dirs_exist_ok=True, ignore=shutil.ignore_patterns(os.path.basename(sys.executable)))
             print('Installing files...Success')
         except Exception as e:
-            logger.critical(f"fatal error: Installation failed: {e}")
+            logger.critical("fatal error: Installation failed: %s", e)
             print()
             sys.exit(5)
         
@@ -328,9 +328,9 @@ if __name__ == "__main__":
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        logger.critical(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash. Exception trace has been output to the logfile.")
-        logger.error("\n" + traceback.format_exc())
+        logger.critical("Uncaught exception caused %s to crash. Exception trace has been output to the logfile.", parsers.PROG_NAME_ABBR)
+        logger.error("\n%s", traceback.format_exc())
         exitcode = 1
     finally:
-        logger.info(f"Program terminated with exit code {exitcode}")
+        logger.info("Program terminated with exit code %d", exitcode)
         sys.exit(exitcode)

@@ -48,7 +48,7 @@ def path_preview(fpath):
     return f"[ERROR] No data found in \'{fpath}\'"
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Keep track of issue number and errors
     finding_count = 0
@@ -60,11 +60,11 @@ def parse(fpath, scanner, substr, prepend):
     elif fpath.endswith('.csv'):
         finding_count, err_count = _parse_csv(fpath, substr, prepend, scanner)
     else:
-        logger.error(f"File {fpath} is not an XML or CSV.")
+        logger.error("File %s is not an XML or CSV.", fpath)
         return finding_count, err_count + 1
     
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous rows: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous rows: %d", err_count)
     return finding_count, err_count
 # End of parse
 
@@ -133,7 +133,7 @@ def _parse_csv(fpath, substr, prepend, scanner):
                                 })
                 finding_count += 1
             except Exception:
-                logger.error(f"Row {row_num} of \'{fpath}\': {traceback.format_exc()}")
+                logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
     return finding_count, err_count
 # End of _parse_csv
@@ -301,7 +301,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
                                 })
             finding_count += 1
         except Exception:
-            logger.error(f"Finding with ID {finding_id} in \'{fpath}\': {traceback.format_exc()}")
+            logger.error("Finding with ID %s in \'%s\': %s", finding_id, fpath, traceback.format_exc())
             err_count += 1
     return finding_count, err_count
 # End of _parse_xml

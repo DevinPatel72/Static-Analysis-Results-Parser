@@ -53,7 +53,7 @@ logging.getLogger().addHandler(consoleHandler)
 logger = logging.getLogger(__name__)
 
 from datetime import datetime
-logger.info(f"{PROG_NAME} {VERSION}")
+logger.info("%s %s", PROG_NAME, VERSION)
 logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 # Check if openpyxl is installed. Logged here to ensure correct placement in log file
@@ -64,7 +64,7 @@ if find_spec('openpyxl') is None:
 
 # Check if matplotlib is installed. Logged here to ensure correct placement in log file
 if find_spec('matplotlib') is None:
-    logger.warning(f'Module \'matplotlib\' not found, {parsers.PROG_NAME_ABBR} will skip chart reporting.')
+    logger.warning('Module \'matplotlib\' not found, %s will skip chart reporting.', parsers.PROG_NAME_ABBR)
     # Handled in reporting.py
 
 ################################
@@ -98,7 +98,7 @@ def print_inputs_file_list():
 def print_inputs_file_contents(fpath):
     rv = load_config_user_inputs(fpath)
     if isinstance(rv, str):
-        logger.critical(f"Unable to open inputs: {rv}")
+        logger.critical("Unable to open inputs: %s", rv)
         sys.exit(3)
     else:
         parser_inputs, parser_outfile, control_flags = rv
@@ -200,7 +200,7 @@ def main():
     # Load inputs from config file
     rv = load_config_user_inputs(inp_path, default_outfile=f"{parsers.PROG_NAME_ABBR.lower()}_output.xlsx", default_control_flags=control_flags)
     if isinstance(rv, str):
-        logger.critical(f"Unable to open inputs: {rv}")
+        logger.critical("Unable to open inputs: %s", rv)
         sys.exit(3)
     else:
         parser_inputs, parser_outfile, control_flags = rv
@@ -212,7 +212,7 @@ def main():
     # Change format if defined
     if args.format is not None and len(args.format) > 0:
         if args.format.lower() not in ['excel', 'sarif', 'csv']:
-            logger.error(f"Unsupported format {args.format}. Options are EXCEL, SARIF, or CSV.")
+            logger.error("Unsupported format %s. Options are EXCEL, SARIF, or CSV.", args.format)
             sys.exit(6)
 
         match args.format.lower().strip():
@@ -330,10 +330,10 @@ if __name__ == "__main__":
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        logger.critical(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash. Exception trace has been output to the logfile.")
-        logger.error("\n" + traceback.format_exc())
+        logger.critical("Uncaught exception caused %s to crash. Exception trace has been output to the logfile.", parsers.PROG_NAME_ABBR)
+        logger.error("\n%s", traceback.format_exc())
         exitcode = 1
     finally:
-        logger.info(f"Program terminated with exit code {exitcode}")
+        logger.info("Program terminated with exit code %d", exitcode)
         print()
         sys.exit(exitcode)

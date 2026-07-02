@@ -38,7 +38,7 @@ def path_preview(fpath):
     return f"[ERROR] No data found in Checkmarx file \'{fpath}\'"
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Count findings and errors
     finding_count = 0
@@ -52,11 +52,11 @@ def parse(fpath, scanner, substr, prepend):
     elif fpath.endswith('.csv'):
         finding_count, err_count = _parse_csv(fpath, substr, prepend, total_findings, scanner)
     else:
-        logger.error(f"File {fpath} is not an XML or CSV.")
+        logger.error("File %s is not an XML or CSV.", fpath)
         
         
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous rows: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous rows: %d", err_count)
     return finding_count, err_count
 # End of parse
 
@@ -161,7 +161,7 @@ def _parse_csv(fpath, substr, prepend, total_findings, scanner):
     
                 finding_count += 1
             except Exception:
-                logger.error(f"Row {row_num} of \'{fpath}\': {traceback.format_exc()}")
+                logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
     return finding_count, err_count
 # End of _parse_csv
@@ -299,10 +299,10 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner):
                                         })
                     finding_count += 1
                 except Exception:
-                    logger.error(f"Error detected in Result ID {result_id} in \'{fpath}\': {traceback.format_exc()}")
+                    logger.error("Error detected in Result ID %s in \'%s\': %s", result_id, fpath, traceback.format_exc())
                     err_count += 1
         except Exception:
-            logger.error(f"Error detected in Query ID {query_id} in \'{fpath}\': {traceback.format_exc()}")
+            logger.error("Error detected in Query ID %s in \'%s\': %s", query_id, fpath, traceback.format_exc())
             err_count += 1
     return finding_count, err_count
 # End of _parse_xml

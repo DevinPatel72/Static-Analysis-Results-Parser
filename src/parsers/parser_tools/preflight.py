@@ -32,8 +32,7 @@ def load_prules():
             parsers.prules.sort(key=lambda rule: int(rule.precedence))
             logger.info("Preflight rules loaded successfully")
         except:
-            logger.error(f"Failed to import PRULES from '{data_path}'")
-            logger.error(traceback.format_exc())
+            logger.error("Failed to import PRULES from \'%s\'\n%s", data_path, traceback.format_exc())
             parsers.prules = []
     
     # Now load default rules
@@ -52,8 +51,7 @@ def load_prules():
             parsers.default_prules.sort(key=lambda rule: int(rule.precedence))
             logger.info("Default preflight rules loaded successfully")
         except:
-            logger.error(f"Failed to import DEFAULT_PRULES from '{data_path}'")
-            logger.error(traceback.format_exc())
+            logger.error("Failed to import DEFAULT_PRULES from \'%s\'\n%s", data_path, traceback.format_exc())
             parsers.default_prules = []
 
 
@@ -74,7 +72,7 @@ def save_prules(prules):
 
         f.write(FOOTER)
     
-    logger.info(f"Preflight rules saved to '{data_path}'")
+    logger.info("Preflight rules saved to \'%s\'", data_path)
 
 
 def apply_prules(data):
@@ -113,7 +111,7 @@ def apply_prules(data):
     if parsers.control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag]:
         def_len = len(parsers.default_prules)
     else: def_len = 0
-    logger.info(f"Preflight: Applied {len(parsers.prules)} user rules and {def_len} default rules")
+    logger.info("Preflight: Applied %d user rules and %d default rules", len(parsers.prules), def_len)
         
     
 

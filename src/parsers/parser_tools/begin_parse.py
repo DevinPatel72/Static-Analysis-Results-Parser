@@ -7,7 +7,6 @@ import logging
 import threading
 import importlib
 import parsers
-from parsers import *
 from . import parser_writer
 from .toolbox import InputDictKeys, Scanners, select_scanner
 from .loading_screen import LoadingWindow
@@ -56,9 +55,9 @@ def begin(parser_inputs):
     _report.generate_report()
     
     # Final printing if in CLI
-    logger.info(f"Parsing complete!")
+    logger.info("Parsing complete!")
     if not parsers.GUI_MODE:
-        print(f"\nParsing complete!")
+        print("\nParsing complete!")
         if _report.get_total_errors() > 0:
             print(f"Errors have been detected while parsing files. Please see logfile \"{parsers.LOGFILE}\" for more details.")
 
@@ -89,7 +88,7 @@ def run_parsers(parser_inputs):
         selected_scanner = select_scanner(scanner)
         if selected_scanner is None:
             # Scanner not supported
-            logger.error(f"Unsupported scanner. Skipped {fpath},{scanner}")
+            logger.error("Unsupported scanner. Skipped %s, %s", scanner, fpath)
             t_finding_count = 0
             t_err_count = 1
         else:

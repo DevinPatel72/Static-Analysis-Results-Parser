@@ -58,7 +58,7 @@ logging.getLogger().addHandler(consoleHandler)
 logger = logging.getLogger(__name__)
 
 from datetime import datetime
-logger.info(f"{PROG_NAME} {VERSION}")
+logger.info("%s %s", PROG_NAME, VERSION)
 logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
@@ -70,7 +70,7 @@ if find_spec('openpyxl') is None:
 
 # Check if matplotlib is installed. Logged here to ensure correct placement in log file
 if find_spec('matplotlib') is None:
-    logger.warning(f'Module \'matplotlib\' not found, {parsers.PROG_NAME_ABBR} will skip chart reporting.')
+    logger.warning('Module \'matplotlib\' not found, %s will skip chart reporting.', parsers.PROG_NAME_ABBR)
     # Handled in reporting.py
 
 ################################
@@ -97,7 +97,7 @@ def main():
             rv = load_config_user_inputs(select_input.results)
             if isinstance(rv, str):
                 if f"Config file {select_input.results} not found." != rv:
-                    logger.warning(f"{rv}")
+                    logger.warning(rv)
                     console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning", orig_name=__name__)
                 parser_inputs = []
                 parser_outfile = ""
@@ -213,12 +213,12 @@ if __name__ == "__main__":
         exitcode = 2
     except:
         console(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error", orig_name=__name__)
-        logger.error("\n" + traceback.format_exc())
+        logger.error("\n%s", traceback.format_exc())
         exitcode = 1
     finally:
         if parsers.progress_queue is not None:
             parsers.progress_queue.put({
                 "type": "stop"
             })
-        logger.info(f"Program terminated with exit code {exitcode}")
+        logger.info("Program terminated with exit code %d", exitcode)
         sys.exit(exitcode)

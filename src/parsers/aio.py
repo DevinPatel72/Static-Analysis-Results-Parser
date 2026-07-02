@@ -63,7 +63,7 @@ def path_preview(fpath):
 
 def parse(fpath, scanner, substr, prepend):
     global __excel_enabled
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Keep track of row number and errors
     data = None
@@ -117,10 +117,10 @@ def parse(fpath, scanner, substr, prepend):
             parser_writer.write_row(new_row)
             finding_count += 1
         except Exception:
-            logger.error(f"Row {row_num} of \'{fpath}\':\n{traceback.format_exc()}")
+            logger.error("Row %d of \'%s\':\n%s", row_num, fpath, traceback.format_exc())
             err_count += 1
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous rows: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous rows: %d", err_count)
     return finding_count, err_count
 # End of parse
 
@@ -137,7 +137,7 @@ def _parse_sarp_sarif(fpath, scanner, substr, prepend):
         with open(fpath, mode='r', encoding='utf-8-sig') as f:
             data = json.load(f)
     except:
-        logger.error(f"File \'{fpath}\' failed to open:\n{traceback.format_exc()}")
+        logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
         return finding_count, err_count + 1
     
     total_results = sum([len(run.get('results', [])) for run in data.get('runs', [])])
@@ -246,7 +246,7 @@ def _parse_sarp_sarif(fpath, scanner, substr, prepend):
                 parser_writer.write_row(new_row)
                 finding_count += 1
             except:
-                logger.error(f"Result ID {finding_id} of \'{fpath}\':\n{traceback.format_exc()}")
+                logger.error("Result ID %s of \'%s\':\n%s", finding_id, fpath, traceback.format_exc())
                 err_count += 1
     return finding_count, err_count
 

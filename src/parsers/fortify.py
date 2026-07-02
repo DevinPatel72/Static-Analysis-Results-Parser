@@ -42,8 +42,8 @@ def path_preview(fpath):
             try:
                 vulnerabilities = root.findall('.//ns:Vulnerability', namespace)
                 if vulnerabilities is None or len(vulnerabilities) <= 0:
-                    logger.warning(f'No findings in Fortify file \'{fpath}\'')
-                    return "[ERROR] No findings found. See logfile for details.."
+                    logger.warning('No findings in Fortify file \'%s\'', fpath)
+                    return "[ERROR] No findings found. See logfile for details."
                 for vulnerability in vulnerabilities:
                     entries = vulnerability.findall('./ns:AnalysisInfo/ns:Unified/ns:Trace/ns:Primary/ns:Entry', namespace)
                     if len(entries) <= 0:
@@ -55,20 +55,20 @@ def path_preview(fpath):
                         path = os.path.join(source_base_path, file_path) if len(source_base_path) > 0 else file_path
                         break
             except:
-                logger.error("Unable to load preview.\n" + traceback.format_exc())
+                logger.error("Unable to load preview.\n%s", traceback.format_exc())
                 return "[ERROR] Unable to load preview. See log file for details."
             
             if len(path) <= 0:
-                logger.warning(f'Could not find a defined path in Fortify file \'{fpath}\'')
-                return f"[ERROR] No paths found. See logfile for details.."
+                logger.warning('Could not find a defined path in Fortify file \'%s\'', fpath)
+                return "[ERROR] No paths found. See logfile for details."
     
             return path
     except Exception:
-        logger.error("Unable to load preview.\n" + traceback.format_exc())
+        logger.error("Unable to load preview.\n%s", traceback.format_exc())
         return "[ERROR] Unable to load preview. See log file for details."
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Count errors encountered while running
     finding_count = 0
@@ -96,7 +96,7 @@ def parse(fpath, scanner, substr, prepend):
         # Check if there are vulnerabilities to read
         total_vulnerabilities = len(root.findall('.//ns:Vulnerability', namespace))
         if total_vulnerabilities <= 0:
-            logger.warning(f"No vulnerabilities found in the FPR file \"{fpath}\". Skipping the file.")
+            logger.warning("No vulnerabilities found in the FPR file \"%s\". Skipping the file.", fpath)
             return 0, 0
 
         # Extract base path for source files
@@ -137,7 +137,7 @@ def parse(fpath, scanner, substr, prepend):
                 # Check if entries are found. If no entries are found, it is likely a bad vulnerability.
                 if len(entries_info) <= 0:
                     err_count += 1
-                    logger.error(f"Vulnerability '{class_id}' has no Entry tags. Manually unzip the .fpr file and check the audit.fvdl file for the vulnerability with classID '{class_id}' for any problems.")
+                    logger.error("Vulnerability '%s' has no Entry tags. Manually unzip the .fpr file and check the audit.fvdl file for the vulnerability with classID '%s' for any problems.", class_id, class_id)
                     continue
                 
                 # Take first 3 events and the 5 events prior to the last if it is larger than 8
@@ -178,7 +178,7 @@ def parse(fpath, scanner, substr, prepend):
                             try:
                                 description = description.replace(f"<Replace key=\"{m}\"/>", replacement_defs[m])
                             except KeyError:
-                                logger.warning(f"Vulnerability {vulnerability_num} (Rule ID: {rule_id}) does not have a replacement definition for key '{m}'. All keys for '{m}' in the message column will be output as '[[{m}]]'")
+                                logger.warning("Vulnerability %d (Rule ID: %s) does not have a replacement definition for key '%s'. All keys for '%s' in the message column will be output as '[[%s]]'", vulnerability_num, rule_id, m, m, m)
                                 description = description.replace(f"<Replace key=\"{m}\"/>", f"[[{m}]]")
                         description = re.sub("</?(Content|Paragraph|AltParagraph|code)>", '', description)
                             
@@ -216,7 +216,7 @@ def parse(fpath, scanner, substr, prepend):
                                     t_path = srcLocation.get('path')
                                     t_line = srcLocation.get('line')
                         else:
-                            logger.error("Vulnerability {} (Rule ID: {}): Cannot resolve NodeRef ID {} in UnifiedNodePool".format(vulnerability_num, rule_id, node_ref.get('id')))
+                            logger.error("Vulnerability %d (Rule ID: %s): Cannot resolve NodeRef ID %s in UnifiedNodePool", vulnerability_num, rule_id, node_ref.get('id'))
                     # No NodeRef tag means it is a main node
                     else:
                         srcLocation = entry.find("./ns:Node/ns:SourceLocation", namespace)
@@ -314,11 +314,11 @@ def parse(fpath, scanner, substr, prepend):
                 finding_count += 1
             
             except Exception:
-                logger.error(f"Vulnerability {vulnerability_num} (Rule ID: {rule_id}) of \'{fpath}\': {traceback.format_exc()}")
+                logger.error("Vulnerability %d (Rule ID: %s) of \'%s\': %s", vulnerability_num, rule_id, fpath, traceback.format_exc())
                 err_count += 1
 
-    logger.info(f"Successfully processed {finding_count} vulnerabilities")
-    logger.info(f"Number of erroneous vulnerabilities: {err_count}")
+    logger.info("Successfully processed %d vulnerabilities", finding_count)
+    logger.info("Number of erroneous vulnerabilities: %d", err_count)
     
     if err_count > 0:
         logger.warning("Errors have been detected while parsing a Fortify .fpr file. To troubleshoot, unzip the .fpr file and manually search the \"audit.fvdl\" file for the problematic vulnerabilities.")

@@ -54,5 +54,5 @@ def dupe_scan_consolidation(data):
             except ValueError:
                 continue
         dupe_count += len(matches)
-    logger.info(f"Discovered {dupe_count} duplicate findings")
+    logger.info("Discovered %d duplicate findings", dupe_count)
     return dupe_count

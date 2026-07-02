@@ -16,7 +16,7 @@ def path_preview(fpath):
     return 'No preview available for NVD CVEs'
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Keep track of row number and error count
     row_num = 0
@@ -75,7 +75,7 @@ def parse(fpath, scanner, substr, prepend):
                 # Quick check to ensure CVE is actually a CVE
                 if not (re.match(r'^CVE-\d{4}-\d+$', cve)):
                     err_count += 1
-                    logger.error(f"Row {row_num} of \'{fpath}\': Invalid CVE number. Please check \'{fpath}\' and the user overrides.")
+                    logger.error("Row %d of \'%s\': Invalid CVE number. Please check \'%s\' and the user overrides.", row_num, fpath, fpath)
 
                 # Write row to outfile
                 parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
@@ -99,9 +99,9 @@ def parse(fpath, scanner, substr, prepend):
                                 })
                 finding_count += 1
             except Exception:
-                logger.error(f"Row {row_num} of \'{fpath}\': {traceback.format_exc()}")
+                logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
-    logger.info(f"Successfully processed {finding_count} vulnerabilities")
-    logger.info(f"Number of erroneous rows: {err_count}")
+    logger.info("Successfully processed %d vulnerabilities", finding_count)
+    logger.info("Number of erroneous rows: %d", err_count)
     return finding_count, err_count
 # End of parse

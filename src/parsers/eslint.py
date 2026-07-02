@@ -23,7 +23,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Count findings and errors encountered while running
     finding_count = 0
@@ -34,7 +34,7 @@ def parse(fpath, scanner, substr, prepend):
         with open(fpath, mode='r', encoding='utf-8-sig') as f:
             data = json.load(f)
     except:
-        logger.error(f"File \'{fpath}\' failed to open:\n{traceback.format_exc()}")
+        logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
         return finding_count, err_count + 1
     
     # Keep track of issue number for debug
@@ -55,7 +55,7 @@ def parse(fpath, scanner, substr, prepend):
                 rule_id = message['ruleId']
                 
                 if rule_id is None or rule_id == 'null':
-                    logger.warning(f"Skipping message {issue_num} because its ruleId is null.\n    Location: {file['filePath']}:{message['line']}\n    Message: {message['message']}")
+                    logger.warning("Skipping message %d because its ruleId is null.\n    Location: %s:%d\n    Message: %s", issue_num, file['filePath'], message['line'], message['message'])
                     continue
                 
                 # Map eslint message id to CWE
@@ -110,10 +110,10 @@ def parse(fpath, scanner, substr, prepend):
                                 })
                 finding_count += 1
             except:
-                logger.error("Issue {} in file \'{}\' of json file \'{}\':\n{}".format(issue_num, file['filePath'], fpath, traceback.format_exc()))
+                logger.error("Issue %d in file \'%s\' of json file \'%s\':\n%s", issue_num, file['filePath'], fpath, traceback.format_exc())
                 err_count += 1
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous findings: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous findings: %d", err_count)
     return finding_count, err_count
 # End of parse
 

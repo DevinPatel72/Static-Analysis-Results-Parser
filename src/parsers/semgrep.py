@@ -37,7 +37,7 @@ def path_preview(fpath):
     return f"[ERROR] No data found in \'{fpath}\'"
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Keep track of finding number and errors
     finding_num = 0
@@ -54,13 +54,13 @@ def parse(fpath, scanner, substr, prepend):
                 reader = csv.DictReader(r)
                 data = {'findings': [row for row in reader]}
             else:
-                logger.error(f"Unsupported file type for semgrep results: {fpath}")
+                logger.error("Unsupported file type for semgrep results: %s", fpath)
                 return finding_count, err_count + 1
     except json.JSONDecodeError:
-        logger.error(f"Invalid JSON format: {fpath}")
+        logger.error("Invalid JSON format: %s", fpath)
         return finding_count, err_count + 1
     except Exception:
-        logger.error(f"Unable to read file: {fpath}")
+        logger.error("Unable to read file: %s", fpath)
         return finding_count, err_count + 1
     
     # Get meta information
@@ -99,7 +99,7 @@ def parse(fpath, scanner, substr, prepend):
                 if (m := re.search(r"CWE-(\d+):.*", cwe)):
                     cwe = m.group(1)
                 else:
-                    logger.warning(f'Failed to parse CWE for {fpath}, bad regex match.')
+                    logger.warning('Failed to parse CWE for %s, bad regex match.', fpath)
                     err_count += 1
                     cwe = ''
             
@@ -146,10 +146,10 @@ def parse(fpath, scanner, substr, prepend):
                             })
             finding_count += 1
         except Exception:
-            logger.error(f"Finding with finding number {finding_num} in \'{fpath}\': {traceback.format_exc()}")
+            logger.error("Finding with finding number %d in \'%s\': %s", finding_num, fpath, traceback.format_exc())
             err_count += 1
     
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous rows: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous rows: %d", err_count)
     return finding_count, err_count
 # End of parse

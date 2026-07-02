@@ -68,7 +68,7 @@ def parse(fpath, scanner, substr, prepend):
         with open(fpath, mode='r', encoding='utf-8-sig') as f:
             data = json.load(f)
     except:
-        logger.error(f"File \'{fpath}\' failed to open:\n{traceback.format_exc()}")
+        logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
         return finding_count, err_count + 1
     
     total_results = sum([len(run.get('results', [])) for run in data.get('runs', [])])
@@ -191,7 +191,7 @@ def parse(fpath, scanner, substr, prepend):
                 parser_writer.write_row(new_row)
                 finding_count += 1
             except:
-                logger.error(f"Result ID {finding_id} of \'{fpath}\':\n{traceback.format_exc()}")
+                logger.error("Result ID %s of \'%s\':\n%s", finding_id, fpath, traceback.format_exc())
                 err_count += 1
     return finding_count, err_count
     

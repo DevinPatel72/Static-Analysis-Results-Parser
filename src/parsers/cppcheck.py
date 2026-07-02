@@ -27,7 +27,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Count findings and errors encountered while running
     finding_count = 0
@@ -84,8 +84,7 @@ def parse(fpath, scanner, substr, prepend):
                 symbol = symbol.text if symbol is not None else ''
                 
             except:
-                logger.error(f"Erroneous entry: {html.unescape(ET.tostring(error, encoding='utf8').decode('utf8'))}\n"
-                             + traceback.format_exc())
+                logger.error("Erroneous entry: %s\n%s", html.unescape(ET.tostring(error, encoding='utf8').decode('utf8')), traceback.format_exc())
                 err_count += 1
                 continue
             
@@ -143,7 +142,7 @@ def parse(fpath, scanner, substr, prepend):
                                 Fieldnames.SEVERITY.value:severity
                             })
             finding_count += 1
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous entries: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous entries: %d", err_count)
     return finding_count, err_count
 # End of parse

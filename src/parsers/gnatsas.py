@@ -36,7 +36,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     if fpath.endswith('.csv'):
         finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
@@ -44,8 +44,8 @@ def parse(fpath, scanner, substr, prepend):
         finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
     
     
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous rows: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous rows: %d", err_count)
     return finding_count, err_count
 # End of parse
 
@@ -63,7 +63,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
             data = json.load(read_obj)
     except (FileNotFoundError, json.JSONDecodeError):
         err_count += 1
-        logger.error(f"Unable to parse input file \"{fpath}\". Ensure GNAT SAS is configured to output in SARIF format.")
+        logger.error("Unable to parse input file \"%s\". Ensure GNAT SAS is configured to output in SARIF format.", fpath)
         return finding_count, err_count
     
     # Get just data
@@ -191,7 +191,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
                             })
             finding_count += 1
         except Exception:
-            logger.error(f"Result with fingerprint checksum \"{fingerprint_checksum}\" in \'{fpath}\': {traceback.format_exc()}")
+            logger.error("Result with fingerprint checksum \"%s\" in \'%s\': %s", fingerprint_checksum, fpath, traceback.format_exc())
             err_count += 1
         
     return finding_count, err_count
@@ -268,7 +268,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                                 })
                 finding_count += 1
             except Exception:
-                logger.error(f"Row {row_num} of \'{fpath}\': {traceback.format_exc()}")
+                logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
     return finding_count, err_count
 # End of _parse_csv

@@ -112,7 +112,7 @@ def search_row(tuples, skip_ids='', match_once=False):
                     try:
                         matches.append(int(keyword) == lookup)
                     except ValueError:
-                        logger.error(f"Invalid search lookup. Expected integer input for \"{lookup}\", got string keyword \"{keyword}\"")
+                        logger.error("Invalid search lookup. Expected integer input for \"%s\", got string keyword \"%s\"", lookup, keyword)
                         matches.append(False)
                         break
                 
@@ -233,6 +233,6 @@ def close_writer():
     if not GUI_MODE and elapsed_time >= 0:
         print()
     
-    logger.info(f"Output saved to {__filepath}")
+    logger.info("Output saved to %s", __filepath)
     __filepath = None
     

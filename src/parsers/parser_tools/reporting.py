@@ -63,7 +63,7 @@ class Report:
             bbox_inches="tight"
         )
         
-        logger.info(f"Report chart saved to \"{outpath}\"")
+        logger.info("Report chart saved to \"%s\"", outpath)
 
         # Only display GUI if enabled
         if GUI_MODE:
@@ -92,7 +92,7 @@ class Report:
 
         def make_autopct(values):
             def autopct(pct):
-                value = int(round(pct / 100 * sum(findings)))
+                value = int(round(pct / 100 * sum(values)))
                 if value == 0:
                     return ""
                 return f"{pct:.1f}%\n({value})"

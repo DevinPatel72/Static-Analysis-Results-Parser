@@ -496,7 +496,7 @@ def check_all_CWEs(data):
         
         # Turn CWE into int if capable
         row[Fieldnames.SCORING_BASIS.value] = int(row[Fieldnames.SCORING_BASIS.value]) if str(row[Fieldnames.SCORING_BASIS.value]).isdigit() else row[Fieldnames.SCORING_BASIS.value]
-    logger.info(f"Identified {count} CWE IDs that may require remapping")
+    logger.info("Identified %d CWE IDs that may require remapping", count)
 
 def check_CWE_category(cwe, count=0):
     if cwe in parsers.cwe_categories.keys():

@@ -31,7 +31,7 @@ def path_preview(fpath):
     return f"[ERROR] No data found in \'{fpath}\'"
 
 def parse(fpath, scanner, substr, prepend):
-    logger.info(f"Parsing {scanner} - {fpath}")
+    logger.info("Parsing %s - %s", scanner, fpath)
     
     # Keep track of issue number and errors
     issue_num = 0
@@ -44,7 +44,7 @@ def parse(fpath, scanner, substr, prepend):
         with open(fpath, 'r', encoding='utf-8-sig') as r:
             data = json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        logger.error(f"[ERROR] Invalid JSON format: {fpath}")
+        logger.error("[ERROR] Invalid JSON format: %s", fpath)
         return finding_count, err_count + 1
     
     issues = data['issues']
@@ -86,7 +86,7 @@ def parse(fpath, scanner, substr, prepend):
             elif 'Could not find declaration' in description:
                 cwe = '457'
             else:
-                logger.warning(f"Code \"{issue_code}\" not defined in sigasi_cdata.json")
+                logger.warning("Code \"%s\" not defined in sigasi_cdata.json", issue_code)
                 err_count += 1
                 cwe = ''
             
@@ -120,11 +120,11 @@ def parse(fpath, scanner, substr, prepend):
                             })
             finding_count += 1
         except Exception:
-            logger.error(f"Finding with issue number {issue_num} in \'{fpath}\': {traceback.format_exc()}")
+            logger.error("Finding with issue number %d in \'%s\': %s", issue_num, fpath, traceback.format_exc())
             err_count += 1
     
-    logger.info(f"Successfully processed {finding_count} findings")
-    logger.info(f"Number of erroneous rows: {err_count}")
+    logger.info("Successfully processed %d findings", finding_count)
+    logger.info("Number of erroneous rows: %d", err_count)
     return finding_count, err_count
 # End of parse
 
