@@ -73,6 +73,10 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
             
 def write_row(r):
     global __parser_data
+    # Remove any None values
+    for k in r.keys():
+        if r[k] is None:
+            r[k] = ''
     __parser_data.append(r)
         
 def search_row(tuples, skip_ids='', match_once=False):
