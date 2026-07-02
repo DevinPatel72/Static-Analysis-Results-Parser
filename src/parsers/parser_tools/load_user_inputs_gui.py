@@ -19,6 +19,10 @@ class JsonInputPreviewGUI:
         self.project_files = {}
         self.scanner_sections = []
 
+        self.current_wraplength = 0
+        self._tooltip = None
+        self._tooltip_after_id = None
+
         self.root = tk.Tk()
         self.root.title(PROG_NAME)
         self.root.geometry("1300x500")

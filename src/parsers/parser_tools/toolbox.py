@@ -395,7 +395,8 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
             return f"Error in parsing config file \'{inputs_path}\'. No inputs defined in \"main\"."
         
         # Check if each input contains the right keys
-        if not all([all([sorted(list(inp.keys())) == sorted(InputDictKeys.inputs())]) for inp in user_inputs['main']]):
+        expected_keys = set(InputDictKeys.inputs())
+        if not all(set(inp) == expected_keys for inp in user_inputs["main"]):
             return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid keys detected in \"main\". All of the following keys (and only these keys) must be defined: {}.".format(", ".join(InputDictKeys.inputs()))
 
         # All is green, set main equal to parser_inputs

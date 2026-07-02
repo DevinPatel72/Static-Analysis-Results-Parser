@@ -106,6 +106,8 @@ class InputsGUI:
             self.results = {}
         else:
             self.results = inputs
+        self.results_project_name = ''
+        self.results_project_version = ''
         self.cleanexit = False
         self.dupe_detected_submit_again = False
         self.root = tk.Tk()
@@ -268,6 +270,7 @@ class InputsGUI:
         
         if project_version == "" or project_version == self.project_version.placeholder:
             project_version = ""
+        
         self.results_project_name = project_name
         self.results_project_version = project_version
 

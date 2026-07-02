@@ -148,7 +148,7 @@ class Report:
         ax.text(
             0,
             0.065,
-            f"Total",
+            "Total",
             ha="center",
             va="center",
             fontsize=14,
