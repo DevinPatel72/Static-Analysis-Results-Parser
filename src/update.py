@@ -99,7 +99,7 @@ def check_version(current_version):
     if version_key(latest_version.lstrip("v")) > version_key(current_version):
         return latest_version
 
-    return None
+    return ''
 
 def get_platform():
     system = platform.system()
@@ -251,7 +251,10 @@ def main():
     
     # Check for most recent release
     latest_version = check_version(parsers.VERSION)
-    if latest_version is None or not isinstance(latest_version, str):
+    if latest_version is None:
+        print('Unable to connect to release repository')
+        sys.exit(4)
+    elif isinstance(latest_version, str) and len(latest_version) <= 0:
         print(f'You are on the most recent version of {parsers.PROG_NAME_ABBR}')
         sys.exit(0)
     
@@ -259,6 +262,7 @@ def main():
     print("A new version is available for {}: {} -> {}".format(parsers.PROG_NAME_ABBR, parsers.VERSION, latest_version.lstrip('v')))
     if not ask("Would you like to update to version {}?".format(latest_version.lstrip('v')), default=False):
         sys.exit(0)
+    print()
 
     # Get OS name and arch
     try:
