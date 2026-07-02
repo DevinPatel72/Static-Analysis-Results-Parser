@@ -170,7 +170,7 @@ def parse(fpath, scanner, substr, prepend):
 
                 # Generate ID if none was provided
                 if len(finding_id) <= 0:
-                    preimage = '\0'.join(str(p) for p in (path, line, new_row[Fieldnames.MESSAGE.value], trace, new_row[Fieldnames.SCORING_BASIS.value]) if len(str(p)) > 0)
+                    preimage = '\0'.join(str(p) for p in (path, line, new_row[Fieldnames.MESSAGE.value], new_row[Fieldnames.TYPE.value], trace) if len(str(p)) > 0)
                     finding_id = idgenerator.hash(preimage)
                         
                 new_row[Fieldnames.TRACE.value] = trace.strip()
