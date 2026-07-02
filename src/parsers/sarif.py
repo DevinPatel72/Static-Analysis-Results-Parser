@@ -8,7 +8,7 @@ import json
 import parsers
 from .parser_tools import idgenerator, parser_writer
 from .parser_tools.progressbar import SPACE,progress_bar
-from .parser_tools.toolbox import Fieldnames, Scanners, select_scanner, console
+from .parser_tools.toolbox import Fieldnames, Scanners, select_scanner
 
 
 logger = logging.getLogger(__name__)
@@ -167,6 +167,11 @@ def parse(fpath, scanner, substr, prepend):
                             trace += f"{i}) {':'.join(str(p) for p in parts if len(str(p)) > 0)}\n"
                     except (KeyError, IndexError):
                         trace = ''
+
+                # Generate ID if none was provided
+                if len(finding_id) <= 0:
+                    preimage = '\0'.join(str(p) for p in (path, line, new_row[Fieldnames.MESSAGE.value], trace, new_row[Fieldnames.SCORING_BASIS.value]) if len(str(p)) > 0)
+                    finding_id = idgenerator.hash(preimage)
                         
                 new_row[Fieldnames.TRACE.value] = trace.strip()
                 

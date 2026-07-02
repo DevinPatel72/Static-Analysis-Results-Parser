@@ -2,14 +2,12 @@
 
 import os
 import re
-import json
 import parsers
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from tkinter.scrolledtext import ScrolledText
 
 from .. import PROG_NAME, VERSION
-from .toolbox import InputDictKeys, InputConfigFlags, InputSchemaKeys, Scanners, validate_path_and_scanner, get_all_previews, generate_preview, select_scanner
+from .toolbox import InputDictKeys, InputConfigFlags, Scanners, validate_path_and_scanner, get_all_previews, generate_preview, select_scanner
 
 # Constants
 WINDOW_LENGTH = 900
