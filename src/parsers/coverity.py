@@ -73,6 +73,8 @@ def parse(fpath, scanner, substr, prepend):
                 events = issue['events'][:3] + ['...'] + issue['events'][beg:end+1]
             elif len(mainEventsIdxs) > 1:
                 # If multiple main events, take first event, 2 events around the middle main events, and last 4 before last main event
+                from parsers import PROG_NAME_ABBR
+                logger.warning(f"This log message was left by the developer in case a Coverity finding produced multiple main events in the code trace. If you see this message, please alert the developer of {PROG_NAME_ABBR}.")
                 events.append(issue['events'][0])
                 events.append(['...'])
                 for idx in mainEventsIdxs[1:-1]:
