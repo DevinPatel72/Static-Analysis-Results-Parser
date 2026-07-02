@@ -23,7 +23,7 @@ def path_preview(fpath):
             if len(preview) > 0:
                 return preview
     except json.JSONDecodeError:
-        return f"[ERROR] Invalid JSON format"
+        return "[ERROR] Invalid JSON format"
     except Exception as e:
         return f"[ERROR] {e}"
     

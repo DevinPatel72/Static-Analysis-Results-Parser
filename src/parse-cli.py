@@ -72,7 +72,7 @@ if find_spec('matplotlib') is None:
 
 def print_inputs(p_parser_inputs, p_parser_outfile, p_control_flags):
     if len(parsers.PROJ_NAME) > 0:
-        s = f"\nConfiguration for " + " ".join([part for part in [parsers.PROJ_NAME, parsers.PROJ_VERSION]]) + ":\n"
+        s = "\nConfiguration for " + " ".join([parsers.PROJ_NAME, parsers.PROJ_VERSION]) + ":\n"
     else:
         s = "\nConfiguration:\n"
     for i, inp in enumerate(p_parser_inputs, 1):
