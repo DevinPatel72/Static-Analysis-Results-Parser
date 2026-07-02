@@ -12,6 +12,16 @@ WINDOW_HEIGHT = 750
 BG_COLOR1 = "#ffffff" 
 BG_COLOR2 = "#e0e0e0"
 
+def set_widget_bg(widget, bg):
+    if not isinstance(widget, tk.Entry):
+        try:
+            widget.configure(bg=bg)
+        except tk.TclError:
+            pass
+
+    for child in widget.winfo_children():
+        set_widget_bg(child, bg)
+
 class ConditionFrame:
     def __init__(self, master, bg=None, remove_callback=None):
         self.frame = tk.Frame(master, relief=tk.RIDGE, borderwidth=1, bg=bg)
@@ -155,17 +165,6 @@ class ConditionGroupFrame:
         if len(self.children) == 0:
             self.add_condition()
 
-    def set_bg(self, bg):
-        self.bg = bg
-        self.frame.configure(bg=bg)
-        self.child_frame.configure(bg=bg)
-
-        for child in self.children:
-            if isinstance(child, ConditionFrame):
-                child.frame.configure(bg=bg)
-            else:
-                child.set_bg(bg)
-
     def get_group(self):
 
         operator = self.operator.get()
@@ -286,7 +285,7 @@ class ReplacementEditor:
 
         self.root.destroy()
 
-class RootConditionFrame:
+class RootConditionFrame(ConditionGroupFrame):
 
     def __init__(self, master, bg=None):
 
@@ -424,8 +423,7 @@ class RuleFrame:
 
     def set_bg(self, bg):
         self.bg = bg
-        self.frame.configure(bg=bg)
-        self.group.set_bg(bg)
+        set_widget_bg(self.frame, bg)
 
     def move_up(self):
         if self.move_up_callback:
@@ -655,7 +653,7 @@ class RuleBuilderGUI:
     def refresh_colors(self):
         for i, rule in enumerate(self.rules):
             bg = BG_COLOR1 if i % 2 == 0 else BG_COLOR2
-            rule.frame.configure(bg=bg)
+            rule.set_bg(bg)
 
     def add_rule(self, rule_data=None):
 
