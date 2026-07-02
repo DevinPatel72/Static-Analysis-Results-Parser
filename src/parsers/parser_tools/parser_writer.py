@@ -1,12 +1,13 @@
 # parser_writer.py
 
 import os
+import re
 import csv
 import time
 import json
 import logging
-from parsers import sarif
-from .toolbox import check_all_CWEs, format_time
+import parsers
+from .toolbox import Fieldnames, InputConfigFlags, Scanners, check_all_CWEs, format_time, select_scanner
 from .preflight import apply_prules
 from .dupe_scan_consolidation import dupe_scan_consolidation
 
@@ -193,7 +194,7 @@ def close_writer():
                 while True:
                     try:
                         with open(__filepath, 'w', encoding='utf-8-sig') as out:
-                            json.dump(sarif.rows_to_sarif(__parser_data), out, indent=2)
+                            json.dump(rows_to_sarif(__parser_data), out, indent=2)
                         break
                     except PermissionError:
                         if GUI_MODE:
@@ -235,4 +236,146 @@ def close_writer():
     
     logger.info("Output saved to %s", __filepath)
     __filepath = None
+
+# Converts list of dictionaries to SARIF format
+def rows_to_sarif(data):
+    # Get list of scanners
+    runs = {}
     
+    # Prep the results and rules
+    for row in data:
+        scanner = row[Fieldnames.SCANNER.value]
+        selected_scanner = select_scanner(scanner)
+        if selected_scanner == Scanners.SRM:
+            selected_scanner = select_scanner(row[Fieldnames.TOOL.value])
+        
+        if scanner not in runs:
+            runs[scanner] = {
+                "tool": {
+                    "driver": {
+                        "name": scanner,
+                        "rules": []
+                    }
+                },
+                "results": [],
+                "_rules": {}
+            }
+        
+        run = runs[scanner]
+        
+        # Get rule
+        rule_id = row[Fieldnames.TYPE.value]
+        if rule_id not in run['_rules']:
+            rule = {
+                "id": rule_id,
+                "name": rule_id,
+                "shortDescription": {
+                    "text": rule_id
+                }
+            }
+            run['_rules'][rule_id] = rule
+            run["tool"]["driver"]["rules"].append(rule)
+
+        # Get result
+        result = {
+            "ruleId": rule_id,
+            "message": {
+                "text": row[Fieldnames.MESSAGE.value]
+            },
+            "locations": [{
+                "physicalLocation": {
+                    "artifactLocation": {
+                        "uri": row[Fieldnames.PATH.value]
+                    },
+                    "region": {
+                        "startLine": row[Fieldnames.LINE.value]
+                    }
+                }
+            }],
+            "fingerprints": {
+                "findingId": row[Fieldnames.ID.value]
+            },
+            "properties": {
+                Fieldnames.LANGUAGE.value.lower().replace(' ', '_'): row[Fieldnames.LANGUAGE.value],
+                Fieldnames.SYMBOL.value.lower().replace(' ', '_'): row[Fieldnames.SYMBOL.value],
+                Fieldnames.SEVERITY.value.lower().replace(' ', '_'): row[Fieldnames.SEVERITY.value]
+            } | ({
+                Fieldnames.CONFIDENCE.value.lower(): row[Fieldnames.CONFIDENCE.value],
+                Fieldnames.MATURITY.value.lower().replace(' ', '_'): row[Fieldnames.MATURITY.value],
+                Fieldnames.MITIGATION.value.lower().replace(' ', '_'): row[Fieldnames.MITIGATION.value],
+                Fieldnames.PROPOSED_MITIGATION.value.lower().replace(' ', '_'): row[Fieldnames.PROPOSED_MITIGATION.value],
+                Fieldnames.VALIDATOR_COMMENT.value.lower().replace(' ', '_'): row[Fieldnames.VALIDATOR_COMMENT.value]
+            } if parsers.control_flags[InputConfigFlags.SARIF_STITCH_PROPERTIES.flag] else {}) 
+        }
+        
+        severity = selected_scanner.severity_map.get(str(row[Fieldnames.SEVERITY.value]).lower(), '')
+        if len(severity) > 0:
+            result['level'] = severity
+        
+        # Trace
+        if len(row[Fieldnames.TRACE.value]) > 0:
+            trace = row[Fieldnames.TRACE.value].strip().split('\n')
+            locations = []
+            for t in trace:
+                t = t.strip()
+                if len(t) <= 0:
+                    continue
+                
+                # Extract path, line, and message from trace entry
+                if (m := re.match(r"^\d+\) (.*?):(\d+)(?::(.*))?$", t)):
+                    path = m.group(1)
+                    line = int(m.group(2))
+                    msg = m.group(3) if m.group(3) is not None else ""
+                else:
+                    path = line = msg = ""
+                
+                # Creation location object
+                location = {}
+
+                if len(msg) > 0:
+                    location["message"] = {"text": msg.strip()}
+
+                if len(path) > 0:
+                    location["physicalLocation"] = {
+                        "artifactLocation": {
+                            "uri": path
+                        }
+                    }
+
+                    if isinstance(line, int) or len(line) > 0:
+                        location["physicalLocation"]["region"] = {
+                            "startLine": int(line) if str(line).isdigit() else line
+                        }
+
+                locations.append({
+                    "location": location
+                })
+            
+            if len(locations) > 0:
+                result["codeFlows"] = [{
+                    "threadFlows": [{
+                        "locations": locations
+                    }]
+                }]
+        
+        # Scanner-specific properties
+        if selected_scanner in [Scanners.DEP_CHECK, Scanners.NVD_CVE]:
+            result['properties']['cve'] = row[Fieldnames.SCORING_BASIS.value]
+            result['properties']['tool_cwe'] = row[Fieldnames.TOOL_CWE.value]
+        # Remaining scanners
+        else:
+            result['properties']['cwe'] = row[Fieldnames.SCORING_BASIS.value]
+            result['properties']['tool_cwe'] = row[Fieldnames.TOOL_CWE.value]
+
+        run["results"].append(result)
+
+    for run in runs.values():
+        del run['_rules']
+
+    sarif = {
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": list(runs.values())
+    }
+    
+    return sarif

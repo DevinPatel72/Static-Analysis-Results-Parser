@@ -651,11 +651,3 @@ class ToolTip:
         if self.tip_window:
             self.tip_window.destroy()
             self.tip_window = None
-
-def message_box(title, msg, type):
-    if type == 'error':
-        messagebox.showerror(title, msg)
-    elif type == 'warning':
-        messagebox.showwarning(title, msg)
-    elif type == 'info':
-        messagebox.showinfo(title, msg)

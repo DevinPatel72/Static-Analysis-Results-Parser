@@ -5,6 +5,7 @@ import logging
 import json
 import importlib
 from enum import Enum
+from tkinter import messagebox
 from .progressbar import progress_bar,SPACE
 import parsers
 
@@ -543,9 +544,16 @@ def generate_preview(preview, remove_substr='', add_substr=''):
     
     return preview
 
+def message_box(title, msg, type):
+    if type == 'error':
+        messagebox.showerror(title, msg)
+    elif type == 'warning':
+        messagebox.showwarning(title, msg)
+    elif type == 'info':
+        messagebox.showinfo(title, msg)
+
 def console(msg, title='', type='info', orig_name=__name__):
     if parsers.GUI_MODE:
-        from .inputs_gui import message_box
         message_box(title, msg, type)
     else:
         print(f'\n[{type.upper()}]  {msg}')
