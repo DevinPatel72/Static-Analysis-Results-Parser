@@ -190,7 +190,6 @@ def extract_archive(path, destination):
         raise ValueError(f"Unsupported archive format: {path}")
 
 def split_archive_ext(filename):
-
     if filename.endswith(".tar.gz"):
         return filename[:-7], ".tar.gz"
     elif filename.endswith(".tar.bz2"):

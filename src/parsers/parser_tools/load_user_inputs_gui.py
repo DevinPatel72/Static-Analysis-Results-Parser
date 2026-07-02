@@ -353,9 +353,7 @@ class JsonInputPreviewGUI:
 
         # SARP inputs files
         for filename in file_list:
-            if not filename.lower().endswith(
-                ".json"
-            ):
+            if not filename.lower().endswith(".json"):
                 continue
 
             full_path = os.path.join(

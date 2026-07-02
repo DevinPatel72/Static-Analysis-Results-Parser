@@ -311,7 +311,7 @@ def main():
 
     # Init the outfile
     force_csv = parser_outfile.lower().endswith('.csv')
-    force_sarif = parser_outfile.lower().endswith('.sarif') or parser_outfile.lower().endswith('.json')
+    force_sarif = parser_outfile.lower().endswith(('.sarif', '.json'))
     parser_writer.open_writer(parser_outfile, Fieldnames.HEADERS.value, force_csv=force_csv, force_sarif=force_sarif)
     
     begin(parser_inputs)

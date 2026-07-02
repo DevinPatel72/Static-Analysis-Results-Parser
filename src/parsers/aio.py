@@ -6,7 +6,7 @@ import logging
 import traceback
 from .parser_tools import parser_writer
 from .parser_tools.progressbar import SPACE, progress_bar
-from .parser_tools.toolbox import Fieldnames
+from .parser_tools.toolbox import Fieldnames, Scanners
 
 __excel_enabled = False
 
@@ -23,7 +23,7 @@ def path_preview(fpath):
     # Parse the input file
     try:
         # SARIF input - Get first result
-        if fpath.endswith('.json'):
+        if fpath.endswith(('.sarif', '.json')):
             with open(fpath, "r", encoding='utf-8-sig') as read_obj:
                 data = json.load(read_obj)
             p = "[ERROR] No path found"
@@ -73,7 +73,7 @@ def parse(fpath, scanner, substr, prepend):
     err_count = 0
     
     # SARIF Move to different helper function
-    if fpath.endswith('.json'):
+    if fpath.endswith(('.sarif', '.json')):
         finding_count, err_count = _parse_sarp_sarif(fpath, scanner, substr, prepend)
         return finding_count, err_count
     
