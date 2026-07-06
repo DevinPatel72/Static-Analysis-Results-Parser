@@ -529,8 +529,8 @@ def check_all_CWEs(data):
     logger.info("Identified %d CWE IDs that may require remapping", count)
 
 def check_CWE_category(cwe, count=0):
-    if cwe in parsers.cwe_categories.keys():
-        return f"{cwe}:{parsers.cwe_categories[cwe]}", count + 1
+    if str(cwe) in parsers.cwe_categories.keys():
+        return f"{cwe}:{parsers.cwe_categories[str(cwe)]}", count + 1
     else:
         return cwe, count
 
