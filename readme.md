@@ -21,6 +21,7 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 | Pylint                                                       | JSON                   |
 | Semgrep                                                      | JSON\*\*, CSV          |
 | Sigasi                                                       | JSON                   |
+| Spotbugs                                                     | SARIF\*\*, XML         |
 | SRM                                                          | XML\*\*, CSV           |
 
 \*\* This format is preferred because it provides the most complete set of information for parsing.

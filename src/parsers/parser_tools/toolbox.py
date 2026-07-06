@@ -257,6 +257,16 @@ class Scanners(Enum):
                   "failure": "note"
               },
               'parsers.sigasi')
+    SPOTBUGS = ('SpotBugs',
+              ['spotbugs', 'findbugs'],
+              ('.sarif', '.xml'),
+              _sarif_mapping_identity | {
+                  "of concern": "warning",
+                  "troubling": "warning",
+                  "scary": "error",
+                  "scariest": "error"
+              },
+              'parsers.spotbugs')
     SRM = ('Software Risk Manager',
            ['srm', 'softwareriskmanager', 'codedx'],
            ('.xml', '.csv'),
@@ -625,8 +635,14 @@ def select_scanner(scanner):
     scan_match = scanner.lower().replace(' ', '')
     
     for scanner_enum in Scanners:
+        if scanner_enum == Scanners.SARIF: continue
         if any(s in scan_match for s in scanner_enum.keywords):
             return scanner_enum
+    
+    # Explicitly do SARIF last
+    if any(s in scan_match for s in Scanners.SARIF.keywords):
+        return scanner_enum
+    
     return None
     
 
