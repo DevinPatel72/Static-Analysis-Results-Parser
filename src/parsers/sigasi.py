@@ -5,7 +5,7 @@ import logging
 import traceback
 import json
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.language_resolver import resolve_lang
+from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames, console
 
@@ -67,7 +67,7 @@ def parse(fpath, scanner, substr, prepend):
             path = os.path.join(prepend, path).replace('\\', '/')
             
             # Resolve language of the file
-            lang = resolve_lang(os.path.splitext(path)[1])
+            lang = resolve_lang_from_ext(os.path.splitext(path)[1])
             
             description = issue['description']
             severity = issue['severity']

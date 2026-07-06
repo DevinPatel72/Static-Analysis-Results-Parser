@@ -7,7 +7,7 @@ import csv
 import json
 import traceback
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.language_resolver import resolve_lang
+from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 
@@ -126,7 +126,7 @@ def _parse_json(fpath, scanner, substr, prepend):
                 #id = "DEP{:04}".format(finding_count+1)
                 
                 # Resolve language of the file
-                lang = resolve_lang(os.path.splitext(path)[1])
+                lang = resolve_lang_from_ext(os.path.splitext(path)[1])
                 
                 # Resolve Severity
                 severity = vuln.get('severity', '')
@@ -230,7 +230,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 path = os.path.join(prepend, path).replace('\\', '/')
                 
                 # Resolve language of the file
-                lang = resolve_lang(os.path.splitext(path)[1])
+                lang = resolve_lang_from_ext(os.path.splitext(path)[1])
                 
                 # Generate ID for Fortify finding (concat CVE, CWE, Path, Scanner, and Vulnerability)
                 preimage = '\0'.join(str(p) for p in (cve, path, row['Vulnerability']) if len(str(p)) > 0)

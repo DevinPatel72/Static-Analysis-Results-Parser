@@ -8,7 +8,7 @@ import zipfile
 import tempfile
 import re
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.language_resolver import resolve_lang
+from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 
@@ -283,7 +283,7 @@ def parse(fpath, scanner, substr, prepend):
                 line = int(line) if str(line).isdigit() else line
                 
                 # Resolve language of the file
-                lang = resolve_lang(os.path.splitext(path)[1])
+                lang = resolve_lang_from_ext(os.path.splitext(path)[1])
                 
                 # Generate ID for Fortify finding
                 preimage = '\0'.join(str(p) for p in (path, line, vulnerability_type, description, trace) if len(str(p)) > 0)

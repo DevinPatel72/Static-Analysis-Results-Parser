@@ -155,6 +155,24 @@ class Scanners(Enum):
                     "2": "error"
                 },
                 'parsers.eslint')
+    FLAWFINDER = ('Flawfinder',
+                ['flawfinder'],
+                ('.csv',),
+                {
+                    "0": "note",
+                    "1": "warning",
+                    "2": "warning",
+                    "3": "error",
+                    "4": "error",
+                    "5": "error",
+                    "0 (very little risk)": "note",
+                    "1 (little risk)": "warning",
+                    "2 (medium risk)": "warning",
+                    "3 (high risk)": "error",
+                    "4 (very high risk)": "error",
+                    "5 (great risk)": "error"
+                },
+                'parsers.flawfinder')
     FORTIFY = ('Fortify',
                 ['fortify', 'fortifysca'],
                 ('.fpr',),

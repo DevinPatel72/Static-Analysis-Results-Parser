@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from .eslint import get_eslint_cdata
 from .pylint import get_pylint_cdata
 from .parser_tools import idgenerator, parser_writer
-from .parser_tools.language_resolver import resolve_lang
+from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 
@@ -91,7 +91,7 @@ def _parse_csv(fpath, substr, prepend, scanner):
                 progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
             
                 # Resolve language of the file
-                lang = resolve_lang(os.path.splitext(row['Path'])[1])
+                lang = resolve_lang_from_ext(os.path.splitext(row['Path'])[1])
                 
                 cwe = row['CWE']
                 
@@ -176,7 +176,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
             path = os.path.join(prepend, path).replace('\\', '/')
             
             # Resolve language of the file
-            lang = resolve_lang(os.path.splitext(path)[1])
+            lang = resolve_lang_from_ext(os.path.splitext(path)[1])
             
             # Get cwe
             if finding.find('cwe') is not None:

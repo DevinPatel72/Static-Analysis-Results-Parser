@@ -11,11 +11,12 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 | Checkmarx                                                    | XML\*\*, CSV           |
 | CppCheck                                                     | XML                    |
 | Coverity                                                     | JSON                   |
-| OWASP Dependency Check                                       | JSON, CSV              |
 | ESLint                                                       | JSON                   |
+| Flawfinder                                                   | CSV                    |
 | Fortify                                                      | FPR                    |
 | Gnat SAS                                                     | SARIF\*\*, CSV         |
 | [NVD CVE](https://github.com/DevinPatel72/Batch-NVD-Query)   | CSV                    |
+| OWASP Dependency Check                                       | JSON, CSV              |
 | Pragmatic                                                    | CSV                    |
 | Pylint                                                       | JSON                   |
 | Semgrep                                                      | JSON\*\*, CSV          |

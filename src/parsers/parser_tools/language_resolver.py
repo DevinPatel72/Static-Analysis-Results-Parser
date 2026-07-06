@@ -1,7 +1,11 @@
 # language_resolver.py
 
-def resolve_lang(lang):
-    if lang in ['.cpp', '.c', '.cc', '.h', '.hh', '.hpp']:
+def resolve_lang_from_ext(lang):
+    if lang in ['.c']:
+        return 'c'
+    elif lang in ['.cpp', '.cc', '.hh', '.hpp']:
+        return 'c++'
+    elif lang in ['.h']:
         return 'c/c++'
     elif lang in ['.cs']:
         return 'c#'

@@ -208,10 +208,11 @@ def close_writer():
                             time.sleep(1)
                             elapsed_time += 1
             elif __excel_enabled:
+                temp = __excel_workbook.active
+                for r in __parser_data:
+                    temp.append([r.get(header, '') for header in __fieldnames])
                 while True:
                     try:
-                        temp = __excel_workbook.active
-                        for r in __parser_data: temp.append([r.get(header, '') for header in __fieldnames])
                         __excel_workbook.save(__filepath)
                         break
                     except PermissionError:
