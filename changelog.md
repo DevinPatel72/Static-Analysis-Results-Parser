@@ -4,7 +4,7 @@
 - Added Flawfinder to the list of supported scanners
 - Added Spotbugs + FindSecBugs to the list of supported scanners
 - Added an updater executable that checks for and installs new SARP releases
-- Fixed bug where if a lock is on the outfile in SARP CLI, the waiting time will result in duplicate output of findings.
+- Fixed bug where if a lock is on the output file, the wait mechanic will result in duplicate output of findings.
 - Fixed background coloring in Rule Builder window
 
 ## [Version 2.7.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.7.0) (2026-06-30)
