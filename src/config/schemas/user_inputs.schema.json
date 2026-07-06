@@ -73,7 +73,7 @@
         },
         "SARIF STITCH Properties": {
           "type": "boolean",
-          "description": "By default, SARIF format will output without CVSS properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true."
+          "description": "By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true."
         }
       },
       "additionalProperties": false
