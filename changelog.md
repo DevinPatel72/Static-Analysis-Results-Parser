@@ -1,5 +1,10 @@
 # Change Log
 
+## [Version 2.8.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.8.1) (2026-07-07)
+- Added ability to pass SARIF results for Flawfinder.
+- Added CWE mappings for Spotbugs.
+- Minor bug fixes in Flawfinder and Spotbugs parsers.
+
 ## [Version 2.8.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.8.0) (2026-07-06)
 - Added Flawfinder to the list of supported scanners
 - Added Spotbugs + FindSecBugs to the list of supported scanners

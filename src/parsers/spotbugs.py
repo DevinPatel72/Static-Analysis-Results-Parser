@@ -90,6 +90,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
     scanner = "{} {}".format(data['tool']['driver']['name'], data['tool']['driver']['version'])
     
     # Get rules
+    rules = {}
     for rule in data['tool']['driver']['rules']:
         rule_id = rule['id']
         short_desc = _normalize_text(rule['shortDescription']['text'])
@@ -103,7 +104,9 @@ def _parse_sarif(fpath, scanner, substr, prepend):
                 append_cwe['cweid'] = relationship['target']['id']
                 break
         
-        insert_pattern(rule_id, append_cwe | {"ShortDescription": short_desc, "LongDescription": long_desc, "Details": details})
+        rules[rule_id] = append_cwe | {"ShortDescription": short_desc, "LongDescription": long_desc, "Details": details}
+
+    load_spotbugs_bug_patterns(rules)
     
     # Iterate through results
     for result in data['results']:
@@ -306,19 +309,29 @@ def _parse_xml(fpath, scanner, substr, prepend):
     return finding_count, err_count
 # End of _parse_xml
 
-def insert_pattern(rule_id, new_bug_pattern):
+def load_spotbugs_bug_patterns(existing_data=None):
     global spotbugs_bug_patterns
-    spotbugs_bug_patterns[rule_id] = new_bug_pattern
-
-def load_spotbugs_bug_patterns():
     from . import PROG_NAME_ABBR, MAPPINGS_DIR
     try:
         with open(os.path.join(MAPPINGS_DIR, 'spotbugs_bug_patterns.json'), 'r', encoding='utf-8-sig') as r:
-            return json.load(r)
+            data = json.load(r)
         logger.info("Loaded Spotbugs description map")
     except (FileNotFoundError, json.JSONDecodeError):
         console(f"Unable to load Spotbugs Bug Patterns: Invalid JSON format\n{PROG_NAME_ABBR} will continue without finding descriptions.", "Config Error", type='error', orig_name=__name__)
-        return {"__spotbugs_bug_patterns_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
+        if existing_data is not None:
+            spotbugs_bug_patterns = existing_data
+        else:
+            spotbugs_bug_patterns = {"__spotbugs_bug_patterns_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
+        return
+
+    if existing_data is not None:
+        for k, v in existing_data.items():
+            if k in data and isinstance(v, dict):
+                spotbugs_bug_patterns[k] = data[k] | v
+            else:
+                spotbugs_bug_patterns[k] = v
+    else:
+        spotbugs_bug_patterns = data
     
 
 def get_spotbugs_bug_description(*args, bug_type, default=('', '')):
@@ -329,7 +342,7 @@ def get_spotbugs_bug_description(*args, bug_type, default=('', '')):
         return default
     
     if len(spotbugs_bug_patterns) <= 0:
-        spotbugs_bug_patterns = load_spotbugs_bug_patterns()
+        load_spotbugs_bug_patterns()
     
     if bug_type in spotbugs_bug_patterns.keys():
         # Get description
@@ -344,7 +357,6 @@ def get_spotbugs_bug_description(*args, bug_type, default=('', '')):
         
         # Get other info
         cwe = spotbugs_bug_patterns[bug_type].get('cweid', '')
-        cwe = cwe if cwe is not None else ''
         details = spotbugs_bug_patterns[bug_type].get('Details', '')
         
         # Append details to the end of description
