@@ -157,7 +157,7 @@ class Scanners(Enum):
                 'parsers.eslint')
     FLAWFINDER = ('Flawfinder',
                 ['flawfinder'],
-                ('.csv',),
+                ('.sarif', '.json', '.csv'),
                 {
                     "0": "note",
                     "1": "warning",
@@ -171,7 +171,7 @@ class Scanners(Enum):
                     "3 (high risk)": "error",
                     "4 (very high risk)": "error",
                     "5 (great risk)": "error"
-                },
+                } | _sarif_mapping_identity,
                 'parsers.flawfinder')
     FORTIFY = ('Fortify',
                 ['fortify', 'fortifysca'],

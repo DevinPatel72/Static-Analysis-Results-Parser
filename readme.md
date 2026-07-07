@@ -12,7 +12,7 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 | CppCheck                                                     | XML                    |
 | Coverity                                                     | JSON                   |
 | ESLint                                                       | JSON                   |
-| Flawfinder                                                   | CSV                    |
+| Flawfinder                                                   | SARIF\*\*, CSV         |
 | Fortify                                                      | FPR                    |
 | Gnat SAS                                                     | SARIF\*\*, CSV         |
 | [NVD CVE](https://github.com/DevinPatel72/Batch-NVD-Query)   | CSV                    |

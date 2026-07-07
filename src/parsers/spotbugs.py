@@ -139,8 +139,8 @@ def _parse_sarif(fpath, scanner, substr, prepend):
                 endline = int(endline) if endline.isdigit() else endline
             except KeyError as ke:
                 if 'region' in str(ke):
-                    line = ''
-                    endline = ''
+                    line = line if len(line) > 0 else ''
+                    endline = line if len(endline) > 0 else ''
             
             # Language
             lang = 'java'
