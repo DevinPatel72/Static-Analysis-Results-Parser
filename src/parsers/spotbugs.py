@@ -116,7 +116,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
         
             # Get CWE and message
             arguments = result['message'].get('arguments', [])
-            cwe, message = get_spotbugs_bug_description(*arguments, bug_type=bug_type, default=('', '', ''))
+            cwe, message = get_spotbugs_bug_description(*arguments, bug_type=bug_type, default=('', ''))
             
             # Get tool cwe before any overrides are performed
             if len(cwe) <= 0:
@@ -321,7 +321,7 @@ def load_spotbugs_bug_patterns():
         return {"__spotbugs_bug_patterns_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
     
 
-def get_spotbugs_bug_description(*args, bug_type, default=('', '', '')):
+def get_spotbugs_bug_description(*args, bug_type, default=('', '')):
     # Maps Spotbugs bug_type to its description and parses any args with it
     global spotbugs_bug_patterns
     
@@ -343,10 +343,12 @@ def get_spotbugs_bug_description(*args, bug_type, default=('', '', '')):
             description = spotbugs_bug_patterns[bug_type]['ShortDescription']
         
         # Get other info
+        cwe = spotbugs_bug_patterns[bug_type].get('cweid', '')
+        cwe = cwe if cwe is not None else ''
         details = spotbugs_bug_patterns[bug_type].get('Details', '')
         
-        # Append details to the end
-        return spotbugs_bug_patterns[bug_type].get('cweid', ''), " ".join(p for p in [description, details] if len(p) > 0)
+        # Append details to the end of description
+        return cwe, " ".join(p for p in [description, details] if len(p) > 0)
     else:
         return default
 
