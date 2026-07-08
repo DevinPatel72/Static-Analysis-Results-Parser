@@ -4,15 +4,6 @@ import os
 import logging
 from .toolbox import console
 
-_plotlib_enabled = False
-
-try:
-    import matplotlib.pyplot as plt
-    from matplotlib.figure import Figure
-    _plotlib_enabled = True
-except (ImportError, ModuleNotFoundError):
-    _plotlib_enabled = False
-
 logger = logging.getLogger(__name__)
 
 class Report:
@@ -36,7 +27,6 @@ class Report:
         return sum([v[1] for v in self.counts.values()])
 
     def generate_report(self):
-        global _plotlib_enabled
         from parsers import PROJ_NAME, PROJ_VERSION, GUI_MODE, LOGS_DIR
         
         # Print CLI and log string here
@@ -48,12 +38,10 @@ class Report:
             print(outstr)
         
         # Create pie charts
-        if not _plotlib_enabled:
-            console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", type='error', orig_name=__name__)
-            return
-        
-        # Create chart figure
         fig = self._build_chart()
+        
+        if fig is None:
+            return
 
         # Always save PNG
         fname = "_".join(part for part in [PROJ_NAME.replace(' ', '_'), PROJ_VERSION.replace(' ', '_'), "Findings.png"] if len(part.strip()) > 0)
@@ -70,7 +58,13 @@ class Report:
             self._gui_chart(fig)
                     
     def _build_chart(self):
-        from parsers import PROJ_NAME, PROJ_VERSION
+        from parsers import PROJ_NAME, PROJ_VERSION, LOGS_DIR
+        try:
+            import matplotlib.pyplot as plt
+            from matplotlib.figure import Figure
+        except (ImportError, ModuleNotFoundError):
+            console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", type='error', orig_name=__name__)
+            return None
         findings = [i[0] for i in self.counts.values()]
         labels = list(self.counts.keys())
 
