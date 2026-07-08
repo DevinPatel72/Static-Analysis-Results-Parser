@@ -4,7 +4,7 @@ import os
 import json
 import parsers
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import tkinter.font as tkfont
 
 from .. import PROG_NAME, VERSION
@@ -63,18 +63,18 @@ class JsonInputPreviewGUI:
             pady=10
         )
 
-        self.load_button = ttk.Button(
-            button_frame,
-            text="Load",
-            command=self._submit
-        )
-
         self.submit_button = ttk.Button(
             button_frame,
             text="Load",
             command=self._submit
         )
         self.submit_button.pack(side=tk.RIGHT)
+
+        self.delete_button = ttk.Button(
+            button_frame,
+            text="Delete",
+            command=self._delete_profile
+        )
 
         self.submit_execute_button = ttk.Button(
             button_frame,
@@ -282,9 +282,18 @@ class JsonInputPreviewGUI:
                     side=tk.RIGHT,
                     padx=(0, 5)
                 )
+            
+            if not self.delete_button.winfo_manager():
+                self.delete_button.pack(
+                    side=tk.RIGHT,
+                    padx=(0, 5)
+                )
         else:
             if self.submit_execute_button.winfo_manager():
                 self.submit_execute_button.pack_forget()
+
+            if self.delete_button.winfo_manager():
+                self.delete_button.pack_forget()
     
     def _submit(self):
         self.results = self.selected_file_var.get()
@@ -383,7 +392,39 @@ class JsonInputPreviewGUI:
                 padx=2,
                 pady=1
             )
-    
+
+    def _delete_profile(self):
+        filepath = self.selected_file_var.get()
+
+        if not filepath or not os.path.isfile(filepath):
+            return
+
+        confirmed = messagebox.askyesno(
+            f"Delete {os.path.splitext(os.path.basename(filepath))[0]}",
+            (
+                "Deleting this profile will be permanent.\n\n"
+                "Do you still want to proceed?"
+            ),
+            icon="warning"
+        )
+
+        if not confirmed:
+            return
+
+        try:
+            os.remove(filepath)
+
+            self.selected_file_var.set("")
+            self._populate_preview(None)
+            self._set_execute_button_visible(False)
+            self._load_json_files()
+
+        except Exception as ex:
+            messagebox.showerror(
+                "Delete Failed",
+                f"Failed to delete profile:\n\n{ex}"
+            )
+
     def _load_preview_from_path(self, filepath):
         self._set_execute_button_visible(bool(filepath))
         try:

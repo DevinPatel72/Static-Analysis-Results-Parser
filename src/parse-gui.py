@@ -112,7 +112,9 @@ def main():
     
     # Check inputs format
     if len(parser_inputs) > 0:
-        check_input_format(parser_inputs, parser_outfile, control_flags)
+        if not check_input_format(parser_inputs, parser_outfile, control_flags):
+            if select_input is not None:
+                select_input.execute_now = False
     
     # Skip all the GUI steps if Execute button is selected
     if select_input is None or not select_input.execute_now:
