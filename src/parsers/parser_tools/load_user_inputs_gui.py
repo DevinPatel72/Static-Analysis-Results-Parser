@@ -2,6 +2,7 @@
 
 import os
 import json
+import logging
 import parsers
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -9,6 +10,8 @@ import tkinter.font as tkfont
 
 from .. import PROG_NAME, VERSION
 from .toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags
+
+logger = logging.getLogger(__name__)
 
 class JsonInputPreviewGUI:
     def __init__(self):
@@ -420,9 +423,10 @@ class JsonInputPreviewGUI:
             self._load_json_files()
 
         except Exception as ex:
+            logger.error("Failed to delete profile:\n\n%s", ex)
             messagebox.showerror(
                 "Delete Failed",
-                f"Failed to delete profile:\n\n{ex}"
+                f"Failed to delete {os.path.splitext(os.path.basename(filepath))[0]}"
             )
 
     def _load_preview_from_path(self, filepath):
@@ -441,6 +445,7 @@ class JsonInputPreviewGUI:
                 self._populate_preview(None)
 
         except Exception as ex:
+            logger.error("Failed to load JSON file:\n\n%s", ex)
             self.controls_frame.pack_forget()
             self.scanner_sections.clear()
 
@@ -449,7 +454,7 @@ class JsonInputPreviewGUI:
 
             ttk.Label(
                 self.preview_content,
-                text=f"Failed to load JSON file:\n\n{ex}"
+                text="Failed to load JSON file"
             ).pack(anchor="w")
 
     def _create_scanner_section(
