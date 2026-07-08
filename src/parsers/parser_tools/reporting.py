@@ -4,6 +4,15 @@ import os
 import logging
 from .toolbox import console
 
+__enable_matplotlib = False
+
+try:
+    import matplotlib.pyplot as plt
+    from matplotlib.figure import Figure
+    __enable_matplotlib = True
+except (ImportError, ModuleNotFoundError):
+    __enable_matplotlib = False
+
 logger = logging.getLogger(__name__)
 
 class Report:
@@ -37,11 +46,12 @@ class Report:
         if not GUI_MODE:
             print(outstr)
         
+        if not __enable_matplotlib:
+            console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", type='error', orig_name=__name__)
+            return
+        
         # Create pie charts
         fig = self._build_chart()
-        
-        if fig is None:
-            return
 
         # Always save PNG
         fname = "_".join(part for part in [PROJ_NAME.replace(' ', '_'), PROJ_VERSION.replace(' ', '_'), "Findings.png"] if len(part.strip()) > 0)
@@ -58,13 +68,7 @@ class Report:
             self._gui_chart(fig)
                     
     def _build_chart(self):
-        from parsers import PROJ_NAME, PROJ_VERSION, LOGS_DIR
-        try:
-            import matplotlib.pyplot as plt
-            from matplotlib.figure import Figure
-        except (ImportError, ModuleNotFoundError):
-            console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", type='error', orig_name=__name__)
-            return None
+        from parsers import PROJ_NAME, PROJ_VERSION
         findings = [i[0] for i in self.counts.values()]
         labels = list(self.counts.keys())
 
