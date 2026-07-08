@@ -11,6 +11,7 @@ import tempfile
 import shutil
 import time
 import logging
+import argparse
 from urllib.parse import urlsplit, urlunsplit
 import parsers
 
@@ -248,6 +249,9 @@ def main():
     
     ################################################################################################################################################
     
+    argparser = argparse.ArgumentParser(description="Checks and fetches updates for SARP", formatter_class=argparse.RawTextHelpFormatter)
+    argparser.add_argument('-y', '--yes', action='store_true', dest='yes', help='Skip confirmation and updates to new version.')
+    args = argparser.parse_args()
     
     # Check for most recent release
     latest_version = check_version(parsers.VERSION)
@@ -260,9 +264,10 @@ def main():
     
     # Query to continue update
     print("A new version is available for {}: {} -> {}".format(parsers.PROG_NAME_ABBR, parsers.VERSION, latest_version.lstrip('v')))
-    if not ask("Would you like to update to version {}?".format(latest_version.lstrip('v')), default=False):
-        sys.exit(0)
-    print()
+    if not args.yes:
+        if not ask("Would you like to update to version {}?".format(latest_version.lstrip('v')), default=False):
+            sys.exit(0)
+        print()
 
     # Get OS name and arch
     try:
