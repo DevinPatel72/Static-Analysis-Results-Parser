@@ -4,6 +4,7 @@
 - Added a delete button to profile selection.
 - Fixed "Execute" to permit changes to input profile parameters if it fails checks and validations.
 - Added a `-y` option to the updater to skip confirmation before updating.
+- Added a splash screen for GUI.
 
 ## [Version 2.8.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.8.1) (2026-07-07)
 - Added ability to pass SARIF results for Flawfinder.

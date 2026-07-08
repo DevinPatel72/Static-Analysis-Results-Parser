@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.building.splash import Splash
 
 hiddenimports = (
     collect_submodules('parsers') +
@@ -23,12 +24,19 @@ a = Analysis(
 )
 pyz = PYZ(a.pure)
 
+splash = Splash(
+    "assets/sarp-splash.png",
+    binaries=a.binaries,
+    datas=a.datas
+)
+
 exe = EXE(
     pyz,
     a.scripts,
+    splash,
     a.binaries,
     a.datas,
-    [],
+    splash.binaries,
     name='sarp-gui',
     debug=False,
     bootloader_ignore_signals=False,
@@ -41,5 +49,5 @@ exe = EXE(
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
-    entitlements_file=None,
+    entitlements_file=None
 )

@@ -14,8 +14,8 @@ class ProgressUpdate:
     status: str
 
 class LoadingWindow:
-    def __init__(self):
-        self.root = tk.Tk()
+    def __init__(self, root):
+        self.root = tk.Toplevel(root)
         self.queue = queue.Queue()
         self.cleanexit = False
         

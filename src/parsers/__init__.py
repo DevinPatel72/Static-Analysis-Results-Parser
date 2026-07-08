@@ -17,6 +17,9 @@ FLAG_SARIF_STITCH_PROPERTIES = 'SARIF STITCH Properties'
 # Set GUI mode to enable/disable messageboxes
 GUI_MODE = False
 
+# GUI Root
+gui_root = None
+
 # Preflight Rules
 prules = []
 default_prules = []

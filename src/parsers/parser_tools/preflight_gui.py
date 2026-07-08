@@ -555,15 +555,24 @@ class RuleFrame:
 
 class RuleBuilderGUI:
 
-    def __init__(self, rules=None):
+    def __init__(self, root: tk.Tk, rules=None):
 
         self.result = None
         self.enable_default_rules = None
         self.rules = []
 
-        self.root = tk.Tk()
+        self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
-        self.root.geometry(f"{WINDOW_LENGTH}x{WINDOW_HEIGHT}")
+        
+        # Set geometry
+        width = WINDOW_LENGTH
+        height = WINDOW_HEIGHT
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
 
         container = tk.Frame(self.root)
         container.pack(fill="both", expand=True, padx=10, pady=10)
@@ -648,7 +657,7 @@ class RuleBuilderGUI:
         )
         version_label.pack(side="bottom", pady=5)
 
-        self.root.mainloop()
+        root.wait_window(self.root)
 
     def refresh_colors(self):
         for i, rule in enumerate(self.rules):

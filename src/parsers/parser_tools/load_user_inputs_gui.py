@@ -2,6 +2,7 @@
 
 import os
 import json
+import traceback
 import logging
 import parsers
 import tkinter as tk
@@ -14,7 +15,7 @@ from .toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags
 logger = logging.getLogger(__name__)
 
 class JsonInputPreviewGUI:
-    def __init__(self):
+    def __init__(self, root: tk.Tk):
         self.cleanexit = False
         self.results = None
         self.execute_now = False
@@ -26,15 +27,27 @@ class JsonInputPreviewGUI:
         self._tooltip = None
         self._tooltip_after_id = None
 
-        self.root = tk.Tk()
+        self.root = tk.Toplevel(root)
         self.root.title(PROG_NAME)
-        self.root.geometry("1300x500")
+        
+        # Set geometry
+        width = 1300
+        height = 500
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
         
         self.root.protocol(
             "WM_DELETE_WINDOW",
             self._on_close
         )
 
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_force()
         self.root.attributes("-topmost", True)
         self.root.update()
         self.root.attributes("-topmost", False)
@@ -44,7 +57,6 @@ class JsonInputPreviewGUI:
         self._build_gui()
         self._load_json_files()
 
-        self.root.mainloop()
 
     def _on_close(self):
         self.cleanexit = False
@@ -423,7 +435,7 @@ class JsonInputPreviewGUI:
             self._load_json_files()
 
         except Exception as ex:
-            logger.error("Failed to delete profile:\n\n%s", ex)
+            logger.error("Failed to delete profile:\n%s", ex)
             messagebox.showerror(
                 "Delete Failed",
                 f"Failed to delete {os.path.splitext(os.path.basename(filepath))[0]}"
@@ -445,7 +457,7 @@ class JsonInputPreviewGUI:
                 self._populate_preview(None)
 
         except Exception as ex:
-            logger.error("Failed to load JSON file:\n\n%s", ex)
+            logger.error("Failed to load JSON file:\n%s", traceback.format_exc())
             self.controls_frame.pack_forget()
             self.scanner_sections.clear()
 

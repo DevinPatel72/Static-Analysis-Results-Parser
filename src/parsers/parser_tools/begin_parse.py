@@ -32,7 +32,7 @@ def begin(parser_inputs):
     # GUI mode
     if parsers.GUI_MODE:
         # Init loading window
-        loading_window = LoadingWindow()
+        loading_window = LoadingWindow(parsers.gui_root)
         parsers.progress_queue = loading_window.queue
     
         threading.Thread(
@@ -42,7 +42,7 @@ def begin(parser_inputs):
         ).start()
 
         # Loading screen mainloop to wait until the "complete" status type is reached in run_parsers
-        loading_window.root.mainloop()
+        parsers.gui_root.wait_window(loading_window.root)
     
         # Handle unclean exit
         if not loading_window.cleanexit:

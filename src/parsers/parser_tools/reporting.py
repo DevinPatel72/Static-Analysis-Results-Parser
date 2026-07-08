@@ -165,15 +165,25 @@ class Report:
         return fig
     
     def _gui_chart(self, fig):
-        from parsers import PROG_NAME, VERSION, LOGFILE
+        from parsers import gui_root, PROG_NAME, VERSION, LOGFILE
         import tkinter as tk
 
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-        root = tk.Tk()
+        root = tk.Toplevel(gui_root)
 
         root.title(f"{PROG_NAME} Report")
-        root.geometry("900x800")
+        
+        # Set geometry
+        width = 900
+        height = 800
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        root.geometry(f"{width}x{height}+{x}+{y}")
+        
         root.minsize(700, 600)
 
         total_findings, total_errors = self._get_total()
@@ -416,7 +426,7 @@ class Report:
         version_label = tk.Label(root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
         version_label.pack(side="bottom", pady=5)
 
-        root.mainloop()
+        gui_root.wait_window(root)
     
     def _cli_table(self):
         _max_key_len = max([len(k) for k in self.counts.keys()])

@@ -34,40 +34,6 @@ EXT_TO_FORMAT = {
     for k, v in FORMAT_MAP.items()
 }
 
-class YesNoGUI:
-    def __init__(self, question="Do you want to continue?", windowsize=f"{WINDOW_LENGTH-400}x{WINDOW_HEIGHT-200}"):
-        self.result = None
-        self.root = tk.Tk()
-        self.root.title(WINDOW_TITLE)
-        self.root.geometry(windowsize)
-        self.root.attributes('-topmost', True)
-        self.root.update()
-        self.root.attributes('-topmost', False)
-
-        # Question label
-        label = tk.Label(self.root, text=question, wraplength=280, font=("Arial", 12))
-        label.pack(pady=15)
-
-        # Buttons frame
-        btn_frame = tk.Frame(self.root)
-        btn_frame.pack(pady=5)
-
-        yes_btn = tk.Button(btn_frame, text="Yes", width=10, command=self.yes)
-        yes_btn.pack(side=tk.LEFT, padx=5)
-
-        no_btn = tk.Button(btn_frame, text="No", width=10, command=self.no)
-        no_btn.pack(side=tk.LEFT, padx=5)
-
-        # Run GUI loop
-        self.root.mainloop()
-
-    def yes(self):
-        self.result = True
-        self.root.destroy()
-
-    def no(self):
-        self.result = False
-        self.root.destroy()
 
 class PathInputWithPlaceholder(tk.Entry):
     def __init__(self, master=None, placeholder="PLACEHOLDER", color='grey', **kwargs):
@@ -101,7 +67,7 @@ class PathInputWithPlaceholder(tk.Entry):
 
 
 class InputsGUI:
-    def __init__(self, inputs=None):
+    def __init__(self, root: tk.Tk, inputs=None):
         if inputs is None:
             self.results = {}
         else:
@@ -110,12 +76,20 @@ class InputsGUI:
         self.results_project_version = ''
         self.cleanexit = False
         self.dupe_detected_submit_again = False
-        self.root = tk.Tk()
+        
+        self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
-        self.root.geometry(f"{WINDOW_LENGTH}x{WINDOW_HEIGHT}")
-        self.root.attributes('-topmost', True)
-        self.root.update()
-        self.root.attributes('-topmost', False)
+        
+        # Set geometry
+        width = WINDOW_LENGTH
+        height = WINDOW_HEIGHT
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        
         
         # Top row: Project Name + Version
         top_frame = tk.Frame(self.root)
@@ -196,7 +170,14 @@ class InputsGUI:
         version_label.pack(side="bottom", pady=5)
 
         # Execute GUI
-        self.root.mainloop()
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_force()
+        self.root.attributes("-topmost", True)
+        self.root.update()
+        self.root.attributes("-topmost", False)
+        
+        root.wait_window(self.root)
 
     def add_entry(self, p_entry=None):
         row_frame = tk.Frame(self.entry_frame)
@@ -340,21 +321,26 @@ class InputsGUI:
 
 
 class AdjustPathsGUI:
-    def __init__(self, current_inputs):
+    def __init__(self, root: tk.Tk, current_inputs):
         self.results = {}
         self.cleanexit = False
+        self.root = tk.Toplevel(root)
+        self.root.title(WINDOW_TITLE)
+        
+        # Get previews
         self.previous_results = current_inputs
         self.previews = get_all_previews(current_inputs)
-        self.root = tk.Tk()
-        self.root.title(WINDOW_TITLE)
-        self.root.attributes('-topmost', True)
-        self.root.update()
-        self.root.attributes('-topmost', False)
         
-        # Populate window
-        #max_scanner_width = max([len(f"{i[InputDictKeys.SCANNER.value]} - {os.path.basename(i[InputDictKeys.PATH.value])}") for i in self.previous_results])
+        
+        # Set geometry
+        width = min(WINDOW_LENGTH+200, self.root.winfo_screenwidth())
+        height = WINDOW_HEIGHT
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
 
-        self.root.geometry(f"{min(WINDOW_LENGTH+200, self.root.winfo_screenwidth())}x{WINDOW_HEIGHT}")
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
         
         self.updated_paths = []
 
@@ -446,7 +432,14 @@ class AdjustPathsGUI:
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
         version_label.pack(side="bottom", pady=5)
 
-        self.root.mainloop()
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_force()
+        self.root.attributes("-topmost", True)
+        self.root.update()
+        self.root.attributes("-topmost", False)
+
+        root.wait_window(self.root)
 
     def collect_paths(self):
         self.results = []
@@ -466,7 +459,7 @@ class AdjustPathsGUI:
         self.root.destroy()
 
 class OutfileFlagsGUI:
-    def __init__(self, outfile="", control_flags=None):
+    def __init__(self, root: tk.Tk, outfile="", control_flags=None):
         self.initial_outfile = outfile
         if control_flags is None:
             self.initial_flags = {}
@@ -475,12 +468,17 @@ class OutfileFlagsGUI:
         self.results = {}
         self.cleanexit = False
         
-        self.root = tk.Tk()
+        self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
-        self.root.geometry(f"{550}x{200 + (25*len(InputConfigFlags))}")
-        self.root.attributes('-topmost', True)
-        self.root.update()
-        self.root.attributes('-topmost', False)
+        # Set geometry
+        width = 550
+        height = 200 + (25*len(InputConfigFlags))
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
 
         self.output_path = tk.StringVar()
         self.output_format = tk.StringVar(value="Excel")
@@ -543,7 +541,14 @@ class OutfileFlagsGUI:
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
         version_label.pack(side="bottom", pady=5)
 
-        self.root.mainloop()
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_force()
+        self.root.attributes("-topmost", True)
+        self.root.update()
+        self.root.attributes("-topmost", False)
+        
+        root.wait_window(self.root)
 
     def browse_file(self):
         fmt = FORMAT_MAP[self.output_format.get()]

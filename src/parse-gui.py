@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
 
+# Pyinstaller splash screen
+try:
+    import pyi_splash
+except ImportError:
+    pyi_splash = None
+
+def close_splash():
+    if pyi_splash is not None:
+        pyi_splash.close()
+
 # Imports
 import os
 import sys
 import traceback
 import parsers
+import tkinter as tk
 from parsers.parser_tools.inputs_gui import InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
 from parsers.parser_tools.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.preflight_gui import RuleBuilderGUI
@@ -14,6 +25,9 @@ from parsers.parser_tools import parser_writer, preflight
 import parsers.parser_tools.progressbar as progressbar
 from parsers.parser_tools.begin_parse import begin
 
+# Init GUI
+parsers.gui_root = tk.Tk()
+parsers.gui_root.withdraw()
 parsers.GUI_MODE = True
 progressbar.DISABLE_PROGRESS_BAR = True
 
@@ -87,24 +101,25 @@ def main():
     control_flags = {}
     
     # Load inputs if there are any
-    select_input = None
-    if len(os.listdir(parsers.INPUTS_DIR)) > 0:
-        select_input = JsonInputPreviewGUI()
-        
-        # Load inputs from config file
-        if select_input.cleanexit and select_input.results is not None:
-            rv = load_config_user_inputs(select_input.results)
-            if isinstance(rv, str):
-                if f"Config file {select_input.results} not found." != rv:
-                    console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning", orig_name=__name__)
-                parser_inputs = []
-                parser_outfile = ""
-                control_flags = {}
-            else:
-                parser_inputs, parser_outfile, control_flags = rv
-        # Else exit
+    select_input = JsonInputPreviewGUI(parsers.gui_root)
+    close_splash()
+    parsers.gui_root.wait_window(select_input.root)
+
+    
+    # Load inputs from config file
+    if select_input.cleanexit and select_input.results is not None:
+        rv = load_config_user_inputs(select_input.results)
+        if isinstance(rv, str):
+            if f"Config file {select_input.results} not found." != rv:
+                console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning", orig_name=__name__)
+            parser_inputs = []
+            parser_outfile = ""
+            control_flags = {}
         else:
-            sys.exit(0)
+            parser_inputs, parser_outfile, control_flags = rv
+    # Else exit
+    else:
+        sys.exit(0)
     
     # Dedupe parser_inputs
     parser_inputs = dedupe_parser_inputs(parser_inputs)
@@ -119,20 +134,20 @@ def main():
     if ((len(parser_inputs) <= 0 or len(parser_outfile) <= 0 or len(control_flags) <= 0)
         or (select_input is None or not select_input.execute_now)
         ):
-        inputs_gui = InputsGUI(parser_inputs)
+        inputs_gui = InputsGUI(parsers.gui_root, parser_inputs)
         if not inputs_gui.cleanexit or (inputs_gui.results is None or len(inputs_gui.results) <= 0):
             sys.exit(0)
             
         parsers.PROJ_NAME = inputs_gui.results_project_name
         parsers.PROJ_VERSION = inputs_gui.results_project_version
         
-        adjust_paths_gui = AdjustPathsGUI(inputs_gui.results)
+        adjust_paths_gui = AdjustPathsGUI(parsers.gui_root, inputs_gui.results)
         if not adjust_paths_gui.cleanexit or (adjust_paths_gui.results is None or len(adjust_paths_gui.results) <= 0):
             sys.exit(0)
         
         parser_inputs = adjust_paths_gui.results
         
-        outfile_flags_gui = OutfileFlagsGUI(parser_outfile, control_flags)
+        outfile_flags_gui = OutfileFlagsGUI(parsers.gui_root, parser_outfile, control_flags)
         if not outfile_flags_gui.cleanexit or (outfile_flags_gui.results is None or len(outfile_flags_gui.results) <= 0):
             sys.exit(0)
         
@@ -146,7 +161,7 @@ def main():
             # Load the preflight rules
             preflight.load_prules()
 
-            rulebuildergui = RuleBuilderGUI(parsers.prules)
+            rulebuildergui = RuleBuilderGUI(parsers.gui_root, parsers.prules)
             
             if rulebuildergui.result is not None:
                 parsers.prules = rulebuildergui.result
