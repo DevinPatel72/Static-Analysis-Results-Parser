@@ -117,8 +117,7 @@ def main():
     
     # Skip all the GUI steps if Execute button is selected or no inputs are defined
     if ((len(parser_inputs) <= 0 or len(parser_outfile) <= 0 or len(control_flags) <= 0)
-        or select_input is None
-        or not select_input.execute_now
+        or (select_input is None or not select_input.execute_now)
         ):
         inputs_gui = InputsGUI(parser_inputs)
         if not inputs_gui.cleanexit or (inputs_gui.results is None or len(inputs_gui.results) <= 0):
