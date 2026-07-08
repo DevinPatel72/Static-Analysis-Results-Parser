@@ -1,5 +1,9 @@
 # Change Log
 
+## [Version 2.8.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.8.2) (2026-07-08)
+- Added a delete button to profile selection.
+- Fixed "Execute" to permit changes to input profile parameters if it fails checks and validations.
+
 ## [Version 2.8.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.8.1) (2026-07-07)
 - Added ability to pass SARIF results for Flawfinder.
 - Added CWE mappings for Spotbugs.
