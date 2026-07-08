@@ -4,14 +4,14 @@ import os
 import logging
 from .toolbox import console
 
-__enable_matplotlib = False
+_enable_matplotlib = False
 
 try:
     import matplotlib.pyplot as plt
     from matplotlib.figure import Figure
-    __enable_matplotlib = True
+    _enable_matplotlib = True
 except (ImportError, ModuleNotFoundError):
-    __enable_matplotlib = False
+    _enable_matplotlib = False
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +36,7 @@ class Report:
         return sum([v[1] for v in self.counts.values()])
 
     def generate_report(self):
+        global _enable_matplotlib
         from parsers import PROJ_NAME, PROJ_VERSION, GUI_MODE, LOGS_DIR
         
         # Print CLI and log string here
@@ -46,7 +47,7 @@ class Report:
         if not GUI_MODE:
             print(outstr)
         
-        if not __enable_matplotlib:
+        if not _enable_matplotlib:
             console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", type='error', orig_name=__name__)
             return
         
