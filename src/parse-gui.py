@@ -96,7 +96,6 @@ def main():
             rv = load_config_user_inputs(select_input.results)
             if isinstance(rv, str):
                 if f"Config file {select_input.results} not found." != rv:
-                    logger.warning(rv)
                     console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning", orig_name=__name__)
                 parser_inputs = []
                 parser_outfile = ""
