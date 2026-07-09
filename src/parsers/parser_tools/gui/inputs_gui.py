@@ -231,12 +231,12 @@ class InputsGUI:
 
     def ask_open_filename(self, title, file_filters=None):
         if file_filters is None:
-            file_filters = []
+            file_filters = ''
         if platform.system() == "Linux" and shutil.which("zenity"):
             result = subprocess.run(
                 ["zenity",
                  "--file-selection",
-                 *file_filters,
+                 *( [f"--filename={file_filters}"] if len(file_filters) > 0 else [] ),
                  "--file-filter=All files | *",
                  ],
                 capture_output=True,
@@ -248,10 +248,11 @@ class InputsGUI:
         return filedialog.askopenfilename(title=title)
 
     def browse_file(self, entry_widget, scanner):
-        file_filters = []
+        file_filters = None
         if scanner != 'Select Scanner...':
             selected_scanner = select_scanner(scanner)
-            file_filters = [f"--file-filter={selected_scanner.sname} files (*{ext}) | *{ext}" for ext in selected_scanner.valid_ext]
+            filter_str = ", ".join(f"*{ext}" for ext in selected_scanner.valid_ext)
+            file_filters = f"--file-filter={selected_scanner.sname} files (*{filter_str}) | *{filter_str}"
         
         path = self.ask_open_filename(title="Select a file", file_filters=file_filters)
             
@@ -614,14 +615,15 @@ class OutfileFlagsGUI:
         fmt = FORMAT_MAP[self.output_format.get()]
         
         if platform.system() == "Linux" and shutil.which("zenity"):
+            filter_str = ", ".join("*{}".format(f['ext']) for f in FORMAT_MAP.values())
             result = subprocess.run(
                 [
                     "zenity",
                     "--file-selection",
                     "--save",
                     "--confirm-overwrite",
-                    f"--filename=output{fmt['ext']}",
-                    *[f"--file-filter={k} files (*{f['ext']}) | *{f['ext']}" for k, f in FORMAT_MAP.items()]
+                    "--filename=output{}".format(fmt['ext']),
+                    "--file-filter={} files ({}) | {}".format(parsers.PROG_NAME_ABBR, filter_str, filter_str)
                 ],
                 capture_output=True,
                 text=True,
