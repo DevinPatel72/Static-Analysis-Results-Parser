@@ -221,7 +221,7 @@ class InputsGUI:
         path_inp.pack(side=tk.LEFT, expand=True, fill='x', padx=5)
         path_inp.set_real_value(path_inp_entry)
 
-        browse_btn = tk.Button(row_frame, text="Browse", command=lambda: self.browse_file(path_inp))
+        browse_btn = tk.Button(row_frame, text="Browse", command=lambda: self.browse_file(path_inp, scanner_dropdown.get().strip()))
         browse_btn.pack(side=tk.LEFT, padx=2)
 
         del_btn = tk.Button(row_frame, text="Delete", command=lambda: self.delete_entry(row_frame))
@@ -229,10 +229,16 @@ class InputsGUI:
 
         self.entries.append((row_frame, path_inp, scanner_dropdown, version_textbox))
 
-    def ask_open_filename(self, title):
+    def ask_open_filename(self, title, file_filters=None):
+        if file_filters is None:
+            file_filters = []
         if platform.system() == "Linux" and shutil.which("zenity"):
             result = subprocess.run(
-                ["zenity", "--file-selection"],
+                ["zenity",
+                 "--file-selection",
+                 *file_filters,
+                 "--file-filter=All files | *",
+                 ],
                 capture_output=True,
                 text=True,
             )
@@ -241,8 +247,13 @@ class InputsGUI:
 
         return filedialog.askopenfilename(title=title)
 
-    def browse_file(self, entry_widget):
-        path = self.ask_open_filename(title="Select a file")
+    def browse_file(self, entry_widget, scanner):
+        file_filters = []
+        if scanner != 'Select Scanner...':
+            selected_scanner = select_scanner(scanner)
+            file_filters = [f"--file-filter={selected_scanner.sname} files (*{ext}) | *{ext}" for ext in selected_scanner.valid_ext]
+        
+        path = self.ask_open_filename(title="Select a file", file_filters=file_filters)
             
         if path:
             existing_paths = [e.get() for _, e, _, _ in self.entries if e != entry_widget]
@@ -602,21 +613,22 @@ class OutfileFlagsGUI:
     def browse_file(self):
         fmt = FORMAT_MAP[self.output_format.get()]
         
-        result = subprocess.run(
-            [
-                "zenity",
-                "--file-selection",
-                "--save",
-                "--confirm-overwrite",
-                f"--filename=output{fmt['ext']}",
-                f"--file-filter=*{fmt['ext']}"
-            ],
-            capture_output=True,
-            text=True,
-        )
+        if platform.system() == "Linux" and shutil.which("zenity"):
+            result = subprocess.run(
+                [
+                    "zenity",
+                    "--file-selection",
+                    "--save",
+                    "--confirm-overwrite",
+                    f"--filename=output{fmt['ext']}",
+                    *[f"--file-filter={k} files (*{f['ext']}) | *{f['ext']}" for k, f in FORMAT_MAP.items()]
+                ],
+                capture_output=True,
+                text=True,
+            )
 
-        if result.returncode == 0:
-            self.output_path.set(result.stdout.strip())
+            if result.returncode == 0:
+                self.output_path.set(result.stdout.strip())
             return
 
         filetypes = [v["filetype"] for v in FORMAT_MAP.values()]
