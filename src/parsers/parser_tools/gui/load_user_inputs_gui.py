@@ -274,21 +274,14 @@ class JsonInputPreviewGUI:
         )
 
         # Mouse wheel support
+        self.preview_canvas.bind("<Enter>", self._bind_mousewheel)
+        self.preview_canvas.bind("<Leave>", self._unbind_mousewheel)
+    
+    def _bind_mousewheel(self, event=None):
+        self.root.bind_all("<MouseWheel>", self._on_mousewheel)
 
-        self.root.bind_all(
-            "<MouseWheel>",
-            self._on_mousewheel
-        )
-
-        self.root.bind_all(
-            "<Button-4>",
-            lambda e: self.preview_canvas.yview_scroll(-1, "units")
-        )
-
-        self.root.bind_all(
-            "<Button-5>",
-            lambda e: self.preview_canvas.yview_scroll(1, "units")
-        )
+    def _unbind_mousewheel(self, event=None):
+        self.root.unbind_all("<MouseWheel>")
     
     def _set_execute_button_visible(self, visible: bool):
         if visible:
@@ -768,7 +761,7 @@ class JsonInputPreviewGUI:
             self.preview_content,
             text="Flags",
             font=self.section_header_font
-        )
+        ).pack(anchor="w")
 
         flags = data.get(
             InputSchemaKeys.FLAGS.value,

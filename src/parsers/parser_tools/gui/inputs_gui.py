@@ -148,7 +148,7 @@ class InputsGUI:
         canvas.configure(yscrollcommand=scrollbar.set)
 
         canvas.pack(side=tk.LEFT, fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        scrollbar.pack(side=tk.RIGHT, fill="y")
 
         
         # Entries setup
@@ -177,7 +177,7 @@ class InputsGUI:
         
         # Version text
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
-        version_label.pack(side="bottom", pady=5)
+        version_label.pack(side=tk.BOTTOM, pady=5)
 
         # Execute GUI
         self.root.deiconify()
@@ -323,13 +323,19 @@ class InputsGUI:
 
             seen.add(key)
         
-        # Results successful, destroy window and exit
-        for result in results:
-            for r in self.results:
-                if result[InputDictKeys.PATH.value] == r[InputDictKeys.PATH.value]:
-                    result[InputDictKeys.REMOVE.value] = r[InputDictKeys.REMOVE.value]
-                    result[InputDictKeys.PREPEND.value] = r[InputDictKeys.PREPEND.value]
+        # Remove and Prepend keys must be carried over from self.results to results
+        for result in self.results:
+            for r in results:
+                if (r[InputDictKeys.PATH.value] == result[InputDictKeys.PATH.value]
+                    and r[InputDictKeys.SCANNER.value] == result[InputDictKeys.SCANNER.value]
+                ):
+                    if InputDictKeys.REMOVE.value in result:
+                        r[InputDictKeys.REMOVE.value] = result[InputDictKeys.REMOVE.value]
+                    if InputDictKeys.PREPEND.value in result:
+                        r[InputDictKeys.PREPEND.value] = result[InputDictKeys.PREPEND.value]
+
         
+        # Results successful, destroy window and exit
         self.results = results
         self.cleanexit = True
         self.root.destroy()
@@ -387,7 +393,7 @@ class AdjustPathsGUI:
 
         canvas.configure(yscrollcommand=scrollbar.set)
         canvas.pack(side=tk.LEFT, fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        scrollbar.pack(side=tk.RIGHT, fill="y")
         
         self.path_entries = []
         
@@ -460,7 +466,7 @@ class AdjustPathsGUI:
         
         # Version text
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
-        version_label.pack(side="bottom", pady=5)
+        version_label.pack(side=tk.BOTTOM, pady=5)
 
         self.root.deiconify()
         self.root.lift()
@@ -582,7 +588,7 @@ class OutfileFlagsGUI:
 
         # Version text
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
-        version_label.pack(side="bottom", pady=5)
+        version_label.pack(side=tk.BOTTOM, pady=5)
 
         self.root.deiconify()
         self.root.lift()

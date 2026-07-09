@@ -72,6 +72,7 @@ class SARPApp:
                     if inputs_gui.back:
                         self.current_window = GuiWindow.JsonInputPreviewGUI
                     else:
+                        self.parser_inputs = inputs_gui.results
                         parsers.PROJ_NAME = inputs_gui.results_project_name
                         parsers.PROJ_VERSION = inputs_gui.results_project_version
                         self.current_window = GuiWindow.AdjustPathsGUI
