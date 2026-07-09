@@ -2,6 +2,9 @@
 
 import os
 import re
+import platform
+import shutil
+import subprocess
 import parsers
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -218,7 +221,7 @@ class InputsGUI:
         path_inp.pack(side=tk.LEFT, expand=True, fill='x', padx=5)
         path_inp.set_real_value(path_inp_entry)
 
-        browse_btn = tk.Button(row_frame, text="Browse", command=lambda: self.browse_file(path_inp, scanner_dropdown.get().strip()))
+        browse_btn = tk.Button(row_frame, text="Browse", command=lambda: self.browse_file(path_inp))
         browse_btn.pack(side=tk.LEFT, padx=2)
 
         del_btn = tk.Button(row_frame, text="Delete", command=lambda: self.delete_entry(row_frame))
@@ -226,12 +229,20 @@ class InputsGUI:
 
         self.entries.append((row_frame, path_inp, scanner_dropdown, version_textbox))
 
-    def browse_file(self, entry_widget, scanner):
-        if scanner == 'Select Scanner...':
-            messagebox.showinfo("Select a scanner", "Please select a scanner before browsing for a file.")
-            return
-        
-        path = filedialog.askopenfilename(title="Select a file")
+    def ask_open_filename(self, title):
+        if platform.system() == "Linux" and shutil.which("zenity"):
+            result = subprocess.run(
+                ["zenity", "--file-selection"],
+                capture_output=True,
+                text=True,
+            )
+            if result.returncode == 0:
+                return result.stdout.strip()
+
+        return filedialog.askopenfilename(title=title)
+
+    def browse_file(self, entry_widget):
+        path = self.ask_open_filename(title="Select a file")
             
         if path:
             existing_paths = [e.get() for _, e, _, _ in self.entries if e != entry_widget]
@@ -584,6 +595,23 @@ class OutfileFlagsGUI:
 
     def browse_file(self):
         fmt = FORMAT_MAP[self.output_format.get()]
+        
+        result = subprocess.run(
+            [
+                "zenity",
+                "--file-selection",
+                "--save",
+                "--confirm-overwrite",
+                f"--filename=output{fmt['ext']}",
+                f"--file-filter=*{fmt['ext']}"
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode == 0:
+            self.output_path.set(result.stdout.strip())
+            return
 
         filetypes = [v["filetype"] for v in FORMAT_MAP.values()]
 
