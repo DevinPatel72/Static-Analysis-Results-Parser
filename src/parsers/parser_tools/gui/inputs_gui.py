@@ -236,7 +236,7 @@ class InputsGUI:
             result = subprocess.run(
                 ["zenity",
                  "--file-selection",
-                 *( [f"--filename={file_filters}"] if len(file_filters) > 0 else [] ),
+                 *( [file_filters] if len(file_filters) > 0 else [] ),
                  "--file-filter=All files | *",
                  ],
                 capture_output=True,
@@ -254,7 +254,7 @@ class InputsGUI:
         if scanner != 'Select Scanner...':
             selected_scanner = select_scanner(scanner)
             filter_str = ", ".join(f"*{ext}" for ext in selected_scanner.valid_ext)
-            file_filters = f"--file-filter={selected_scanner.sname} files (*{filter_str}) | *{filter_str}"
+            file_filters = f"--file-filter={selected_scanner.sname} files ({filter_str}) | {filter_str.replace(',', '')}"
         
         path = self.ask_open_filename(title="Select a file", file_filters=file_filters)
         if path is None:
@@ -627,7 +627,7 @@ class OutfileFlagsGUI:
                     "--save",
                     "--confirm-overwrite",
                     "--filename=output{}".format(fmt['ext']),
-                    "--file-filter={} files ({}) | {}".format(parsers.PROG_NAME_ABBR, filter_str, filter_str)
+                    "--file-filter={} files ({}) | {}".format(parsers.PROG_NAME_ABBR, filter_str, filter_str.replace(',', ''))
                 ],
                 capture_output=True,
                 text=True,
