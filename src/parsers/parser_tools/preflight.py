@@ -12,9 +12,14 @@ import parsers
 
 
 logger = logging.getLogger(__name__)
+_LOADED_ONCE = False
 
 def load_prules():
+    global _LOADED_ONCE
     from parsers import PREFLIGHT_DIR
+    
+    if _LOADED_ONCE:
+        return
 
     data_path = os.path.join(PREFLIGHT_DIR, 'preflight_rules.py')
     
@@ -53,6 +58,8 @@ def load_prules():
         except:
             logger.error("Failed to import DEFAULT_PRULES from \'%s\'\n%s", data_path, traceback.format_exc())
             parsers.default_prules = []
+    
+    _LOADED_ONCE = True
 
 
 def save_prules(prules):

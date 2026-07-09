@@ -6,8 +6,8 @@ import parsers
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from .. import PROG_NAME, VERSION
-from .toolbox import InputDictKeys, InputConfigFlags, Scanners, validate_path_and_scanner, get_all_previews, generate_preview, select_scanner
+from ... import PROG_NAME, VERSION
+from ..toolbox import GuiWindow, InputDictKeys, InputConfigFlags, Scanners, validate_path_and_scanner, get_all_previews, generate_preview, select_scanner
 
 # Constants
 WINDOW_LENGTH = 900
@@ -75,6 +75,7 @@ class InputsGUI:
         self.results_project_name = ''
         self.results_project_version = ''
         self.cleanexit = False
+        self.back = False
         self.dupe_detected_submit_again = False
         
         self.root = tk.Toplevel(root)
@@ -87,7 +88,7 @@ class InputsGUI:
         screen_height = self.root.winfo_screenheight()
 
         x = (screen_width - width) // 2
-        y = (screen_height - height) // 2
+        y = ((screen_height - height) // 2) - 50
         self.root.geometry(f"{width}x{height}+{x}+{y}")
         
         
@@ -143,7 +144,7 @@ class InputsGUI:
 
         canvas.configure(yscrollcommand=scrollbar.set)
 
-        canvas.pack(side="left", fill="both", expand=True)
+        canvas.pack(side=tk.LEFT, fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
         
@@ -162,8 +163,14 @@ class InputsGUI:
             for entry in self.results:
                 self.add_entry(entry)
 
-        submit_button = tk.Button(self.root, text="Submit", command=self.submit_data)
-        submit_button.pack(pady=10)
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(pady=10)
+
+        back_button = tk.Button(button_frame, text="Go Back", command=self.go_back)
+        back_button.pack(side=tk.LEFT, padx=(0, 10))
+
+        submit_button = tk.Button(button_frame, text="Submit", command=self.submit_data)
+        submit_button.pack(side=tk.LEFT)
         
         # Version text
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
@@ -239,6 +246,11 @@ class InputsGUI:
                 self.entries.pop(i)
                 break
         row_frame.destroy()
+    
+    def go_back(self):
+        self.back = True
+        self.cleanexit = True
+        self.root.destroy()
     
     def submit_data(self):
         results = []
@@ -324,6 +336,7 @@ class AdjustPathsGUI:
     def __init__(self, root: tk.Tk, current_inputs):
         self.results = {}
         self.cleanexit = False
+        self.back = False
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
         
@@ -339,7 +352,7 @@ class AdjustPathsGUI:
         screen_height = self.root.winfo_screenheight()
 
         x = (screen_width - width) // 2
-        y = (screen_height - height) // 2
+        y = ((screen_height - height) // 2) - 50
         self.root.geometry(f"{width}x{height}+{x}+{y}")
         
         self.updated_paths = []
@@ -362,7 +375,7 @@ class AdjustPathsGUI:
         canvas.bind("<Configure>", on_canvas_configure)
 
         canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True)
+        canvas.pack(side=tk.LEFT, fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
         self.path_entries = []
@@ -425,8 +438,14 @@ class AdjustPathsGUI:
 
             self.path_entries.append((scanner, path, remove_var, add_var, preview_box))
 
-        # Button to finalize or do further actions
-        tk.Button(self.root, text="Save Adjusted Paths", command=self.collect_paths).pack(pady=10)
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(pady=10)
+
+        back_button = tk.Button(button_frame, text="Go Back", command=self.go_back)
+        back_button.pack(side=tk.LEFT, padx=(0, 10))
+
+        submit_button = tk.Button(button_frame, text="Save Adjusted Paths", command=self.collect_paths)
+        submit_button.pack(side=tk.LEFT)
         
         # Version text
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
@@ -440,6 +459,11 @@ class AdjustPathsGUI:
         self.root.attributes("-topmost", False)
 
         root.wait_window(self.root)
+    
+    def go_back(self):
+        self.back = True
+        self.cleanexit = True
+        self.root.destroy()
 
     def collect_paths(self):
         self.results = []
@@ -467,9 +491,11 @@ class OutfileFlagsGUI:
             self.initial_flags = control_flags
         self.results = {}
         self.cleanexit = False
+        self.back = False
         
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
+        
         # Set geometry
         width = 550
         height = 200 + (25*len(InputConfigFlags))
@@ -477,7 +503,7 @@ class OutfileFlagsGUI:
         screen_height = self.root.winfo_screenheight()
 
         x = (screen_width - width) // 2
-        y = (screen_height - height) // 2
+        y = ((screen_height - height) // 2) - 50
         self.root.geometry(f"{width}x{height}+{x}+{y}")
 
         self.output_path = tk.StringVar()
@@ -491,7 +517,7 @@ class OutfileFlagsGUI:
         tk.Label(path_frame, text="Select Output File:", anchor="w").pack(anchor="w")
 
         path_entry = tk.Entry(path_frame, textvariable=self.output_path)
-        path_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        path_entry.pack(side=tk.LEFT, fill="x", expand=True, padx=(0, 5))
 
         self.output_path.set(self.initial_outfile)
         fmt = EXT_TO_FORMAT.get(os.path.splitext(self.initial_outfile)[1].lower())
@@ -503,10 +529,10 @@ class OutfileFlagsGUI:
             self.output_format,
             *FORMAT_MAP.keys()
         )
-        format_box.pack(side="left", padx=(0, 5))
+        format_box.pack(side=tk.LEFT, padx=(0, 5))
 
         browse_btn = tk.Button(path_frame, text="Browse", command=self.browse_file)
-        browse_btn.pack(side="left")
+        browse_btn.pack(side=tk.LEFT)
         
         
         self.output_path.trace_add("write", self._path_changed)
@@ -521,7 +547,7 @@ class OutfileFlagsGUI:
         self.flag_bool_vars = {}
         for f in InputConfigFlags:
             # Skip flags not meant for this window
-            if f.module_visibility != 'OutfileFlagsGUI':
+            if f.module_visibility != GuiWindow.OutfileFlagsGUI:
                 continue
             
             self.flag_bool_vars[f.flag] = tk.BooleanVar(value=self.initial_flags.get(f.flag, f.default))
@@ -534,9 +560,15 @@ class OutfileFlagsGUI:
             )
 
         # ─── Submit Button ─────────────────────────────
-        submit_btn = tk.Button(self.root, text="Submit", command=self.submit)
-        submit_btn.pack(pady=10)
-        
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(pady=10)
+
+        back_button = tk.Button(button_frame, text="Go Back", command=self.go_back)
+        back_button.pack(side=tk.LEFT, padx=(0, 10))
+
+        submit_button = tk.Button(button_frame, text="Submit", command=self.submit)
+        submit_button.pack(side=tk.LEFT)
+
         # Version text
         version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
         version_label.pack(side="bottom", pady=5)
@@ -569,10 +601,10 @@ class OutfileFlagsGUI:
         frame.pack(anchor="w", pady=2, fill="x")
 
         cb = tk.Checkbutton(frame, text=text, variable=variable)
-        cb.pack(side="left")
+        cb.pack(side=tk.LEFT)
 
         q_label = tk.Label(frame, text="?", fg="blue", font=("Arial", 10, "bold"), cursor="question_arrow")
-        q_label.pack(side="left", padx=5)
+        q_label.pack(side=tk.LEFT, padx=5)
 
         ToolTip(q_label, tooltip_text)
     
@@ -609,20 +641,26 @@ class OutfileFlagsGUI:
 
         self._updating = False
 
+    def go_back(self):
+        self.back = True
+        self.submit()
+
     def submit(self):
         output_path = self.output_path.get().strip()
         ext = os.path.splitext(output_path.lower())[1]
         
-        if ext not in EXT_TO_FORMAT:
-            messagebox.showerror(
-                "Invalid File",
-                f"Supported extensions: {', '.join(EXT_TO_FORMAT.keys())}"
-            )
-            return
+        # Skip validation check if going back
+        if not self.back:
+            if ext not in EXT_TO_FORMAT:
+                messagebox.showerror(
+                    "Invalid File",
+                    f"Supported extensions: {', '.join(EXT_TO_FORMAT.keys())}"
+                )
+                return
 
         self.results = { InputDictKeys.OUTFILE.value: output_path } | {
             f.flag: self.flag_bool_vars[f.flag].get() for f in InputConfigFlags
-            if f.module_visibility == 'OutfileFlagsGUI'
+            if f.module_visibility == GuiWindow.OutfileFlagsGUI
         }
 
         self.cleanexit = True

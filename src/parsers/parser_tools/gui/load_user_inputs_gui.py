@@ -9,8 +9,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import tkinter.font as tkfont
 
-from .. import PROG_NAME, VERSION
-from .toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags
+from ... import PROG_NAME, VERSION
+from ..toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class JsonInputPreviewGUI:
         screen_height = self.root.winfo_screenheight()
 
         x = (screen_width - width) // 2
-        y = (screen_height - height) // 2
+        y = ((screen_height - height) // 2) - 50
         self.root.geometry(f"{width}x{height}+{x}+{y}")
         
         self.root.protocol(

@@ -9,7 +9,7 @@ import importlib
 import parsers
 from . import parser_writer
 from .toolbox import InputDictKeys, Scanners, select_scanner
-from .loading_screen import LoadingWindow
+from .gui.loading_screen import LoadingWindow
 from .reporting import Report
 
 logger = logging.getLogger(__name__)

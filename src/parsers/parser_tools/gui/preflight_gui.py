@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from .. import PROG_NAME, VERSION
-from .prule import PRule, Condition, ConditionGroup, Strictness
-from .toolbox import Fieldnames
+from ... import PROG_NAME, VERSION
+from ..prule import PRule, Condition, ConditionGroup, Strictness
+from ..toolbox import Fieldnames, InputConfigFlags
 
 WINDOW_TITLE = "Rule Builder"
 WINDOW_LENGTH = 1100
@@ -555,11 +555,14 @@ class RuleFrame:
 
 class RuleBuilderGUI:
 
-    def __init__(self, root: tk.Tk, rules=None):
+    def __init__(self, root: tk.Tk, rules=None, control_flags=None):
 
         self.result = None
         self.enable_default_rules = None
+        self.cleanexit = False
+        self.back = False
         self.rules = []
+        self.control_flags = control_flags
 
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
@@ -571,7 +574,7 @@ class RuleBuilderGUI:
         screen_height = self.root.winfo_screenheight()
 
         x = (screen_width - width) // 2
-        y = (screen_height - height) // 2
+        y = ((screen_height - height) // 2) - 50
         self.root.geometry(f"{width}x{height}+{x}+{y}")
 
         container = tk.Frame(self.root)
@@ -615,34 +618,38 @@ class RuleBuilderGUI:
         canvas.bind("<Leave>", _unbind_mousewheel)
 
         canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        scrollbar.pack(side=tk.RIGHT, fill="y")
 
         control = tk.Frame(self.root)
         control.pack()
         
         # Enable Default Rules checkbox
-        self.cb_enable_default_rules = tk.BooleanVar(value=True)
-
-        # default_frame = tk.Frame(self.root)
-        # default_frame.pack(fill='x', padx=10, pady=(5,0))
+        if self.control_flags is not None:
+            self.cb_enable_default_rules = tk.BooleanVar(value=self.control_flags.get(InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag, InputConfigFlags.DEFAULT_PREFLIGHT_RULES.default))
+        else:
+            self.cb_enable_default_rules = tk.BooleanVar(value=InputConfigFlags.DEFAULT_PREFLIGHT_RULES.default)
 
         tk.Checkbutton(
             control,
             text="Enable Default Rule Profile",
             variable=self.cb_enable_default_rules
-        ).pack(side="top", pady=6)
+        ).pack(side=tk.TOP, pady=6)
 
-        tk.Button(
+        add_button = tk.Button(
             control,
             text="Add Rule",
             command=self.add_rule
-        ).pack(side=tk.LEFT, padx=10)
+        )
+        add_button.pack(side=tk.TOP, pady=10)
 
-        tk.Button(
-            control,
-            text="Submit",
-            command=self.submit
-        ).pack(side=tk.LEFT, padx=10)
+        button_frame = tk.Frame(control)
+        button_frame.pack(pady=10)
+        
+        back_button = tk.Button(button_frame, text="Go Back", command=self.go_back)
+        back_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        submit_button = tk.Button(button_frame, text="Submit", command=self.submit)
+        submit_button.pack(side=tk.LEFT)
 
         if rules is not None:
             for rule in rules:
@@ -655,7 +662,7 @@ class RuleBuilderGUI:
             font=("Arial", 8),
             fg="gray"
         )
-        version_label.pack(side="bottom", pady=5)
+        version_label.pack(side=tk.BOTTOM, pady=5)
 
         root.wait_window(self.root)
 
@@ -689,6 +696,8 @@ class RuleBuilderGUI:
         self.refresh_colors()
 
     def validate(self):
+        if self.back:
+            return self.back
 
         ids = set()
 
@@ -745,8 +754,11 @@ class RuleBuilderGUI:
         self.enable_default_rules = None
         self.root.destroy()
 
-    def submit(self):
+    def go_back(self):
+        self.back = True
+        self.submit()
 
+    def submit(self):
         if not self.validate():
             return
 
@@ -758,5 +770,7 @@ class RuleBuilderGUI:
             self.result.append(rule.get_rule())
 
         self.enable_default_rules = self.cb_enable_default_rules.get()
+        
+        self.cleanexit = True
         
         self.root.destroy()

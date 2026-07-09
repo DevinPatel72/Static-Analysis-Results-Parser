@@ -186,7 +186,7 @@ class Report:
         screen_height = root.winfo_screenheight()
 
         x = (screen_width - width) // 2
-        y = (screen_height - height) // 2
+        y = ((screen_height - height) // 2) - 50
         root.geometry(f"{width}x{height}+{x}+{y}")
         
         root.minsize(700, 600)

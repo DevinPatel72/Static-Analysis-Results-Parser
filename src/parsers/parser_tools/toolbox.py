@@ -23,6 +23,19 @@ LARGE_FILE_THRESHOLD_MB = 40
 FILE_SIZE_WARNED_ONCE = False
 FORTIFY_FILE_WARNED_ONCE = False
 
+class GuiWindow(Enum):
+    JsonInputPreviewGUI = 'JsonInputPreviewGUI'
+    InputsGUI = 'InputsGUI'
+    AdjustPathsGUI = 'AdjustPathsGUI'
+    OutfileFlagsGUI = 'OutfileFlagsGUI'
+    RuleBuilderGUI = 'RuleBuilderGUI'
+    LoadingWindow = 'LoadingWindow'
+    Report = 'Report'
+    
+    @classmethod
+    def user_interaction_windows(cls):
+        return [cls.JsonInputPreviewGUI, cls.InputsGUI, cls.AdjustPathsGUI, cls.OutfileFlagsGUI, cls.RuleBuilderGUI]
+
 class InputDictKeys(Enum):
     PATH = 'path'
     SCANNER = 'scanner'
@@ -35,11 +48,11 @@ class InputDictKeys(Enum):
         return [cls.PATH.value, cls.SCANNER.value, cls.PREPEND.value, cls.REMOVE.value]
 
 class InputConfigFlags(Enum):
-    OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True, "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.", 'OutfileFlagsGUI')
-    PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, "If enabled, this will change final output values according to user-defined rules.", 'OutfileFlagsGUI')
-    DEFAULT_PREFLIGHT_RULES = (parsers.FLAG_DEFAULT_PREFLIGHT_RULES, True, "If enabled, changes final output values according to a default profile of rules. Only activated if \"Preflight Rules\" flag is also true.", 'RuleBuilderGUI')
-    DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False, "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner.", 'OutfileFlagsGUI')
-    SARIF_STITCH_PROPERTIES = (parsers.FLAG_SARIF_STITCH_PROPERTIES, False, "By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true.", 'OutfileFlagsGUI')
+    OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True, "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.", GuiWindow.OutfileFlagsGUI)
+    PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, "If enabled, this will change final output values according to user-defined rules.", GuiWindow.OutfileFlagsGUI)
+    DEFAULT_PREFLIGHT_RULES = (parsers.FLAG_DEFAULT_PREFLIGHT_RULES, True, "If enabled, changes final output values according to a default profile of rules. Only activated if \"Preflight Rules\" flag is also true.", GuiWindow.RuleBuilderGUI)
+    DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False, "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner.", GuiWindow.OutfileFlagsGUI)
+    SARIF_STITCH_PROPERTIES = (parsers.FLAG_SARIF_STITCH_PROPERTIES, False, "By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true.", GuiWindow.OutfileFlagsGUI)
 
     def __init__(self, flag, default, description, module_visibility):
         self.flag = flag

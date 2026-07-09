@@ -1,29 +1,17 @@
 #!/usr/bin/env python3
 
-# Pyinstaller splash screen
-try:
-    import pyi_splash
-except ImportError:
-    pyi_splash = None
-
-def close_splash():
-    if pyi_splash is not None:
-        pyi_splash.close()
-
 # Imports
 import os
 import sys
 import traceback
 import parsers
 import tkinter as tk
-from parsers.parser_tools.inputs_gui import InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
-from parsers.parser_tools.load_user_inputs_gui import JsonInputPreviewGUI
-from parsers.parser_tools.preflight_gui import RuleBuilderGUI
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, dedupe_parser_inputs
-from update import check_version
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_cwe_category_mappings, export_config
 from parsers.parser_tools import parser_writer, preflight
 import parsers.parser_tools.progressbar as progressbar
 from parsers.parser_tools.begin_parse import begin
+from parsers.parser_tools.gui.app_controller import SARPApp
+from update import check_version
 
 # Init GUI
 parsers.gui_root = tk.Tk()
@@ -100,82 +88,11 @@ def main():
     parser_outfile = ""
     control_flags = {}
     
-    # Load inputs if there are any
-    select_input = JsonInputPreviewGUI(parsers.gui_root)
-    close_splash()
-    parsers.gui_root.wait_window(select_input.root)
-
+    app = SARPApp()
     
-    # Load inputs from config file
-    if select_input.cleanexit and select_input.results is not None:
-        rv = load_config_user_inputs(select_input.results)
-        if isinstance(rv, str):
-            if f"Config file {select_input.results} not found." != rv:
-                console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning", orig_name=__name__)
-            parser_inputs = []
-            parser_outfile = ""
-            control_flags = {}
-        else:
-            parser_inputs, parser_outfile, control_flags = rv
-    # Else exit
-    else:
-        sys.exit(0)
-    
-    # Dedupe parser_inputs
-    parser_inputs = dedupe_parser_inputs(parser_inputs)
-    
-    # Check inputs format
-    if len(parser_inputs) > 0:
-        if not check_input_format(parser_inputs, parser_outfile, control_flags):
-            if select_input is not None:
-                select_input.execute_now = False
-    
-    # Skip all the GUI steps if Execute button is selected or no inputs are defined
-    if ((len(parser_inputs) <= 0 or len(parser_outfile) <= 0 or len(control_flags) <= 0)
-        or (select_input is None or not select_input.execute_now)
-        ):
-        inputs_gui = InputsGUI(parsers.gui_root, parser_inputs)
-        if not inputs_gui.cleanexit or (inputs_gui.results is None or len(inputs_gui.results) <= 0):
-            sys.exit(0)
-            
-        parsers.PROJ_NAME = inputs_gui.results_project_name
-        parsers.PROJ_VERSION = inputs_gui.results_project_version
-        
-        adjust_paths_gui = AdjustPathsGUI(parsers.gui_root, inputs_gui.results)
-        if not adjust_paths_gui.cleanexit or (adjust_paths_gui.results is None or len(adjust_paths_gui.results) <= 0):
-            sys.exit(0)
-        
-        parser_inputs = adjust_paths_gui.results
-        
-        outfile_flags_gui = OutfileFlagsGUI(parsers.gui_root, parser_outfile, control_flags)
-        if not outfile_flags_gui.cleanexit or (outfile_flags_gui.results is None or len(outfile_flags_gui.results) <= 0):
-            sys.exit(0)
-        
-        parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
-        control_flags = {f.flag: outfile_flags_gui.results[f.flag]
-                        for f in InputConfigFlags
-                        if f.module_visibility == 'OutfileFlagsGUI'}
-        
-        # If the checkbox was enabled, ask if user wants to edit the preflight rules
-        if control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
-            # Load the preflight rules
-            preflight.load_prules()
-
-            rulebuildergui = RuleBuilderGUI(parsers.gui_root, parsers.prules)
-            
-            if rulebuildergui.result is not None:
-                parsers.prules = rulebuildergui.result
-            
-            if rulebuildergui.enable_default_rules is not None:
-                control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag] = rulebuildergui.enable_default_rules
-            else:
-                control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag] = True
-            
-            if rulebuildergui.result is None and rulebuildergui.enable_default_rules is None:
-                sys.exit(0)
-        else:
-            parsers.prules = []
-            control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag] = True
+    parser_inputs = app.parser_inputs
+    parser_outfile = app.parser_outfile
+    control_flags = app.control_flags
     
     # Log the configuration
     s = "Reading from files:\n"
@@ -192,13 +109,10 @@ def main():
     logger.info("\n".join(['    ' + l for l in s.split('\n')]))
     
     # Export parser inputs to config file for reruns. If reading from a selected inputs file, overwrite it instead of creating a new file.
-    if select_input is None:
+    if app.select_input is None:
         no_overwrite = False
-    else: no_overwrite = not (select_input.results is not None and len(select_input.results) > 0)
+    else: no_overwrite = not (app.select_input.results is not None and len(app.select_input.results) > 0)
     export_config(parser_inputs, parser_outfile, control_flags, no_overwrite=no_overwrite)
-    
-    # Put control_flags into module variable
-    parsers.control_flags = control_flags
     
     # Save the preflight rules
     preflight.save_prules(parsers.prules)
@@ -206,6 +120,9 @@ def main():
     # Load the mapping if true
     if control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
         parsers.cwe_categories = load_config_cwe_category_mappings()
+    
+    # Put control_flags into module variable
+    parsers.control_flags = control_flags
 
     # Init the outfile
     force_csv = parser_outfile.lower().endswith('.csv')
