@@ -244,6 +244,8 @@ class InputsGUI:
             )
             if result.returncode == 0:
                 return result.stdout.strip()
+            else:
+                return None
 
         return filedialog.askopenfilename(title=title)
 
@@ -255,6 +257,8 @@ class InputsGUI:
             file_filters = f"--file-filter={selected_scanner.sname} files (*{filter_str}) | *{filter_str}"
         
         path = self.ask_open_filename(title="Select a file", file_filters=file_filters)
+        if path is None:
+            return
             
         if path:
             existing_paths = [e.get() for _, e, _, _ in self.entries if e != entry_widget]
