@@ -43,7 +43,6 @@ class LoadingWindow:
         if (m := re.match(r"(\d+)x(\d+)\+(\d+)\+(\d+)", current_geometry)) is not None:
             width = int(m.group(1))
             height = int(m.group(2))
-            print(width, height)
         else:
             width = 100
             height = 50

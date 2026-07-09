@@ -1,10 +1,12 @@
 # Change Log
 
-## [Version 2.8.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.8.2) (2026-07-08)
-- Added a delete button to profile selection.
+## [Version 2.9.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.9.0) (2026-07-09)
+- Added a "Delete" button to profile selection.
+- Added a "Go Back" button for each GUI window.
 - Fixed "Execute" to permit changes to input profile parameters if it fails checks and validations.
-- Added a `-y` option to the updater to skip confirmation before updating.
+- Fixed centering for each GUI window.
 - Added a splash screen for GUI.
+- Added a `-y` option to the updater to skip confirmation before updating.
 
 ## [Version 2.8.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.8.1) (2026-07-07)
 - Added ability to pass SARIF results for Flawfinder.
