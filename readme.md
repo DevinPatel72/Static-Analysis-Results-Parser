@@ -53,27 +53,27 @@ Though not required, SARP does use external modules for certain features.
 #### Windows
 
 ```bat
-> py -m venv venv
-> .\venv\Scripts\activate
-> pip install -r requirements.txt
+py -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
 ```bat
-> py parse-cli.py
-> py parse-gui.py
+py parse-cli.py
+py parse-gui.py
 ```
 
 #### Linux
 
 ```bash
-$ python3 -m venv venv
-$ source ./venv/bin/activate
-$ pip install -r requirements.txt
+python3 -m venv venv
+source ./venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ```bash
-$ py parse-cli.py
-$ py parse-gui.py
+py parse-cli.py
+py parse-gui.py
 ```
 
 
@@ -84,7 +84,7 @@ $ py parse-gui.py
 External modules `tkinter`, `openpyxl`, `matplotlib`, `requests`, `truststore`, and `pyinstaller` must be installed.
 
 ```bash
-$ pip install pyinstaller openpyxl matplotlib requests truststore
+pip install pyinstaller openpyxl matplotlib requests truststore
 ```
 
 `tkinter` must be installed system-wide. Methods vary for [Windows](https://www.pythonguis.com/installation/install-tkinter-windows/) and [Linux](https://www.pythonguis.com/installation/install-tkinter-linux/).
