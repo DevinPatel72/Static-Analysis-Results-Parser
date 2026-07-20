@@ -29,41 +29,57 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 ### Features
 - Parses scan results from the supported scanners and input formats listed above.
 - Exports results to Excel workbooks, SARIF, or CSV.
-- Provides configurable path normalization.
 - Maps findings to corresponding Common Weakness Enumeration (CWE) entries.
+- Provides configurable path normalization.
 - Supports configurable filtering and mapping overrides through [Preflight](#configure-preflight).
 - Identifies duplicate findings within results produced by the same scanner.
 - Available as both a desktop application and a command-line interface.
 
 ## Execute Using Executables
 
-**Requirements:**
+#### Requirements
 - Ensure the config folder is in the same directory as the executables.
 - No external dependencies are required to execute the executables.
 
 
 ## Execute Using Interpreter
 
-**Dependencies:**
+#### Dependencies
 
 Though not required, SARP does use external modules for certain features.
 
+`tkinter` must be installed system-wide for GUI functionality. Methods vary for [Windows](https://www.pythonguis.com/installation/install-tkinter-windows/) and [Linux](https://www.pythonguis.com/installation/install-tkinter-linux/).
+
+#### Windows
+
+```bat
+> py -m venv venv
+> .\venv\Scripts\activate
+> pip install -r requirements.txt
+```
+
+```bat
+> py parse-cli.py
+> py parse-gui.py
+```
+
+#### Linux
+
 ```bash
+$ python3 -m venv venv
+$ source ./venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
-**Execution:**
-
 ```bash
-$ python3 parse-cli.py
-  --or--
-$ python3 parse-gui.py
+$ py parse-cli.py
+$ py parse-gui.py
 ```
 
 
 ## Build Instructions
 
-**Requirements:**
+#### Requirements
 
 External modules `tkinter`, `openpyxl`, `matplotlib`, `requests`, `truststore`, and `pyinstaller` must be installed.
 
