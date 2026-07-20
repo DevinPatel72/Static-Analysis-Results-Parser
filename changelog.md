@@ -1,6 +1,7 @@
 # Change Log
 
 ## [Version 2.9.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.9.0) (2026-07-09)
+- Changed Checkmarx to pass in a single file as input instead of a directory.
 - Added a "Delete" button to profile selection.
 - Added a "Go Back" button for each GUI window.
 - Fixed "Execute" to permit changes to input profile parameters if it fails checks and validations.
