@@ -84,6 +84,9 @@ class InputsGUI:
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
         
+        # Constant
+        self.row_frame_pady = 4
+        
         # Set geometry
         width = WINDOW_LENGTH
         height = WINDOW_HEIGHT
@@ -191,12 +194,27 @@ class InputsGUI:
 
     def add_entry(self, p_entry=None):
         row_frame = tk.Frame(self.entry_frame)
-        row_frame.pack(fill='x', pady=2)
+        row_frame.pack(fill='x', pady=self.row_frame_pady)
         
         if p_entry is None:
             entry = {}
         else:
             entry = p_entry
+
+        # Move Up/Down
+        up_btn = tk.Button(
+            row_frame,
+            text="↑",
+            command=lambda: self.move_up(row_frame)
+        )
+        up_btn.pack(side=tk.LEFT, padx=2)
+
+        down_btn = tk.Button(
+            row_frame,
+            text="↓",
+            command=lambda: self.move_down(row_frame)
+        )
+        down_btn.pack(side=tk.LEFT, padx=2)
 
         # Scanner dropdown (Combobox)
         scanner_dropdown_placeholder = self._select_scanner(entry[InputDictKeys.SCANNER.value]) if len(entry) > 0 else 'Select Scanner...'
@@ -228,6 +246,41 @@ class InputsGUI:
         del_btn.pack(side=tk.LEFT, padx=2)
 
         self.entries.append((row_frame, path_inp, scanner_dropdown, version_textbox))
+
+    def reorder(self):
+        for frame, *_ in self.entries:
+            frame.pack_forget()
+
+        for frame, *_ in self.entries:
+            frame.pack(fill='x', pady=self.row_frame_pady)
+    
+    def move_up(self, row_frame):
+        index = next(
+            i for i, (frame, *_)
+            in enumerate(self.entries)
+            if frame == row_frame
+        )
+
+        if index > 0:
+            self.entries[index], self.entries[index - 1] = (
+                self.entries[index - 1],
+                self.entries[index]
+            )
+            self.reorder()
+    
+    def move_down(self, row_frame):
+        index = next(
+            i for i, (frame, *_)
+            in enumerate(self.entries)
+            if frame == row_frame
+        )
+
+        if index < len(self.entries) - 1:
+            self.entries[index], self.entries[index + 1] = (
+                self.entries[index + 1],
+                self.entries[index]
+            )
+            self.reorder()
 
     def ask_open_filename(self, title, file_filters=None):
         if file_filters is None:
