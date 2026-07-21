@@ -2,6 +2,7 @@
 
 import os
 import logging
+from .gui.version_label import VersionLabel
 from .toolbox import console
 
 _enable_matplotlib = False
@@ -170,7 +171,7 @@ class Report:
         return fig
     
     def _gui_chart(self, fig):
-        from parsers import gui_root, PROG_NAME, VERSION, LOGFILE
+        from parsers import gui_root, PROG_NAME, LOGFILE
         import tkinter as tk
 
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -428,8 +429,7 @@ class Report:
         )
         
         # Version text
-        version_label = tk.Label(root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
-        version_label.pack(side="bottom", pady=5)
+        VersionLabel(self.root).pack(side=tk.BOTTOM, pady=5)
 
         gui_root.wait_window(root)
     

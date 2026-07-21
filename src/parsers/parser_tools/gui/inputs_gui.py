@@ -9,6 +9,7 @@ import parsers
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
+from .version_label import VersionLabel
 from ... import PROG_NAME, VERSION
 from ..toolbox import GuiWindow, InputDictKeys, InputConfigFlags, Scanners, validate_path_and_scanner, get_all_previews, generate_preview, select_scanner
 
@@ -179,8 +180,7 @@ class InputsGUI:
         submit_button.pack(side=tk.LEFT)
         
         # Version text
-        version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
-        version_label.pack(side=tk.BOTTOM, pady=5)
+        VersionLabel(self.root).pack(side=tk.BOTTOM, pady=5)
 
         # Execute GUI
         self.root.deiconify()
@@ -534,8 +534,7 @@ class AdjustPathsGUI:
         submit_button.pack(side=tk.LEFT)
         
         # Version text
-        version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
-        version_label.pack(side=tk.BOTTOM, pady=5)
+        VersionLabel(self.root).pack(side=tk.BOTTOM, pady=5)
 
         self.root.deiconify()
         self.root.lift()
@@ -656,8 +655,7 @@ class OutfileFlagsGUI:
         submit_button.pack(side=tk.LEFT)
 
         # Version text
-        version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
-        version_label.pack(side=tk.BOTTOM, pady=5)
+        VersionLabel(self.root).pack(side=tk.BOTTOM, pady=5)
 
         self.root.deiconify()
         self.root.lift()

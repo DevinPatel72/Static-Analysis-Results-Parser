@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from ... import PROG_NAME, VERSION
+from .version_label import VersionLabel
 from ..prule import PRule, Condition, ConditionGroup, Strictness
 from ..toolbox import Fieldnames, InputConfigFlags
 
@@ -656,13 +656,8 @@ class RuleBuilderGUI:
                 self.add_rule(rule)
         else: self.add_rule()
 
-        version_label = tk.Label(
-            self.root,
-            text=f"{PROG_NAME} {VERSION}",
-            font=("Arial", 8),
-            fg="gray"
-        )
-        version_label.pack(side=tk.BOTTOM, pady=5)
+        # Version text
+        VersionLabel(self.root).pack(side=tk.BOTTOM, pady=5)
 
         root.wait_window(self.root)
 

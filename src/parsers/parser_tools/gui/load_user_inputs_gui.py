@@ -9,8 +9,9 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import tkinter.font as tkfont
 
-from ... import PROG_NAME, VERSION
+from ... import PROG_NAME
 from ..toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags
+from .version_label import VersionLabel
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +67,7 @@ class JsonInputPreviewGUI:
     def _build_gui(self):
         
         # Version text
-        version_label = tk.Label(self.root, text=f"{PROG_NAME} {VERSION}", font=("Arial", 8), fg="gray")
-        version_label.pack(side=tk.BOTTOM, pady=5)
+        VersionLabel(self.root).pack(side=tk.BOTTOM, pady=5)
         
         # Submit buttons
         button_frame = ttk.Frame(self.root)
