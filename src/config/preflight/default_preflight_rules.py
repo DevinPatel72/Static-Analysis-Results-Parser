@@ -1789,6 +1789,15 @@ DEFAULT_PRULES = [
                         ]),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "semgrep_insecure_use_memset",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"semgrep", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"insecure-use-memset", strictness=Strictness.CONTAINS, case_sensitive=False)
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '244'}
         )
 ]
 

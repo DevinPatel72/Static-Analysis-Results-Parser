@@ -248,8 +248,8 @@ class Scanners(Enum):
                 },
                 'parsers.pylint')
     SEMGREP = ('Semgrep',
-                ['semgrep'],
-                ('.json', '.csv'),
+                ['semgrep', 'semgreposs'],
+                ('.json', '.sarif'),
                 {
                     "low": "note",
                     "medium": "warning",

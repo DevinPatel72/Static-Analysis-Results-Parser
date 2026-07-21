@@ -19,7 +19,7 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 | OWASP Dependency Check                                       | JSON, CSV              |
 | Pragmatic                                                    | CSV                    |
 | Pylint                                                       | JSON                   |
-| Semgrep                                                      | JSON\*\*, CSV          |
+| Semgrep                                                      | JSON\*\*, SARIF        |
 | Sigasi                                                       | JSON                   |
 | Spotbugs + FindSecBugs                                       | SARIF\*\*, XML         |
 | SRM                                                          | XML\*\*, CSV           |
