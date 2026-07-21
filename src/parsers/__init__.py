@@ -1,7 +1,7 @@
 # Version String
 PROG_NAME = 'Static Analysis Results Parser'
 PROG_NAME_ABBR = 'SARP'
-VERSION = '2.9.0'
+VERSION = '2.9.1'
 
 # Project Info
 PROJ_NAME = ""
@@ -38,6 +38,8 @@ CONFIG_DIR = 'config'
 MAPPINGS_DIR = 'mappings'
 PREFLIGHT_DIR = 'preflight'
 INPUTS_DIR = 'inputs'
+ASSETS_DIR = 'assets'
+LOGO_PATH=''
 INPUTS_PATH = ''
 
 # Multithreading globals

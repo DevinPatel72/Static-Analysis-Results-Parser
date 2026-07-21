@@ -13,6 +13,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ('parsers', 'parsers'),
+        ('assets/logos/sarp-logo-256.png', 'assets/logos')
     ],
     hiddenimports=hiddenimports,
     hookspath=[],
@@ -25,7 +26,7 @@ a = Analysis(
 pyz = PYZ(a.pure)
 
 splash = Splash(
-    "assets/sarp-splash.png",
+    "assets/logos/sarp-splash.png",
     binaries=a.binaries,
     datas=a.datas
 )
@@ -50,5 +51,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='assets/sarp-icon.ico'
+    icon='assets/logos/sarp-icon.ico'
 )

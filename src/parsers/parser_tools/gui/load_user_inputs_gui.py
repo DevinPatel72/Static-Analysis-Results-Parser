@@ -77,13 +77,13 @@ class JsonInputPreviewGUI:
             padx=10,
             pady=10
         )
-
+        
         self.submit_button = ttk.Button(
             button_frame,
             text="Load",
             command=self._submit
         )
-        self.submit_button.pack(side=tk.RIGHT)
+        self.submit_button.pack(side=tk.RIGHT, padx=(0, 5))
 
         self.delete_button = ttk.Button(
             button_frame,
@@ -96,10 +96,6 @@ class JsonInputPreviewGUI:
             text="Execute",
             command=self._execute
         )
-        
-        # Pack only if something is selected
-        self._set_execute_button_visible(False)
-
         
         container = ttk.Frame(
             self.root,
@@ -132,11 +128,26 @@ class JsonInputPreviewGUI:
         )
         self.left_frame.pack_propagate(False)
 
+        header_frame = ttk.Frame(self.left_frame)
+        header_frame.pack(fill=tk.X)
+
         ttk.Label(
-            self.left_frame,
+            header_frame,
             text="Input Profiles",
             font=self.section_header_font
-        ).pack(anchor="w")
+        ).pack(
+            side=tk.LEFT,
+            anchor="w"
+        )
+
+        ttk.Button(
+            header_frame,
+            text="⟲",
+            width=3,
+            command=self._refresh_profiles
+        ).pack(
+            
+        )
 
         self.selected_file_var = tk.StringVar(value="")
 
@@ -203,22 +214,20 @@ class JsonInputPreviewGUI:
 
         self.controls_frame = ttk.Frame(right_frame)
 
-        ttk.Button(
+        self.expand_all_button = ttk.Button(
             self.controls_frame,
             text="Expand All",
             command=self._expand_all
-        ).pack(
-            side=tk.LEFT,
-            padx=(0, 5)
         )
 
-        ttk.Button(
+        self.collapse_all_button = ttk.Button(
             self.controls_frame,
             text="Collapse All",
             command=self._collapse_all
-        ).pack(
-            side=tk.LEFT
         )
+        
+        # Pack only if something is selected
+        self._set_execute_button_visible(False)
         
         for child in self.controls_frame.winfo_children():
             try:
@@ -284,7 +293,13 @@ class JsonInputPreviewGUI:
         self.root.unbind_all("<MouseWheel>")
     
     def _set_execute_button_visible(self, visible: bool):
-        if visible:
+        if visible:    
+            if not self.expand_all_button.winfo_manager():
+                self.expand_all_button.pack(side=tk.LEFT, padx=(0, 5))
+            
+            if not self.collapse_all_button.winfo_manager():
+                self.collapse_all_button.pack(side=tk.LEFT, padx=(0, 5))
+            
             if not self.submit_execute_button.winfo_manager():
                 self.submit_execute_button.pack(
                     side=tk.RIGHT,
@@ -297,6 +312,12 @@ class JsonInputPreviewGUI:
                     padx=(0, 5)
                 )
         else:
+            if self.expand_all_button.winfo_manager():
+                self.expand_all_button.pack_forget()
+                
+            if self.collapse_all_button.winfo_manager():
+                self.collapse_all_button.pack_forget()
+            
             if self.submit_execute_button.winfo_manager():
                 self.submit_execute_button.pack_forget()
 
@@ -323,6 +344,23 @@ class JsonInputPreviewGUI:
             int(-1 * (event.delta / 120)),
             "units"
         )
+    
+    def _refresh_profiles(self):
+        # Clear selection
+        self.selected_file_var.set("")
+
+        # Hide buttons associated with a selected profile
+        self._set_execute_button_visible(False)
+
+        # Clear preview pane
+        self._populate_preview(None)
+        
+        # Reset preview window scroll location
+        self.file_selection_canvas.yview_moveto(0)
+        self.preview_canvas.yview_moveto(0)
+
+        # Reload files from disk
+        self._load_json_files()
 
     def _load_json_files(self):
         self.project_files.clear()
@@ -619,7 +657,7 @@ class JsonInputPreviewGUI:
     def _populate_preview(
         self,
         data
-    ):
+    ):  
         if not self.controls_frame.winfo_ismapped():
             self.controls_frame.pack(
                 fill=tk.X,

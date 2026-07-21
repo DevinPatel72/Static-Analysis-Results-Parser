@@ -2,6 +2,7 @@
 
 import sys
 import logging
+import tkinter as tk
 import parsers
 from parsers.parser_tools.gui.inputs_gui import InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
 from parsers.parser_tools.gui.load_user_inputs_gui import JsonInputPreviewGUI
@@ -20,6 +21,10 @@ class SARPApp:
         self.control_flags = {}
         self.select_input = None
         self.current_window = GuiWindow.JsonInputPreviewGUI
+        
+        # Set icon
+        icon = tk.PhotoImage(file=parsers.LOGO_PATH)
+        parsers.gui_root.iconphoto(True, icon)
         
         # GUI feedback loop
         while True:

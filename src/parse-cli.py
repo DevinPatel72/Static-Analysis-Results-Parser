@@ -17,10 +17,12 @@ if getattr(sys, 'frozen', False):
     # Running as bundled executable
     parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
     logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
+    parsers.ASSETS_DIR = os.path.join(sys._MEIPASS, parsers.ASSETS_DIR)
 else:
     # Running as script
     parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
     logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
+    parsers.ASSETS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.ASSETS_DIR)
 
 # Capitalized drive letter if on Windows
 drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)

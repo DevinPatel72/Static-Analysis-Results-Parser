@@ -1,5 +1,11 @@
 # Change Log
 
+## [Version 2.9.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.9.1) (2026-07-21)
+- Fixed bug where CWE data fails to fetch for ESLint and Sigasi.
+- Added up/down arrows to change order of scanner inputs in GUI.
+- Added a refresh button in the input profile selection window.
+- Fixed graphical bug where Expand All and Collapse All buttons will display even if no input profile is selected.
+
 ## [Version 2.9.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.9.0) (2026-07-09)
 - Changed Checkmarx to pass in a single file as input instead of a directory.
 - Added a "Delete" button to profile selection.
