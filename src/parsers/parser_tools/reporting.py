@@ -429,7 +429,7 @@ class Report:
         )
         
         # Version text
-        VersionLabel(self.root).pack(side=tk.BOTTOM, pady=5)
+        VersionLabel(root).pack(side=tk.BOTTOM, pady=5)
 
         gui_root.wait_window(root)
     
