@@ -72,8 +72,8 @@ pip install -r requirements.txt
 ```
 
 ```bash
-py parse-cli.py
-py parse-gui.py
+python3 parse-cli.py
+python3 parse-gui.py
 ```
 
 
