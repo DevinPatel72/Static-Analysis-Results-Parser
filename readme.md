@@ -181,3 +181,9 @@ Expression: `(Path glob "**/*.cpp") && ("nullptr" in Type)`
 The above `Rule3` looks for any finding that originates from either CPPCheck **OR** SRM, **AND** it is either of `Type` *nullPtrDeref* **OR** contains *Null Pointer*. The `Scoring Basis` is replaced with *476*.
 
 Expression: `("cppcheck" in Scanner || "srm" in Scanner) && (Type == "nullPtrDeref" || "Null Pointer" in Type)`
+
+
+## Copyright
+Copyright (c) 2026 Devin Patel
+
+Static Analysis Results Parser is licensed under the Apache License 2.0.
