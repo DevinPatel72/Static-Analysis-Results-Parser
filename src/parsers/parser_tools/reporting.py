@@ -90,10 +90,10 @@ class Report:
 
         explode = [0.03] * len(findings)
 
-        def make_autopct(values):
+        def make_autopct(values, min_percent=3):
             def autopct(pct):
                 value = int(round(pct / 100 * sum(values)))
-                if value == 0:
+                if value == 0 or pct < min_percent:
                     return ""
                 return f"{pct:.1f}%\n({value})"
             return autopct
@@ -181,8 +181,13 @@ class Report:
         root.title(f"{PROG_NAME} Report")
         
         # Set geometry
-        width = 900
-        height = 800
+        if max([len(i) for i in list(self.counts.keys())]) > 25:
+            width = 1000
+            height = 800
+        else:
+            width = 900
+            height = 800
+            
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
 
