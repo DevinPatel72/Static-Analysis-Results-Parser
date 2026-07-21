@@ -8,6 +8,7 @@ import parsers
 import tkinter as tk
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_cwe_category_mappings, export_config
 from parsers.parser_tools import parser_writer, preflight
+from parsers.parser_tools.gui.app_controller import close_splash
 import parsers.parser_tools.progressbar as progressbar
 from parsers.parser_tools.begin_parse import begin
 from parsers.parser_tools.gui.app_controller import SARPApp
@@ -90,6 +91,7 @@ def main():
     # Check for updates first
     rv = check_version(parsers.VERSION)
     if rv is not None and isinstance(rv, str) and len(rv) > 0:
+        close_splash()
         console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', type='info', orig_name=__name__)
     
     parser_inputs = []

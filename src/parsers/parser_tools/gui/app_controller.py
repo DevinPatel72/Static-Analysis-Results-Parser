@@ -33,7 +33,7 @@ class SARPApp:
                 case GuiWindow.JsonInputPreviewGUI:
                     # Load inputs if there are any
                     self.select_input = JsonInputPreviewGUI(parsers.gui_root)
-                    self.close_splash()
+                    close_splash()
                     parsers.gui_root.wait_window(self.select_input.root)
 
                     # Load inputs from config file
@@ -144,10 +144,11 @@ class SARPApp:
             # End match
         # End while
 
-    def close_splash(self):
-        # Pyinstaller splash screen
-        try:
-            import pyi_splash
+def close_splash():
+    # Pyinstaller splash screen
+    try:
+        import pyi_splash
+        if pyi_splash.is_alive():
             pyi_splash.close()
-        except ImportError:
-            pass
+    except ImportError:
+        pass
