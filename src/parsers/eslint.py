@@ -138,4 +138,4 @@ def get_eslint_cdata(rule_id, default=''):
     if len(eslint_cdata) <= 0:
         eslint_cdata = load_eslint_cdata()
     
-    return eslint_cdata.get(key=rule_id, default=default)
+    return eslint_cdata.get(rule_id, default)

@@ -149,8 +149,8 @@ def get_sigasi_cdata(rule_id, rule_type, default=''):
         sigasi_cdata = load_sigasi_cdata()
     
     if rule_type == 'vhdl':
-        return sigasi_cdata['vhdl'].get(key=rule_id, default=default)
+        return sigasi_cdata['vhdl'].get(rule_id, default)
     elif rule_type == 'verilog':
-        return sigasi_cdata['verilog'].get(key=rule_id, default=default)
+        return sigasi_cdata['verilog'].get(rule_id, default)
     else:
         return default
