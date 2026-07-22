@@ -664,7 +664,7 @@ def select_scanner(scanner):
 def print_user_inputs_template():
     flags = ""
     for f in [f.flag for f in InputConfigFlags]:
-        flags += f'        "{f}": [true|false],\n'
+        flags += f'        \"{f}\": [true|false],\n'
     flags = flags.rstrip(',\n')
     
     s = f"""{{
