@@ -317,7 +317,7 @@ def load_spotbugs_bug_patterns(existing_data=None):
             data = json.load(r)
         logger.info("Loaded Spotbugs description map")
     except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load Spotbugs Bug Patterns: Invalid JSON format\n{PROG_NAME_ABBR} will continue without finding descriptions.", "Config Error", type='error', orig_name=__name__)
+        console(f"Unable to load Spotbugs Bug Patterns: Invalid JSON format\n{PROG_NAME_ABBR} will continue without finding descriptions.", "Config Error", level='error', orig_name=__name__)
         if existing_data is not None:
             spotbugs_bug_patterns = existing_data
         else:

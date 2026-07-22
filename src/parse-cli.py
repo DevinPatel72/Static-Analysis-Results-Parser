@@ -196,7 +196,7 @@ def main():
     # Check for updates
     rv = check_version(parsers.VERSION)
     if rv is not None and isinstance(rv, str) and len(rv) > 0:
-        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', type='info', orig_name=__name__)
+        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info', orig_name=__name__)
     
     # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default <PROG_NAME_ABBR>_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
     if len(args.file) > 0:
@@ -284,12 +284,12 @@ def main():
         rv = check_input_format(parser_inputs, parser_outfile, control_flags)
         
         if rv and args.checkinputs:
-            console("[PASS] Inputs are valid", 'Valid Inputs', type='info', orig_name=__name__)
+            console("[PASS] Inputs are valid", 'Valid Inputs', level='info', orig_name=__name__)
             sys.exit(0)
         elif not rv:
             sys.exit(2)
     else:
-        console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...", 'No Inputs Defined', type='info', orig_name=__name__)
+        console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...", 'No Inputs Defined', level='info', orig_name=__name__)
         sys.exit(0)
 
     # Output confirmation

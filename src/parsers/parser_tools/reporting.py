@@ -49,7 +49,7 @@ class Report:
             print(outstr)
         
         if not _enable_matplotlib:
-            console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", type='error', orig_name=__name__)
+            console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", level='error', orig_name=__name__)
             return
         
         # Create pie charts

@@ -323,7 +323,7 @@ def validate_path_and_scanner(fpath, scanner):
             _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
         else:
             _end = ""
-        console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', type='warning', orig_name=__name__)
+        console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', level='warning', orig_name=__name__)
     
     # AIO parser inputs
     elif any(s in scan_match for s in Scanners.SARP.keywords) and os.path.isfile(fpath):
@@ -365,7 +365,7 @@ def validate_path_and_scanner(fpath, scanner):
                 _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
             else:
                 _end = ""
-            console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', type='warning', orig_name=__name__)
+            console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', level='warning', orig_name=__name__)
         
         # For fortify inputs, check if the audit.fvdl file is present in the fpr archive
         if any(s in scan_match for s in Scanners.FORTIFY.keywords) and not parsers.fortify.check_fvdl(fpath):
@@ -411,7 +411,7 @@ def load_config_cwe_category_mappings():
         with open(os.path.join(parsers.MAPPINGS_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load MITRE CWE Category Mappings: Invalid JSON format\n{parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", type='error', orig_name=__name__)
+        console(f"Unable to load MITRE CWE Category Mappings: Invalid JSON format\n{parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", level='error', orig_name=__name__)
         return {}
 
 def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_control_flags=None):
@@ -487,7 +487,7 @@ def check_input_format(inputs, outfile, flags):
     for inp in inputs:
         # Check if path and scanner exist
         if (msg := validate_path_and_scanner(inp[InputDictKeys.PATH.value], inp[InputDictKeys.SCANNER.value])) != 'TRUE':
-            console(msg, title='Invalid Config Input', type='error', orig_name=__name__)
+            console(msg, title='Invalid Config Input', level='error', orig_name=__name__)
             success = False
     
     # Check outfile
@@ -495,22 +495,22 @@ def check_input_format(inputs, outfile, flags):
     if msg == "Outfile not defined":
         pass
     elif msg != 'TRUE':
-        console(msg, title='Invalid Config Input', type='error', orig_name=__name__)
+        console(msg, title='Invalid Config Input', level='error', orig_name=__name__)
         success = False
     
     # Check control flags
     for k, v in flags.items():
         if k not in [f.flag for f in InputConfigFlags]:
-            console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {[f.flag for f in InputConfigFlags]}", title='Invalid Config Input', type='error', orig_name=__name__)
+            console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {[f.flag for f in InputConfigFlags]}", title='Invalid Config Input', level='error', orig_name=__name__)
             success = False
         if not isinstance(v, bool):
-            console(f"Invalid data type for control flag \"{k}\". Please ensure all values are boolean types.", title='Invalid Config Input', type='error', orig_name=__name__)
+            console(f"Invalid data type for control flag \"{k}\". Please ensure all values are boolean types.", title='Invalid Config Input', level='error', orig_name=__name__)
             success = False
     
     # Check if all control flags are present
     missing = [f"\'{f}\'" for f in [t_f.flag for t_f in InputConfigFlags] if f not in flags.keys()]
     if len(missing) > 0 and not parsers.GUI_MODE:
-        console(f"Missing control flag{'s' if len(missing, orig_name=__name__) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', type='error')
+        console(f"Missing control flag{'s' if len(missing, orig_name=__name__) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', level='error')
         success = False
 
     return success
@@ -585,29 +585,29 @@ def generate_preview(preview, remove_substr='', add_substr=''):
     
     return preview
 
-def message_box(title, msg, type):
-    if type == 'error':
+def message_box(title, msg, level):
+    if level == 'error':
         messagebox.showerror(title, msg)
-    elif type == 'warning':
+    elif level == 'warning':
         messagebox.showwarning(title, msg)
-    elif type == 'info':
+    elif level == 'info':
         messagebox.showinfo(title, msg)
 
-def console(msg, title='', type='info', orig_name=__name__):
+def console(msg, title='', level='info', orig_name=__name__):
     if parsers.GUI_MODE:
-        message_box(title, msg, type)
+        message_box(title, msg, level)
     else:
-        print(f'\n[{type.upper()}]  {msg}')
+        print(f'\n[{level.upper()}]  {msg}')
         
     t_logger = logging.getLogger(orig_name)
     
-    if type == 'critical':
+    if level == 'critical':
         t_logger.critical(msg)
-    elif type == 'error':
+    elif level == 'error':
         t_logger.error(msg)
-    elif type == 'warning':
+    elif level == 'warning':
         t_logger.warning(msg)
-    elif type == 'info':
+    elif level == 'info':
         t_logger.info(msg)
 
 def get_file_size_mb(path):

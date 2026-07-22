@@ -105,7 +105,7 @@ def main():
     rv = check_version(parsers.VERSION)
     if rv is not None and isinstance(rv, str) and len(rv) > 0:
         close_splash()
-        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', type='info', orig_name=__name__)
+        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info', orig_name=__name__)
     
     parser_inputs = []
     parser_outfile = ""
