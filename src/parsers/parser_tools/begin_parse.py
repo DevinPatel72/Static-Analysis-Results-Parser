@@ -8,7 +8,7 @@ import threading
 import importlib
 import parsers
 from . import parser_writer
-from .toolbox import InputDictKeys, Scanners, select_scanner
+from .toolbox import InputDictKeys, Scanners, select_scanner, console
 from .gui.loading_screen import LoadingWindow
 from .reporting import Report
 
@@ -19,6 +19,10 @@ _report = None
 
 def begin(parser_inputs):
     global _report
+    
+    if len(parser_inputs) <= 0:
+        console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}.", 'No Inputs Defined', level='info', orig_name=__name__)
+        sys.exit(0)
     
     # Put SRM in the back
     for i, inp in enumerate(parser_inputs, start=0):
