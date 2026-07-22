@@ -691,7 +691,7 @@ def print_user_inputs_template():
             "prepend": "top_level_src_dir/"
         }}
     ],
-    "outfile": "path/to/outfile.[xlsx|csv]",
+    "outfile": "path/to/outfile.[xlsx|sarif|csv]",
     "flags": {{
 {flags}
     }}
