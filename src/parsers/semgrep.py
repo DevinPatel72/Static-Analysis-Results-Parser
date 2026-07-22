@@ -168,8 +168,8 @@ def _parse_sarif(data, fpath, scanner, substr, prepend):
                 start_line = result['locations'][0]['physicalLocation']['region']['startLine']
                 start_line = int(start_line) if str(start_line).isdigit() else start_line
             except KeyError:
-                start_line = -1
-            if start_line > 0 and start_line != line:
+                start_line = line
+            if start_line != line:
                 trace = f"1) {path}:{start_line}\n2) {path}:{line}"
             else:
                 trace = ''
