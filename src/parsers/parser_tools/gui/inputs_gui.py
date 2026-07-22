@@ -317,7 +317,6 @@ class InputsGUI:
             existing_paths = [e.get() for _, e, _, _ in self.entries if e != entry_widget]
             if path in existing_paths:
                 messagebox.showwarning("Duplicate File", "This file path has already been selected.")
-                return
             entry_widget.set_real_value(path)
     
     def delete_entry(self, row_frame):
@@ -386,7 +385,7 @@ class InputsGUI:
             key = tuple(d[k] for k in d.keys())
 
             if key in seen and not self.dupe_detected_submit_again:
-                messagebox.showerror("Invalid Input", "Duplicate input entries detected. If this is intentional, submit again.")
+                messagebox.showwarning("Invalid Input", "Duplicate input entries detected. If this is intentional, submit again.")
                 self.dupe_detected_submit_again = True
                 return
 
