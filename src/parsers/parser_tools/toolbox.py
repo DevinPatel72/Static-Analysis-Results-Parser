@@ -609,6 +609,8 @@ def console(msg, title='', level='info', orig_name=__name__):
         t_logger.warning(msg)
     elif level == 'info':
         t_logger.info(msg)
+    elif level == 'debug':
+        t_logger.debug(msg)
 
 def get_file_size_mb(path):
     size_bytes = os.path.getsize(path)
