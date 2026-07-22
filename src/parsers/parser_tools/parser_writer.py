@@ -314,7 +314,7 @@ def rows_to_sarif(data):
             result['level'] = severity
         
         # Trace
-        if len(row[Fieldnames.TRACE.value]) > 0:
+        if Fieldnames.TRACE.value in row.keys() and len(row[Fieldnames.TRACE.value]) > 0:
             trace = row[Fieldnames.TRACE.value].strip().split('\n')
             locations = []
             for t in trace:
