@@ -43,17 +43,17 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
         # Attempt to open file
         try:
             if __export_sarif:
-                if not outfile.endswith('.sarif'):
+                if not outfile.lower().endswith('.sarif'):
                     outfile = os.path.splitext(outfile)[0] + '.sarif'
             elif __excel_enabled:
-                if not outfile.endswith('.xlsx'):
+                if not outfile.lower().endswith('.xlsx'):
                     outfile = os.path.splitext(outfile)[0] + '.xlsx'
                 __excel_workbook = openpyxl.Workbook()
                 temp = __excel_workbook.active
                 temp.title = sheet_name
                 temp.append([header for header in __fieldnames])
             else:
-                if not outfile.endswith('.csv'):
+                if not outfile.lower().endswith('.csv'):
                     outfile = os.path.splitext(outfile)[0] + '.csv'
             __filepath = outfile
             break
