@@ -294,7 +294,7 @@ def main():
 
     # Output confirmation
     print_inputs(parser_inputs, parser_outfile, control_flags)
-    print('\n{}\n'.format('#'*100))
+    print('\n{}\n'.format('—'*100))
     
     # Export parser inputs to config file for reruns
     if args.save_config is not False:
