@@ -448,7 +448,7 @@ class Report:
             _pad = 0
         
         outstr = "\nScanner{}\tFindings\tPercentage\tErrors".format(' '*(max(_max_key_len-len("Findings")-1, _pad)))
-        outstr += "\n—————————————————————————————————————————————————————————————\n"
+        outstr += "\n"+("—"*75)+"\n"
         
         total_findings = self.get_total_findings()
         total_errors = self.get_total_errors()
@@ -469,6 +469,6 @@ class Report:
         outstr += f"\t\t{total_errors}"
         
         outstr += '\n'
-        outstr += "—————————————————————————————————————————————————————————————"
+        outstr += "—"*75
         
         return outstr
