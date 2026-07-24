@@ -286,7 +286,7 @@ def main():
         logger.error(f'Version cannot be obtained from {parsers.PROG_NAME_ABBR} executable. Using version number built into this updater executable, which may not be accurate.')
         current_version = parsers.VERSION
     except (FileNotFoundError, PermissionError):
-        logger.error(f'Version cannot be obtained from {parsers.PROG_NAME_ABBR} executable because it is missing, lacks execution permissions, or is locked. Using version number built into ththis updater executable, which may not be accurate.')
+        logger.error(f'Version cannot be obtained from {parsers.PROG_NAME_ABBR} executable because it is missing, lacks execution permissions, or is locked. Using version number built into this updater executable, which may not be accurate.')
         current_version = parsers.VERSION
     
     # Check for most recent release
