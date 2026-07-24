@@ -26,6 +26,8 @@ import time
 import logging
 import argparse
 from urllib.parse import urlsplit, urlunsplit
+import subprocess
+import re
 import parsers
 
 # Configure CA trust
@@ -266,13 +268,22 @@ def main():
     argparser.add_argument('-y', '--yes', action='store_true', dest='yes', help='Skip confirmation and updates to new version.')
     args = argparser.parse_args()
     
-    # Check for version.txt file and pull version number from there
+    # Check for version in sarp executable
     current_version = parsers.VERSION
     try:
-        with open(os.path.join(parsers.CONFIG_DIR, 'version.txt'), 'r') as r:
-            current_version = r.readline().strip()
-    except (FileNotFoundError, PermissionError):
-        logger.error('File \'version.txt\' not found. Using version number built into the executable, which may not be accurate.')
+        result = subprocess.run(
+            [os.path.join(parsers.EXE_ROOT_DIR, parsers.PROG_NAME_ABBR.lower()), "--version"],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode != 0:
+            raise ValueError("Version not found")
+        
+        if (m := re.search(r'(\d+(?:\.\d+)*)$', result.stdout)) is not None:
+            current_version = m.group(1)
+    except ValueError:
+        logger.error('Version cannot be obtained from SARP executable. Using version number built into the updater executable, which may not be accurate.')
         current_version = parsers.VERSION
     
     # Check for most recent release
@@ -294,8 +305,8 @@ def main():
     # Get OS name and arch
     try:
         os_name, arch = get_current_platform()
-    except RuntimeError as re:
-        logger.critical("fatal error: Cannot determining platform name: %s", re)
+    except RuntimeError as runtime_error:
+        logger.critical("fatal error: Cannot determining platform name: %s", runtime_error)
         sys.exit(4)
     
     # Get correct asset download url

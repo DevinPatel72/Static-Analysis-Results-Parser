@@ -88,9 +88,6 @@ done
 mkdir -p "$BIN_DIR"
 cp -r dist/. "$BIN_DIR/"
 
-# Write version to a version file
-echo $ver > "$BIN_DIR/config/version.txt"
-
 # Delete the inputs files and preflight_rules.py
 find "$BIN_DIR/config/inputs" -mindepth 1 -delete
 rm "$BIN_DIR/config/preflight/preflight_rules.py"
