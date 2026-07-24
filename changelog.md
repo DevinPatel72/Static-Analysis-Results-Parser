@@ -1,5 +1,8 @@
 # Change Log
 
+## [Version 2.9.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.9.2) (2026-07-24)
+- Hotfix to address bug where a Fortify FPR file will result in a crash.
+
 ## [Version 2.9.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.9.1) (2026-07-21)
 - Fixed Semgrep parsing. Semgrep now only accepts JSON (preferred) and SARIF inputs.
 - Fixed bug where CWE map fails to resolve for ESLint and Sigasi.
