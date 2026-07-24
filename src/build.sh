@@ -23,10 +23,6 @@ BIN_DIR="../bin/${name}_v${ver}_${osName}_${osArch}"
 
 # Function to check if file is text
 is_text() {
-    # Quick null byte test
-    # if grep -q $'\x00' "$1"; then
-    #     return 0  # not text
-    # fi
 
     # MIME fallback
     mime=$(file -b --mime-type "$1" 2>/dev/null) || return 1
@@ -91,6 +87,9 @@ done
 # Copy files to bin dir
 mkdir -p "$BIN_DIR"
 cp -r dist/. "$BIN_DIR/"
+
+# Write version to a version file
+echo $ver > "$BIN_DIR/config/version.txt"
 
 # Delete the inputs files and preflight_rules.py
 find "$BIN_DIR/config/inputs" -mindepth 1 -delete

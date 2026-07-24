@@ -266,8 +266,17 @@ def main():
     argparser.add_argument('-y', '--yes', action='store_true', dest='yes', help='Skip confirmation and updates to new version.')
     args = argparser.parse_args()
     
+    # Check for version.txt file and pull version number from there
+    current_version = parsers.VERSION
+    try:
+        with open(os.path.join(parsers.CONFIG_DIR, 'version.txt'), 'r') as r:
+            current_version = r.readline().strip()
+    except (FileNotFoundError, PermissionError):
+        logger.error('File \'version.txt\' not found. Using version number built into the executable, which may not be accurate.')
+        current_version = parsers.VERSION
+    
     # Check for most recent release
-    latest_version = check_version(parsers.VERSION)
+    latest_version = check_version(current_version)
     if latest_version is None:
         print('Unable to connect to release repository')
         sys.exit(4)
