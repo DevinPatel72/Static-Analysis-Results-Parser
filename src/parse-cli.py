@@ -12,15 +12,19 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
+# If version option is passed, check for that first to avoid unnecessary imports
+import sys
+from parsers import PROG_NAME, VERSION
+if '-v' in sys.argv or '--version' in sys.argv:
+    print(f"{PROG_NAME} {VERSION}")
+    sys.exit(0)
 
 # Imports
 import os
-import sys
 import argparse
 import traceback
 import parsers
 from update import check_version
-from parsers import PROG_NAME, VERSION
 from parsers.parser_tools import parser_writer, preflight
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs, console
 from parsers.parser_tools.begin_parse import begin
@@ -170,7 +174,7 @@ def main():
     
     # Parse args
     if args.version:
-        print(f"{PROG_NAME} {VERSION}")
+        #print(f"{PROG_NAME} {VERSION}") # Version printed at beginning of this file instead
         sys.exit(0)
     
     # Print inputs template
