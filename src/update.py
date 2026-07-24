@@ -299,7 +299,7 @@ def main():
         sys.exit(0)
     
     # Query to continue update
-    print("A new version is available for {}: {} -> {}".format(parsers.PROG_NAME_ABBR, parsers.VERSION, latest_version.lstrip('v')))
+    print("A new version is available for {}: {} -> {}".format(parsers.PROG_NAME_ABBR, current_version, latest_version.lstrip('v')))
     if not args.yes:
         if not ask("Would you like to update to version {}?".format(latest_version.lstrip('v')), default=False):
             sys.exit(0)
