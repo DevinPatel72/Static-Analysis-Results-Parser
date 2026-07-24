@@ -368,7 +368,8 @@ def validate_path_and_scanner(fpath, scanner):
             console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', level='warning', orig_name=__name__)
         
         # For fortify inputs, check if the audit.fvdl file is present in the fpr archive
-        if any(s in scan_match for s in Scanners.FORTIFY.keywords) and not parsers.fortify.check_fvdl(fpath):
+        from parsers.fortify import check_fvdl # This import statement is necessary because directly calling 'parsers.fortify.check_fvdl' results in a failed import resolution
+        if any(s in scan_match for s in Scanners.FORTIFY.keywords) and not check_fvdl(fpath):
             return "The specified Fortify FPR archive does not contain an \'audit.fvdl\' file. The archive may be corrupted or the scanner output is invalid."
 
     # All other inputs
