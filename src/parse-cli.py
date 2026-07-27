@@ -296,6 +296,9 @@ def main():
         console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...", 'No Inputs Defined', level='info', orig_name=__name__)
         sys.exit(0)
 
+    # Put control_flags into module variable
+    parsers.control_flags = control_flags
+
     # Output confirmation
     print_inputs(parser_inputs, parser_outfile, control_flags)
     print('\n{}\n'.format('—'*100))
@@ -312,9 +315,6 @@ def main():
             else:
                 parsers.INPUTS_PATH = save_filename
         export_config(parser_inputs, parser_outfile, control_flags)
-    
-    # Put control_flags into module variable
-    parsers.control_flags = control_flags
     
     # Load preflight rules if true
     if control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:

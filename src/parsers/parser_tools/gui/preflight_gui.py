@@ -509,36 +509,53 @@ class RuleFrame:
             child.frame.destroy()
             root_frame.children.remove(child)
 
-        for cond in group_data.conditions:
+        if hasattr(group_data, 'conditions'):
+            for cond in group_data.conditions:
 
-            if isinstance(cond, Condition):
+                if isinstance(cond, Condition):
 
+                    cf = ConditionFrame(
+                        root_frame.child_frame,
+                        bg=self.bg,
+                        remove_callback=root_frame.remove_child
+                    )
+
+                    cf.field.set(cond.fieldname)
+                    cf.pattern.insert(0, cond.pattern)
+                    cf.strictness.set(cond.strictness.value)
+                    cf.case.set(cond.case_sensitive)
+
+                    cf.frame.pack(fill="x", pady=2)
+                    root_frame.children.append(cf)
+
+                else:
+
+                    sub = ConditionGroupFrame(
+                        root_frame.child_frame,
+                        bg=self.bg,
+                        remove_callback=root_frame.remove_child
+                    )
+
+                    sub.frame.pack(fill="x", pady=5)
+                    root_frame.children.append(sub)
+
+                    self.load_group(sub, cond)
+        else: # group_data is the condition
+            if isinstance(group_data, Condition):
+            
                 cf = ConditionFrame(
                     root_frame.child_frame,
                     bg=self.bg,
                     remove_callback=root_frame.remove_child
                 )
-
-                cf.field.set(cond.fieldname)
-                cf.pattern.insert(0, cond.pattern)
-                cf.strictness.set(cond.strictness.value)
-                cf.case.set(cond.case_sensitive)
-
+            
+                cf.field.set(group_data.fieldname)
+                cf.pattern.insert(0, group_data.pattern)
+                cf.strictness.set(group_data.strictness.value)
+                cf.case.set(group_data.case_sensitive)
+            
                 cf.frame.pack(fill="x", pady=2)
                 root_frame.children.append(cf)
-
-            else:
-
-                sub = ConditionGroupFrame(
-                    root_frame.child_frame,
-                    bg=self.bg,
-                    remove_callback=root_frame.remove_child
-                )
-
-                sub.frame.pack(fill="x", pady=5)
-                root_frame.children.append(sub)
-
-                self.load_group(sub, cond)
 
     def get_rule(self):
 

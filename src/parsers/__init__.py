@@ -1,7 +1,7 @@
 # Version String
 PROG_NAME = 'Static Analysis Results Parser'
 PROG_NAME_ABBR = 'SARP'
-VERSION = '2.9.2'
+VERSION = '2.9.3'
 
 # Project Info
 PROJ_NAME = ""

@@ -1,5 +1,11 @@
 # Change Log
 
+## [Version 2.9.3](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.9.3) (2026-07-27)
+- Patches bugs in preflight system such as:
+  - Failure to load preflight rules when pressing "Execute" in the GUI
+  - Failure to properly load preflight rules in the Rule Builder window if the root condition is not a ConditionGroup object
+  - Preflight rules get overwritten even though it is disabled in control flags.
+
 ## [Version 2.9.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.9.2) (2026-07-24)
 - Hotfix to address bug where a Fortify FPR file will result in a crash.
 - Fixed minor bug in updater executable to read version info from the sarp executable instead of what was originally packaged in the updater executable.

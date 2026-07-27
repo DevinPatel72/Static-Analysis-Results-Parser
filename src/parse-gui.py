@@ -117,6 +117,9 @@ def main():
     parser_outfile = app.parser_outfile
     control_flags = app.control_flags
     
+    # Put control_flags into module variable
+    parsers.control_flags = control_flags
+    
     # Log the configuration
     s = "Reading from files:\n"
     for i, entry in enumerate(parser_inputs, start=1):
@@ -143,9 +146,6 @@ def main():
     # Load the mapping if true
     if control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
         parsers.cwe_categories = load_config_cwe_category_mappings()
-    
-    # Put control_flags into module variable
-    parsers.control_flags = control_flags
 
     # Init the outfile
     force_csv = parser_outfile.lower().endswith('.csv')

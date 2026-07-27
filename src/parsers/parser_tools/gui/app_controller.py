@@ -61,6 +61,9 @@ class SARPApp:
                             and self.select_input.execute_now
                         ):
                             self.current_window = None
+                            
+                            # Load the preflight rules
+                            preflight.load_prules()
                         else:
                             self.current_window = GuiWindow.InputsGUI
                     # Else exit
