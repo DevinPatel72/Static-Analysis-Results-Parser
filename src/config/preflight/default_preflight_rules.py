@@ -161,16 +161,49 @@ DEFAULT_PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Assignment of a variable or expression to itself has no effect", strictness=Strictness.EXACT, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Assignment of a variable or expression to itself has no effect", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Self assignment", strictness=Strictness.EXACT, case_sensitive=False),
+                        ])
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "coverity_bad_bit_shift",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad bit shift operation", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1335'}
+        ),
+        PRule(
+            rule_id = "coverity_bad_floating_point_comparison",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad comparison of floating-point expressions", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1077'}
+        ),
+        PRule(
+            rule_id = "coverity_bad_virtual_method_call",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad call to a virtual method", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
             rule_id = "coverity_comparing_two_pointers_not_into_the_same_object",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Comparing two pointers not into the same object, which may have nondeterministic results.", strictness=Strictness.EXACT, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Comparing two pointers not into the same object, which may have nondeterministic results.", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Nondeterministic pointer comparison", strictness=Strictness.EXACT, case_sensitive=False),
+                        ])
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '595'}
         ),
@@ -179,7 +212,10 @@ DEFAULT_PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Continue might be at the wrong place", strictness=Strictness.EXACT, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Continue might be at the wrong place", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Continue has no effect", strictness=Strictness.EXACT, case_sensitive=False),
+                        ])
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '710'}
         ),
@@ -188,9 +224,21 @@ DEFAULT_PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Creating a copy of a variable that is no longer used instead of using std::move().", strictness=Strictness.EXACT, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Creating a copy of a variable that is no longer used instead of using std::move().", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Variable copied when it could be moved", strictness=Strictness.EXACT, case_sensitive=False)
+                        ])
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info', Fieldnames.VALIDATOR_COMMENT.value: "The software may see a performance benefit from switching to std::move()"}
+        ),
+        PRule(
+            rule_id = "coverity_copy_without_assign",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Copy without assign", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '825'}
         ),
         PRule(
             rule_id = "coverity_excessive_use_of_stack_memory_by_local_variables_or_parameters",
@@ -200,6 +248,15 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Excessive use of stack memory by local variables or parameters", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '789'}
+        ),
+        PRule(
+            rule_id = "coverity_expression_with_no_effect",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Expression with no effect", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
         ),
         PRule(
             rule_id = "coverity_floating_point_expressions_shall_not_be_directly_or_indirectly_tested_for_equality_or_inequality",
@@ -247,6 +304,15 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '789'}
         ),
         PRule(
+            rule_id = "coverity_large_stack_use",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Large stack use", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '789'}
+        ),
+        PRule(
             rule_id = "coverity_leak_of_memory_or_pointers_to_system_resources",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -254,6 +320,24 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Leak of memory or pointers to system resources", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '401'}
+        ),
+        PRule(
+            rule_id = "coverity_missing_comma_string_array_initialization",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Missing comma in a string array initialization", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "coverity_missing_move_assignment_operator",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Missing move assignment operator", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "coverity_non_void_function_has_no_return",
@@ -265,11 +349,41 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
-            rule_id = "coverity_out_of_bounds_write_to_a_buffer",
+            rule_id = "coverity_not_restoring_ostream_format",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Out-of-bounds write to a buffer", strictness=Strictness.EXACT, case_sensitive=False)
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Not restoring ostream format", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "coverity_one_definition_rule_violation",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"One Definition Rule violation", strictness=Strictness.EXACT, case_sensitive=False)
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '1109'}
+        ),
+        PRule(
+            rule_id = "coverity_out_of_bounds_access",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Out-of-bounds access", strictness=Strictness.EXACT, case_sensitive=False)
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '126'}
+        ),
+        PRule(
+            rule_id = "coverity_out_of_bounds_write",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ConditionGroup(operator="AND", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Out-of-bounds write to a buffer", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Out-of-bounds write", strictness=Strictness.EXACT, case_sensitive=False)
+                        ])
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '787'}
         ),
@@ -292,6 +406,36 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
+            rule_id = "coverity_recursion_in_included_headers",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Recursion in included headers", strictness=Strictness.EXACT, case_sensitive=False)
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
+        ),
+        PRule(
+            rule_id = "coverity_result_is_not_floating_point",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Result is not floating-point", strictness=Strictness.EXACT, case_sensitive=False)
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '480'}
+        ),
+        PRule(
+            rule_id = "coverity_rule_of_five_rule_of_three",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Rule of five", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Rule of three", strictness=Strictness.EXACT, case_sensitive=False)
+                        ])
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '825'}
+        ),
+        PRule(
             rule_id = "coverity_user_definitions_for_at_least_one_but_not_all_special_functions",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -299,6 +443,15 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"This class has user-definitions for at least one but not all of its special functions (copy constructor, copy assignment operator, destructor).", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '825'}
+        ),
+        PRule(
+            rule_id = "coverity_variable_copied_instead_of_moved",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Variable copied when it could be moved", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "coverity_when_dividing_two_values_of_integer_types_integer_division_is_used_which_ignores_any_remainder_when_such_a_result_is_used_in_a_context_expecting_a_floating_point_number_it_is_likely_that_floating_point_division_was_intended",
@@ -408,6 +561,18 @@ DEFAULT_PRULES = [
                     ])
             ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '480'}
+        ),
+        PRule(
+            rule_id = "cppcheck_bufferAccessOutOfBounds",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"bufferAccessOutOfBounds", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '126'}
         ),
         PRule(
             rule_id = "cppcheck_catchexceptionbyvalue",
@@ -895,7 +1060,10 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
-                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"noCopyConstructor", strictness=Strictness.EXACT, case_sensitive=False),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"noCopyConstructor", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Class should have copy constructor", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '825'}
         ),
@@ -949,6 +1117,21 @@ DEFAULT_PRULES = [
                     ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '570'}
+        ),
+        PRule(
+            rule_id = "cppcheck_overlappingWriteFunction",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"overlappingWriteFunction", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Overlapping read/write is undefined behavior", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '120'}
         ),
         PRule(
             rule_id = "cppcheck_passedbyvalue",
@@ -1098,6 +1281,33 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '562'}
         ),
         PRule(
+            rule_id = "cppcheck_returnImplicitInt",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"returnImplicitInt", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
+        ),
+        PRule(
+            rule_id = "cppcheck_returnNonBoolInBooleanFunction",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"returnNonBoolInBooleanFunction", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Non-boolean value returned from function returning bool", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '571'}
+        ),
+        PRule(
             rule_id = "cppcheck_same_expression_operator",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
@@ -1123,6 +1333,18 @@ DEFAULT_PRULES = [
                     ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
+        ),
+        PRule(
+            rule_id = "cppcheck_selfinitialization",
+            precedence = 0,
+            condition=ConditionGroup(operator="AND", conditions=[
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"selfInitialization", strictness=Strictness.EXACT, case_sensitive=False),
+                ]),
+            replacement = {Fieldnames.SCORING_BASIS.value: '457'}
         ),
         PRule(
             rule_id = "cppcheck_shadowvariable",
@@ -1516,7 +1738,10 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
-                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"virtualCallInConstructor", strictness=Strictness.EXACT, case_sensitive=False),
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"virtualCallInConstructor", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Virtual function called from constructor", strictness=Strictness.EXACT, case_sensitive=False),
+                    ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
@@ -1686,7 +1911,7 @@ DEFAULT_PRULES = [
                             Condition(fieldname=Fieldnames.TYPE.value, pattern=r"bad-indentation", strictness=Strictness.CONTAINS, case_sensitive=False),
                         ]),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1078', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1114', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "pylint_chained_comparison",
