@@ -272,9 +272,12 @@ DEFAULT_PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A header file was included but none of its contents were used in the rest of the source file", strictness=Strictness.EXACT, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A header file was included but none of its contents were used in the rest of the source file", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Unnecessary header file", strictness=Strictness.EXACT, case_sensitive=False),
+                        ])
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '561'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '561', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "coverity_header_include_recursion",
@@ -401,7 +404,10 @@ DEFAULT_PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A parse warning from the Coverity parser may indicate a bug, or poor coding practice", strictness=Strictness.EXACT, case_sensitive=False)
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A parse warning from the Coverity parser may indicate a bug, or poor coding practice", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Parse warning", strictness=Strictness.EXACT, case_sensitive=False)
+                        ])
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1076', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
@@ -1358,6 +1364,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"shadowVariable", strictness=Strictness.EXACT, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"shadowFunction", strictness=Strictness.EXACT, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"shadowArgument", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"shadowMember", strictness=Strictness.EXACT, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Local variable shadows", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
                 ]),
@@ -2025,4 +2032,3 @@ DEFAULT_PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '244'}
         )
 ]
-
