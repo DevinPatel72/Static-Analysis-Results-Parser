@@ -3,6 +3,15 @@
 ## Description
 Static Analysis Results Parser (SARP) will parse a set of output files from static analysis tools and collect them into one Excel, SARIF, or CSV file.
 
+### Features
+- Parses scan results from the supported scanners and input formats listed above.
+- Exports results to Excel workbooks, SARIF, or CSV.
+- Maps findings to corresponding Common Weakness Enumeration (CWE) entries.
+- Provides configurable path normalization.
+- Supports configurable filtering and mapping overrides through [Preflight](#configure-preflight).
+- Identifies duplicate findings within results produced by the same scanner.
+- Available as both a desktop application and a command-line interface.
+
 ### Supported Scanners
 | Scanner                                                      | Results File Format    |
 | ------------------------------------------------------------ | ---------------------- |
@@ -25,15 +34,6 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 | SRM                                                          | XML\*\*, CSV           |
 
 \*\* This format is preferred because it provides the most complete set of information for parsing.
-
-### Features
-- Parses scan results from the supported scanners and input formats listed above.
-- Exports results to Excel workbooks, SARIF, or CSV.
-- Maps findings to corresponding Common Weakness Enumeration (CWE) entries.
-- Provides configurable path normalization.
-- Supports configurable filtering and mapping overrides through [Preflight](#configure-preflight).
-- Identifies duplicate findings within results produced by the same scanner.
-- Available as both a desktop application and a command-line interface.
 
 ## Execute Using Executables
 
