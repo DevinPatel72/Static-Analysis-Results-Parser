@@ -104,7 +104,10 @@ DEFAULT_PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A virtual method is called from a constructor/destructor.", strictness=Strictness.EXACT, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"A virtual method is called from a constructor/destructor.", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad call to a virtual method", strictness=Strictness.EXACT, case_sensitive=False),
+                        ])
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "Attempting to call a virtual function from a constructor or destructor will result in the incorrect function being executed. During construction and destruction, virtual dispatch is disabled. Calls to virtual functions resolve to the class currently being constructed/destructed, not derived classes. The execution of the incorrect definition of a virtual function might result in unexpected or undesirable program behavior, and in security contexts this might result in weaknesses."}
         ),
@@ -185,15 +188,6 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad comparison of floating-point expressions", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1077'}
-        ),
-        PRule(
-            rule_id = "coverity_bad_virtual_method_call",
-            precedence = 0,
-            condition=ConditionGroup(operator="AND", conditions=[
-                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad call to a virtual method", strictness=Strictness.EXACT, case_sensitive=False),
-                    ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
         ),
         PRule(
             rule_id = "coverity_comparing_two_pointers_not_into_the_same_object",
@@ -1750,7 +1744,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Virtual function called from constructor", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '758', Fieldnames.VALIDATOR_COMMENT.value: "Attempting to call a virtual function from a constructor or destructor will result in the incorrect function being executed. During construction and destruction, virtual dispatch is disabled. Calls to virtual functions resolve to the class currently being constructed/destructed, not derived classes. The execution of the incorrect definition of a virtual function might result in unexpected or undesirable program behavior, and in security contexts this might result in weaknesses."}
         ),
         PRule(
             rule_id = "cppcheck_y2038_unsafe_call",
