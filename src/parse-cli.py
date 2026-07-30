@@ -288,7 +288,8 @@ def main():
         rv = check_input_format(parser_inputs, parser_outfile, control_flags)
         
         if rv and args.checkinputs:
-            console("[PASS] Inputs are valid", 'Valid Inputs', level='info', orig_name=__name__)
+            print("[PASS] Inputs are valid")
+            logger.info("[PASS] Inputs are valid")
             sys.exit(0)
         elif not rv:
             sys.exit(2)

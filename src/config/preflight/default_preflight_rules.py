@@ -296,9 +296,12 @@ DEFAULT_PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"function call parameter exceeding the", strictness=Strictness.CONTAINS, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"function call parameter exceeding the", strictness=Strictness.CONTAINS, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Big parameter passed by value", strictness=Strictness.EXACT, case_sensitive=False),
+                        ])
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '789'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.VALIDATOR_COMMENT.value: 'Repeated function calls in quick succession may see a performance drag'}
         ),
         PRule(
             rule_id = "coverity_large_stack_use",
