@@ -69,7 +69,7 @@
         },
         "Security Preflight Rules": {
           "type": "boolean",
-          "description": "If enabled, changes final output values according to a default profile of rules. Only activated if \"Preflight Rules\" flag is also true."
+          "description": "If enabled, changes final output values according to a prebuilt profile of rules. Only activated if \"Preflight Rules\" flag is also true."
         },
         "SARIF STITCH Properties": {
           "type": "boolean",

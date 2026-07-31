@@ -642,14 +642,14 @@ class RuleBuilderGUI:
         
         # Enable Default Rules checkbox
         if self.control_flags is not None:
-            self.cb_enable_default_rules = tk.BooleanVar(value=self.control_flags.get(InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag, InputConfigFlags.SECURITY_PREFLIGHT_RULES.default))
+            self.cb_enable_security_rules = tk.BooleanVar(value=self.control_flags.get(InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag, InputConfigFlags.SECURITY_PREFLIGHT_RULES.default))
         else:
-            self.cb_enable_default_rules = tk.BooleanVar(value=InputConfigFlags.SECURITY_PREFLIGHT_RULES.default)
+            self.cb_enable_security_rules = tk.BooleanVar(value=InputConfigFlags.SECURITY_PREFLIGHT_RULES.default)
 
         tk.Checkbutton(
             control,
-            text="Enable Default Rule Profile",
-            variable=self.cb_enable_default_rules
+            text=f"Enable {InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag}",
+            variable=self.cb_enable_security_rules
         ).pack(side=tk.TOP, pady=6)
 
         add_button = tk.Button(
@@ -781,7 +781,7 @@ class RuleBuilderGUI:
         for rule in self.rules:
             self.result.append(rule.get_rule())
 
-        self.enable_default_rules = self.cb_enable_default_rules.get()
+        self.enable_default_rules = self.cb_enable_security_rules.get()
         
         self.cleanexit = True
         
