@@ -116,6 +116,7 @@ def main():
     parser_inputs = app.parser_inputs
     parser_outfile = app.parser_outfile
     control_flags = app.control_flags
+    parsers.jobs = app.jobs
     
     # Put control_flags into module variable
     parsers.control_flags = control_flags

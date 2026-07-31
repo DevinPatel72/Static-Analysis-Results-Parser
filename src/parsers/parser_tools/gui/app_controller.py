@@ -19,6 +19,7 @@ class SARPApp:
         self.parser_inputs = []
         self.parser_outfile = ""
         self.control_flags = {}
+        self.jobs = 1
         self.select_input = None
         self.current_window = GuiWindow.JsonInputPreviewGUI
         
@@ -99,11 +100,12 @@ class SARPApp:
 
                 # User chooses outfile location and control flags
                 case GuiWindow.OutfileFlagsGUI:
-                    outfile_flags_gui = OutfileFlagsGUI(parsers.gui_root, self.parser_outfile, self.control_flags)
+                    outfile_flags_gui = OutfileFlagsGUI(parsers.gui_root, self.parser_outfile, self.control_flags, self.jobs)
                     if not outfile_flags_gui.cleanexit:
                         sys.exit(0)
                     
                     self.parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
+                    self.jobs = outfile_flags_gui.results[InputDictKeys.JOBS.value]
                     self.control_flags = {f.flag: outfile_flags_gui.results[f.flag]
                                         for f in InputConfigFlags
                                         if GuiWindow.OutfileFlagsGUI in f.module_visibility}

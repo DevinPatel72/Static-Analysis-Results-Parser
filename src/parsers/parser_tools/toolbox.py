@@ -44,6 +44,7 @@ class InputDictKeys(Enum):
     REMOVE = 'remove'
     OUTFILE = 'outfile'
     INPUT_ID = 'inputid'
+    JOBS = 'jobs'
     
     @classmethod
     def inputs(cls):
@@ -629,9 +630,17 @@ def format_time(seconds):
 
 def get_all_previews(inputs):
     previews = {}
+    results = []
     
-    with Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags,)) as pool:
-        results = pool.map(worker_get_preview, inputs)
+    # Skip multithreading if number of jobs is 1. Slightly improves performance
+    if parsers.jobs > 1:
+        with Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags,)) as pool:
+            results = pool.map(worker_get_preview, inputs)
+    else:
+        results = [
+            worker_get_preview(inp)
+            for inp in inputs
+        ]
     
     for result in results:
         previews[result['fpath']] = result['preview']

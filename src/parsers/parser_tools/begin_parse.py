@@ -75,7 +75,7 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
     parsers.progress_queue = progress_queue
     parsers.control_flags = control_flags
     
-    with Pool(processes=4, initializer=init_worker, initargs=(progress_queue, control_flags)) as pool:
+    with Pool(processes=parsers.jobs, initializer=init_worker, initargs=(progress_queue, control_flags)) as pool:
         results = pool.map(parse_input, parser_inputs)
     
     # Merge results

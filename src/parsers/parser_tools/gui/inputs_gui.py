@@ -567,7 +567,7 @@ class AdjustPathsGUI:
         self.root.destroy()
 
 class OutfileFlagsGUI:
-    def __init__(self, root: tk.Tk, outfile="", control_flags=None):
+    def __init__(self, root: tk.Tk, outfile="", control_flags=None, jobs=1):
         self.initial_outfile = outfile
         if control_flags is None:
             self.initial_flags = {}
@@ -582,7 +582,7 @@ class OutfileFlagsGUI:
         
         # Set geometry
         width = 550
-        height = 200 + (25*len(InputConfigFlags))
+        height = 200 + (25*(len(InputConfigFlags)+2))
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
 
@@ -593,6 +593,7 @@ class OutfileFlagsGUI:
         self.output_path = tk.StringVar()
         self.output_format = tk.StringVar(value="Excel")
         self._updating = False
+        self.jobs = tk.IntVar(value=jobs)
 
         # ─── File Path Selector and Format ────────────────────
         path_frame = tk.Frame(self.root)
@@ -624,9 +625,11 @@ class OutfileFlagsGUI:
 
         self._path_changed()
 
+
         # ─── Checkboxes for Flags ─────────────────────────────
-        checkbox_frame = tk.LabelFrame(self.root, text="Output Flags", padx=10, pady=10)
+        checkbox_frame = tk.LabelFrame(self.root, text="Options", padx=10, pady=10)
         checkbox_frame.pack(padx=10, pady=10, fill="both", expand=True)
+
         
         self.flag_bool_vars = {}
         for f in InputConfigFlags:
@@ -642,6 +645,40 @@ class OutfileFlagsGUI:
                 self.flag_bool_vars[f.flag],
                 f.description
             )
+        
+        # ─── Jobs Selector ─────────────────────────────
+        jobs_frame = tk.Frame(checkbox_frame)
+        jobs_frame.pack(pady=5, padx=10, fill="x")
+    
+        tk.Label(
+            jobs_frame,
+            text="Jobs:",
+            anchor="w"
+        ).pack(side=tk.LEFT)
+    
+        max_jobs = os.cpu_count() or 1
+    
+        jobs_menu = tk.OptionMenu(
+            jobs_frame,
+            self.jobs,
+            *range(1, max_jobs + 1)
+        )
+        jobs_menu.pack(side=tk.LEFT, padx=5)
+    
+        jobs_tooltip = (
+            "Define the number of processors to complete parsing."
+        )
+    
+        q_label = tk.Label(
+            jobs_frame,
+            text="?",
+            fg="blue",
+            font=("Arial", 10, "bold"),
+            cursor="question_arrow"
+        )
+        q_label.pack(side=tk.LEFT, padx=5)
+    
+        ToolTip(q_label, jobs_tooltip)
 
         # ─── Submit Button ─────────────────────────────
         button_frame = tk.Frame(self.root)
@@ -760,14 +797,13 @@ class OutfileFlagsGUI:
                 )
                 return
 
-        self.results = { InputDictKeys.OUTFILE.value: output_path } | {
+        self.results = { InputDictKeys.OUTFILE.value: output_path, InputDictKeys.JOBS.value: self.jobs.get() } | {
             f.flag: self.flag_bool_vars[f.flag].get() for f in InputConfigFlags
             if GuiWindow.OutfileFlagsGUI in f.module_visibility
         }
 
         self.cleanexit = True
         self.root.destroy()
-    
 
 
 class ToolTip:

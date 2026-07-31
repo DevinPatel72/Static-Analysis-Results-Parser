@@ -166,7 +166,7 @@ def main():
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", metavar="CONFIG_FILE", nargs='?', const=True, default=False, help="List available input config files in the `inputs` directory. If `CONFIG_FILE` (file name or path) is provided, display that file's contents instead.")
     argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new configuration file.")
     argparser.add_argument('--format', dest="format", type=str, default="", help="Format of output file. Valid options are EXCEL, SARIF, or CSV.")
-    argparser.add_argument('--include-cvss-properties', dest="include_cvss_properties", action='store_true', help="By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, pass this option.")
+    argparser.add_argument('-j', '--jobs', dest="jobs", type=int, default=1, help="Define the number of processors to complete parsing. By default uses 1 processor.")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print an example inputs JSON template and exit.")
     argparser.add_argument('--disable-progressbar', dest="disableprogressbar", action='store_true', help="Disables progress bar in CLI for faster performance.")
     
@@ -201,6 +201,10 @@ def main():
     rv = check_version(parsers.VERSION)
     if rv is not None and isinstance(rv, str) and len(rv) > 0:
         console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info', orig_name=__name__)
+    
+    # Check jobs
+    if args.jobs is not None:
+        parsers.jobs = min(args.jobs, os.cpu_count())
     
     # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default <PROG_NAME_ABBR>_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
     if len(args.file) > 0:
