@@ -17,6 +17,7 @@
 import os
 import sys
 import traceback
+import logging
 import parsers
 import tkinter as tk
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_cwe_category_mappings, export_config
@@ -27,85 +28,94 @@ from parsers.parser_tools.begin_parse import begin
 from parsers.parser_tools.gui.app_controller import SARPApp
 from update import check_version
 
-# Init GUI
-parsers.gui_root = tk.Tk()
-parsers.gui_root.withdraw()
-parsers.GUI_MODE = True
-progressbar.DISABLE_PROGRESS_BAR = True
+logger = None
+logfile = None
 
-# Configure root path and important dirs of script
-if getattr(sys, 'frozen', False):
-    # Running as bundled executable
-    parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
-    logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
-    parsers.ASSETS_DIR = os.path.join(sys._MEIPASS, parsers.ASSETS_DIR)
-    parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-256.png')
-    if not os.path.isfile(parsers.LOGO_PATH):
-        parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-1024.png')
-else:
-    # Running as script
-    parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
-    logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
-    parsers.ASSETS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.ASSETS_DIR)
-    parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-256.png')
-    if not os.path.isfile(parsers.LOGO_PATH):
-        parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-1024.png')
+def init():
+    global logger, logfile
+    
+    # Init GUI
+    parsers.gui_root = tk.Tk()
+    parsers.gui_root.withdraw()
+    parsers.GUI_MODE = True
+    progressbar.DISABLE_PROGRESS_BAR = True
 
-# Capitalized drive letter if on Windows
-drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
-if len(drive) > 0: drive = drive.upper()
-parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
+    # Configure root path and important dirs of script
+    if getattr(sys, 'frozen', False):
+        # Running as bundled executable
+        parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
+        logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
+        parsers.ASSETS_DIR = os.path.join(sys._MEIPASS, parsers.ASSETS_DIR)
+        parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-256.png')
+        if not os.path.isfile(parsers.LOGO_PATH):
+            parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-1024.png')
+    else:
+        # Running as script
+        parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
+        logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
+        parsers.ASSETS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.ASSETS_DIR)
+        parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-256.png')
+        if not os.path.isfile(parsers.LOGO_PATH):
+            parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-1024.png')
 
-# Set import directories
-parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
-parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
-parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
+    # Capitalized drive letter if on Windows
+    drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
+    if len(drive) > 0: drive = drive.upper()
+    parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
 
-# Create inputs directory
-parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
-os.makedirs(parsers.INPUTS_DIR, exist_ok=True)
+    # Set import directories
+    parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
+    parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
+    parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
 
-# Set log paths
-parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
-os.makedirs(parsers.LOGS_DIR, exist_ok=True)
-logfile = os.path.join(parsers.LOGS_DIR, logname)
-parsers.LOGFILE = logfile
+    # Create inputs directory
+    parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
+    os.makedirs(parsers.INPUTS_DIR, exist_ok=True)
 
-# Configure logger
-import logging
-logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
-consoleHandler = logging.StreamHandler()
-consoleHandler.setLevel(logging.CRITICAL)
-consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
-logging.getLogger().addHandler(consoleHandler)
-logger = logging.getLogger(__name__)
+    # Set log paths
+    parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
+    os.makedirs(parsers.LOGS_DIR, exist_ok=True)
+    logfile = os.path.join(parsers.LOGS_DIR, logname)
+    parsers.LOGFILE = logfile
 
-from datetime import datetime
-logger.info("%s %s", parsers.PROG_NAME, parsers.VERSION)
-logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    # Configure logger
+    logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setLevel(logging.CRITICAL)
+    consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
+    logging.getLogger().addHandler(consoleHandler)
+    logger = logging.getLogger(__name__)
+
+    from datetime import datetime
+    logger.info("%s %s", parsers.PROG_NAME, parsers.VERSION)
+    logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
-# Check if openpyxl is installed. Logged here to ensure correct placement in log file
-from importlib.util import find_spec
-if find_spec('openpyxl') is None:
-    logger.warning('Module \'openpyxl\' not found, defaulting output to CSV.')
-    # Handled in parser_writer.py
+    # Check if openpyxl is installed. Logged here to ensure correct placement in log file
+    from importlib.util import find_spec
+    if find_spec('openpyxl') is None:
+        logger.warning('Module \'openpyxl\' not found, defaulting output to CSV.')
+        # Handled in parser_writer.py
 
-# Check if matplotlib is installed. Logged here to ensure correct placement in log file
-if find_spec('matplotlib') is None:
-    logger.warning('Module \'matplotlib\' not found, %s will skip chart reporting.', parsers.PROG_NAME_ABBR)
-    # Handled in reporting.py
+    # Check if matplotlib is installed. Logged here to ensure correct placement in log file
+    if find_spec('matplotlib') is None:
+        logger.warning('Module \'matplotlib\' not found, %s will skip chart reporting.', parsers.PROG_NAME_ABBR)
+        # Handled in reporting.py
 
 ################################
 # Main
 ################################
 
 def main():
+    global logger
+    
     # Check for updates first
     rv = check_version(parsers.VERSION)
     if rv is not None and isinstance(rv, str) and len(rv) > 0:
         close_splash()
         console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info', orig_name=__name__)
+    
+    init()
     
     parser_inputs = []
     parser_outfile = ""

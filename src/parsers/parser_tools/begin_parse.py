@@ -3,7 +3,8 @@
 import os
 import sys
 import logging
-from multiprocessing import Queue, Pool
+import logging.handlers
+import multiprocessing
 import threading
 import importlib
 import parsers
@@ -40,7 +41,7 @@ def begin(parser_inputs):
     # GUI mode
     if parsers.GUI_MODE:
         # Init loading window
-        parsers.progress_queue = Queue()
+        parsers.progress_queue = multiprocessing.Queue()
         loading_window = LoadingWindow(parsers.gui_root, scanner_ids=[(os.path.basename(i[InputDictKeys.PATH.value]), i[InputDictKeys.INPUT_ID.value]) for i in parser_inputs], progress_queue=parsers.progress_queue)
     
         threading.Thread(
@@ -57,7 +58,7 @@ def begin(parser_inputs):
             sys.exit(0)
     # CLI mode
     else:
-        run_parsers(parser_inputs)
+        run_parsers(parser_inputs, control_flags=parsers.control_flags)
     
     # Generate report
     _report.generate_report()
@@ -74,10 +75,40 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
     global _report
     parsers.progress_queue = progress_queue
     parsers.control_flags = control_flags
+    results = []
     
-    with Pool(processes=parsers.jobs, initializer=init_worker, initargs=(progress_queue, control_flags)) as pool:
+    # Init logger
+    log_queue = multiprocessing.Queue()
+    formatter = logging.Formatter(fmt='[%(processName)s] %(name)-18s :: %(levelname)-8s :: %(message)s')
+    file_handler = logging.FileHandler(parsers.LOGFILE, 'a', encoding='utf-8')
+    file_handler.setFormatter(formatter)
+    listener = logging.handlers.QueueListener(
+        log_queue,
+        file_handler
+    )
+    
+    pool = None
+    
+    try:
+        # Start log listener
+        listener.start()
+        print("Listener handler:", listener.handlers)
+        
+        # Init multithreading pool
+        pool = multiprocessing.Pool(processes=parsers.jobs, initializer=init_worker, initargs=(progress_queue, control_flags, log_queue))
+        
+        # Start multithreading pool
         results = pool.map(parse_input, parser_inputs)
-    
+    except KeyboardInterrupt:
+        if pool is not None: pool.terminate()
+        raise
+    else:
+        pool.close()
+    finally:
+        if pool is not None: pool.join()
+        listener.stop()
+        file_handler.close()
+        
     # Merge results
     for result in results:
         parser_writer.write_rows(result['rows'])
@@ -88,12 +119,20 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
     # Write findings to file
     parser_writer.close_writer()
 
-def init_worker(progress_queue=None, control_flags=None):
+def init_worker(progress_queue=None, control_flags=None, logging_queue=None):
+    
     # Necessary to reassign progress queue and control flags since multithreading spawns a new process
     parsers.progress_queue = progress_queue
     parsers.control_flags = control_flags
+    
+    # Logging
+    logger = logging.getLogger()
+    logger.handlers.clear()
+    queue_handler = logging.handlers.QueueHandler(logging_queue)
+    logger.addHandler(queue_handler)
+    logger.setLevel(logging.INFO)
 
-def parse_input(entry, progress_queue=None, control_flags=None):
+def parse_input(entry):
     fpath = entry[InputDictKeys.PATH.value]
     scanner = entry[InputDictKeys.SCANNER.value]
     substr = entry[InputDictKeys.REMOVE.value]

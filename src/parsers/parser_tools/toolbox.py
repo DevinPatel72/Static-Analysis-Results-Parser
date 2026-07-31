@@ -2,10 +2,11 @@
 
 import os
 import logging
+import logging.handlers
 import json
 import importlib
 from enum import Enum
-from multiprocessing import Pool
+import multiprocessing
 from tkinter import messagebox
 from .progressbar import progress_bar,SPACE
 import parsers
@@ -634,8 +635,34 @@ def get_all_previews(inputs):
     
     # Skip multithreading if number of jobs is 1. Slightly improves performance
     if parsers.jobs > 1:
-        with Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags,)) as pool:
+        # Init logger
+        log_queue = multiprocessing.Queue()
+        formatter = logging.Formatter(fmt='[%(processName)s] %(name)-18s :: %(levelname)-8s :: %(message)s')
+        file_handler = logging.FileHandler(parsers.LOGFILE, 'a', encoding='utf-8')
+        file_handler.setFormatter(formatter)
+        listener = logging.handlers.QueueListener(
+            log_queue,
+            file_handler
+        )
+        
+        try:
+            # Start log listener
+            listener.start()
+            
+            # Init multithreading pool
+            pool = multiprocessing.Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags, log_queue))
+            
+            # Start multithreading pool
             results = pool.map(worker_get_preview, inputs)
+        except KeyboardInterrupt:
+            pool.terminate()
+            raise
+        else:
+            pool.close()
+        finally:
+            pool.join()
+            listener.stop()
+            file_handler.close()
     else:
         results = [
             worker_get_preview(inp)
@@ -647,8 +674,15 @@ def get_all_previews(inputs):
     
     return previews
     
-def _init_worker(control_flags):
+def _init_worker(control_flags, logging_queue):
     parsers.control_flags = control_flags
+    
+    # Logging
+    logger = logging.getLogger()
+    logger.handlers.clear()
+    queue_handler = logging.handlers.QueueHandler(logging_queue)
+    logger.addHandler(queue_handler)
+    logger.setLevel(logging.INFO)
 
 def worker_get_preview(entry):
     fpath = entry[InputDictKeys.PATH.value]
