@@ -4,7 +4,7 @@ import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.toolbox import Fieldnames, console
 
@@ -39,6 +39,7 @@ def path_preview(fpath):
 
 def parse(fpath, scanner, substr, prepend):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Count findings and errors
     finding_count = 0
@@ -48,16 +49,16 @@ def parse(fpath, scanner, substr, prepend):
     
     # Parse the file
     if fpath.endswith('.xml'):
-        finding_count, err_count = _parse_xml(fpath, substr, prepend, total_findings, scanner)
+        parsed_data, finding_count, err_count = _parse_xml(fpath, substr, prepend, total_findings, scanner)
     elif fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, substr, prepend, total_findings, scanner)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, substr, prepend, total_findings, scanner)
     else:
         logger.error("File %s is not an XML or CSV.", fpath)
         
         
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 def _get_total(path):
@@ -71,7 +72,7 @@ def _get_total(path):
         root = tree.getroot()
         queries = root.findall('Query')
         if queries is None or len(queries) <= 0:
-            return finding_count
+            return parsed_data, finding_count
         
         for query in queries:
             results = query.findall('Result')
@@ -79,10 +80,11 @@ def _get_total(path):
                 continue
             else:
                 finding_count += len(results)
-    return finding_count
+    return parsed_data, finding_count
 # End of _get_total
 
 def _parse_csv(fpath, substr, prepend, total_findings, scanner):
+    parsed_data = []
     # Counts
     finding_count = 0
     err_count = 0
@@ -139,7 +141,7 @@ def _parse_csv(fpath, substr, prepend, total_findings, scanner):
                 message = "{} - {}:{}: {}".format(query, dest_path, dest_line, row['DestName'])
                 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                         Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                         Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                         Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -163,10 +165,12 @@ def _parse_csv(fpath, substr, prepend, total_findings, scanner):
             except Exception:
                 logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_csv
 
 def _parse_xml(fpath, substr, prepend, total_findings, scanner):
+    parsed_data = []
+    
     # Counts
     i = 0
     finding_count = 0
@@ -184,7 +188,7 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner):
     # Checkmarx is organized via query ('Type'), so iterate through all queries
     queries = root.findall('Query')
     if queries is None or len(queries) <= 0:
-        return finding_count, err_count
+        return parsed_data, finding_count, err_count
     
     for query in queries:
         try:
@@ -278,7 +282,7 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner):
                     id = idgenerator.hash(preimage)
                     
                     # Write row to outfile
-                    parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                    parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                             Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                             Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                             Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -304,7 +308,7 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner):
         except Exception:
             logger.error("Error detected in Query ID %s in \'%s\': %s", query_id, fpath, traceback.format_exc())
             err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_xml
 
 def load_checkmarx_cdata():

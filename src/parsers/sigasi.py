@@ -4,7 +4,7 @@ import os
 import logging
 import traceback
 import json
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator
 from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames, console
@@ -32,6 +32,7 @@ def path_preview(fpath):
 
 def parse(fpath, scanner, substr, prepend):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Keep track of issue number and errors
     issue_num = 0
@@ -45,7 +46,7 @@ def parse(fpath, scanner, substr, prepend):
             data = json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
         logger.error("[ERROR] Invalid JSON format: %s", fpath)
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     
     issues = data['issues']
     
@@ -99,7 +100,7 @@ def parse(fpath, scanner, substr, prepend):
             id = idgenerator.hash(preimage)
 
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+            parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                 Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                 Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                 Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -125,7 +126,7 @@ def parse(fpath, scanner, substr, prepend):
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 def load_sigasi_cdata():

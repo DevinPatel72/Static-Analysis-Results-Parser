@@ -44,6 +44,7 @@ INPUTS_PATH = ''
 
 # Multithreading globals
 progress_queue = None
+jobs = 1
 
 # Updater globals
 REPO_BASE_URL = "https://api.github.com/repos/DevinPatel72/Static-Analysis-Results-Parser"

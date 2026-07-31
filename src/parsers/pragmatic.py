@@ -3,7 +3,7 @@ import os
 import logging
 import traceback
 import csv
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 
@@ -22,6 +22,7 @@ def path_preview(fpath):
 
 def parse(fpath, scanner, substr, prepend):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Keep track of row number and errors
     row_num = 0
@@ -62,7 +63,7 @@ def parse(fpath, scanner, substr, prepend):
                 #id = "PRG{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -87,5 +88,5 @@ def parse(fpath, scanner, substr, prepend):
                 err_count += 1
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse

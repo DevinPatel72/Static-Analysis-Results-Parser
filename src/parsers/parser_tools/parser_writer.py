@@ -79,6 +79,10 @@ def write_row(r):
         if r[k] is None:
             r[k] = ''
     __parser_data.append(r)
+
+def write_rows(data):
+    for row in data:
+        write_row(row)
         
 def search_row(tuples, skip_ids='', match_once=False):
     """

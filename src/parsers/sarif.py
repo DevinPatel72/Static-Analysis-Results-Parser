@@ -5,7 +5,7 @@ import re
 import logging
 import traceback
 import json
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 
@@ -56,6 +56,8 @@ def _fetch_fingerprint(result):
     
 
 def parse(fpath, scanner, substr, prepend):
+    parsed_data = []
+    
     # Convert SARIF file to dict rows
     result_num = 0
     total_results = 0
@@ -68,7 +70,7 @@ def parse(fpath, scanner, substr, prepend):
             data = json.load(f)
     except:
         logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     
     total_results = sum([len(run.get('results', [])) for run in data.get('runs', [])])
     
@@ -187,9 +189,9 @@ def parse(fpath, scanner, substr, prepend):
                         new_row[fieldname] = ''
             
                 # Write row to outfile
-                parser_writer.write_row(new_row)
+                parsed_data.append(new_row)
                 finding_count += 1
             except:
                 logger.error("Result ID %s of \'%s\':\n%s", finding_id, fpath, traceback.format_exc())
                 err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count

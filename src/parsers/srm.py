@@ -49,6 +49,7 @@ def path_preview(fpath):
 
 def parse(fpath, scanner, substr, prepend):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Keep track of issue number and errors
     finding_count = 0
@@ -56,20 +57,22 @@ def parse(fpath, scanner, substr, prepend):
     
     # Parse the file
     if fpath.endswith('.xml'):
-        finding_count, err_count = _parse_xml(fpath, substr, prepend, scanner)
+        parsed_data, finding_count, err_count = _parse_xml(fpath, substr, prepend, scanner)
     elif fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, substr, prepend, scanner)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, substr, prepend, scanner)
     else:
         logger.error("File %s is not an XML or CSV.", fpath)
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 
 def _parse_csv(fpath, substr, prepend, scanner):
+    parsed_data = []
+    
     # Keep track of row number and errors
     row_num = 0
     total_rows = 0
@@ -112,7 +115,7 @@ def _parse_csv(fpath, substr, prepend, scanner):
                 #id = "SRM{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -135,10 +138,12 @@ def _parse_csv(fpath, substr, prepend, scanner):
             except Exception:
                 logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_csv
 
 def _parse_xml(fpath, substr, prepend, scanner):
+    parsed_data = []
+    
     # Keep track of issue number and errors
     finding_num = 0
     finding_count = 0
@@ -280,7 +285,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
                     id = idgenerator.hash(preimage)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:confidence,
                                     Fieldnames.MATURITY.value:maturity,
                                     Fieldnames.MITIGATION.value:mitigation,
@@ -303,5 +308,5 @@ def _parse_xml(fpath, substr, prepend, scanner):
         except Exception:
             logger.error("Finding with ID %s in \'%s\': %s", finding_id, fpath, traceback.format_exc())
             err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_xml

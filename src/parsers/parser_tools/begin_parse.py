@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import logging
+from multiprocessing import Pool
 import threading
 import importlib
 import parsers
@@ -98,8 +99,9 @@ def run_parsers(parser_inputs):
         else:
             # Import corresponding module and parse
             module = importlib.import_module(selected_scanner.module)
-            t_finding_count, t_err_count = module.parse(path, scanner, substr, prepend)
+            t_parsed_results, t_finding_count, t_err_count = module.parse(path, scanner, substr, prepend)
         
+        parser_writer.write_rows(t_parsed_results)
         _report.counts[scanner][0] += t_finding_count
         _report.counts[scanner][1] += t_err_count
         

@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 import tempfile
 import re
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator
 from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
@@ -69,6 +69,7 @@ def path_preview(fpath):
 
 def parse(fpath, scanner, substr, prepend):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Count errors encountered while running
     finding_count = 0
@@ -86,7 +87,7 @@ def parse(fpath, scanner, substr, prepend):
         fvdl_path = os.path.join(temp_dir, "audit.fvdl")
         if not os.path.exists(fvdl_path):
             logger.error("audit.fvdl not found in the provided FPR file. Skipping fortify parsing.")
-            return finding_count, err_count + 1
+            return parsed_data, finding_count, err_count + 1
 
         # Parse the audit.fvdl file
         tree = ET.parse(fvdl_path)
@@ -291,7 +292,7 @@ def parse(fpath, scanner, substr, prepend):
                 #id = "FORT{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -323,7 +324,7 @@ def parse(fpath, scanner, substr, prepend):
     if err_count > 0:
         logger.warning("Errors have been detected while parsing a Fortify .fpr file. To troubleshoot, unzip the .fpr file and manually search the \"audit.fvdl\" file for the problematic vulnerabilities.")
         
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 

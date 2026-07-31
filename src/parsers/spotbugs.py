@@ -6,7 +6,7 @@ import json
 import re
 import traceback
 import xml.etree.ElementTree as ET
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames, console
 
@@ -51,19 +51,21 @@ def path_preview(fpath):
 
 def parse(fpath, scanner, substr, prepend):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     if fpath.endswith('.xml'):
-        finding_count, err_count = _parse_xml(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_xml(fpath, scanner, substr, prepend)
     else:
-        finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
     
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 def _parse_sarif(fpath, scanner, substr, prepend):
+    parsed_data = []
     
     finding_count = 0
     result_num = 0
@@ -78,7 +80,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
     except (FileNotFoundError, json.JSONDecodeError):
         err_count += 1
         logger.error("Unable to parse input file \"%s\". Ensure %s is configured to output in SARIF format.", fpath, scanner)
-        return finding_count, err_count
+        return parsed_data, finding_count, err_count
     
     # Get runs
     data = data['runs'][0]
@@ -166,7 +168,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
             id = idgenerator.hash(preimage)
 
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+            parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                 Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                 Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                 Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -190,11 +192,12 @@ def _parse_sarif(fpath, scanner, substr, prepend):
             logger.error("Result with ID \"%s\", message %s in \'%s\': %s", bug_type, result.get('message', ''), fpath, traceback.format_exc())
             err_count += 1
         
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_sarif
 
 
 def _parse_xml(fpath, scanner, substr, prepend):
+    parsed_data = []
     
     # Counters
     instance_num = 0
@@ -284,7 +287,7 @@ def _parse_xml(fpath, scanner, substr, prepend):
         id = idgenerator.hash(preimage)
 
         # Write row to outfile
-        parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+        parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                             Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                             Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                             Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -306,7 +309,7 @@ def _parse_xml(fpath, scanner, substr, prepend):
         finding_count += 1
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous entries: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_xml
 
 def load_spotbugs_bug_patterns(existing_data=None):

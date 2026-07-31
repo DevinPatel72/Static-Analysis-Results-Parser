@@ -7,7 +7,7 @@ import json
 import logging
 import traceback
 from urllib.parse import unquote
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 from .parser_tools.language_resolver import resolve_lang_from_ext
@@ -40,18 +40,19 @@ def path_preview(fpath):
 
 def parse(fpath, scanner, substr, prepend):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     if fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
     else:
-        finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 
 def _parse_sarif(fpath, scanner, substr, prepend):
-    
+    parsed_data = []
     finding_count = 0
     result_num = 0
     
@@ -65,7 +66,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
     except (FileNotFoundError, json.JSONDecodeError):
         err_count += 1
         logger.error("Unable to parse input file \"%s\". Ensure %s is configured to output in SARIF format.", fpath, scanner)
-        return finding_count, err_count
+        return parsed_data, finding_count, err_count
     
     # Get runs
     data = data['runs'][0]
@@ -177,7 +178,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
                 id = idgenerator.hash(preimage)
 
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+            parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                 Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                 Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                 Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -201,10 +202,11 @@ def _parse_sarif(fpath, scanner, substr, prepend):
             logger.error("Result with ID \"%s\", message %s in \'%s\': %s", rule_id, result.get('message', ''), fpath, traceback.format_exc())
             err_count += 1
         
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_sarif
 
 def _parse_csv(fpath, scanner, substr, prepend):
+    parsed_data = []
     
     # Keep track of row number and errors
     row_num = 0
@@ -297,7 +299,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                     fingerprint = idgenerator.hash(preimage)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -322,7 +324,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 err_count += 1
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 def _normalize_text(s):
