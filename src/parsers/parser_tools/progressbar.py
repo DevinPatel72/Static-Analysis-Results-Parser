@@ -43,7 +43,7 @@ def progress_bar(iteration, total, input_id='', prefix='', suffix='', decimals=2
     if parsers.GUI_MODE:
         parsers.progress_queue.put({
             "type": "progress",
-            "input_id": input_id,
+            "id": input_id,
             "status": prefix.strip(),
             "percent": (iteration / l_total) * 100
         })

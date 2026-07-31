@@ -1,17 +1,17 @@
 # loading_screen.py
 
 import re
-import queue
 import parsers
 from ..toolbox import InputConfigFlags
 import tkinter as tk
 from tkinter import ttk
+from queue import Empty
 
 class LoadingWindow:
-    def __init__(self, root, scanner_ids):
+    def __init__(self, root, scanner_ids, progress_queue):
 
         self.root = tk.Toplevel(root)
-        self.queue = queue.Queue()
+        self.queue = progress_queue
         self.cleanexit = False
 
         self.root.title(parsers.PROG_NAME)
@@ -23,25 +23,43 @@ class LoadingWindow:
         ############################################################
         # Create one progress bar per scanner
         ############################################################
-
+        ttk.Label(
+            self.root,
+            text="Scanners",
+            font=("TkDefaultFont", 10, "bold")
+        ).pack(
+            padx=10,
+            pady=(10, 5)
+        )
+        
         row = 0
+        
+        scanner_content = ttk.Frame(self.root, padding=10)
+        scanner_content.pack(fill="both", expand=True)
 
-        for input_id in scanner_ids:
+        scanner_content.columnconfigure(0, weight=1)
+        scanner_content.columnconfigure(1, weight=0)
 
-            label = ttk.Label(
-                self.root,
-                text="Waiting..."
-            )
-            label.grid(
-                row=row,
-                column=0,
-                sticky="w",
-                padx=10,
-                pady=(8, 0)
-            )
+        row += 1
+        
+        for scanner, input_id in scanner_ids:
+
+            scanner_content.grid_columnconfigure(0, weight=1)
+            scanner_content.grid_columnconfigure(1, weight=0)
+
+            header = ttk.Frame(scanner_content)
+            header.grid(row=row, column=0, columnspan=2, sticky="ew", padx=10, pady=(10, 5))
+
+            header.columnconfigure(0, weight=1)
+
+            status = ttk.Label(header, text=f"Initializing {scanner}")
+            status.grid(row=0, column=0, sticky="w")
+
+            percent = ttk.Label(header, text="0 %")
+            percent.grid(row=0, column=1, sticky="e")
 
             progress = ttk.Progressbar(
-                self.root,
+                scanner_content,
                 mode="determinate",
                 maximum=100,
                 length=450
@@ -49,13 +67,13 @@ class LoadingWindow:
             progress.grid(
                 row=row + 1,
                 column=0,
-                padx=10,
-                pady=(0, 8),
-                sticky="ew"
+                columnspan=2,
+                sticky="ew",
             )
 
             self.progress_widgets[input_id] = {
-                "label": label,
+                "status": status,
+                "percent": percent,
                 "bar": progress
             }
 
@@ -70,39 +88,68 @@ class LoadingWindow:
         CONTROL_FLAG_BARS = [
             (
                 InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag,
-                                f"Waiting for {InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag}...",
+                f"{InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag}: Waiting for scanners to finish parsing...",
                 InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag,
             ),
             (
                 InputConfigFlags.PREFLIGHT_RULES.flag,
-                f"Waiting for {InputConfigFlags.PREFLIGHT_RULES.flag}...",
+                f"{InputConfigFlags.PREFLIGHT_RULES.flag}: Waiting for scanners to finish parsing...",
                 InputConfigFlags.PREFLIGHT_RULES.flag,
             ),
             (
                 InputConfigFlags.OVERRIDE_VULN_MAPPING.flag,
-                f"Waiting for {InputConfigFlags.OVERRIDE_VULN_MAPPING.flag}...",
+                f"{InputConfigFlags.OVERRIDE_VULN_MAPPING.flag}: Waiting for scanners to finish parsing...",
                 InputConfigFlags.OVERRIDE_VULN_MAPPING.flag,
             ),
         ]
+        enabled = [
+            item for item in CONTROL_FLAG_BARS
+            if parsers.control_flags.get(item[2], False)
+        ]
+
+        if enabled:
+            ttk.Separator(self.root, orient="horizontal").pack(
+                padx=10,
+                pady=(10, 5)
+            )
+
+            ttk.Label(
+                self.root,
+                text="Post Processing",
+                font=("TkDefaultFont", 10, "bold")
+            ).pack(
+                padx=10,
+                pady=(0, 5)
+            )
+        
+        row = 0
+        
+        post_content = ttk.Frame(self.root, padding=10)
+        post_content.pack(fill="both", expand=True)
+
+        post_content.columnconfigure(0, weight=1)
+        post_content.columnconfigure(1, weight=0)
 
         for progress_id, waiting_text, flag_name in CONTROL_FLAG_BARS:
-            if flag_name not in parsers.control_flags.keys() or parsers.control_flags[flag_name]:
+            if flag_name not in parsers.control_flags.keys() or not parsers.control_flags[flag_name]:
                 continue
 
-            label = ttk.Label(
-                self.root,
-                text=waiting_text
-            )
-            label.grid(
-                row=row,
-                column=0,
-                sticky="w",
-                padx=10,
-                pady=(8, 0)
-            )
+            post_content.grid_columnconfigure(0, weight=1)
+            post_content.grid_columnconfigure(1, weight=0)
+            
+            post_header = ttk.Frame(post_content)
+            post_header.grid(row=row, column=0, columnspan=2, sticky="ew", padx=10, pady=(10, 5))
+            
+            post_header.columnconfigure(0, weight=1)
+            
+            status = ttk.Label(post_header, text=waiting_text)
+            status.grid(row=0, column=0, sticky="w")
+            
+            percent = ttk.Label(post_header, text="0 %")
+            percent.grid(row=0, column=1, sticky="e")
 
             progress = ttk.Progressbar(
-                self.root,
+                post_content,
                 mode="determinate",
                 maximum=100,
                 length=450
@@ -116,7 +163,8 @@ class LoadingWindow:
             )
 
             self.progress_widgets[progress_id] = {
-                "label": label,
+                "status": status,
+                "percent": percent,
                 "bar": progress
             }
 
@@ -148,6 +196,13 @@ class LoadingWindow:
         self.root.geometry(f"{width}x{height}+{x}+{y}")
 
         self.root.after(100, self.poll_queue)
+        
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_force()
+        self.root.attributes("-topmost", True)
+        self.root.update()
+        self.root.attributes("-topmost", False)
 
     ###########################################################################
 
@@ -176,6 +231,8 @@ class LoadingWindow:
                         widgets = self.progress_widgets[progress_id]
 
                         widgets["bar"]["value"] = 100
+                        widgets["status"].config(text=msg.get("status", ""))
+                        widgets["percent"].config(text="100 %")
 
                         self.completed.add(progress_id)
 
@@ -192,7 +249,7 @@ class LoadingWindow:
                     self.root.destroy()
                     return
 
-        except queue.Empty:
+        except Empty:
             pass
 
         self.root.after(100, self.poll_queue)
@@ -209,6 +266,5 @@ class LoadingWindow:
 
         widgets["bar"]["value"] = msg.get("percent", 0)
 
-        widgets["label"].config(
-            text=msg.get("status", "")
-        )
+        widgets["status"].config(text=msg.get("status", ""))
+        widgets["percent"].config(text="{:.0f} %".format(msg.get("percent", 0)))

@@ -106,7 +106,7 @@ class SARPApp:
                     self.parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
                     self.control_flags = {f.flag: outfile_flags_gui.results[f.flag]
                                         for f in InputConfigFlags
-                                        if f.module_visibility == GuiWindow.OutfileFlagsGUI}
+                                        if GuiWindow.OutfileFlagsGUI in f.module_visibility}
                     
                     # Go back
                     if outfile_flags_gui.back:

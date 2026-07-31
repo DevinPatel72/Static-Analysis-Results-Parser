@@ -2,9 +2,8 @@
 
 import os
 import sys
-import time
 import logging
-from multiprocessing import Pool
+from multiprocessing import Queue, Pool
 import threading
 import importlib
 import parsers
@@ -41,12 +40,12 @@ def begin(parser_inputs):
     # GUI mode
     if parsers.GUI_MODE:
         # Init loading window
-        loading_window = LoadingWindow(parsers.gui_root, scanner_ids=[i[InputDictKeys.INPUT_ID.value] for i in parser_inputs])
-        parsers.progress_queue = loading_window.queue
+        parsers.progress_queue = Queue()
+        loading_window = LoadingWindow(parsers.gui_root, scanner_ids=[(os.path.basename(i[InputDictKeys.PATH.value]), i[InputDictKeys.INPUT_ID.value]) for i in parser_inputs], progress_queue=parsers.progress_queue)
     
         threading.Thread(
             target=run_parsers,
-            args=(parser_inputs,),
+            args=(parser_inputs, parsers.progress_queue, parsers.control_flags),
             daemon=True
         ).start()
 
@@ -71,10 +70,12 @@ def begin(parser_inputs):
             print(f"Errors have been detected while parsing files. Please see logfile \"{parsers.LOGFILE}\" for more details.")
 
 # Executed in a worker thread in GUI mode or in the main thread in CLI mode
-def run_parsers(parser_inputs):
+def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
     global _report
+    parsers.progress_queue = progress_queue
+    parsers.control_flags = control_flags
     
-    with Pool() as pool:
+    with Pool(processes=4, initializer=init_worker, initargs=(progress_queue, control_flags)) as pool:
         results = pool.map(parse_input, parser_inputs)
     
     # Merge results
@@ -87,8 +88,12 @@ def run_parsers(parser_inputs):
     # Write findings to file
     parser_writer.close_writer()
 
+def init_worker(progress_queue=None, control_flags=None):
+    # Necessary to reassign progress queue and control flags since multithreading spawns a new process
+    parsers.progress_queue = progress_queue
+    parsers.control_flags = control_flags
 
-def parse_input(entry):
+def parse_input(entry, progress_queue=None, control_flags=None):
     fpath = entry[InputDictKeys.PATH.value]
     scanner = entry[InputDictKeys.SCANNER.value]
     substr = entry[InputDictKeys.REMOVE.value]
@@ -122,6 +127,7 @@ def parse_input(entry):
     if parsers.GUI_MODE:
         parsers.progress_queue.put({
             "type": "complete",
+            "status": f"Finished {os.path.basename(fpath)}",
             "id": input_id
         })
     
