@@ -5,6 +5,7 @@ import logging
 import json
 import importlib
 from enum import Enum
+from multiprocessing import Pool
 from tkinter import messagebox
 from .progressbar import progress_bar,SPACE
 import parsers
@@ -49,10 +50,10 @@ class InputDictKeys(Enum):
         return [cls.PATH.value, cls.SCANNER.value, cls.PREPEND.value, cls.REMOVE.value]
 
 class InputConfigFlags(Enum):
-    OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True, "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
-    PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, "If enabled, this will change final output values according to user-defined rules.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
-    SECURITY_PREFLIGHT_RULES = (parsers.FLAG_SECURITY_PREFLIGHT_RULES, True, "If enabled, changes final output values according to a prebuilt profile of rules. Only activated if \"Preflight Rules\" flag is also true.", (GuiWindow.RuleBuilderGUI,))
     DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False, "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
+    PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, "If enabled, this will change final output values according to user-defined rules.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
+    OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True, "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
+    SECURITY_PREFLIGHT_RULES = (parsers.FLAG_SECURITY_PREFLIGHT_RULES, True, "If enabled, changes final output values according to a prebuilt profile of rules. Only activated if \"Preflight Rules\" flag is also true.", (GuiWindow.RuleBuilderGUI,))
     SARIF_STITCH_PROPERTIES = (parsers.FLAG_SARIF_STITCH_PROPERTIES, False, "By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true.", (GuiWindow.OutfileFlagsGUI,))
 
     def __init__(self, flag, default, description, module_visibility):
@@ -629,23 +630,32 @@ def format_time(seconds):
 def get_all_previews(inputs):
     previews = {}
     
-    for inp in inputs:
-        fpath = inp[InputDictKeys.PATH.value]
-        scanner = inp[InputDictKeys.SCANNER.value]
-        preview = ''
+    with Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags,)) as pool:
+        results = pool.map(worker_get_preview, inputs)
     
-        fp = os.path.realpath(fpath)
-        
-        selected_scanner = select_scanner(scanner)
-        if selected_scanner is None:
-            preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
-        else:
-            module = importlib.import_module(selected_scanner.module)
-            preview = module.path_preview(fp)
-
-        previews[fpath] = preview
+    for result in results:
+        previews[result['fpath']] = result['preview']
     
     return previews
+    
+def _init_worker(control_flags):
+    parsers.control_flags = control_flags
+
+def worker_get_preview(entry):
+    fpath = entry[InputDictKeys.PATH.value]
+    scanner = entry[InputDictKeys.SCANNER.value]
+    preview = ''
+
+    fp = os.path.realpath(fpath)
+    
+    selected_scanner = select_scanner(scanner)
+    if selected_scanner is None:
+        preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
+    else:
+        module = importlib.import_module(selected_scanner.module)
+        preview = module.path_preview(fp)
+
+    return {'fpath':fpath, 'preview': preview}
 
 def select_scanner(scanner):
     # Returns enum corresponding to scanner text, else returns None

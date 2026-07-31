@@ -107,7 +107,7 @@ def parse_input(entry, progress_queue=None, control_flags=None):
         parsers.progress_queue.put({
             "type": "progress",
             "id": input_id,
-            "status": f"Parsing {os.path.basename(fpath)}",
+            "status": f"Initializing {os.path.basename(fpath)}",
             "percent": 0
         })
     

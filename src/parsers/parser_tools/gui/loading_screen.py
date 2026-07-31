@@ -2,7 +2,7 @@
 
 import re
 import parsers
-from ..toolbox import InputConfigFlags
+from ..toolbox import InputConfigFlags, GuiWindow
 import tkinter as tk
 from tkinter import ttk
 from queue import Empty
@@ -42,7 +42,7 @@ class LoadingWindow:
 
         row += 1
         
-        for scanner, input_id in scanner_ids:
+        for scanner_fpath, input_id in scanner_ids:
 
             scanner_content.grid_columnconfigure(0, weight=1)
             scanner_content.grid_columnconfigure(1, weight=0)
@@ -52,7 +52,7 @@ class LoadingWindow:
 
             header.columnconfigure(0, weight=1)
 
-            status = ttk.Label(header, text=f"Initializing {scanner}")
+            status = ttk.Label(header, text=f"Initializing {scanner_fpath}")
             status.grid(row=0, column=0, sticky="w")
 
             percent = ttk.Label(header, text="0 %")
@@ -86,22 +86,11 @@ class LoadingWindow:
         ############################################################
 
         CONTROL_FLAG_BARS = [
-            (
-                InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag,
-                f"{InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag}: Waiting for scanners to finish parsing...",
-                InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag,
-            ),
-            (
-                InputConfigFlags.PREFLIGHT_RULES.flag,
-                f"{InputConfigFlags.PREFLIGHT_RULES.flag}: Waiting for scanners to finish parsing...",
-                InputConfigFlags.PREFLIGHT_RULES.flag,
-            ),
-            (
-                InputConfigFlags.OVERRIDE_VULN_MAPPING.flag,
-                f"{InputConfigFlags.OVERRIDE_VULN_MAPPING.flag}: Waiting for scanners to finish parsing...",
-                InputConfigFlags.OVERRIDE_VULN_MAPPING.flag,
-            ),
+            (f.flag, f"{f.flag}: Waiting for scanners to finish parsing...", f.flag)
+            for f in InputConfigFlags
+            if GuiWindow.LoadingWindow in f.module_visibility
         ]
+        
         enabled = [
             item for item in CONTROL_FLAG_BARS
             if parsers.control_flags.get(item[2], False)
