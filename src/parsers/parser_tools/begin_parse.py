@@ -41,7 +41,7 @@ def begin(parser_inputs):
     # GUI mode
     if parsers.GUI_MODE:
         # Init loading window
-        loading_window = LoadingWindow(parsers.gui_root, scanners=[(i[InputDictKeys.SCANNER.value], i[InputDictKeys.PATH.value]) for i in parser_inputs])
+        loading_window = LoadingWindow(parsers.gui_root, scanner_ids=[i[InputDictKeys.INPUT_ID.value] for i in parser_inputs])
         parsers.progress_queue = loading_window.queue
     
         threading.Thread(
