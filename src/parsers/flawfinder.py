@@ -167,15 +167,9 @@ def _parse_sarif(fpath, scanner, substr, prepend, input_id):
             else:
                 trace = ""
             
-            # Generate ID
-            id = ''
-            for k, v in result.get('fingerprints', {}).items():
-                if 'contextHash' in k:
-                    id = v
-                    break
-            if len(id) <= 0:
-                preimage = '\0'.join(str(p) for p in (path, line, rule_id, message) if len(str(p)) > 0)
-                id = idgenerator.hash(preimage)
+            # Generate ID. Do not use Fingerprint ID since it is generated solely using source snippets
+            preimage = '\0'.join(str(p) for p in (path, line, rule_id, message) if len(str(p)) > 0)
+            id = idgenerator.hash(preimage)
 
             # Write row to outfile
             parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
@@ -292,11 +286,9 @@ def _parse_csv(fpath, scanner, substr, prepend, input_id):
                 note = row['Note']
                 message = ". ".join(part for part in [warning, suggestion, note] if len(part.strip()) > 0)
                 
-                # Generate ID for finding if fingerprint is not here
-                fingerprint = row['Fingerprint']
-                if not (fingerprint is not None and isinstance(fingerprint, str) and len(fingerprint) > 0):
-                    preimage = '\0'.join(str(p) for p in (path, line, category, message) if len(str(p)) > 0)
-                    fingerprint = idgenerator.hash(preimage)
+                # Generate ID. Do not use Fingerprint ID since it is generated solely using source snippets
+                preimage = '\0'.join(str(p) for p in (path, line, category, message) if len(str(p)) > 0)
+                fingerprint = idgenerator.hash(preimage)
 
                 # Write row to outfile
                 parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
