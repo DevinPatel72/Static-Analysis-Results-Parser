@@ -38,20 +38,20 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
     parsed_data = []
     
     if fpath.endswith('.csv'):
-        parsed_data, finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend, input_id)
     else:
-        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend, input_id)
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
     return parsed_data, finding_count, err_count
 
-def _parse_sarif(fpath, scanner, substr, prepend):
+def _parse_sarif(fpath, scanner, substr, prepend, input_id):
     parsed_data = []
     finding_count = 0
     result_num = 0
@@ -101,7 +101,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
     for result in data['results']:
         try:
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
             # Type
             rule_id = result['ruleId']
@@ -205,7 +205,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
     return parsed_data, finding_count, err_count
 # End of _parse_sarif
 
-def _parse_csv(fpath, scanner, substr, prepend):
+def _parse_csv(fpath, scanner, substr, prepend, input_id):
     parsed_data = []
     
     # Keep track of row number and errors
@@ -226,7 +226,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             
                 cwe = row['CWEs']
                 if cwe is not None and isinstance(cwe, str):

@@ -30,7 +30,7 @@ def path_preview(fpath):
     # No data, return error message
     return f"[ERROR] No data found in \'{fpath}\'"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
     parsed_data = []
     
@@ -56,7 +56,7 @@ def parse(fpath, scanner, substr, prepend):
     for issue in issues:
         issue_num += 1
         try:
-            progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
             # Get path/line and resolve language
             path = issue['resource']

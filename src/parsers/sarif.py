@@ -55,7 +55,7 @@ def _fetch_fingerprint(result):
     return finding_id
     
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     parsed_data = []
     
     # Convert SARIF file to dict rows
@@ -82,7 +82,7 @@ def parse(fpath, scanner, substr, prepend):
         # Iterate through results and rebuild excel column
         for result in run.get('results', []):
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             try:
                 finding_id = _fetch_fingerprint(result)
                 new_row = {

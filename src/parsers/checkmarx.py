@@ -72,7 +72,7 @@ def _get_total(path):
         root = tree.getroot()
         queries = root.findall('Query')
         if queries is None or len(queries) <= 0:
-            return parsed_data, finding_count
+            return finding_count
         
         for query in queries:
             results = query.findall('Result')
@@ -80,10 +80,10 @@ def _get_total(path):
                 continue
             else:
                 finding_count += len(results)
-    return parsed_data, finding_count
+    return finding_count
 # End of _get_total
 
-def _parse_csv(fpath, substr, prepend, total_findings, scanner):
+def _parse_csv(fpath, substr, prepend, total_findings, scanner, input_id):
     parsed_data = []
     # Counts
     finding_count = 0
@@ -100,7 +100,7 @@ def _parse_csv(fpath, substr, prepend, total_findings, scanner):
         for row in csv_dict_reader:
             row_num += 1
             try:
-                progress_bar(row_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
                 # row variable is a dictionary that represents a row in csv
                 lang = row['QueryPath'].split('\\')[0]
@@ -168,7 +168,7 @@ def _parse_csv(fpath, substr, prepend, total_findings, scanner):
     return parsed_data, finding_count, err_count
 # End of _parse_csv
 
-def _parse_xml(fpath, substr, prepend, total_findings, scanner):
+def _parse_xml(fpath, substr, prepend, total_findings, scanner, input_id):
     parsed_data = []
     
     # Counts
@@ -224,7 +224,7 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner):
             
             for result in results:
                 i += 1
-                progress_bar(i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
                 try:
                     # Get result ID for logging purposes
                     result_id = result.get('NodeId', '')

@@ -15,7 +15,7 @@ def path_preview(fpath):
     # No preview available
     return 'No preview available for NVD CVEs'
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
     parsed_data = []
     
@@ -55,7 +55,7 @@ def parse(fpath, scanner, substr, prepend):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
                 
                 # Extract CWE
                 cwe = row['CWE']

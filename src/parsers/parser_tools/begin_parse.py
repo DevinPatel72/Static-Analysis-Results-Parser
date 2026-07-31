@@ -31,13 +31,17 @@ def begin(parser_inputs):
             parser_inputs.append(parser_inputs.pop(i))
             break
     
+    # Assign an input ID for each input
+    for i, inp in enumerate(parser_inputs, start=1):
+        inp[InputDictKeys.INPUT_ID.value] = f"{i}_{os.path.basename(inp[InputDictKeys.PATH.value])}"
+    
     # Init report object
     _report = Report(scanners=[i[InputDictKeys.SCANNER.value] for i in parser_inputs])
     
     # GUI mode
     if parsers.GUI_MODE:
         # Init loading window
-        loading_window = LoadingWindow(parsers.gui_root)
+        loading_window = LoadingWindow(parsers.gui_root, scanners=[(i[InputDictKeys.SCANNER.value], i[InputDictKeys.PATH.value]) for i in parser_inputs])
         parsers.progress_queue = loading_window.queue
     
         threading.Thread(
@@ -56,6 +60,9 @@ def begin(parser_inputs):
     else:
         run_parsers(parser_inputs)
     
+    # Write findings to file
+    parser_writer.close_writer()
+    
     # Generate report
     _report.generate_report()
     
@@ -70,48 +77,58 @@ def begin(parser_inputs):
 def run_parsers(parser_inputs):
     global _report
     
-    # Parse the inputs
-    for entry in parser_inputs:
-        fpath = entry[InputDictKeys.PATH.value]
-        scanner = entry[InputDictKeys.SCANNER.value]
-        substr = entry[InputDictKeys.REMOVE.value]
-        prepend = entry[InputDictKeys.PREPEND.value]
-        
-        # Put out message early in case loading screen hangs on large inputs or .fpr files
-        if parsers.GUI_MODE:
-            parsers.progress_queue.put({
-                "type": "progress",
-                "status": f"Parsing {os.path.basename(fpath)}",
-                "percent": 0
-            })
-        
-        path = os.path.realpath(fpath)
-        
-        t_finding_count = 0
-        t_err_count = 0
-        
-        selected_scanner = select_scanner(scanner)
-        if selected_scanner is None:
-            # Scanner not supported
-            logger.error("Unsupported scanner. Skipped %s, %s", scanner, fpath)
-            t_finding_count = 0
-            t_err_count = 1
-        else:
-            # Import corresponding module and parse
-            module = importlib.import_module(selected_scanner.module)
-            t_parsed_results, t_finding_count, t_err_count = module.parse(path, scanner, substr, prepend)
-        
-        parser_writer.write_rows(t_parsed_results)
-        _report.counts[scanner][0] += t_finding_count
-        _report.counts[scanner][1] += t_err_count
-        
-        if parsers.GUI_MODE:
-            time.sleep(0.2)
+    with Pool() as pool:
+        results = pool.map(parse_input, parser_inputs)
     
-    parser_writer.close_writer()
+    # Merge results
+    for result in results:
+        parser_writer.write_rows(result['rows'])
+        scanner = result['scanner']
+        _report.counts[scanner][0] += result['finding_count']
+        _report.counts[scanner][1] += result['err_count']
 
-    # Send message to main thread that parsing is done
+
+def parse_input(entry):
+    fpath = entry[InputDictKeys.PATH.value]
+    scanner = entry[InputDictKeys.SCANNER.value]
+    substr = entry[InputDictKeys.REMOVE.value]
+    prepend = entry[InputDictKeys.PREPEND.value]
+    input_id = entry[InputDictKeys.INPUT_ID.value]
+    
+    path = os.path.realpath(fpath)
+    
+    # Put out message early in case loading screen hangs on large inputs or .fpr files
     if parsers.GUI_MODE:
         parsers.progress_queue.put({
-            "type": "complete"
+            "type": "progress",
+            "id": input_id,
+            "status": f"Parsing {os.path.basename(fpath)}",
+            "percent": 0
         })
+    
+    selected_scanner = select_scanner(scanner)
+    if selected_scanner is None:
+        # Scanner not supported
+        logger.error("Unsupported scanner. Skipped %s, %s", scanner, fpath)
+        parsed_results = []
+        finding_count = 0
+        err_count = 1
+    else:
+        # Import corresponding module and parse
+        module = importlib.import_module(selected_scanner.module)
+        parsed_results, finding_count, err_count = module.parse(path, scanner, substr, prepend, input_id)
+    
+    # Send message that parser is done
+    if parsers.GUI_MODE:
+        parsers.progress_queue.put({
+            "type": "complete",
+            "id": input_id
+        })
+    
+    return {
+        "scanner": scanner,
+        "rows": parsed_results,
+        "finding_count": finding_count,
+        "err_count": err_count,
+    }
+    

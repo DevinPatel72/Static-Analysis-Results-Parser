@@ -67,7 +67,7 @@ def path_preview(fpath):
         logger.error("Unable to load preview.\n%s", traceback.format_exc())
         return "[ERROR] Unable to load preview. See log file for details."
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
     parsed_data = []
     
@@ -109,7 +109,7 @@ def parse(fpath, scanner, substr, prepend):
             symbol = ''
             try:
                 vulnerability_num += 1
-                progress_bar(vulnerability_num, total_vulnerabilities, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(vulnerability_num, total_vulnerabilities, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
                 
                 # Extract class information
                 class_info = vulnerability.find('./ns:ClassInfo', namespace)

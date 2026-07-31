@@ -60,7 +60,7 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     global __excel_enabled
     logger.info("Parsing %s - %s", scanner, fpath)
     parsed_data = []
@@ -74,7 +74,7 @@ def parse(fpath, scanner, substr, prepend):
     
     # SARIF Move to different helper function
     if fpath.endswith(('.sarif', '.json')):
-        finding_count, err_count = _parse_sarp_sarif(fpath, scanner, substr, prepend)
+        finding_count, err_count = _parse_sarp_sarif(fpath, scanner, substr, prepend, input_id)
         return parsed_data, finding_count, err_count
     
     # Excel - Set data iterable and total_rows
@@ -104,7 +104,7 @@ def parse(fpath, scanner, substr, prepend):
     for row in data:
         try:
             row_num += 1
-            progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
 
             # Cut and prepend the paths and convert all backslashes to forward slashes
             path = str(row[Fieldnames.PATH.value]).replace(substr, "", 1)
@@ -124,7 +124,7 @@ def parse(fpath, scanner, substr, prepend):
     return parsed_data, finding_count, err_count
 # End of parse
 
-def _parse_sarp_sarif(fpath, scanner, substr, prepend):
+def _parse_sarp_sarif(fpath, scanner, substr, prepend, input_id):
     # Side function to handle SARIF format
     
     parsed_data = []
@@ -152,7 +152,7 @@ def _parse_sarp_sarif(fpath, scanner, substr, prepend):
         # Iterate through results and rebuild excel column
         for result in run.get('results', []):
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             try:
                 finding_id = result.get('partialFingerprints', {}).get('findingId', '')
                 new_row = {

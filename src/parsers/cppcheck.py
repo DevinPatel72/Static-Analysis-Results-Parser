@@ -26,7 +26,7 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
     parsed_data = []
     
@@ -63,7 +63,7 @@ def parse(fpath, scanner, substr, prepend):
         for error in errors.findall('error'):
             try:
                 error_num += 1
-                progress_bar(error_num, total_errors, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(error_num, total_errors, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
                 
                 if error.get('id') in config_errors:
                     # Config error found. The error will be output to a separate CSV

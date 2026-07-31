@@ -49,14 +49,14 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
     parsed_data = []
     
     if fpath.endswith('.xml'):
-        parsed_data, finding_count, err_count = _parse_xml(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_xml(fpath, scanner, substr, prepend, input_id)
     else:
-        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend, input_id)
     
     
     logger.info("Successfully processed %d findings", finding_count)
@@ -64,7 +64,7 @@ def parse(fpath, scanner, substr, prepend):
     return parsed_data, finding_count, err_count
 # End of parse
 
-def _parse_sarif(fpath, scanner, substr, prepend):
+def _parse_sarif(fpath, scanner, substr, prepend, input_id):
     parsed_data = []
     
     finding_count = 0
@@ -114,7 +114,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
     for result in data['results']:
         try:
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
             # Type
             bug_type = result['ruleId']
@@ -196,7 +196,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
 # End of _parse_sarif
 
 
-def _parse_xml(fpath, scanner, substr, prepend):
+def _parse_xml(fpath, scanner, substr, prepend, input_id):
     parsed_data = []
     
     # Counters
@@ -221,7 +221,7 @@ def _parse_xml(fpath, scanner, substr, prepend):
     for instance in instances:
         try:
             instance_num += 1
-            progress_bar(instance_num, total_instances, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(instance_num, total_instances, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             
             # Type
             bug_type = instance.get('type')

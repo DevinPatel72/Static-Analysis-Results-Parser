@@ -42,6 +42,7 @@ class InputDictKeys(Enum):
     PREPEND = 'prepend'
     REMOVE = 'remove'
     OUTFILE = 'outfile'
+    INPUT_ID = 'inputid'
     
     @classmethod
     def inputs(cls):

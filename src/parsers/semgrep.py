@@ -43,7 +43,7 @@ def path_preview(fpath):
     # No data, return error message
     return f"[ERROR] No data found in \'{fpath}\'"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
     parsed_data = []
     
@@ -70,16 +70,16 @@ def parse(fpath, scanner, substr, prepend):
     
     # Parse
     if fpath.endswith('.json'):
-        parsed_data, finding_count, err_count = _parse_json(data, fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_json(data, fpath, scanner, substr, prepend, input_id)
     else:
-        parsed_data, finding_count, err_count = _parse_sarif(data, fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_sarif(data, fpath, scanner, substr, prepend, input_id)
     
     logger.info("Successfully processed %d results", finding_count)
     logger.info("Number of erroneous results: %d", err_count)
     return parsed_data, finding_count, err_count
 
 
-def _parse_sarif(data, fpath, scanner, substr, prepend):
+def _parse_sarif(data, fpath, scanner, substr, prepend, input_id):
     parsed_data = []
     
     # Keep track of finding number and errors
@@ -107,7 +107,7 @@ def _parse_sarif(data, fpath, scanner, substr, prepend):
     for result in results:
         result_num += 1
         try:
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
             # Get rule_id
             rule_id = result['ruleId']
@@ -208,7 +208,7 @@ def _parse_sarif(data, fpath, scanner, substr, prepend):
 # End of _parse_sarif
 
 
-def _parse_json(data, fpath, scanner, substr, prepend):
+def _parse_json(data, fpath, scanner, substr, prepend, input_id):
     parsed_data = []
     
     # Keep track of finding number and errors
@@ -230,7 +230,7 @@ def _parse_json(data, fpath, scanner, substr, prepend):
     for result in results:
         result_num += 1
         try:
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
             # Get path/line
             path = result['path']
