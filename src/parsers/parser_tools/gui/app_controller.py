@@ -133,13 +133,13 @@ class SARPApp:
                             self.current_window = GuiWindow.OutfileFlagsGUI
                         else:
                             if rulebuildergui.enable_default_rules is not None:
-                                self.control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag] = rulebuildergui.enable_default_rules
+                                self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = rulebuildergui.enable_default_rules
                             else:
-                                self.control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag] = InputConfigFlags.DEFAULT_PREFLIGHT_RULES.default
+                                self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
                             self.current_window = None
                     else:
                         parsers.prules = []
-                        self.control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag] = InputConfigFlags.DEFAULT_PREFLIGHT_RULES.default
+                        self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
                         self.current_window = None
                 # All inputs windows are finished
                 case _:

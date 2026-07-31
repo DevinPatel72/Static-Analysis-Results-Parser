@@ -40,24 +40,24 @@ def load_prules():
             logger.error("Failed to import PRULES from \'%s\'\n%s", data_path, traceback.format_exc())
             parsers.prules = []
     
-    # Now load default rules
-    data_path = os.path.join(PREFLIGHT_DIR, 'default_preflight_rules.py')
+    # Now load security rules
+    data_path = os.path.join(PREFLIGHT_DIR, 'security_preflight_rules.py')
     
     if not os.path.isfile(data_path):
-        logger.warning("Unable to load default preflight rules: 'default_preflight_rules.py' does not exist in config/preflight directory.")
-        parsers.default_prules = []
+        logger.warning("Unable to load security preflight rules: 'security_preflight_rules.py' does not exist in config/preflight directory.")
+        parsers.security_prules = []
     else:
         try:
-            spec = importlib.util.spec_from_file_location("default_preflight_rules", data_path)
+            spec = importlib.util.spec_from_file_location("security_preflight_rules", data_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
-            parsers.default_prules = module.DEFAULT_PRULES
-            parsers.default_prules.sort(key=lambda rule: int(rule.precedence))
-            logger.info("Default preflight rules loaded successfully")
+            parsers.security_prules = module.PRULES
+            parsers.security_prules.sort(key=lambda rule: int(rule.precedence))
+            logger.info("Security preflight rules loaded successfully")
         except:
-            logger.error("Failed to import DEFAULT_PRULES from \'%s\'\n%s", data_path, traceback.format_exc())
-            parsers.default_prules = []
+            logger.error("Failed to import SECURITY_PRULES from \'%s\'\n%s", data_path, traceback.format_exc())
+            parsers.security_prules = []
     
     _LOADED_ONCE = True
 
@@ -94,7 +94,7 @@ def apply_prules(data):
     
     # Ensure prules are sorted by precedence
     parsers.prules.sort(key=lambda rule: int(rule.precedence))
-    parsers.default_prules.sort(key=lambda rule: int(rule.precedence))
+    parsers.security_prules.sort(key=lambda rule: int(rule.precedence))
     
     def loop_rules(rules, row):
         for pr in rules:
@@ -115,12 +115,12 @@ def apply_prules(data):
         progress_bar(i, len(data), prefix=InputConfigFlags.PREFLIGHT_RULES.flag.rjust(SPACE))
         
         # Default prules first
-        if parsers.control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag]:
-            loop_rules(parsers.default_prules, row)
+        if parsers.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag]:
+            loop_rules(parsers.security_prules, row)
         loop_rules(parsers.prules, row)
     
-    if parsers.control_flags[InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag]:
-        def_len = len(parsers.default_prules)
+    if parsers.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag]:
+        def_len = len(parsers.security_prules)
     else: def_len = 0
     logger.info("Preflight: Applied %d user rules and %d default rules", len(parsers.prules), def_len)
         

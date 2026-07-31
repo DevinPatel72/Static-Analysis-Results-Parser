@@ -10,7 +10,7 @@ PROJ_VERSION = ""
 # Control Flag Names
 FLAG_CATEGORY_MAPPING = 'Category Mappings'
 FLAG_PREFLIGHT_RULES = 'Preflight Rules'
-FLAG_DEFAULT_PREFLIGHT_RULES = 'Default Preflight Rules'
+FLAG_SECURITY_PREFLIGHT_RULES = 'Security Preflight Rules'
 FLAG_DUPE_SCAN_CONSOLIDATION = 'Duplicate Scanner Consolidation'
 FLAG_SARIF_STITCH_PROPERTIES = 'SARIF STITCH Properties'
 
@@ -22,7 +22,7 @@ gui_root = None
 
 # Preflight Rules
 prules = []
-default_prules = []
+security_prules = []
 
 # Control Flags
 control_flags = []

@@ -642,9 +642,9 @@ class RuleBuilderGUI:
         
         # Enable Default Rules checkbox
         if self.control_flags is not None:
-            self.cb_enable_default_rules = tk.BooleanVar(value=self.control_flags.get(InputConfigFlags.DEFAULT_PREFLIGHT_RULES.flag, InputConfigFlags.DEFAULT_PREFLIGHT_RULES.default))
+            self.cb_enable_default_rules = tk.BooleanVar(value=self.control_flags.get(InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag, InputConfigFlags.SECURITY_PREFLIGHT_RULES.default))
         else:
-            self.cb_enable_default_rules = tk.BooleanVar(value=InputConfigFlags.DEFAULT_PREFLIGHT_RULES.default)
+            self.cb_enable_default_rules = tk.BooleanVar(value=InputConfigFlags.SECURITY_PREFLIGHT_RULES.default)
 
         tk.Checkbutton(
             control,

@@ -52,7 +52,7 @@
       "required": [
         "Category Mappings",
         "Preflight Rules",
-        "Default Preflight Rules"
+        "Security Preflight Rules"
       ],
       "properties": {
         "Category Mappings": {
@@ -67,7 +67,7 @@
           "type": "boolean",
           "description": "If enabled, changes final output values according to user-defined rules"
         },
-        "Default Preflight Rules": {
+        "Security Preflight Rules": {
           "type": "boolean",
           "description": "If enabled, changes final output values according to a default profile of rules. Only activated if \"Preflight Rules\" flag is also true."
         },

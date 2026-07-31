@@ -7,7 +7,7 @@
 from parsers.parser_tools.prule import PRule, ConditionGroup, Condition, Strictness
 from parsers.parser_tools.toolbox import Fieldnames
 
-DEFAULT_PRULES = [
+PRULES = [
         PRule(
             rule_id = "checkmarx_buffer_size_literal",
             precedence = 0,
@@ -337,7 +337,7 @@ DEFAULT_PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Missing move assignment operator", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info', Fieldnames.VALIDATOR_COMMENT.value: "This finding is strictly related to performance, not security."}
         ),
         PRule(
             rule_id = "coverity_non_void_function_has_no_return",
