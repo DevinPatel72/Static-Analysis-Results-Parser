@@ -10,7 +10,7 @@ PROJ_VERSION = ""
 # Control Flag Names
 FLAG_CATEGORY_MAPPING = 'Category Mappings'
 FLAG_PREFLIGHT_RULES = 'Preflight Rules'
-FLAG_SECURITY_PREFLIGHT_RULES = 'Security Preflight Rules'
+FLAG_SECURITY_PREFLIGHT_RULES = 'Default Preflight Rules'
 FLAG_DUPE_SCAN_CONSOLIDATION = 'Duplicate Scanner Consolidation'
 FLAG_SARIF_STITCH_PROPERTIES = 'SARIF STITCH Properties'
 
