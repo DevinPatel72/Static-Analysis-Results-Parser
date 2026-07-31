@@ -132,8 +132,8 @@ class SARPApp:
                         if rulebuildergui.back:
                             self.current_window = GuiWindow.OutfileFlagsGUI
                         else:
-                            if rulebuildergui.enable_default_rules is not None:
-                                self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = rulebuildergui.enable_default_rules
+                            if rulebuildergui.enable_security_rules is not None:
+                                self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = rulebuildergui.enable_security_rules
                             else:
                                 self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
                             self.current_window = None

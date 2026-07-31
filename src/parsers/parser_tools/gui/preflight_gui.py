@@ -575,7 +575,7 @@ class RuleBuilderGUI:
     def __init__(self, root: tk.Tk, rules=None, control_flags=None):
 
         self.result = None
-        self.enable_default_rules = None
+        self.enable_security_rules = None
         self.cleanexit = False
         self.back = False
         self.rules = []
@@ -763,7 +763,7 @@ class RuleBuilderGUI:
 
     def on_close(self):
         self.result = None
-        self.enable_default_rules = None
+        self.enable_security_rules = None
         self.root.destroy()
 
     def go_back(self):
@@ -781,7 +781,7 @@ class RuleBuilderGUI:
         for rule in self.rules:
             self.result.append(rule.get_rule())
 
-        self.enable_default_rules = self.cb_enable_security_rules.get()
+        self.enable_security_rules = self.cb_enable_security_rules.get()
         
         self.cleanexit = True
         
