@@ -1,7 +1,7 @@
 # loading_screen.py
 
 import re
-from parsers import PROG_NAME
+import parsers
 from dataclasses import dataclass
 import queue
 import tkinter as tk
@@ -15,13 +15,13 @@ class ProgressUpdate:
     status: str
 
 class LoadingWindow:
-    def __init__(self, root, scanners):
+    def __init__(self, root, scanners_fpaths):
         self.root = tk.Toplevel(root)
-        self.scanners = scanners
+        self.scanners_fpaths = scanners_fpaths
         self.queue = queue.Queue()
         self.cleanexit = False
         
-        self.root.title(PROG_NAME)
+        self.root.title(parsers.PROG_NAME)
         
         self.status_text = ""
 

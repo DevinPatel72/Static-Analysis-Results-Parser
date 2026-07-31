@@ -23,7 +23,7 @@ def dupe_scan_consolidation(data):
     # Perform dupe searching
     dupe_count = 0
     for i, row in enumerate(data, start=1):
-        progress_bar(i, len(data), prefix=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag.rjust(SPACE))
+        progress_bar(i, len(data), prefix=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag.rjust(SPACE), input_id=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag)
         
         # Check to see if this is already a duplicate row or if it is designated as a canon row
         if (row[Fieldnames.CONFIDENCE.value].lower() == Fieldnames.DUPLICATE_CONF.value.lower()):

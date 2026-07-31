@@ -60,9 +60,6 @@ def begin(parser_inputs):
     else:
         run_parsers(parser_inputs)
     
-    # Write findings to file
-    parser_writer.close_writer()
-    
     # Generate report
     _report.generate_report()
     
@@ -86,6 +83,9 @@ def run_parsers(parser_inputs):
         scanner = result['scanner']
         _report.counts[scanner][0] += result['finding_count']
         _report.counts[scanner][1] += result['err_count']
+    
+    # Write findings to file
+    parser_writer.close_writer()
 
 
 def parse_input(entry):

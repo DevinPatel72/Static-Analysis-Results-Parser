@@ -536,7 +536,7 @@ def check_all_CWEs(data):
     for i, row in enumerate(data, start=1):
         # Control flag check
         if parsers.control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
-            progress_bar(i, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(SPACE))
+            progress_bar(i, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(SPACE), input_id=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag)
             row[Fieldnames.SCORING_BASIS.value], count = check_CWE_category(row[Fieldnames.SCORING_BASIS.value], count)
         
         # Turn CWE into int if capable
