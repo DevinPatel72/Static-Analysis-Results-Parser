@@ -431,13 +431,14 @@ def load_config_cwe_category_mappings():
         logger.console(f"Unable to load MITRE CWE Category Mappings: {exc}. {parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", level='error')
         return {}
 
-def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_control_flags=None):
+def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_control_flags=None, default_additional_options=None):
     # Check if there are inputs in the inputs file
     if len(inputs_path) <= 0:
-        if default_control_flags is not None: 
-            return [], default_outfile, default_control_flags
-        else:
-            return [], default_outfile, {}
+        if default_control_flags is None:
+            default_control_flags = {}
+        if default_additional_options is None:
+            default_additional_options = {}
+        return [], default_outfile, default_control_flags, default_additional_options
     if os.path.isfile(inputs_path):
         try:
             with open(inputs_path, 'r', encoding='utf-8-sig') as uin:

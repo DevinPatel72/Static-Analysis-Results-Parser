@@ -8,9 +8,6 @@ import parsers.parser_tools.parser_logger as logger
 
 
 def init_globals(gui_mode=False):
-    
-    
-    
     # Init GUI if true
     if gui_mode:
         import tkinter as tk

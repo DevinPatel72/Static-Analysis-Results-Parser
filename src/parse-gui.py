@@ -16,6 +16,7 @@
 # Imports
 import sys
 import traceback
+from multiprocessing import freeze_support
 from datetime import datetime
 import parsers
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, InputAdditionalOptions, Fieldnames, load_config_cwe_category_mappings, export_config
@@ -94,6 +95,7 @@ def main():
     
 
 if __name__ == "__main__":
+    freeze_support()
     exitcode = 0
     try:
         main()
@@ -117,4 +119,4 @@ if __name__ == "__main__":
         logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         logger.info("Program terminated with exit code %d", exitcode)
         logger.close_logger()
-        sys.exit(exitcode)
+    sys.exit(exitcode)

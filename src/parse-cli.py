@@ -23,6 +23,7 @@ if '-v' in sys.argv or '--version' in sys.argv:
 import os
 import argparse
 import traceback
+from multiprocessing import freeze_support
 from datetime import datetime
 import parsers
 from update import check_version
@@ -303,6 +304,7 @@ def main():
 
 
 if __name__ == "__main__":
+    freeze_support()
     exitcode = 0
     try:
         main()
@@ -324,4 +326,4 @@ if __name__ == "__main__":
         logger.info("Program terminated with exit code %d", exitcode)
         print()
         logger.close_logger()
-        sys.exit(exitcode)
+    sys.exit(exitcode)

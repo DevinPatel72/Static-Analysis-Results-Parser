@@ -1,6 +1,6 @@
 # Change Log
 
-## [Version 2.10.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.0) (2026-07-31)
+## [Version 2.10.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.0) (2026-08-04)
 - Added multithreading to parsing results. By default executes with only 1 job. Jobs can be set via CLI option `--jobs` or GUI.
 - Fixed bug in Flawfinder where IDs are identical between two distinct findings
 - Changed and added Default Rules
