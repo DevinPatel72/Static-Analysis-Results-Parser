@@ -2,8 +2,8 @@
 import os
 import csv
 import json
-import logging
 import traceback
+from .parser_tools import parser_logger as logger
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.toolbox import Fieldnames
 
@@ -14,8 +14,6 @@ try:
     __excel_enabled = True
 except (ImportError, ModuleNotFoundError):
     __excel_enabled = False
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     global __excel_enabled

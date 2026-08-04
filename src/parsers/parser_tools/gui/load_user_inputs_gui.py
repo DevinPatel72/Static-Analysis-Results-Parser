@@ -3,17 +3,15 @@
 import os
 import json
 import traceback
-import logging
 import parsers
 import tkinter as tk
 from tkinter import ttk, messagebox
 import tkinter.font as tkfont
 
 from ... import PROG_NAME
+from .. import parser_logger as logger
 from ..toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags
 from .version_label import VersionLabel
-
-logger = logging.getLogger(__name__)
 
 class JsonInputPreviewGUI:
     def __init__(self, root: tk.Tk):

@@ -1,13 +1,11 @@
 # toolbox.py
 
 import os
-import logging
-import logging.handlers
 import json
 import importlib
 from enum import Enum
 import multiprocessing
-from tkinter import messagebox
+from . import parser_logger as logger
 from .progressbar import progress_bar,SPACE
 import parsers
 
@@ -17,9 +15,6 @@ try:
     __excel_enabled = True
 except (ImportError, ModuleNotFoundError):
     __excel_enabled = False
-
-
-logger = logging.getLogger(__name__)
 
 LARGE_FILE_THRESHOLD_MB = 40
 FILE_SIZE_WARNED_ONCE = False
@@ -327,7 +322,7 @@ def validate_path_and_scanner(fpath, scanner):
             _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
         else:
             _end = ""
-        console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', level='warning', orig_name=__name__)
+        logger.console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', level='warning')
     
     # AIO parser inputs
     elif any(s in scan_match for s in Scanners.SARP.keywords) and os.path.isfile(fpath):
@@ -369,7 +364,7 @@ def validate_path_and_scanner(fpath, scanner):
                 _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
             else:
                 _end = ""
-            console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', level='warning', orig_name=__name__)
+            logger.console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', level='warning')
         
         # For fortify inputs, check if the audit.fvdl file is present in the fpr archive
         from parsers.fortify import check_fvdl # This import statement is necessary because directly calling 'parsers.fortify.check_fvdl' results in a failed import resolution
@@ -416,7 +411,7 @@ def load_config_cwe_category_mappings():
         with open(os.path.join(parsers.MAPPINGS_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load MITRE CWE Category Mappings: Invalid JSON format\n{parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", level='error', orig_name=__name__)
+        logger.console(f"Unable to load MITRE CWE Category Mappings: Invalid JSON format\n{parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", level='error')
         return {}
 
 def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_control_flags=None):
@@ -492,7 +487,7 @@ def check_input_format(inputs, outfile, flags):
     for inp in inputs:
         # Check if path and scanner exist
         if (msg := validate_path_and_scanner(inp[InputDictKeys.PATH.value], inp[InputDictKeys.SCANNER.value])) != 'TRUE':
-            console(msg, title='Invalid Config Input', level='error', orig_name=__name__)
+            logger.console(msg, title='Invalid Config Input', level='error')
             success = False
     
     # Check outfile
@@ -500,22 +495,22 @@ def check_input_format(inputs, outfile, flags):
     if msg == "Outfile not defined":
         pass
     elif msg != 'TRUE':
-        console(msg, title='Invalid Config Input', level='error', orig_name=__name__)
+        logger.console(msg, title='Invalid Config Input', level='error')
         success = False
     
     # Check control flags
     for k, v in flags.items():
         if k not in [f.flag for f in InputConfigFlags]:
-            console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {[f.flag for f in InputConfigFlags]}", title='Invalid Config Input', level='error', orig_name=__name__)
+            logger.console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {[f.flag for f in InputConfigFlags]}", title='Invalid Config Input', level='error')
             success = False
         if not isinstance(v, bool):
-            console(f"Invalid data type for control flag \"{k}\". Please ensure all values are boolean types.", title='Invalid Config Input', level='error', orig_name=__name__)
+            logger.console(f"Invalid data type for control flag \"{k}\". Please ensure all values are boolean types.", title='Invalid Config Input', level='error')
             success = False
     
     # Check if all control flags are present
     missing = [f"\'{f}\'" for f in [t_f.flag for t_f in InputConfigFlags] if f not in flags.keys()]
     if len(missing) > 0 and not parsers.GUI_MODE:
-        console(f"Missing control flag{'s' if len(missing, orig_name=__name__) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', level='error')
+        logger.console(f"Missing control flag{'s' if len(missing) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', level='error')
         success = False
 
     return success
@@ -590,33 +585,6 @@ def generate_preview(preview, remove_substr='', add_substr=''):
     
     return preview
 
-def message_box(title, msg, level):
-    if level == 'error':
-        messagebox.showerror(title, msg)
-    elif level == 'warning':
-        messagebox.showwarning(title, msg)
-    elif level == 'info':
-        messagebox.showinfo(title, msg)
-
-def console(msg, title='', level='info', orig_name=__name__):
-    if parsers.GUI_MODE:
-        message_box(title, msg, level)
-    else:
-        print(f'\n[{level.upper()}]  {msg}')
-        
-    t_logger = logging.getLogger(orig_name)
-    
-    if level == 'critical':
-        t_logger.critical(msg)
-    elif level == 'error':
-        t_logger.error(msg)
-    elif level == 'warning':
-        t_logger.warning(msg)
-    elif level == 'info':
-        t_logger.info(msg)
-    elif level == 'debug':
-        t_logger.debug(msg)
-
 def get_file_size_mb(path):
     size_bytes = os.path.getsize(path)
     size_mb = size_bytes // (1024 * 1024)
@@ -635,34 +603,24 @@ def get_all_previews(inputs):
     
     # Skip multithreading if number of jobs is 1. Slightly improves performance
     if parsers.jobs > 1:
-        # Init logger
-        log_queue = multiprocessing.Queue()
-        formatter = logging.Formatter(fmt='[%(processName)s] %(name)-18s :: %(levelname)-8s :: %(message)s')
-        file_handler = logging.FileHandler(parsers.LOGFILE, 'a', encoding='utf-8')
-        file_handler.setFormatter(formatter)
-        listener = logging.handlers.QueueListener(
-            log_queue,
-            file_handler
-        )
+        # Init logger queue and start listener
+        log_queue = logger.initialize_multiprocessing()
+        
+        pool = None
         
         try:
-            # Start log listener
-            listener.start()
-            
             # Init multithreading pool
             pool = multiprocessing.Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags, log_queue))
             
             # Start multithreading pool
             results = pool.map(worker_get_preview, inputs)
         except KeyboardInterrupt:
-            pool.terminate()
+            if pool is not None: pool.terminate()
             raise
         else:
-            pool.close()
+            if pool is not None: pool.close()
         finally:
-            pool.join()
-            listener.stop()
-            file_handler.close()
+            if pool is not None: pool.join()
     else:
         results = [
             worker_get_preview(inp)
@@ -678,11 +636,7 @@ def _init_worker(control_flags, logging_queue):
     parsers.control_flags = control_flags
     
     # Logging
-    logger = logging.getLogger()
-    logger.handlers.clear()
-    queue_handler = logging.handlers.QueueHandler(logging_queue)
-    logger.addHandler(queue_handler)
-    logger.setLevel(logging.INFO)
+    logger.initialize_worker(logging_queue)
 
 def worker_get_preview(entry):
     fpath = entry[InputDictKeys.PATH.value]

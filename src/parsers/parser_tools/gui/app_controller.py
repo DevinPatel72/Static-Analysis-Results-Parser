@@ -1,16 +1,13 @@
 # app_controller.py
 
 import sys
-import logging
 import tkinter as tk
 import parsers
 from parsers.parser_tools.gui.inputs_gui import InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
 from parsers.parser_tools.gui.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.gui.preflight_gui import RuleBuilderGUI
-from parsers.parser_tools.toolbox import GuiWindow, InputDictKeys, InputConfigFlags, console, load_config_user_inputs, check_input_format, dedupe_parser_inputs
-from parsers.parser_tools import preflight
-
-logger = logging.getLogger(__name__)
+from parsers.parser_tools.toolbox import GuiWindow, InputDictKeys, InputConfigFlags, load_config_user_inputs, check_input_format, dedupe_parser_inputs
+from parsers.parser_tools import preflight, parser_logger as logger
 
 
 class SARPApp:
@@ -42,7 +39,7 @@ class SARPApp:
                         rv = load_config_user_inputs(self.select_input.results)
                         if isinstance(rv, str):
                             if f"Config file {self.select_input.results} not found." != rv:
-                                console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning", orig_name=__name__)
+                                logger.console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning")
                             self.parser_inputs = []
                             self.parser_outfile = ""
                             self.control_flags = {}

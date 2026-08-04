@@ -1,14 +1,11 @@
 # checkmarx.py
 import os
-import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
-from .parser_tools import idgenerator
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE, progress_bar
-from .parser_tools.toolbox import Fieldnames, console
-
-logger = logging.getLogger(__name__)
+from .parser_tools.toolbox import Fieldnames
 
 checkmarx_cdata = []
 
@@ -319,7 +316,7 @@ def load_checkmarx_cdata():
         with open(os.path.join(MAPPINGS_DIR, 'checkmarx_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load Checkmarx CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error', orig_name=__name__)
+        logger.console(f"Unable to load Checkmarx CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
         return [0]
     
 def get_checkmarx_cdata(query, lang, default=''):

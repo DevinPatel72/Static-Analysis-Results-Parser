@@ -1,15 +1,12 @@
 # gnatsas.py
 import os
-import logging
 import csv
 import json
 import re
 import traceback
-from .parser_tools import idgenerator
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Parse the input file

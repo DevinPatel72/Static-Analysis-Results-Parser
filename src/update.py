@@ -23,18 +23,15 @@ import platform
 import tempfile
 import shutil
 import time
-import logging
 import argparse
 from urllib.parse import urlsplit, urlunsplit
 import subprocess
 import re
 import parsers
+from parsers.parser_tools import parser_logger as logger
 
 # Configure CA trust
 truststore.inject_into_ssl()
-
-# This gets overwritten when executing main()
-logger = logging.getLogger(__name__)
 
 
 ################################
@@ -46,6 +43,14 @@ release_assets_json = None
 ################################
 # Functions
 ################################
+
+def init_logger():
+    logger.initialize_main(parsers.LOGFILE)
+    
+    # Include date and time of execution at the top of the logger
+    from datetime import datetime
+    logger.info("%s %s", parsers.PROG_NAME, parsers.VERSION)
+    logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 def ask(prompt_text, default=True):
     y = 'Y' if default else 'y'
@@ -251,16 +256,7 @@ def main():
     parsers.LOGFILE = logfile
     
     # Configure logger
-    logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
-    consoleHandler = logging.StreamHandler()
-    consoleHandler.setLevel(logging.CRITICAL)
-    consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
-    logging.getLogger().addHandler(consoleHandler)
-    logger = logging.getLogger(__name__)
-
-    from datetime import datetime
-    logger.info("%s %s", parsers.PROG_NAME, parsers.VERSION)
-    logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    init_logger()
     
     ################################################################################################################################################
     

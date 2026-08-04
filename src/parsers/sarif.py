@@ -1,16 +1,11 @@
 # sarif.py
 
 import os
-import re
-import logging
 import traceback
 import json
-from .parser_tools import idgenerator
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
-
-
-logger = logging.getLogger(__name__)
 
 # Remaps all known severity values to keywords supported by SARIF standard
 def _severity_remap(severity, scanner_type, default=''):

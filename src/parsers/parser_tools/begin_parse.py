@@ -2,18 +2,14 @@
 
 import os
 import sys
-import logging
-import logging.handlers
 import multiprocessing
 import threading
 import importlib
 import parsers
-from . import parser_writer
-from .toolbox import InputDictKeys, Scanners, select_scanner, console
+from . import parser_writer, parser_logger as logger
+from .toolbox import InputDictKeys, Scanners, select_scanner
 from .gui.loading_screen import LoadingWindow
 from .reporting import Report
-
-logger = logging.getLogger(__name__)
 
 # Multithreading globals
 _report = None
@@ -22,7 +18,7 @@ def begin(parser_inputs):
     global _report
     
     if len(parser_inputs) <= 0:
-        console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}.", 'No Inputs Defined', level='info', orig_name=__name__)
+        logger.console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}.", 'No Inputs Defined', level='info', orig_name=__name__)
         sys.exit(0)
     
     # Put SRM in the back
@@ -77,23 +73,12 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
     parsers.control_flags = control_flags
     results = []
     
-    # Init logger
-    log_queue = multiprocessing.Queue()
-    formatter = logging.Formatter(fmt='[%(processName)s] %(name)-18s :: %(levelname)-8s :: %(message)s')
-    file_handler = logging.FileHandler(parsers.LOGFILE, 'a', encoding='utf-8')
-    file_handler.setFormatter(formatter)
-    listener = logging.handlers.QueueListener(
-        log_queue,
-        file_handler
-    )
-    
+    # Init logger queue and start listener
+    log_queue = logger.initialize_multiprocessing()
+
     pool = None
     
     try:
-        # Start log listener
-        listener.start()
-        print("Listener handler:", listener.handlers)
-        
         # Init multithreading pool
         pool = multiprocessing.Pool(processes=parsers.jobs, initializer=init_worker, initargs=(progress_queue, control_flags, log_queue))
         
@@ -103,11 +88,9 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
         if pool is not None: pool.terminate()
         raise
     else:
-        pool.close()
+        if pool is not None: pool.close()
     finally:
         if pool is not None: pool.join()
-        listener.stop()
-        file_handler.close()
         
     # Merge results
     for result in results:
@@ -126,11 +109,7 @@ def init_worker(progress_queue=None, control_flags=None, logging_queue=None):
     parsers.control_flags = control_flags
     
     # Logging
-    logger = logging.getLogger()
-    logger.handlers.clear()
-    queue_handler = logging.handlers.QueueHandler(logging_queue)
-    logger.addHandler(queue_handler)
-    logger.setLevel(logging.INFO)
+    logger.initialize_worker(logging_queue)
 
 def parse_input(entry):
     fpath = entry[InputDictKeys.PATH.value]

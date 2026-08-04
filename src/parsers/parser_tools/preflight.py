@@ -3,15 +3,13 @@
 # Handles loading, dumping, and application of preflight rules
 
 import os
-import logging
 import traceback
 import importlib
+from . import parser_logger as logger
 from .toolbox import Fieldnames, InputConfigFlags
 from .progressbar import progress_bar,SPACE
 import parsers
 
-
-logger = logging.getLogger(__name__)
 _LOADED_ONCE = False
 
 def load_prules():

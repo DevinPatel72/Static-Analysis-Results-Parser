@@ -1,17 +1,14 @@
 # srm.py
 import os
-import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
 from .eslint import get_eslint_cdata
 from .pylint import get_pylint_cdata
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_writer, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Parse the input file

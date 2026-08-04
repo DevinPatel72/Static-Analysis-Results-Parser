@@ -4,15 +4,12 @@ import os
 import re
 import csv
 import json
-import logging
 import traceback
 from urllib.parse import unquote
-from .parser_tools import idgenerator
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 from .parser_tools.language_resolver import resolve_lang_from_ext
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Parse the input file

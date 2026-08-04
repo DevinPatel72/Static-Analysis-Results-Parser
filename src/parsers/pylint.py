@@ -1,13 +1,10 @@
 # pylint.py
 import os
-import logging
 import traceback
 import json
-from .parser_tools import idgenerator
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE,progress_bar
-from .parser_tools.toolbox import Fieldnames, console
-
-logger = logging.getLogger(__name__)
+from .parser_tools.toolbox import Fieldnames
 
 pylint_cdata = {}
 
@@ -114,7 +111,7 @@ def load_pylint_cdata():
         with open(os.path.join(MAPPINGS_DIR, 'pylint_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load Pylint CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error', orig_name=__name__)
+        logger.console(f"Unable to load Pylint CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
         return {"__pylint_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
     
 def get_pylint_cdata(message_id, default=''):

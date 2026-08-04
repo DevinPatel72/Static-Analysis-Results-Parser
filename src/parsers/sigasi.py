@@ -1,15 +1,12 @@
 # sigasi.py
 
 import os
-import logging
 import traceback
 import json
-from .parser_tools import idgenerator
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
-from .parser_tools.toolbox import Fieldnames, console
-
-logger = logging.getLogger(__name__)
+from .parser_tools.toolbox import Fieldnames
 
 sigasi_cdata = {}
 
@@ -136,7 +133,7 @@ def load_sigasi_cdata():
         with open(os.path.join(MAPPINGS_DIR, 'sigasi_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
     except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load Sigasi CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error', orig_name=__name__)
+        logger.console(f"Unable to load Sigasi CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
         return {"__sigasi_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
 
 def get_sigasi_cdata(rule_id, rule_type, default=''):

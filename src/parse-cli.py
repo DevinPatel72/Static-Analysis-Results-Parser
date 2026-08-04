@@ -25,69 +25,57 @@ import argparse
 import traceback
 import parsers
 from update import check_version
-from parsers.parser_tools import parser_writer, preflight
+from parsers.parser_tools import parser_writer, preflight, parser_logger as logger
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs, console
 from parsers.parser_tools.begin_parse import begin
 
-# Configure root path and important dirs of script
-if getattr(sys, 'frozen', False):
-    # Running as bundled executable
-    parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
-    logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
-    parsers.ASSETS_DIR = os.path.join(sys._MEIPASS, parsers.ASSETS_DIR)
-else:
-    # Running as script
-    parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
-    logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
-    parsers.ASSETS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.ASSETS_DIR)
-
-# Capitalized drive letter if on Windows
-drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
-if len(drive) > 0: drive = drive.upper()
-parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
-
-# Set import directories
-parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
-parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
-parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
-
-# Create inputs directory
-parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
-os.makedirs(parsers.INPUTS_DIR, exist_ok=True)
-
-# Set log paths
-parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
-os.makedirs(parsers.LOGS_DIR, exist_ok=True)
-logfile = os.path.join(parsers.LOGS_DIR, logname)
-parsers.LOGFILE = logfile
-
-# Configure logger
-import logging
-logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
-consoleHandler = logging.StreamHandler()
-consoleHandler.setLevel(logging.CRITICAL)
-consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
-logging.getLogger().addHandler(consoleHandler)
-logger = logging.getLogger(__name__)
-
-from datetime import datetime
-logger.info("%s %s", PROG_NAME, VERSION)
-logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
-# Check if openpyxl is installed. Logged here to ensure correct placement in log file
-from importlib.util import find_spec
-if find_spec('openpyxl') is None:
-    logger.warning('Module \'openpyxl\' not found, defaulting output to CSV.')
-    # Handled in parser_writer.py
-
-# Check if matplotlib is installed. Logged here to ensure correct placement in log file
-if find_spec('matplotlib') is None:
-    logger.warning('Module \'matplotlib\' not found, %s will skip chart reporting.', parsers.PROG_NAME_ABBR)
-    # Handled in reporting.py
 
 ################################
 # Functions
 ################################
+
+def init():
+    # Configure root path and important dirs of script
+    if getattr(sys, 'frozen', False):
+        # Running as bundled executable
+        parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
+        logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
+        parsers.ASSETS_DIR = os.path.join(sys._MEIPASS, parsers.ASSETS_DIR)
+    else:
+        # Running as script
+        parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
+        logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
+        parsers.ASSETS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.ASSETS_DIR)
+
+    # Capitalized drive letter if on Windows
+    drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
+    if len(drive) > 0: drive = drive.upper()
+    parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
+
+    # Set import directories
+    parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
+    parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
+    parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
+
+    # Create inputs directory
+    parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
+    os.makedirs(parsers.INPUTS_DIR, exist_ok=True)
+
+    # Set log paths
+    parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
+    os.makedirs(parsers.LOGS_DIR, exist_ok=True)
+    logfile = os.path.join(parsers.LOGS_DIR, logname)
+    parsers.LOGFILE = logfile
+    
+    init_logger()
+
+def init_logger():
+    logger.initialize_main(parsers.LOGFILE)
+    
+    # Include date and time of execution at the top of the logger
+    from datetime import datetime
+    logger.info("%s %s", parsers.PROG_NAME, parsers.VERSION)
+    logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 def print_inputs(p_parser_inputs, p_parser_outfile, p_control_flags):
     if len(parsers.PROJ_NAME) > 0:
@@ -127,6 +115,7 @@ def print_inputs_file_contents(fpath):
 ################################
 
 def main():
+    init()
     
     parser_inputs = []
     parser_outfile = ""
@@ -359,4 +348,5 @@ if __name__ == "__main__":
     finally:
         logger.info("Program terminated with exit code %d", exitcode)
         print()
+        logger.close_logger()
         sys.exit(exitcode)

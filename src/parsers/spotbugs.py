@@ -1,16 +1,12 @@
 # spotbugs.py
 
 import os
-import logging
 import json
-import re
 import traceback
 import xml.etree.ElementTree as ET
-from .parser_tools import idgenerator
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE,progress_bar
-from .parser_tools.toolbox import Fieldnames, console
-
-logger = logging.getLogger(__name__)
+from .parser_tools.toolbox import Fieldnames
 
 spotbugs_bug_patterns = {}
 
@@ -320,7 +316,7 @@ def load_spotbugs_bug_patterns(existing_data=None):
             data = json.load(r)
         logger.info("Loaded Spotbugs description map")
     except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load Spotbugs Bug Patterns: Invalid JSON format\n{PROG_NAME_ABBR} will continue without finding descriptions.", "Config Error", level='error', orig_name=__name__)
+        logger.console(f"Unable to load Spotbugs Bug Patterns: Invalid JSON format\n{PROG_NAME_ABBR} will continue without finding descriptions.", "Config Error", level='error')
         if existing_data is not None:
             spotbugs_bug_patterns = existing_data
         else:

@@ -17,22 +17,17 @@
 import os
 import sys
 import traceback
-import logging
 import parsers
 import tkinter as tk
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, console, load_config_cwe_category_mappings, export_config
-from parsers.parser_tools import parser_writer, preflight
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_cwe_category_mappings, export_config
+from parsers.parser_tools import parser_writer, preflight, parser_logger as logger
 from parsers.parser_tools.gui.app_controller import close_splash
 import parsers.parser_tools.progressbar as progressbar
 from parsers.parser_tools.begin_parse import begin
 from parsers.parser_tools.gui.app_controller import SARPApp
 from update import check_version
 
-logger = None
-logfile = None
-
 def init():
-    global logger, logfile
     
     # Init GUI
     parsers.gui_root = tk.Tk()
@@ -78,44 +73,30 @@ def init():
     logfile = os.path.join(parsers.LOGS_DIR, logname)
     parsers.LOGFILE = logfile
 
-    # Configure logger
-    logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
-    consoleHandler = logging.StreamHandler()
-    consoleHandler.setLevel(logging.CRITICAL)
-    consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
-    logging.getLogger().addHandler(consoleHandler)
-    logger = logging.getLogger(__name__)
+    # Init logger
+    init_logger()
 
+
+def init_logger():
+    logger.initialize_main(parsers.LOGFILE)
+    
+    # Include date and time of execution at the top of the logger
     from datetime import datetime
     logger.info("%s %s", parsers.PROG_NAME, parsers.VERSION)
     logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
-
-    # Check if openpyxl is installed. Logged here to ensure correct placement in log file
-    from importlib.util import find_spec
-    if find_spec('openpyxl') is None:
-        logger.warning('Module \'openpyxl\' not found, defaulting output to CSV.')
-        # Handled in parser_writer.py
-
-    # Check if matplotlib is installed. Logged here to ensure correct placement in log file
-    if find_spec('matplotlib') is None:
-        logger.warning('Module \'matplotlib\' not found, %s will skip chart reporting.', parsers.PROG_NAME_ABBR)
-        # Handled in reporting.py
 
 ################################
 # Main
 ################################
 
 def main():
-    global logger
+    init()
     
     # Check for updates first
     rv = check_version(parsers.VERSION)
     if rv is not None and isinstance(rv, str) and len(rv) > 0:
         close_splash()
-        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info', orig_name=__name__)
-    
-    init()
+        logger.console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info')
     
     parser_inputs = []
     parser_outfile = ""
@@ -180,7 +161,7 @@ if __name__ == "__main__":
         logger.critical("File access error. Please do not open or lock an input file while the parser is running.")
         exitcode = 2
     except:
-        console(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash.\nException trace has been output to \"{logfile}\"", "Critical Error", "error", orig_name=__name__)
+        logger.console(f"Uncaught exception caused {parsers.PROG_NAME_ABBR} to crash.\nException trace has been output to \"{parsers.LOGFILE}\"", "Critical Error", "error")
         logger.error("\n%s", traceback.format_exc())
         exitcode = 1
     finally:
@@ -189,4 +170,5 @@ if __name__ == "__main__":
                 "type": "stop"
             })
         logger.info("Program terminated with exit code %d", exitcode)
+        logger.close_logger()
         sys.exit(exitcode)

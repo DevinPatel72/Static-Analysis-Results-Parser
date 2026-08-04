@@ -1,15 +1,13 @@
 # cppcheck.py
 import os
-import logging
 import traceback
 import html
 from csv import DictWriter
 import xml.etree.ElementTree as ET
-from .parser_tools import idgenerator
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.toolbox import Fieldnames
 
-logger = logging.getLogger(__name__)
 config_errors = ['templateRecursion', 'checkLevelNormal', 'checkersReport', 'missingInclude', 'missingIncludeSystem', 'toomanyconfigs', 'ConfigurationNotChecked', 'normalCheckLevelMaxBranches', 'noValidConfiguration']
 
 def path_preview(fpath):

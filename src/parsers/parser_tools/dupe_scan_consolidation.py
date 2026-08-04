@@ -1,12 +1,10 @@
 # dupe_scan_consolidation.py
 
 import re
-import logging
 import parsers
+from . import parser_logger as logger
 from .toolbox import Fieldnames, InputConfigFlags
 from .progressbar import progress_bar,SPACE
-
-logger = logging.getLogger(__name__)
 
 def _fix_scanner_name(scanner):
     if match := re.match(r"^(.*?)\s+v?\d+(?:\.\d+)*$", scanner):
