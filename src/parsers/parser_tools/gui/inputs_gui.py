@@ -10,8 +10,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 from .version_label import VersionLabel
-from ... import PROG_NAME, VERSION
-from ..toolbox import GuiWindow, InputDictKeys, InputConfigFlags, Scanners, validate_path_and_scanner, get_all_previews, generate_preview, select_scanner
+from ... import PROG_NAME
+from ..toolbox import GuiWindow, InputDictKeys, InputConfigFlags, InputAdditionalOptions, Scanners, validate_path_and_scanner, get_all_previews, generate_preview, select_scanner
 
 # Constants
 WINDOW_LENGTH = 900
@@ -37,6 +37,17 @@ EXT_TO_FORMAT = {
     v["ext"]: k
     for k, v in FORMAT_MAP.items()
 }
+
+
+def create_tk_variable(value):
+    var_type = {
+        int: tk.IntVar,
+        bool: tk.BooleanVar,
+        float: tk.DoubleVar,
+        str: tk.StringVar,
+    }.get(type(value), tk.StringVar)
+
+    return var_type(value=value)
 
 
 class PathInputWithPlaceholder(tk.Entry):
@@ -567,12 +578,16 @@ class AdjustPathsGUI:
         self.root.destroy()
 
 class OutfileFlagsGUI:
-    def __init__(self, root: tk.Tk, outfile="", control_flags=None, jobs=1):
+    def __init__(self, root: tk.Tk, outfile="", control_flags=None, initial_additional_options=None):
         self.initial_outfile = outfile
         if control_flags is None:
             self.initial_flags = {}
         else:
             self.initial_flags = control_flags
+        if initial_additional_options is None:
+            self.initial_additional_options = {}
+        else:
+            self.initial_additional_options = initial_additional_options
         self.results = {}
         self.cleanexit = False
         self.back = False
@@ -593,7 +608,6 @@ class OutfileFlagsGUI:
         self.output_path = tk.StringVar()
         self.output_format = tk.StringVar(value="Excel")
         self._updating = False
-        self.jobs = tk.IntVar(value=jobs)
 
         # ─── File Path Selector and Format ────────────────────
         path_frame = tk.Frame(self.root)
@@ -646,39 +660,25 @@ class OutfileFlagsGUI:
                 f.description
             )
         
-        # ─── Jobs Selector ─────────────────────────────
-        jobs_frame = tk.Frame(checkbox_frame)
-        jobs_frame.pack(pady=5, padx=10, fill="x")
+        # ─── Additional Options ─────────────────────────────
+        options_frame = tk.Frame(checkbox_frame)
+        options_frame.pack(pady=5, padx=10, fill="x")
     
-        tk.Label(
-            jobs_frame,
-            text="Jobs:",
-            anchor="w"
-        ).pack(side=tk.LEFT)
-    
-        max_jobs = os.cpu_count() or 1
-    
-        jobs_menu = tk.OptionMenu(
-            jobs_frame,
-            self.jobs,
-            *range(1, max_jobs + 1)
-        )
-        jobs_menu.pack(side=tk.LEFT, padx=5)
-    
-        jobs_tooltip = (
-            "Define the number of processors to complete parsing."
-        )
-    
-        q_label = tk.Label(
-            jobs_frame,
-            text="?",
-            fg="blue",
-            font=("Arial", 10, "bold"),
-            cursor="question_arrow"
-        )
-        q_label.pack(side=tk.LEFT, padx=5)
-    
-        ToolTip(q_label, jobs_tooltip)
+        self.additional_option_vars = {}
+        for opt in InputAdditionalOptions:
+            # Skip options not meant for this window
+            if GuiWindow.OutfileFlagsGUI not in opt.module_visibility:
+                continue
+            
+            self.additional_option_vars[opt.opt] = create_tk_variable(value=self.initial_additional_options.get(opt.opt, opt.default))
+
+            self.add_dropdown_with_tooltip(
+                options_frame,
+                opt.opt.capitalize(),
+                self.additional_option_vars[opt.opt],
+                opt.description,
+                opt.values
+            )
 
         # ─── Submit Button ─────────────────────────────
         button_frame = tk.Frame(self.root)
@@ -747,6 +747,36 @@ class OutfileFlagsGUI:
 
         ToolTip(q_label, tooltip_text)
     
+    def add_dropdown_with_tooltip(self, parent, text, variable, tooltip_text, values):
+        frame = tk.Frame(parent)
+        frame.pack(anchor="w", pady=2, fill="x")
+
+        tk.Label(
+            frame,
+            text=text,
+            anchor="w"
+        ).pack(side=tk.LEFT)
+
+        jobs_menu = tk.OptionMenu(
+            frame,
+            variable,
+            *range(values[0], values[1] + 1)
+        )
+        jobs_menu.pack(side=tk.LEFT, padx=5)
+        
+        q_label = tk.Label(
+            frame,
+            text="?",
+            fg="blue",
+            font=("Arial", 10, "bold"),
+            cursor="question_arrow"
+        )
+        q_label.pack(side=tk.LEFT, padx=5)
+        
+        ToolTip(q_label, tooltip_text)
+        
+        
+    
     def _path_changed(self, *_):
         if self._updating:
             return
@@ -797,9 +827,12 @@ class OutfileFlagsGUI:
                 )
                 return
 
-        self.results = { InputDictKeys.OUTFILE.value: output_path, InputDictKeys.JOBS.value: self.jobs.get() } | {
+        self.results = { InputDictKeys.OUTFILE.value: output_path } | {
             f.flag: self.flag_bool_vars[f.flag].get() for f in InputConfigFlags
             if GuiWindow.OutfileFlagsGUI in f.module_visibility
+        } | {
+            opt.opt: self.additional_option_vars[opt.opt].get() for opt in InputAdditionalOptions
+            if GuiWindow.OutfileFlagsGUI in opt.module_visibility
         }
 
         self.cleanexit = True

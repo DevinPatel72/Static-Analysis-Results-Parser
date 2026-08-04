@@ -48,17 +48,32 @@ class InputDictKeys(Enum):
         return [cls.PATH.value, cls.SCANNER.value, cls.PREPEND.value, cls.REMOVE.value]
 
 class InputConfigFlags(Enum):
-    DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False, "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
-    PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, "If enabled, this will change final output values according to user-defined rules.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
-    OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True, "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
-    SECURITY_PREFLIGHT_RULES = (parsers.FLAG_SECURITY_PREFLIGHT_RULES, True, "If enabled, changes final output values according to a prebuilt profile of rules. Only activated if \"Preflight Rules\" flag is also true.", (GuiWindow.RuleBuilderGUI,))
-    SARIF_STITCH_PROPERTIES = (parsers.FLAG_SARIF_STITCH_PROPERTIES, False, "By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true.", (GuiWindow.OutfileFlagsGUI,))
+    DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False, False, "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
+    PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, True, "If enabled, this will change final output values according to user-defined rules.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
+    OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True, True, "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
+    SECURITY_PREFLIGHT_RULES = (parsers.FLAG_SECURITY_PREFLIGHT_RULES, True, True, "If enabled, changes final output values according to a prebuilt profile of rules. Only activated if \"Preflight Rules\" flag is also true.", (GuiWindow.RuleBuilderGUI,))
+    SARIF_STITCH_PROPERTIES = (parsers.FLAG_SARIF_STITCH_PROPERTIES, False, False, "By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true.", (GuiWindow.OutfileFlagsGUI,))
 
-    def __init__(self, flag, default, description, module_visibility):
+    def __init__(self, flag, default, required, description, module_visibility):
         self.flag = flag
+        self.default = default
+        self.required = required
+        self.description = description
+        self.module_visibility = module_visibility
+    
+    @classmethod
+    def all_flags(cls):
+        return [f.flag for f in cls]
+
+class InputAdditionalOptions(Enum):
+    JOBS = ("jobs", 1, "Define the number of processors to complete parsing. By default uses 1 processor.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow), (1, os.cpu_count()))
+
+    def __init__(self, opt, default, description, module_visibility, values):
+        self.opt = opt
         self.default = default
         self.description = description
         self.module_visibility = module_visibility
+        self.values = values
     
     @classmethod
     def all_flags(cls):
@@ -476,9 +491,10 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
         # Check for options
         options = {}
         if 'options' in user_inputs.keys():
-            for k in user_inputs['options'].keys():
-                if k in [InputDictKeys.JOBS.value]:
-                    options[k] = user_inputs['options'][k]
+            options = user_inputs['options']
+            for opt in InputAdditionalOptions:
+                if opt.opt not in options.keys():
+                    options[opt.opt] = opt.default
         
         # Set inputs path global for export
         parsers.INPUTS_PATH = inputs_path

@@ -6,7 +6,7 @@ import parsers
 from parsers.parser_tools.gui.inputs_gui import InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
 from parsers.parser_tools.gui.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.gui.preflight_gui import RuleBuilderGUI
-from parsers.parser_tools.toolbox import GuiWindow, InputDictKeys, InputConfigFlags, load_config_user_inputs, check_input_format, dedupe_parser_inputs
+from parsers.parser_tools.toolbox import GuiWindow, InputDictKeys, InputConfigFlags, InputAdditionalOptions, load_config_user_inputs, check_input_format, dedupe_parser_inputs
 from parsers.parser_tools import preflight, parser_logger as logger
 
 
@@ -17,7 +17,6 @@ class SARPApp:
         self.parser_outfile = ""
         self.control_flags = {}
         self.additional_options = {}
-        self.jobs = 1
         self.select_input = None
         self.current_window = GuiWindow.JsonInputPreviewGUI
         
@@ -98,13 +97,12 @@ class SARPApp:
 
                 # User chooses outfile location and control flags
                 case GuiWindow.OutfileFlagsGUI:
-                    outfile_flags_gui = OutfileFlagsGUI(parsers.gui_root, self.parser_outfile, self.control_flags, self.jobs)
+                    outfile_flags_gui = OutfileFlagsGUI(parsers.gui_root, self.parser_outfile, self.control_flags, self.additional_options)
                     if not outfile_flags_gui.cleanexit:
                         sys.exit(0)
                     
                     self.parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
-                    self.jobs = outfile_flags_gui.results[InputDictKeys.JOBS.value]
-                    self.additional_options[InputDictKeys.JOBS.value] = self.jobs
+                    self.additional_options[InputAdditionalOptions.JOBS.opt] = outfile_flags_gui.results[InputAdditionalOptions.JOBS.opt]
                     self.control_flags = {f.flag: outfile_flags_gui.results[f.flag]
                                         for f in InputConfigFlags
                                         if GuiWindow.OutfileFlagsGUI in f.module_visibility}

@@ -27,7 +27,7 @@ from datetime import datetime
 import parsers
 from update import check_version
 from parsers.parser_tools import parser_writer, preflight, parser_logger as logger
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, InputAdditionalOptions, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs
 from parsers.parser_tools.begin_parse import begin
 from parsers.initialization import init_globals, init_main_logger
 
@@ -175,7 +175,7 @@ def main():
     # Check jobs
     if args.jobs is not None:
         parsers.jobs = min(args.jobs, os.cpu_count())
-        additional_options[InputDictKeys.JOBS.value] = parsers.jobs
+        additional_options[InputAdditionalOptions.JOBS.opt] = parsers.jobs
     
     # Override outfile if the arg was passed
     if args.out is not None and len(args.out) > 0:

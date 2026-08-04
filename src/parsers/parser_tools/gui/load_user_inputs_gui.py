@@ -10,7 +10,7 @@ import tkinter.font as tkfont
 
 from ... import PROG_NAME
 from .. import parser_logger as logger
-from ..toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags
+from ..toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags, InputAdditionalOptions
 from .version_label import VersionLabel
 
 class JsonInputPreviewGUI:
@@ -805,12 +805,10 @@ class JsonInputPreviewGUI:
         )
 
         for f in InputConfigFlags:
-            value = bool(
-                flags.get(
-                    f.flag,
-                    False
-                )
-            )
+            try:
+                value = bool(flags[f.flag])
+            except KeyError:
+                continue
 
             row = ttk.Frame(
                 self.preview_content
@@ -832,6 +830,59 @@ class JsonInputPreviewGUI:
                 row,
                 text=str(value),
                 fg="blue" if value else "red"
+            ).pack(
+                side=tk.LEFT
+            )
+            
+        # Additional Options
+        ttk.Separator(
+            self.preview_content,
+            orient=tk.HORIZONTAL
+        ).pack(
+            fill=tk.X,
+            pady=5
+        )
+        
+        options_label = tk.Label(
+            self.preview_content,
+            text="Additional Options",
+            font=self.section_header_font
+        )
+        
+        options = data.get(
+            InputSchemaKeys.OPTIONS.value,
+            {}
+        )
+        
+        if len(options) > 0:
+            options_label.pack(anchor="w")
+        
+        for aoption in InputAdditionalOptions:
+            try:
+                value = int(options[aoption.opt])
+            except (KeyError, ValueError):
+                continue
+        
+            row = ttk.Frame(
+                self.preview_content
+            )
+        
+            row.pack(
+                anchor="w",
+                padx=10
+            )
+        
+            ttk.Label(
+                row,
+                text=f"{aoption.opt.capitalize()}: "
+            ).pack(
+                side=tk.LEFT
+            )
+        
+            tk.Label(
+                row,
+                text=str(value),
+                fg="#4f9e5a"
             ).pack(
                 side=tk.LEFT
             )

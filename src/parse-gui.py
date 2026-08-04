@@ -18,7 +18,7 @@ import sys
 import traceback
 from datetime import datetime
 import parsers
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_cwe_category_mappings, export_config
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, InputAdditionalOptions, Fieldnames, load_config_cwe_category_mappings, export_config
 from parsers.parser_tools import parser_writer, preflight, parser_logger as logger
 from parsers.parser_tools.gui.app_controller import close_splash
 from parsers.parser_tools.begin_parse import begin
@@ -50,7 +50,7 @@ def main():
     parser_outfile = app.parser_outfile
     control_flags = app.control_flags
     additional_options = app.additional_options
-    parsers.jobs = additional_options.get(InputDictKeys.JOBS.value, 1)
+    parsers.jobs = additional_options.get(InputAdditionalOptions.JOBS.opt, InputAdditionalOptions.JOBS.default)
     
     # Put control_flags into module variable
     parsers.control_flags = control_flags
