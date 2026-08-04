@@ -707,6 +707,11 @@ def print_user_inputs_template():
         flags += f'        \"{f}\": [true|false],\n'
     flags = flags.rstrip(',\n')
     
+    options = ""
+    for opt in InputAdditionalOptions:
+        options += f'        \"{opt.opt}\": {opt.default},\n'
+    options = options.rstrip(',\n')
+    
     s = f"""{{
     "$schema": "../schemas/user_inputs.schema.json",
     "project_name": "example_proj",
@@ -734,6 +739,9 @@ def print_user_inputs_template():
     "outfile": "path/to/outfile.[xlsx|sarif|csv]",
     "flags": {{
 {flags}
+    }},
+    "options": {{
+{options}
     }}
 }}"""
     print(s, sep='', end='')

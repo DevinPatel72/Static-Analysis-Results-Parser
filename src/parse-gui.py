@@ -66,7 +66,7 @@ def main():
     s += f"\nWriting to file: {parser_outfile}\n"
     s += "\nParser Switches:\n"
     s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in control_flags.items()]).strip('\n')
-    s += "\nAdditional Options:\n"
+    s += "\n\nAdditional Options:\n"
     s += "\n".join([f"  {k.capitalize()}:".ljust(42) + f"{v}" for k,v in additional_options.items()]).strip('\n')
     
     logger.info("\n".join(['    ' + l for l in s.split('\n')]))

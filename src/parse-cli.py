@@ -46,7 +46,7 @@ def print_inputs(p_parser_inputs, p_parser_outfile, p_control_flags, p_additiona
     s += f"\nWriting to file: {p_parser_outfile}\n"
     s += "\nParser Switches:\n"
     s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in p_control_flags.items()]).strip('\n')
-    s += "\nAdditional Options:\n"
+    s += "\n\nAdditional Options:\n"
     s += "\n".join([f"  {k.capitalize()}:".ljust(42) + f"{v}" for k,v in p_additional_options.items()]).strip('\n')
     print(s)
     
@@ -113,12 +113,20 @@ def main():
                 default=None,
                 help=f"Enable {f.flag}. Overrides the flag value specified in a `--file`."
             )
+
+    for option in InputAdditionalOptions:
+        argparser.add_argument(
+            f"--{option.opt.lower().replace(' ', '-')}",
+            dest=option.opt.lower().replace(' ', '-'),
+            type=type(option.default),
+            default=option.default,
+            help=option.description
+        )
     
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Validate the inputs JSON file specified by `--file`, report any errors, and exit.")
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", metavar="CONFIG_FILE", nargs='?', const=True, default=False, help="List available input config files in the `inputs` directory. If `CONFIG_FILE` (file name or path) is provided, display that file's contents instead.")
     argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new configuration file.")
     argparser.add_argument('--format', dest="format", type=str, default="", help="Format of output file. Valid options are EXCEL, SARIF, or CSV.")
-    argparser.add_argument('-j', '--jobs', dest="jobs", type=int, default=1, help="Define the number of processors to complete parsing. By default uses 1 processor.")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print an example inputs JSON template and exit.")
     argparser.add_argument('--disable-progressbar', dest="disableprogressbar", action='store_true', help="Disables progress bar in CLI for faster performance.")
     
@@ -171,11 +179,6 @@ def main():
         sys.exit(3)
     else:
         parser_inputs, parser_outfile, control_flags, additional_options = rv
-    
-    # Check jobs
-    if args.jobs is not None:
-        parsers.jobs = min(args.jobs, os.cpu_count())
-        additional_options[InputAdditionalOptions.JOBS.opt] = parsers.jobs
     
     # Override outfile if the arg was passed
     if args.out is not None and len(args.out) > 0:
@@ -232,6 +235,16 @@ def main():
         # Check if argument was passed and overwrite what is there
         if (value := getattr(args, f.flag.lower().replace(' ', '-'))) is not None:
             control_flags[f.flag] = value
+    
+    # Additional options
+    for option in InputAdditionalOptions:
+        # Fill in any empty options with default value
+        if option.opt not in additional_options.keys():
+            additional_options[option.opt] = option.default
+            
+        # Check if argument was passed and overwrite what is there
+        if (value := getattr(args, option.opt.lower().replace(' ', '-'))) is not None:
+            additional_options[option.opt] = min(value, option.values[1])
     
     # Check inputs format
     if len(parser_inputs) > 0:
