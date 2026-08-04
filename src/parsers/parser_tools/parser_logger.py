@@ -44,7 +44,7 @@ def initialize_main(logfile):
     Configure logging for the main process.
     """
 
-    file = logging.FileHandler(logfile, encoding="utf-8")
+    file = logging.FileHandler(logfile, encoding="utf-8", mode='w')
     formatter = logging.Formatter(fmt='%(name)-18s :: %(levelname)-8s :: %(message)s')
     file.setFormatter(formatter)
 
@@ -145,5 +145,5 @@ def close_logger():
     if _listener is not None:
         _listener.stop()
         _listener = None
-
+    
     logging.shutdown()

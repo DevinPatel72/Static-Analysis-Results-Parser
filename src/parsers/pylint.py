@@ -110,8 +110,8 @@ def load_pylint_cdata():
     try:
         with open(os.path.join(MAPPINGS_DIR, 'pylint_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except (FileNotFoundError, json.JSONDecodeError):
-        logger.console(f"Unable to load Pylint CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        logger.console(f"Unable to load Pylint CWE mappings: {exc}. {PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
         return {"__pylint_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
     
 def get_pylint_cdata(message_id, default=''):

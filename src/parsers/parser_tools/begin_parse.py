@@ -6,6 +6,7 @@ import multiprocessing
 import threading
 import importlib
 import parsers
+from parsers.initialization import init_globals
 from . import parser_writer, parser_logger as logger
 from .toolbox import InputDictKeys, Scanners, select_scanner
 from .gui.loading_screen import LoadingWindow
@@ -80,7 +81,7 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
     
     try:
         # Init multithreading pool
-        pool = multiprocessing.Pool(processes=parsers.jobs, initializer=init_worker, initargs=(progress_queue, control_flags, log_queue))
+        pool = multiprocessing.Pool(processes=parsers.jobs, initializer=init_worker, initargs=(progress_queue, control_flags, log_queue, parsers.GUI_MODE))
         
         # Start multithreading pool
         results = pool.map(parse_input, parser_inputs)
@@ -101,12 +102,16 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
     
     # Write findings to file
     parser_writer.close_writer()
+    
 
-def init_worker(progress_queue=None, control_flags=None, logging_queue=None):
+def init_worker(progress_queue=None, control_flags=None, logging_queue=None, gui_mode=False):
     
     # Necessary to reassign progress queue and control flags since multithreading spawns a new process
     parsers.progress_queue = progress_queue
     parsers.control_flags = control_flags
+    
+    # Init globals again since the worker is its own interpreter
+    init_globals(gui_mode)
     
     # Logging
     logger.initialize_worker(logging_queue)
@@ -156,3 +161,4 @@ def parse_input(entry):
         "err_count": err_count,
     }
     
+

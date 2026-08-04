@@ -2,6 +2,7 @@
 import os
 import traceback
 import json
+import parsers
 from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.toolbox import Fieldnames
@@ -117,13 +118,11 @@ def parse(fpath, scanner, substr, prepend, input_id):
 
 def load_eslint_cdata():
     # Loads eslint cdata info from config dir
-    from . import PROG_NAME_ABBR, MAPPINGS_DIR
-    
     try:
-        with open(os.path.join(MAPPINGS_DIR, 'eslint_cdata.json'), 'r', encoding='utf-8-sig') as r:
+        with open(os.path.join(parsers.MAPPINGS_DIR, 'eslint_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except (FileNotFoundError, json.JSONDecodeError):
-        logger.console(f"Unable to load Eslint CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        logger.console(f"Unable to load Eslint CWE mappings: {exc}. {parsers.PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
         return {"__eslint_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
 
 def get_eslint_cdata(rule_id, default=''):

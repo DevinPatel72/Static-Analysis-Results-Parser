@@ -60,9 +60,9 @@ def _parse_sarif(fpath, scanner, substr, prepend, input_id):
     try:
         with open(fpath, "r", encoding='utf-8-sig') as read_obj:
             data = json.load(read_obj)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
         err_count += 1
-        logger.error("Unable to parse input file \"%s\". Ensure %s is configured to output in SARIF format.", fpath, scanner)
+        logger.error("Unable to parse input file \"%s\": %s. Ensure %s is configured to output in SARIF format.", fpath, str(exc), scanner)
         return parsed_data, finding_count, err_count
     
     # Get runs

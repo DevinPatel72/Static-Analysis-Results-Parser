@@ -73,9 +73,9 @@ def _parse_sarif(fpath, scanner, substr, prepend, input_id):
     try:
         with open(fpath, "r", encoding='utf-8-sig') as read_obj:
             data = json.load(read_obj)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
         err_count += 1
-        logger.error("Unable to parse input file \"%s\". Ensure %s is configured to output in SARIF format.", fpath, scanner)
+        logger.error("Unable to parse input file \"%s\": %s. Ensure %s is configured to output in SARIF format.", fpath, str(exc), scanner)
         return parsed_data, finding_count, err_count
     
     # Get runs
@@ -315,8 +315,8 @@ def load_spotbugs_bug_patterns(existing_data=None):
         with open(os.path.join(MAPPINGS_DIR, 'spotbugs_bug_patterns.json'), 'r', encoding='utf-8-sig') as r:
             data = json.load(r)
         logger.info("Loaded Spotbugs description map")
-    except (FileNotFoundError, json.JSONDecodeError):
-        logger.console(f"Unable to load Spotbugs Bug Patterns: Invalid JSON format\n{PROG_NAME_ABBR} will continue without finding descriptions.", "Config Error", level='error')
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        logger.console(f"Unable to load Spotbugs Bug Patterns: {exc}. {PROG_NAME_ABBR} will continue without finding descriptions.", "Config Error", level='error')
         if existing_data is not None:
             spotbugs_bug_patterns = existing_data
         else:

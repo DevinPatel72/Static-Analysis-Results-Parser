@@ -16,6 +16,7 @@ class SARPApp:
         self.parser_inputs = []
         self.parser_outfile = ""
         self.control_flags = {}
+        self.additional_options = {}
         self.jobs = 1
         self.select_input = None
         self.current_window = GuiWindow.JsonInputPreviewGUI
@@ -44,7 +45,7 @@ class SARPApp:
                             self.parser_outfile = ""
                             self.control_flags = {}
                         else:
-                            self.parser_inputs, self.parser_outfile, self.control_flags = rv
+                            self.parser_inputs, self.parser_outfile, self.control_flags, self.additional_options = rv
                         
                         # Check inputs format
                         if len(self.parser_inputs) > 0:
@@ -103,6 +104,7 @@ class SARPApp:
                     
                     self.parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
                     self.jobs = outfile_flags_gui.results[InputDictKeys.JOBS.value]
+                    self.additional_options[InputDictKeys.JOBS.value] = self.jobs
                     self.control_flags = {f.flag: outfile_flags_gui.results[f.flag]
                                         for f in InputConfigFlags
                                         if GuiWindow.OutfileFlagsGUI in f.module_visibility}

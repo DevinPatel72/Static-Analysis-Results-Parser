@@ -315,8 +315,8 @@ def load_checkmarx_cdata():
     try:
         with open(os.path.join(MAPPINGS_DIR, 'checkmarx_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except (FileNotFoundError, json.JSONDecodeError):
-        logger.console(f"Unable to load Checkmarx CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        logger.console(f"Unable to load Checkmarx CWE mappings: {exc}. {PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
         return [0]
     
 def get_checkmarx_cdata(query, lang, default=''):

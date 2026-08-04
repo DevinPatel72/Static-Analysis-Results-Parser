@@ -6,6 +6,7 @@ import importlib
 from enum import Enum
 import multiprocessing
 from . import parser_logger as logger
+from parsers.initialization import init_globals
 from .progressbar import progress_bar,SPACE
 import parsers
 
@@ -70,6 +71,7 @@ class InputSchemaKeys(Enum):
     MAIN = "main"
     OUTFILE = "outfile"
     FLAGS = "flags"
+    OPTIONS = "options"
 
 class Fieldnames(Enum):
     SCORING_BASIS = 'Scoring Basis'
@@ -410,8 +412,8 @@ def load_config_cwe_category_mappings():
     try:
         with open(os.path.join(parsers.MAPPINGS_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except (FileNotFoundError, json.JSONDecodeError):
-        logger.console(f"Unable to load MITRE CWE Category Mappings: Invalid JSON format\n{parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", level='error')
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        logger.console(f"Unable to load MITRE CWE Category Mappings: {exc}. {parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", level='error')
         return {}
 
 def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_control_flags=None):
@@ -425,8 +427,8 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
         try:
             with open(inputs_path, 'r', encoding='utf-8-sig') as uin:
                 user_inputs = json.load(uin)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return f"Unable to parse \"{os.path.basename(inputs_path)}.\" This may be due to an improperly formatted or corrupted JSON file."
+        except (FileNotFoundError, json.JSONDecodeError) as exc:
+            return f"Unable to parse \"{os.path.basename(inputs_path)}\": {exc}"
         
         # Attempt to parse project name and version
         parsers.PROJ_NAME = user_inputs.get('project_name', "")
@@ -461,7 +463,7 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
                 if k not in [f.flag for f in InputConfigFlags]:
                     return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join([f.flag for f in InputConfigFlags]))
         else:
-            control_flags = {}
+            control_flags = {}    
 
         # All is green, set flags equal to control_flags
         control_flags = user_inputs['flags']
@@ -471,11 +473,18 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
             if f.flag not in control_flags.keys():
                 control_flags[f.flag] = f.default
         
+        # Check for options
+        options = {}
+        if 'options' in user_inputs.keys():
+            for k in user_inputs['options'].keys():
+                if k in [InputDictKeys.JOBS.value]:
+                    options[k] = user_inputs['options'][k]
+        
         # Set inputs path global for export
         parsers.INPUTS_PATH = inputs_path
         
         # Completed parsing
-        return parser_inputs, parser_outfile, control_flags
+        return parser_inputs, parser_outfile, control_flags, options
 
     else:
         return f"Config file {inputs_path} not found."
@@ -547,13 +556,14 @@ def check_CWE_category(cwe, count=0):
     else:
         return cwe, count
 
-def export_config(inputs, outfile, control_flags, no_overwrite=False):
+def export_config(inputs, outfile, control_flags, options, no_overwrite=False):
     out_dict = {InputSchemaKeys.SCHEMA.value: "../schemas/user_inputs.schema.json",
                 InputSchemaKeys.PROJ_NAME.value: parsers.PROJ_NAME,
                 InputSchemaKeys.PROJ_VERSION.value: parsers.PROJ_VERSION,
                 InputSchemaKeys.MAIN.value: inputs,
                 InputSchemaKeys.OUTFILE.value: outfile,
-                InputSchemaKeys.FLAGS.value: control_flags}
+                InputSchemaKeys.FLAGS.value: control_flags,
+                InputSchemaKeys.OPTIONS.value: options}
     
     # Set up output path
     if no_overwrite or len(parsers.INPUTS_PATH) <= 0:
@@ -610,7 +620,7 @@ def get_all_previews(inputs):
         
         try:
             # Init multithreading pool
-            pool = multiprocessing.Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags, log_queue))
+            pool = multiprocessing.Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags, log_queue, parsers.GUI_MODE))
             
             # Start multithreading pool
             results = pool.map(worker_get_preview, inputs)
@@ -629,11 +639,16 @@ def get_all_previews(inputs):
     
     for result in results:
         previews[result['fpath']] = result['preview']
+        
+    logger.info("Fetched path previews")
     
     return previews
     
-def _init_worker(control_flags, logging_queue):
+def _init_worker(control_flags, logging_queue, gui_mode=False):
     parsers.control_flags = control_flags
+    
+    # Init globals again since the worker is its own interpreter
+    init_globals(gui_mode)
     
     # Logging
     logger.initialize_worker(logging_queue)

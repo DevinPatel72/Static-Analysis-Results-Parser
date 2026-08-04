@@ -14,83 +14,25 @@
 
 
 # Imports
-import os
 import sys
 import traceback
+from datetime import datetime
 import parsers
-import tkinter as tk
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_cwe_category_mappings, export_config
 from parsers.parser_tools import parser_writer, preflight, parser_logger as logger
 from parsers.parser_tools.gui.app_controller import close_splash
-import parsers.parser_tools.progressbar as progressbar
 from parsers.parser_tools.begin_parse import begin
+from parsers.initialization import init_globals, init_main_logger
 from parsers.parser_tools.gui.app_controller import SARPApp
 from update import check_version
-
-def init():
-    
-    # Init GUI
-    parsers.gui_root = tk.Tk()
-    parsers.gui_root.withdraw()
-    parsers.GUI_MODE = True
-    progressbar.DISABLE_PROGRESS_BAR = True
-
-    # Configure root path and important dirs of script
-    if getattr(sys, 'frozen', False):
-        # Running as bundled executable
-        parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
-        logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
-        parsers.ASSETS_DIR = os.path.join(sys._MEIPASS, parsers.ASSETS_DIR)
-        parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-256.png')
-        if not os.path.isfile(parsers.LOGO_PATH):
-            parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-1024.png')
-    else:
-        # Running as script
-        parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
-        logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
-        parsers.ASSETS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.ASSETS_DIR)
-        parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-256.png')
-        if not os.path.isfile(parsers.LOGO_PATH):
-            parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-1024.png')
-
-    # Capitalized drive letter if on Windows
-    drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
-    if len(drive) > 0: drive = drive.upper()
-    parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
-
-    # Set import directories
-    parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
-    parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
-    parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
-
-    # Create inputs directory
-    parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
-    os.makedirs(parsers.INPUTS_DIR, exist_ok=True)
-
-    # Set log paths
-    parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
-    os.makedirs(parsers.LOGS_DIR, exist_ok=True)
-    logfile = os.path.join(parsers.LOGS_DIR, logname)
-    parsers.LOGFILE = logfile
-
-    # Init logger
-    init_logger()
-
-
-def init_logger():
-    logger.initialize_main(parsers.LOGFILE)
-    
-    # Include date and time of execution at the top of the logger
-    from datetime import datetime
-    logger.info("%s %s", parsers.PROG_NAME, parsers.VERSION)
-    logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 ################################
 # Main
 ################################
 
 def main():
-    init()
+    init_globals(gui_mode=True)
+    init_main_logger()
     
     # Check for updates first
     rv = check_version(parsers.VERSION)
@@ -107,7 +49,8 @@ def main():
     parser_inputs = app.parser_inputs
     parser_outfile = app.parser_outfile
     control_flags = app.control_flags
-    parsers.jobs = app.jobs
+    additional_options = app.additional_options
+    parsers.jobs = additional_options.get(InputDictKeys.JOBS.value, 1)
     
     # Put control_flags into module variable
     parsers.control_flags = control_flags
@@ -123,6 +66,8 @@ def main():
     s += f"\nWriting to file: {parser_outfile}\n"
     s += "\nParser Switches:\n"
     s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in control_flags.items()]).strip('\n')
+    s += "\nAdditional Options:\n"
+    s += "\n".join([f"  {k.capitalize()}:".ljust(42) + f"{v}" for k,v in additional_options.items()]).strip('\n')
     
     logger.info("\n".join(['    ' + l for l in s.split('\n')]))
     
@@ -130,7 +75,7 @@ def main():
     if app.select_input is None:
         no_overwrite = False
     else: no_overwrite = not (app.select_input.results is not None and len(app.select_input.results) > 0)
-    export_config(parser_inputs, parser_outfile, control_flags, no_overwrite=no_overwrite)
+    export_config(parser_inputs, parser_outfile, control_flags, additional_options, no_overwrite=no_overwrite)
     
     # Save the preflight rules
     preflight.save_prules(parsers.prules)
@@ -169,6 +114,7 @@ if __name__ == "__main__":
             parsers.progress_queue.put({
                 "type": "stop"
             })
+        logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         logger.info("Program terminated with exit code %d", exitcode)
         logger.close_logger()
         sys.exit(exitcode)
