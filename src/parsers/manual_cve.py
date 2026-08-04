@@ -2,21 +2,19 @@
 
 import os
 import re
-import logging
 import csv
 import traceback
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # No preview available
     return 'No preview available for NVD CVEs'
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Keep track of row number and error count
     row_num = 0
@@ -54,7 +52,7 @@ def parse(fpath, scanner, substr, prepend):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
                 
                 # Extract CWE
                 cwe = row['CWE']
@@ -78,7 +76,7 @@ def parse(fpath, scanner, substr, prepend):
                     logger.error("Row %d of \'%s\': Invalid CVE number. Please check \'%s\' and the user overrides.", row_num, fpath, fpath)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cve,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -103,5 +101,5 @@ def parse(fpath, scanner, substr, prepend):
                 err_count += 1
     logger.info("Successfully processed %d vulnerabilities", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse

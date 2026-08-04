@@ -1,16 +1,13 @@
 # semgrep.py
 
 import os
-import logging
 import traceback
 import re
 import json
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames, Scanners
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Parse the input file
@@ -43,8 +40,9 @@ def path_preview(fpath):
     # No data, return error message
     return f"[ERROR] No data found in \'{fpath}\'"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Keep track of finding number and errors
     finding_count = 0
@@ -59,26 +57,27 @@ def parse(fpath, scanner, substr, prepend):
                 data = json.load(r)
             else:
                 logger.error("Unsupported file type for semgrep results: %s", fpath)
-                return finding_count, err_count + 1
+                return parsed_data, finding_count, err_count + 1
     except json.JSONDecodeError:
         logger.error("Invalid JSON format: %s", fpath)
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     except Exception:
         logger.error("Unable to read file: %s", fpath)
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     
     # Parse
     if fpath.endswith('.json'):
-        finding_count, err_count = _parse_json(data, fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_json(data, fpath, scanner, substr, prepend, input_id)
     else:
-        finding_count, err_count = _parse_sarif(data, fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_sarif(data, fpath, scanner, substr, prepend, input_id)
     
     logger.info("Successfully processed %d results", finding_count)
     logger.info("Number of erroneous results: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 
 
-def _parse_sarif(data, fpath, scanner, substr, prepend):
+def _parse_sarif(data, fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
     
     # Keep track of finding number and errors
     finding_count = 0
@@ -105,7 +104,7 @@ def _parse_sarif(data, fpath, scanner, substr, prepend):
     for result in results:
         result_num += 1
         try:
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
             # Get rule_id
             rule_id = result['ruleId']
@@ -178,7 +177,7 @@ def _parse_sarif(data, fpath, scanner, substr, prepend):
             id = idgenerator.hash(preimage)
 
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+            parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                 Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                 Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                 Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -202,11 +201,12 @@ def _parse_sarif(data, fpath, scanner, substr, prepend):
             logger.error("Result at ordinal position %d in \'%s\': %s", result_num, fpath, traceback.format_exc())
             err_count += 1
 
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_sarif
 
 
-def _parse_json(data, fpath, scanner, substr, prepend):
+def _parse_json(data, fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
     
     # Keep track of finding number and errors
     finding_count = 0
@@ -227,7 +227,7 @@ def _parse_json(data, fpath, scanner, substr, prepend):
     for result in results:
         result_num += 1
         try:
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
             # Get path/line
             path = result['path']
@@ -287,7 +287,7 @@ def _parse_json(data, fpath, scanner, substr, prepend):
             id = idgenerator.hash(preimage)
 
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+            parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                 Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                 Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                 Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -311,5 +311,5 @@ def _parse_json(data, fpath, scanner, substr, prepend):
             logger.error("Result at ordinal position %d in \'%s\': %s", result_num, fpath, traceback.format_exc())
             err_count += 1
     
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_json

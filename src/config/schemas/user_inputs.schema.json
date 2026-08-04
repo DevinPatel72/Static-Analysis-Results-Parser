@@ -44,7 +44,7 @@
     },
     "outfile": {
       "type": "string",
-      "pattern": ".*\\.(xlsx|csv|sarif)$",
+      "pattern": "^.*\\.(xlsx|csv|sarif)$",
       "description": "Output file path (.xlsx, .sarif, or .csv only)"
     },
     "flags": {
@@ -52,7 +52,7 @@
       "required": [
         "Category Mappings",
         "Preflight Rules",
-        "Security Preflight Rules"
+        "Default Preflight Rules"
       ],
       "properties": {
         "Category Mappings": {
@@ -67,7 +67,7 @@
           "type": "boolean",
           "description": "If enabled, changes final output values according to user-defined rules"
         },
-        "Security Preflight Rules": {
+        "Default Preflight Rules": {
           "type": "boolean",
           "description": "If enabled, changes final output values according to a prebuilt profile of rules. Only activated if \"Preflight Rules\" flag is also true."
         },
@@ -77,8 +77,17 @@
         }
       },
       "additionalProperties": false
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "jobs": {
+          "type": "integer",
+          "description": "Define the number of processors to complete parsing. By default uses 1 processor."
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
 }
-

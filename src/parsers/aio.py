@@ -2,9 +2,8 @@
 import os
 import csv
 import json
-import logging
 import traceback
-from .parser_tools import parser_writer
+from .parser_tools import parser_logger as logger
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.toolbox import Fieldnames
 
@@ -15,8 +14,6 @@ try:
     __excel_enabled = True
 except (ImportError, ModuleNotFoundError):
     __excel_enabled = False
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     global __excel_enabled
@@ -61,9 +58,10 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     global __excel_enabled
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Keep track of row number and errors
     data = None
@@ -74,8 +72,8 @@ def parse(fpath, scanner, substr, prepend):
     
     # SARIF Move to different helper function
     if fpath.endswith(('.sarif', '.json')):
-        finding_count, err_count = _parse_sarp_sarif(fpath, scanner, substr, prepend)
-        return finding_count, err_count
+        finding_count, err_count = _parse_sarp_sarif(fpath, scanner, substr, prepend, input_id)
+        return parsed_data, finding_count, err_count
     
     # Excel - Set data iterable and total_rows
     elif __excel_enabled and fpath.endswith('.xlsx'):
@@ -104,7 +102,7 @@ def parse(fpath, scanner, substr, prepend):
     for row in data:
         try:
             row_num += 1
-            progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
 
             # Cut and prepend the paths and convert all backslashes to forward slashes
             path = str(row[Fieldnames.PATH.value]).replace(substr, "", 1)
@@ -114,18 +112,20 @@ def parse(fpath, scanner, substr, prepend):
             new_row[Fieldnames.PATH.value] = path
             
             # Write row to outfile
-            parser_writer.write_row(new_row)
+            parsed_data.append(new_row)
             finding_count += 1
         except Exception:
             logger.error("Row %d of \'%s\':\n%s", row_num, fpath, traceback.format_exc())
             err_count += 1
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
-def _parse_sarp_sarif(fpath, scanner, substr, prepend):
+def _parse_sarp_sarif(fpath, scanner, substr, prepend, input_id):
     # Side function to handle SARIF format
+    
+    parsed_data = []
     
     result_num = 0
     total_results = 0
@@ -138,7 +138,7 @@ def _parse_sarp_sarif(fpath, scanner, substr, prepend):
             data = json.load(f)
     except:
         logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     
     total_results = sum([len(run.get('results', [])) for run in data.get('runs', [])])
     
@@ -150,7 +150,7 @@ def _parse_sarp_sarif(fpath, scanner, substr, prepend):
         # Iterate through results and rebuild excel column
         for result in run.get('results', []):
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             try:
                 finding_id = result.get('partialFingerprints', {}).get('findingId', '')
                 new_row = {
@@ -243,11 +243,11 @@ def _parse_sarp_sarif(fpath, scanner, substr, prepend):
                         new_row[fieldname] = ''
             
                 # Write row to outfile
-                parser_writer.write_row(new_row)
+                parsed_data.append(new_row)
                 finding_count += 1
             except:
                 logger.error("Result ID %s of \'%s\':\n%s", finding_id, fpath, traceback.format_exc())
                 err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 
 # End of _parse_sarp_sarif

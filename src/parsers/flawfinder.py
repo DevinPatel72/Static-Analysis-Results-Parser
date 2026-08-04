@@ -4,15 +4,12 @@ import os
 import re
 import csv
 import json
-import logging
 import traceback
 from urllib.parse import unquote
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 from .parser_tools.language_resolver import resolve_lang_from_ext
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Parse the input file
@@ -38,20 +35,21 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     if fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend, input_id)
     else:
-        finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend, input_id)
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 
-def _parse_sarif(fpath, scanner, substr, prepend):
-    
+def _parse_sarif(fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
     finding_count = 0
     result_num = 0
     
@@ -62,10 +60,10 @@ def _parse_sarif(fpath, scanner, substr, prepend):
     try:
         with open(fpath, "r", encoding='utf-8-sig') as read_obj:
             data = json.load(read_obj)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
         err_count += 1
-        logger.error("Unable to parse input file \"%s\". Ensure %s is configured to output in SARIF format.", fpath, scanner)
-        return finding_count, err_count
+        logger.error("Unable to parse input file \"%s\": %s. Ensure %s is configured to output in SARIF format.", fpath, str(exc), scanner)
+        return parsed_data, finding_count, err_count
     
     # Get runs
     data = data['runs'][0]
@@ -100,7 +98,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
     for result in data['results']:
         try:
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
             # Type
             rule_id = result['ruleId']
@@ -166,18 +164,12 @@ def _parse_sarif(fpath, scanner, substr, prepend):
             else:
                 trace = ""
             
-            # Generate ID
-            id = ''
-            for k, v in result.get('fingerprints', {}).items():
-                if 'contextHash' in k:
-                    id = v
-                    break
-            if len(id) <= 0:
-                preimage = '\0'.join(str(p) for p in (path, line, rule_id, message) if len(str(p)) > 0)
-                id = idgenerator.hash(preimage)
+            # Generate ID. Do not use Fingerprint ID since it is generated solely using source snippets
+            preimage = '\0'.join(str(p) for p in (path, line, rule_id, message) if len(str(p)) > 0)
+            id = idgenerator.hash(preimage)
 
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+            parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                 Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                 Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                 Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -201,10 +193,11 @@ def _parse_sarif(fpath, scanner, substr, prepend):
             logger.error("Result with ID \"%s\", message %s in \'%s\': %s", rule_id, result.get('message', ''), fpath, traceback.format_exc())
             err_count += 1
         
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_sarif
 
-def _parse_csv(fpath, scanner, substr, prepend):
+def _parse_csv(fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
     
     # Keep track of row number and errors
     row_num = 0
@@ -224,7 +217,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             
                 cwe = row['CWEs']
                 if cwe is not None and isinstance(cwe, str):
@@ -290,14 +283,12 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 note = row['Note']
                 message = ". ".join(part for part in [warning, suggestion, note] if len(part.strip()) > 0)
                 
-                # Generate ID for finding if fingerprint is not here
-                fingerprint = row['Fingerprint']
-                if not (fingerprint is not None and isinstance(fingerprint, str) and len(fingerprint) > 0):
-                    preimage = '\0'.join(str(p) for p in (path, line, category, message) if len(str(p)) > 0)
-                    fingerprint = idgenerator.hash(preimage)
+                # Generate ID. Do not use Fingerprint ID since it is generated solely using source snippets
+                preimage = '\0'.join(str(p) for p in (path, line, category, message) if len(str(p)) > 0)
+                fingerprint = idgenerator.hash(preimage)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -322,7 +313,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 err_count += 1
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 def _normalize_text(s):

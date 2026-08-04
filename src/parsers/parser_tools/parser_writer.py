@@ -5,13 +5,12 @@ import re
 import csv
 import time
 import json
-import logging
 import parsers
+from . import parser_logger as logger
 from .toolbox import Fieldnames, InputConfigFlags, Scanners, check_all_CWEs, format_time, select_scanner
 from .preflight import apply_prules
 from .dupe_scan_consolidation import dupe_scan_consolidation
 
-logger = logging.getLogger(__name__)
 __excel_enabled = False
 __export_sarif = False
 
@@ -20,6 +19,7 @@ try:
     __excel_enabled = True
 except (ImportError, ModuleNotFoundError):
     __excel_enabled = False
+    logger.warning('Module \'openpyxl\' not found, defaulting output to CSV.')
 
 __filepath = None
 __parser_data = []
@@ -79,6 +79,10 @@ def write_row(r):
         if r[k] is None:
             r[k] = ''
     __parser_data.append(r)
+
+def write_rows(data):
+    for row in data:
+        write_row(row)
         
 def search_row(tuples, skip_ids='', match_once=False):
     """

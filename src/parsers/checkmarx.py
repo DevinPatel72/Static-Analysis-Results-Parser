@@ -1,14 +1,11 @@
 # checkmarx.py
 import os
-import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE, progress_bar
-from .parser_tools.toolbox import Fieldnames, console
-
-logger = logging.getLogger(__name__)
+from .parser_tools.toolbox import Fieldnames
 
 checkmarx_cdata = []
 
@@ -39,6 +36,7 @@ def path_preview(fpath):
 
 def parse(fpath, scanner, substr, prepend):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Count findings and errors
     finding_count = 0
@@ -48,16 +46,16 @@ def parse(fpath, scanner, substr, prepend):
     
     # Parse the file
     if fpath.endswith('.xml'):
-        finding_count, err_count = _parse_xml(fpath, substr, prepend, total_findings, scanner)
+        parsed_data, finding_count, err_count = _parse_xml(fpath, substr, prepend, total_findings, scanner)
     elif fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, substr, prepend, total_findings, scanner)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, substr, prepend, total_findings, scanner)
     else:
         logger.error("File %s is not an XML or CSV.", fpath)
         
         
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 def _get_total(path):
@@ -82,7 +80,8 @@ def _get_total(path):
     return finding_count
 # End of _get_total
 
-def _parse_csv(fpath, substr, prepend, total_findings, scanner):
+def _parse_csv(fpath, substr, prepend, total_findings, scanner, input_id):
+    parsed_data = []
     # Counts
     finding_count = 0
     err_count = 0
@@ -98,7 +97,7 @@ def _parse_csv(fpath, substr, prepend, total_findings, scanner):
         for row in csv_dict_reader:
             row_num += 1
             try:
-                progress_bar(row_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
                 # row variable is a dictionary that represents a row in csv
                 lang = row['QueryPath'].split('\\')[0]
@@ -139,7 +138,7 @@ def _parse_csv(fpath, substr, prepend, total_findings, scanner):
                 message = "{} - {}:{}: {}".format(query, dest_path, dest_line, row['DestName'])
                 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                         Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                         Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                         Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -163,10 +162,12 @@ def _parse_csv(fpath, substr, prepend, total_findings, scanner):
             except Exception:
                 logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_csv
 
-def _parse_xml(fpath, substr, prepend, total_findings, scanner):
+def _parse_xml(fpath, substr, prepend, total_findings, scanner, input_id):
+    parsed_data = []
+    
     # Counts
     i = 0
     finding_count = 0
@@ -184,7 +185,7 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner):
     # Checkmarx is organized via query ('Type'), so iterate through all queries
     queries = root.findall('Query')
     if queries is None or len(queries) <= 0:
-        return finding_count, err_count
+        return parsed_data, finding_count, err_count
     
     for query in queries:
         try:
@@ -220,7 +221,7 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner):
             
             for result in results:
                 i += 1
-                progress_bar(i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
                 try:
                     # Get result ID for logging purposes
                     result_id = result.get('NodeId', '')
@@ -278,7 +279,7 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner):
                     id = idgenerator.hash(preimage)
                     
                     # Write row to outfile
-                    parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                    parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                             Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                             Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                             Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -304,7 +305,7 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner):
         except Exception:
             logger.error("Error detected in Query ID %s in \'%s\': %s", query_id, fpath, traceback.format_exc())
             err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_xml
 
 def load_checkmarx_cdata():
@@ -314,8 +315,8 @@ def load_checkmarx_cdata():
     try:
         with open(os.path.join(MAPPINGS_DIR, 'checkmarx_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load Checkmarx CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error', orig_name=__name__)
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        logger.console(f"Unable to load Checkmarx CWE mappings: {exc}. {PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
         return [0]
     
 def get_checkmarx_cdata(query, lang, default=''):

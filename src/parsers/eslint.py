@@ -1,13 +1,11 @@
 # eslint.py
 import os
-import logging
 import traceback
 import json
-from .parser_tools import idgenerator, parser_writer
+import parsers
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE, progress_bar
-from .parser_tools.toolbox import Fieldnames, console
-
-logger = logging.getLogger(__name__)
+from .parser_tools.toolbox import Fieldnames
 
 eslint_cdata = {}
 
@@ -22,8 +20,9 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Count findings and errors encountered while running
     finding_count = 0
@@ -35,7 +34,7 @@ def parse(fpath, scanner, substr, prepend):
             data = json.load(f)
     except:
         logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     
     # Keep track of issue number for debug
     issue_num = 0
@@ -50,7 +49,7 @@ def parse(fpath, scanner, substr, prepend):
         for message in file['messages']:
             try:
                 issue_num += 1
-                progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
                 
                 rule_id = message['ruleId']
                 
@@ -89,7 +88,7 @@ def parse(fpath, scanner, substr, prepend):
                 #id = "ESL{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -114,18 +113,16 @@ def parse(fpath, scanner, substr, prepend):
                 err_count += 1
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous findings: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 def load_eslint_cdata():
     # Loads eslint cdata info from config dir
-    from . import PROG_NAME_ABBR, MAPPINGS_DIR
-    
     try:
-        with open(os.path.join(MAPPINGS_DIR, 'eslint_cdata.json'), 'r', encoding='utf-8-sig') as r:
+        with open(os.path.join(parsers.MAPPINGS_DIR, 'eslint_cdata.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load Eslint CWE mappings: Invalid JSON format\n{PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error', orig_name=__name__)
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        logger.console(f"Unable to load Eslint CWE mappings: {exc}. {parsers.PROG_NAME_ABBR} will continue without CWE mappings.", "Config Error", level='error')
         return {"__eslint_cdata_error__": "Returning a dict of size 1 to ensure this function only gets called once."}
 
 def get_eslint_cdata(rule_id, default=''):

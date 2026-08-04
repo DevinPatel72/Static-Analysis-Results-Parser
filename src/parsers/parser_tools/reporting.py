@@ -1,9 +1,9 @@
 # reporting.py
 
 import os
-import logging
 from .gui.version_label import VersionLabel
-from .toolbox import console
+from parsers import PROG_NAME_ABBR
+from . import parser_logger as logger
 
 _enable_matplotlib = False
 
@@ -14,7 +14,6 @@ try:
 except (ImportError, ModuleNotFoundError):
     _enable_matplotlib = False
 
-logger = logging.getLogger(__name__)
 
 class Report:
     """
@@ -49,7 +48,7 @@ class Report:
             print(outstr)
         
         if not _enable_matplotlib:
-            console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", level='error', orig_name=__name__)
+            logger.console(f"Unable to generate plot charts because matplotlib failed to import. Check logs in \"{LOGS_DIR}\" for finding reports.", "Import Error", level='error')
             return
         
         # Create pie charts

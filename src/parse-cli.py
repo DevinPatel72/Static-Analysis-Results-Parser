@@ -23,73 +23,21 @@ if '-v' in sys.argv or '--version' in sys.argv:
 import os
 import argparse
 import traceback
+from multiprocessing import freeze_support
+from datetime import datetime
 import parsers
 from update import check_version
-from parsers.parser_tools import parser_writer, preflight
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs, console
+from parsers.parser_tools import parser_writer, preflight, parser_logger as logger
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, InputAdditionalOptions, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs
 from parsers.parser_tools.begin_parse import begin
+from parsers.initialization import init_globals, init_main_logger
 
-# Configure root path and important dirs of script
-if getattr(sys, 'frozen', False):
-    # Running as bundled executable
-    parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
-    logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
-    parsers.ASSETS_DIR = os.path.join(sys._MEIPASS, parsers.ASSETS_DIR)
-else:
-    # Running as script
-    parsers.EXE_ROOT_DIR = os.path.dirname(__file__)
-    logname = os.path.splitext(os.path.basename(__file__))[0]+'.log'
-    parsers.ASSETS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.ASSETS_DIR)
-
-# Capitalized drive letter if on Windows
-drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
-if len(drive) > 0: drive = drive.upper()
-parsers.EXE_ROOT_DIR = os.path.join(drive, rest)
-
-# Set import directories
-parsers.CONFIG_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.CONFIG_DIR)
-parsers.MAPPINGS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.MAPPINGS_DIR)
-parsers.PREFLIGHT_DIR = os.path.join(parsers.CONFIG_DIR, parsers.PREFLIGHT_DIR)
-
-# Create inputs directory
-parsers.INPUTS_DIR = os.path.join(parsers.CONFIG_DIR, parsers.INPUTS_DIR)
-os.makedirs(parsers.INPUTS_DIR, exist_ok=True)
-
-# Set log paths
-parsers.LOGS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.LOGS_DIR)
-os.makedirs(parsers.LOGS_DIR, exist_ok=True)
-logfile = os.path.join(parsers.LOGS_DIR, logname)
-parsers.LOGFILE = logfile
-
-# Configure logger
-import logging
-logging.basicConfig(filename=logfile, level=logging.INFO, encoding='utf-8', format='%(name)-18s :: %(levelname)-8s :: %(message)s', filemode='w')
-consoleHandler = logging.StreamHandler()
-consoleHandler.setLevel(logging.CRITICAL)
-consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
-logging.getLogger().addHandler(consoleHandler)
-logger = logging.getLogger(__name__)
-
-from datetime import datetime
-logger.info("%s %s", PROG_NAME, VERSION)
-logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
-# Check if openpyxl is installed. Logged here to ensure correct placement in log file
-from importlib.util import find_spec
-if find_spec('openpyxl') is None:
-    logger.warning('Module \'openpyxl\' not found, defaulting output to CSV.')
-    # Handled in parser_writer.py
-
-# Check if matplotlib is installed. Logged here to ensure correct placement in log file
-if find_spec('matplotlib') is None:
-    logger.warning('Module \'matplotlib\' not found, %s will skip chart reporting.', parsers.PROG_NAME_ABBR)
-    # Handled in reporting.py
 
 ################################
 # Functions
 ################################
 
-def print_inputs(p_parser_inputs, p_parser_outfile, p_control_flags):
+def print_inputs(p_parser_inputs, p_parser_outfile, p_control_flags, p_additional_options):
     if len(parsers.PROJ_NAME) > 0:
         s = "\nConfiguration for " + " ".join([parsers.PROJ_NAME, parsers.PROJ_VERSION]) + ":\n"
     else:
@@ -99,6 +47,8 @@ def print_inputs(p_parser_inputs, p_parser_outfile, p_control_flags):
     s += f"\nWriting to file: {p_parser_outfile}\n"
     s += "\nParser Switches:\n"
     s += "\n".join([f"  Enable {k}:".ljust(42) + f"{v}" for k,v in p_control_flags.items()]).strip('\n')
+    s += "\n\nAdditional Options:\n"
+    s += "\n".join([f"  {k.capitalize()}:".ljust(42) + f"{v}" for k,v in p_additional_options.items()]).strip('\n')
     print(s)
     
     # Log the configuration
@@ -119,18 +69,21 @@ def print_inputs_file_contents(fpath):
         logger.critical("Unable to open inputs: %s", rv)
         sys.exit(3)
     else:
-        t_parser_inputs, t_parser_outfile, t_control_flags = rv
-        print_inputs(t_parser_inputs, t_parser_outfile, t_control_flags)
+        t_parser_inputs, t_parser_outfile, t_control_flags, t_options = rv
+        print_inputs(t_parser_inputs, t_parser_outfile, t_control_flags, t_options)
 
 ################################
 # Main
 ################################
 
 def main():
+    init_globals(gui_mode=False)
+    init_main_logger()
     
     parser_inputs = []
     parser_outfile = ""
     control_flags = {}
+    additional_options = {}
     
     help_description = "This software will parse a list of scanner output files and collect them into one Excel, SARIF, or CSV file."
     
@@ -161,21 +114,26 @@ def main():
                 default=None,
                 help=f"Enable {f.flag}. Overrides the flag value specified in a `--file`."
             )
+
+    for option in InputAdditionalOptions:
+        argparser.add_argument(
+            f"--{option.opt.lower().replace(' ', '-')}",
+            dest=option.opt.lower().replace(' ', '-'),
+            type=type(option.default),
+            default=option.default,
+            help=option.description
+        )
     
     argparser.add_argument('-c', '--check-inputs', dest="checkinputs", action='store_true', help="Validate the inputs JSON file specified by `--file`, report any errors, and exit.")
     argparser.add_argument('-l', '--list-inputs', dest="listinputs", metavar="CONFIG_FILE", nargs='?', const=True, default=False, help="List available input config files in the `inputs` directory. If `CONFIG_FILE` (file name or path) is provided, display that file's contents instead.")
     argparser.add_argument('-s', '--save-config', dest="save_config", metavar="SAVE_NAME", nargs='?', const=True, default=False, help="Save the current command-line inputs to a configuration file. If `SAVE_NAME` is provided, save to the `inputs` directory using that name. If not, overwrite the file specified by `--file` or create a new configuration file.")
     argparser.add_argument('--format', dest="format", type=str, default="", help="Format of output file. Valid options are EXCEL, SARIF, or CSV.")
-    argparser.add_argument('--include-cvss-properties', dest="include_cvss_properties", action='store_true', help="By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, pass this option.")
     argparser.add_argument('--example-template', dest="exampletemplate", action='store_true', help="Print an example inputs JSON template and exit.")
     argparser.add_argument('--disable-progressbar', dest="disableprogressbar", action='store_true', help="Disables progress bar in CLI for faster performance.")
     
     args = argparser.parse_args()
     
     # Parse args
-    if args.version:
-        #print(f"{PROG_NAME} {VERSION}") # Version printed at beginning of this file instead
-        sys.exit(0)
     
     # Print inputs template
     if args.exampletemplate:
@@ -200,7 +158,7 @@ def main():
     # Check for updates
     rv = check_version(parsers.VERSION)
     if rv is not None and isinstance(rv, str) and len(rv) > 0:
-        console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info', orig_name=__name__)
+        logger.console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info')
     
     # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default <PROG_NAME_ABBR>_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
     if len(args.file) > 0:
@@ -221,7 +179,7 @@ def main():
         logger.critical("Unable to open inputs: %s", rv)
         sys.exit(3)
     else:
-        parser_inputs, parser_outfile, control_flags = rv
+        parser_inputs, parser_outfile, control_flags, additional_options = rv
     
     # Override outfile if the arg was passed
     if args.out is not None and len(args.out) > 0:
@@ -279,6 +237,16 @@ def main():
         if (value := getattr(args, f.flag.lower().replace(' ', '-'))) is not None:
             control_flags[f.flag] = value
     
+    # Additional options
+    for option in InputAdditionalOptions:
+        # Fill in any empty options with default value
+        if option.opt not in additional_options.keys():
+            additional_options[option.opt] = option.default
+            
+        # Check if argument was passed and overwrite what is there
+        if (value := getattr(args, option.opt.lower().replace(' ', '-'))) is not None:
+            additional_options[option.opt] = min(value, option.values[1])
+    
     # Check inputs format
     if len(parser_inputs) > 0:
         # Dedupe parser_inputs
@@ -294,14 +262,14 @@ def main():
         elif not rv:
             sys.exit(2)
     else:
-        console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...", 'No Inputs Defined', level='info', orig_name=__name__)
+        logger.console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}...", 'No Inputs Defined', level='info')
         sys.exit(0)
 
     # Put control_flags into module variable
     parsers.control_flags = control_flags
 
     # Output confirmation
-    print_inputs(parser_inputs, parser_outfile, control_flags)
+    print_inputs(parser_inputs, parser_outfile, control_flags, additional_options)
     print('\n{}\n'.format('—'*100))
     
     # Export parser inputs to config file for reruns
@@ -315,7 +283,7 @@ def main():
                 parsers.INPUTS_PATH = os.path.join(parsers.INPUTS_DIR, save_filename)
             else:
                 parsers.INPUTS_PATH = save_filename
-        export_config(parser_inputs, parser_outfile, control_flags)
+        export_config(parser_inputs, parser_outfile, control_flags, additional_options)
     
     # Load preflight rules if true
     if control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
@@ -336,6 +304,7 @@ def main():
 
 
 if __name__ == "__main__":
+    freeze_support()
     exitcode = 0
     try:
         main()
@@ -353,6 +322,8 @@ if __name__ == "__main__":
         logger.error("\n%s", traceback.format_exc())
         exitcode = 1
     finally:
+        logger.info(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         logger.info("Program terminated with exit code %d", exitcode)
         print()
-        sys.exit(exitcode)
+        logger.close_logger()
+    sys.exit(exitcode)

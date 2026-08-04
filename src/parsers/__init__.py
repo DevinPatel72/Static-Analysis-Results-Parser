@@ -1,7 +1,7 @@
 # Version String
 PROG_NAME = 'Static Analysis Results Parser'
 PROG_NAME_ABBR = 'SARP'
-VERSION = '2.9.3'
+VERSION = '2.10.0'
 
 # Project Info
 PROJ_NAME = ""
@@ -10,7 +10,7 @@ PROJ_VERSION = ""
 # Control Flag Names
 FLAG_CATEGORY_MAPPING = 'Category Mappings'
 FLAG_PREFLIGHT_RULES = 'Preflight Rules'
-FLAG_SECURITY_PREFLIGHT_RULES = 'Security Preflight Rules'
+FLAG_SECURITY_PREFLIGHT_RULES = 'Default Preflight Rules'
 FLAG_DUPE_SCAN_CONSOLIDATION = 'Duplicate Scanner Consolidation'
 FLAG_SARIF_STITCH_PROPERTIES = 'SARIF STITCH Properties'
 
@@ -44,6 +44,7 @@ INPUTS_PATH = ''
 
 # Multithreading globals
 progress_queue = None
+jobs = 1
 
 # Updater globals
 REPO_BASE_URL = "https://api.github.com/repos/DevinPatel72/Static-Analysis-Results-Parser"

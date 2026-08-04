@@ -1,11 +1,12 @@
 # toolbox.py
 
 import os
-import logging
 import json
 import importlib
 from enum import Enum
-from tkinter import messagebox
+import multiprocessing
+from . import parser_logger as logger
+from parsers.initialization import init_globals
 from .progressbar import progress_bar,SPACE
 import parsers
 
@@ -15,9 +16,6 @@ try:
     __excel_enabled = True
 except (ImportError, ModuleNotFoundError):
     __excel_enabled = False
-
-
-logger = logging.getLogger(__name__)
 
 LARGE_FILE_THRESHOLD_MB = 40
 FILE_SIZE_WARNED_ONCE = False
@@ -42,23 +40,40 @@ class InputDictKeys(Enum):
     PREPEND = 'prepend'
     REMOVE = 'remove'
     OUTFILE = 'outfile'
+    INPUT_ID = 'inputid'
+    JOBS = 'jobs'
     
     @classmethod
     def inputs(cls):
         return [cls.PATH.value, cls.SCANNER.value, cls.PREPEND.value, cls.REMOVE.value]
 
 class InputConfigFlags(Enum):
-    OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True, "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.", GuiWindow.OutfileFlagsGUI)
-    PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, "If enabled, this will change final output values according to user-defined rules.", GuiWindow.OutfileFlagsGUI)
-    SECURITY_PREFLIGHT_RULES = (parsers.FLAG_SECURITY_PREFLIGHT_RULES, True, "If enabled, changes final output values according to a prebuilt profile of rules. Only activated if \"Preflight Rules\" flag is also true.", GuiWindow.RuleBuilderGUI)
-    DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False, "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner.", GuiWindow.OutfileFlagsGUI)
-    SARIF_STITCH_PROPERTIES = (parsers.FLAG_SARIF_STITCH_PROPERTIES, False, "By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true.", GuiWindow.OutfileFlagsGUI)
+    DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False, False, "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
+    PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, True, "If enabled, this will change final output values according to user-defined rules.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
+    OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True, True, "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
+    SECURITY_PREFLIGHT_RULES = (parsers.FLAG_SECURITY_PREFLIGHT_RULES, True, True, "If enabled, changes final output values according to a prebuilt profile of rules. Only activated if \"Preflight Rules\" flag is also true.", (GuiWindow.RuleBuilderGUI,))
+    SARIF_STITCH_PROPERTIES = (parsers.FLAG_SARIF_STITCH_PROPERTIES, False, False, "By default, SARIF format will output without STITCH properties such as Confidence, Exploit Maturity, Environmental Metrics, etc. To include these properties, set this flag to true.", (GuiWindow.OutfileFlagsGUI,))
 
-    def __init__(self, flag, default, description, module_visibility):
+    def __init__(self, flag, default, required, description, module_visibility):
         self.flag = flag
+        self.default = default
+        self.required = required
+        self.description = description
+        self.module_visibility = module_visibility
+    
+    @classmethod
+    def all_flags(cls):
+        return [f.flag for f in cls]
+
+class InputAdditionalOptions(Enum):
+    JOBS = ("jobs", 1, "Define the number of processors to complete parsing. By default uses 1 processor.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow), (1, os.cpu_count()))
+
+    def __init__(self, opt, default, description, module_visibility, values):
+        self.opt = opt
         self.default = default
         self.description = description
         self.module_visibility = module_visibility
+        self.values = values
     
     @classmethod
     def all_flags(cls):
@@ -71,6 +86,7 @@ class InputSchemaKeys(Enum):
     MAIN = "main"
     OUTFILE = "outfile"
     FLAGS = "flags"
+    OPTIONS = "options"
 
 class Fieldnames(Enum):
     SCORING_BASIS = 'Scoring Basis'
@@ -323,7 +339,7 @@ def validate_path_and_scanner(fpath, scanner):
             _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
         else:
             _end = ""
-        console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', level='warning', orig_name=__name__)
+        logger.console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', level='warning')
     
     # AIO parser inputs
     elif any(s in scan_match for s in Scanners.SARP.keywords) and os.path.isfile(fpath):
@@ -365,7 +381,7 @@ def validate_path_and_scanner(fpath, scanner):
                 _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
             else:
                 _end = ""
-            console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', level='warning', orig_name=__name__)
+            logger.console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', level='warning')
         
         # For fortify inputs, check if the audit.fvdl file is present in the fpr archive
         from parsers.fortify import check_fvdl # This import statement is necessary because directly calling 'parsers.fortify.check_fvdl' results in a failed import resolution
@@ -411,23 +427,24 @@ def load_config_cwe_category_mappings():
     try:
         with open(os.path.join(parsers.MAPPINGS_DIR, 'mitre_cwe_category_mapping.json'), 'r', encoding='utf-8-sig') as r:
             return json.load(r)
-    except (FileNotFoundError, json.JSONDecodeError):
-        console(f"Unable to load MITRE CWE Category Mappings: Invalid JSON format\n{parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", level='error', orig_name=__name__)
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        logger.console(f"Unable to load MITRE CWE Category Mappings: {exc}. {parsers.PROG_NAME_ABBR} will continue without CWE category mappings.", "Config Error", level='error')
         return {}
 
-def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_control_flags=None):
+def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_control_flags=None, default_additional_options=None):
     # Check if there are inputs in the inputs file
     if len(inputs_path) <= 0:
-        if default_control_flags is not None: 
-            return [], default_outfile, default_control_flags
-        else:
-            return [], default_outfile, {}
+        if default_control_flags is None:
+            default_control_flags = {}
+        if default_additional_options is None:
+            default_additional_options = {}
+        return [], default_outfile, default_control_flags, default_additional_options
     if os.path.isfile(inputs_path):
         try:
             with open(inputs_path, 'r', encoding='utf-8-sig') as uin:
                 user_inputs = json.load(uin)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return f"Unable to parse \"{os.path.basename(inputs_path)}.\" This may be due to an improperly formatted or corrupted JSON file."
+        except (FileNotFoundError, json.JSONDecodeError) as exc:
+            return f"Unable to parse \"{os.path.basename(inputs_path)}\": {exc}"
         
         # Attempt to parse project name and version
         parsers.PROJ_NAME = user_inputs.get('project_name', "")
@@ -462,7 +479,7 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
                 if k not in [f.flag for f in InputConfigFlags]:
                     return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join([f.flag for f in InputConfigFlags]))
         else:
-            control_flags = {}
+            control_flags = {}    
 
         # All is green, set flags equal to control_flags
         control_flags = user_inputs['flags']
@@ -472,11 +489,19 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
             if f.flag not in control_flags.keys():
                 control_flags[f.flag] = f.default
         
+        # Check for options
+        options = {}
+        if 'options' in user_inputs.keys():
+            options = user_inputs['options']
+            for opt in InputAdditionalOptions:
+                if opt.opt not in options.keys():
+                    options[opt.opt] = opt.default
+        
         # Set inputs path global for export
         parsers.INPUTS_PATH = inputs_path
         
         # Completed parsing
-        return parser_inputs, parser_outfile, control_flags
+        return parser_inputs, parser_outfile, control_flags, options
 
     else:
         return f"Config file {inputs_path} not found."
@@ -488,7 +513,7 @@ def check_input_format(inputs, outfile, flags):
     for inp in inputs:
         # Check if path and scanner exist
         if (msg := validate_path_and_scanner(inp[InputDictKeys.PATH.value], inp[InputDictKeys.SCANNER.value])) != 'TRUE':
-            console(msg, title='Invalid Config Input', level='error', orig_name=__name__)
+            logger.console(msg, title='Invalid Config Input', level='error')
             success = False
     
     # Check outfile
@@ -496,22 +521,22 @@ def check_input_format(inputs, outfile, flags):
     if msg == "Outfile not defined":
         pass
     elif msg != 'TRUE':
-        console(msg, title='Invalid Config Input', level='error', orig_name=__name__)
+        logger.console(msg, title='Invalid Config Input', level='error')
         success = False
     
     # Check control flags
     for k, v in flags.items():
         if k not in [f.flag for f in InputConfigFlags]:
-            console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {[f.flag for f in InputConfigFlags]}", title='Invalid Config Input', level='error', orig_name=__name__)
+            logger.console(f"Invalid control flag \"{k}\". Only the following control flags are allowed: {[f.flag for f in InputConfigFlags]}", title='Invalid Config Input', level='error')
             success = False
         if not isinstance(v, bool):
-            console(f"Invalid data type for control flag \"{k}\". Please ensure all values are boolean types.", title='Invalid Config Input', level='error', orig_name=__name__)
+            logger.console(f"Invalid data type for control flag \"{k}\". Please ensure all values are boolean types.", title='Invalid Config Input', level='error')
             success = False
     
     # Check if all control flags are present
     missing = [f"\'{f}\'" for f in [t_f.flag for t_f in InputConfigFlags] if f not in flags.keys()]
     if len(missing) > 0 and not parsers.GUI_MODE:
-        console(f"Missing control flag{'s' if len(missing, orig_name=__name__) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', level='error')
+        logger.console(f"Missing control flag{'s' if len(missing) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', level='error')
         success = False
 
     return success
@@ -535,7 +560,7 @@ def check_all_CWEs(data):
     for i, row in enumerate(data, start=1):
         # Control flag check
         if parsers.control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
-            progress_bar(i, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(SPACE))
+            progress_bar(i, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(SPACE), input_id=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag)
             row[Fieldnames.SCORING_BASIS.value], count = check_CWE_category(row[Fieldnames.SCORING_BASIS.value], count)
         
         # Turn CWE into int if capable
@@ -548,13 +573,14 @@ def check_CWE_category(cwe, count=0):
     else:
         return cwe, count
 
-def export_config(inputs, outfile, control_flags, no_overwrite=False):
+def export_config(inputs, outfile, control_flags, options, no_overwrite=False):
     out_dict = {InputSchemaKeys.SCHEMA.value: "../schemas/user_inputs.schema.json",
                 InputSchemaKeys.PROJ_NAME.value: parsers.PROJ_NAME,
                 InputSchemaKeys.PROJ_VERSION.value: parsers.PROJ_VERSION,
                 InputSchemaKeys.MAIN.value: inputs,
                 InputSchemaKeys.OUTFILE.value: outfile,
-                InputSchemaKeys.FLAGS.value: control_flags}
+                InputSchemaKeys.FLAGS.value: control_flags,
+                InputSchemaKeys.OPTIONS.value: options}
     
     # Set up output path
     if no_overwrite or len(parsers.INPUTS_PATH) <= 0:
@@ -586,33 +612,6 @@ def generate_preview(preview, remove_substr='', add_substr=''):
     
     return preview
 
-def message_box(title, msg, level):
-    if level == 'error':
-        messagebox.showerror(title, msg)
-    elif level == 'warning':
-        messagebox.showwarning(title, msg)
-    elif level == 'info':
-        messagebox.showinfo(title, msg)
-
-def console(msg, title='', level='info', orig_name=__name__):
-    if parsers.GUI_MODE:
-        message_box(title, msg, level)
-    else:
-        print(f'\n[{level.upper()}]  {msg}')
-        
-    t_logger = logging.getLogger(orig_name)
-    
-    if level == 'critical':
-        t_logger.critical(msg)
-    elif level == 'error':
-        t_logger.error(msg)
-    elif level == 'warning':
-        t_logger.warning(msg)
-    elif level == 'info':
-        t_logger.info(msg)
-    elif level == 'debug':
-        t_logger.debug(msg)
-
 def get_file_size_mb(path):
     size_bytes = os.path.getsize(path)
     size_mb = size_bytes // (1024 * 1024)
@@ -627,24 +626,65 @@ def format_time(seconds):
 
 def get_all_previews(inputs):
     previews = {}
+    results = []
     
-    for inp in inputs:
-        fpath = inp[InputDictKeys.PATH.value]
-        scanner = inp[InputDictKeys.SCANNER.value]
-        preview = ''
-    
-        fp = os.path.realpath(fpath)
+    # Skip multithreading if number of jobs is 1. Slightly improves performance
+    if parsers.jobs > 1:
+        # Init logger queue and start listener
+        log_queue = logger.initialize_multiprocessing()
         
-        selected_scanner = select_scanner(scanner)
-        if selected_scanner is None:
-            preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
+        pool = None
+        
+        try:
+            # Init multithreading pool
+            pool = multiprocessing.Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags, log_queue, parsers.GUI_MODE))
+            
+            # Start multithreading pool
+            results = pool.map(worker_get_preview, inputs)
+        except KeyboardInterrupt:
+            if pool is not None: pool.terminate()
+            raise
         else:
-            module = importlib.import_module(selected_scanner.module)
-            preview = module.path_preview(fp)
-
-        previews[fpath] = preview
+            if pool is not None: pool.close()
+        finally:
+            if pool is not None: pool.join()
+    else:
+        results = [
+            worker_get_preview(inp)
+            for inp in inputs
+        ]
+    
+    for result in results:
+        previews[result['fpath']] = result['preview']
+        
+    logger.info("Fetched path previews")
     
     return previews
+    
+def _init_worker(control_flags, logging_queue, gui_mode=False):
+    parsers.control_flags = control_flags
+    
+    # Init globals again since the worker is its own interpreter
+    init_globals(gui_mode)
+    
+    # Logging
+    logger.initialize_worker(logging_queue)
+
+def worker_get_preview(entry):
+    fpath = entry[InputDictKeys.PATH.value]
+    scanner = entry[InputDictKeys.SCANNER.value]
+    preview = ''
+
+    fp = os.path.realpath(fpath)
+    
+    selected_scanner = select_scanner(scanner)
+    if selected_scanner is None:
+        preview = f"[ERROR] Unsupported scanner {scanner}, unable to show preview"
+    else:
+        module = importlib.import_module(selected_scanner.module)
+        preview = module.path_preview(fp)
+
+    return {'fpath':fpath, 'preview': preview}
 
 def select_scanner(scanner):
     # Returns enum corresponding to scanner text, else returns None
@@ -667,6 +707,11 @@ def print_user_inputs_template():
     for f in [f.flag for f in InputConfigFlags]:
         flags += f'        \"{f}\": [true|false],\n'
     flags = flags.rstrip(',\n')
+    
+    options = ""
+    for opt in InputAdditionalOptions:
+        options += f'        \"{opt.opt}\": {opt.default},\n'
+    options = options.rstrip(',\n')
     
     s = f"""{{
     "$schema": "../schemas/user_inputs.schema.json",
@@ -695,6 +740,9 @@ def print_user_inputs_template():
     "outfile": "path/to/outfile.[xlsx|sarif|csv]",
     "flags": {{
 {flags}
+    }},
+    "options": {{
+{options}
     }}
 }}"""
     print(s, sep='', end='')

@@ -1,16 +1,11 @@
 # sarif.py
 
 import os
-import re
-import logging
 import traceback
 import json
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
-
-
-logger = logging.getLogger(__name__)
 
 # Remaps all known severity values to keywords supported by SARIF standard
 def _severity_remap(severity, scanner_type, default=''):
@@ -55,7 +50,9 @@ def _fetch_fingerprint(result):
     return finding_id
     
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
+    
     # Convert SARIF file to dict rows
     result_num = 0
     total_results = 0
@@ -68,7 +65,7 @@ def parse(fpath, scanner, substr, prepend):
             data = json.load(f)
     except:
         logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     
     total_results = sum([len(run.get('results', [])) for run in data.get('runs', [])])
     
@@ -80,7 +77,7 @@ def parse(fpath, scanner, substr, prepend):
         # Iterate through results and rebuild excel column
         for result in run.get('results', []):
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             try:
                 finding_id = _fetch_fingerprint(result)
                 new_row = {
@@ -187,9 +184,9 @@ def parse(fpath, scanner, substr, prepend):
                         new_row[fieldname] = ''
             
                 # Write row to outfile
-                parser_writer.write_row(new_row)
+                parsed_data.append(new_row)
                 finding_count += 1
             except:
                 logger.error("Result ID %s of \'%s\':\n%s", finding_id, fpath, traceback.format_exc())
                 err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count

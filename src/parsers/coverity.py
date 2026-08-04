@@ -1,13 +1,10 @@
 # coverity.py
 import os
-import logging
 import traceback
 import json
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE, progress_bar
 from .parser_tools.toolbox import Fieldnames
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Open json in read
@@ -18,8 +15,9 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
     
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Count findings and errors encountered while running
     finding_count = 0
@@ -31,7 +29,7 @@ def parse(fpath, scanner, substr, prepend):
             data = json.load(f)
     except:
         logger.error("File \'%s\' failed to open:\n%s", fpath, traceback.format_exc())
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     
     # Keep track of issue number for debug
     issue_num = 0
@@ -41,7 +39,7 @@ def parse(fpath, scanner, substr, prepend):
     for issue in data['issues']:
         try:
             issue_num += 1
-            progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             
             cwe = issue['checkerProperties']['cweCategory']
             
@@ -118,7 +116,7 @@ def parse(fpath, scanner, substr, prepend):
             #id = "COV{:04}".format(finding_count+1)
             
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+            parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                 Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                 Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                 Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -145,5 +143,5 @@ def parse(fpath, scanner, substr, prepend):
             err_count += 1
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous findings: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse

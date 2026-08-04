@@ -1,12 +1,10 @@
 # dupe_scan_consolidation.py
 
 import re
-import logging
 import parsers
+from . import parser_logger as logger
 from .toolbox import Fieldnames, InputConfigFlags
 from .progressbar import progress_bar,SPACE
-
-logger = logging.getLogger(__name__)
 
 def _fix_scanner_name(scanner):
     if match := re.match(r"^(.*?)\s+v?\d+(?:\.\d+)*$", scanner):
@@ -23,7 +21,7 @@ def dupe_scan_consolidation(data):
     # Perform dupe searching
     dupe_count = 0
     for i, row in enumerate(data, start=1):
-        progress_bar(i, len(data), prefix=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag.rjust(SPACE))
+        progress_bar(i, len(data), prefix=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag.rjust(SPACE), input_id=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag)
         
         # Check to see if this is already a duplicate row or if it is designated as a canon row
         if (row[Fieldnames.CONFIDENCE.value].lower() == Fieldnames.DUPLICATE_CONF.value.lower()):

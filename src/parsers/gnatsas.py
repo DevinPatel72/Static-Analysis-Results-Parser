@@ -1,15 +1,12 @@
 # gnatsas.py
 import os
-import logging
 import csv
 import json
 import re
 import traceback
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Parse the input file
@@ -35,22 +32,23 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     if fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend, input_id)
     else:
-        finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend, input_id)
     
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
-def _parse_sarif(fpath, scanner, substr, prepend):
-    
+def _parse_sarif(fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
     finding_count = 0
     result_num = 0
     
@@ -61,10 +59,10 @@ def _parse_sarif(fpath, scanner, substr, prepend):
     try:
         with open(fpath, "r", encoding='utf-8-sig') as read_obj:
             data = json.load(read_obj)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
         err_count += 1
-        logger.error("Unable to parse input file \"%s\". Ensure GNAT SAS is configured to output in SARIF format.", fpath)
-        return finding_count, err_count
+        logger.error("Unable to parse input file \"%s\": %s. Ensure %s is configured to output in SARIF format.", fpath, str(exc), scanner)
+        return parsed_data, finding_count, err_count
     
     # Get just data
     data = data['runs'][0]
@@ -80,7 +78,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
         try:
             fingerprint_checksum = result['fingerprints']['checksum']
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
         
             # Type
             t = result['ruleId']
@@ -170,7 +168,7 @@ def _parse_sarif(fpath, scanner, substr, prepend):
             #id = "GS{:04}".format(finding_count+1)
 
             # Write row to outfile
-            parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+            parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                 Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                 Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                 Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -194,11 +192,12 @@ def _parse_sarif(fpath, scanner, substr, prepend):
             logger.error("Result with fingerprint checksum \"%s\" in \'%s\': %s", fingerprint_checksum, fpath, traceback.format_exc())
             err_count += 1
         
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_sarif
 
 
-def _parse_csv(fpath, scanner, substr, prepend):
+def _parse_csv(fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
     
     # Count errors encountered while running
     err_count = 0
@@ -220,7 +219,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             
                 cwe = row['cwe']
                 
@@ -247,7 +246,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                 #id = "GS{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -270,5 +269,5 @@ def _parse_csv(fpath, scanner, substr, prepend):
             except Exception:
                 logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_csv

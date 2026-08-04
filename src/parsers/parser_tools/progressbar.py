@@ -9,7 +9,7 @@ DISABLE_PROGRESS_BAR = False
 _modulo = -1
 _old_total = -1
 
-def progress_bar(iteration, total, prefix='', suffix='', decimals=2, length=50, fill='█', unfill='-', print_end="\r"):
+def progress_bar(iteration, total, input_id='', prefix='', suffix='', decimals=2, length=50, fill='█', unfill='-', print_end="\r"):
     r"""
     Call this function in a loop to create terminal progress bar
     
@@ -41,11 +41,20 @@ def progress_bar(iteration, total, prefix='', suffix='', decimals=2, length=50, 
     
     # If GUI mode, send message to loading screen
     if parsers.GUI_MODE:
-        parsers.progress_queue.put({
-            "type": "progress",
-            "status": prefix.strip(),
-            "percent": (iteration / l_total) * 100
-        })
+        if iteration >= l_total:
+            # Complete
+            parsers.progress_queue.put({
+                "type": "complete",
+                "status": f"Finished {prefix.strip()}",
+                "id": input_id
+            })
+        else:
+            parsers.progress_queue.put({
+                "type": "progress",
+                "id": input_id,
+                "status": prefix.strip(),
+                "percent": (iteration / l_total) * 100
+            })
     # If CLI mode, print if progress bar is not disabled
     elif not DISABLE_PROGRESS_BAR:
         percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(l_total)))

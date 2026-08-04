@@ -2,16 +2,13 @@
 
 import os
 import re
-import logging
 import csv
 import json
 import traceback
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Parse the input file
@@ -46,21 +43,23 @@ def path_preview(fpath):
     except Exception as e:
         return f"[ERROR] {e}"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     if fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend, input_id)
     else:
-        finding_count, err_count = _parse_json(fpath, scanner, substr, prepend)
+        parsed_data, finding_count, err_count = _parse_json(fpath, scanner, substr, prepend, input_id)
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 
-def _parse_json(fpath, scanner, substr, prepend):
+def _parse_json(fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
     
     # Keep track of row number and error count
     vuln_number = 0
@@ -75,10 +74,10 @@ def _parse_json(fpath, scanner, substr, prepend):
     try:
         with open(fpath, "r", encoding='utf-8-sig') as read_obj:
             data = json.load(read_obj)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
         err_count += 1
-        logger.error("Unable to parse input file \"%s\". Ensure Dependency Check output the file as JSON or CSV.", fpath)
-        return finding_count, err_count
+        logger.error("Unable to parse input file \"%s\": %s. Ensure %s output the file as JSON or CSV.", fpath, str(exc), scanner)
+        return parsed_data, finding_count, err_count
     
     
     # Get metadata
@@ -102,7 +101,7 @@ def _parse_json(fpath, scanner, substr, prepend):
             
             for vuln in dep.get('vulnerabilities', []):
                 vuln_number += 1
-                progress_bar(vuln_number, total_vulns, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(vuln_number, total_vulns, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
                 
                 # Extract CWE
                 cwe = vuln.get('cwes', '')
@@ -138,7 +137,7 @@ def _parse_json(fpath, scanner, substr, prepend):
                     written_cves.append(cve)
                 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cve,
                                     Fieldnames.CONFIDENCE.value:confidence,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -161,10 +160,11 @@ def _parse_json(fpath, scanner, substr, prepend):
         except Exception:
             logger.error("Dependency \"%s\" with hash SHA256-%s in \'%s\': %s", dependency_name, dependency_hash, fpath, traceback.format_exc())
             err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_json
 
-def _parse_csv(fpath, scanner, substr, prepend):
+def _parse_csv(fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
     
     # Keep track of row number and error count
     row_num = 0
@@ -205,7 +205,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
                 
                 # Extract CWE
                 cwe = row['CWE']
@@ -252,7 +252,7 @@ def _parse_csv(fpath, scanner, substr, prepend):
                     logger.error("Row %d of \'%s\': Invalid CVE number. Please check \'%s\' and the user overrides.", row_num, fpath, fpath)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cve,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cve,
                                     Fieldnames.CONFIDENCE.value:confidence,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -275,5 +275,5 @@ def _parse_csv(fpath, scanner, substr, prepend):
             except Exception:
                 logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_csv

@@ -1,17 +1,14 @@
 # srm.py
 import os
-import logging
 import traceback
 import csv
 import xml.etree.ElementTree as ET
 from .eslint import get_eslint_cdata
 from .pylint import get_pylint_cdata
-from .parser_tools import idgenerator, parser_writer
+from .parser_tools import idgenerator, parser_writer, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
 from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
-
-logger = logging.getLogger(__name__)
 
 def path_preview(fpath):
     # Parse the input file
@@ -47,8 +44,9 @@ def path_preview(fpath):
     # No data, return error message
     return f"[ERROR] No data found in \'{fpath}\'"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
+    parsed_data = []
     
     # Keep track of issue number and errors
     finding_count = 0
@@ -56,20 +54,22 @@ def parse(fpath, scanner, substr, prepend):
     
     # Parse the file
     if fpath.endswith('.xml'):
-        finding_count, err_count = _parse_xml(fpath, substr, prepend, scanner)
+        parsed_data, finding_count, err_count = _parse_xml(fpath, scanner, substr, prepend, input_id)
     elif fpath.endswith('.csv'):
-        finding_count, err_count = _parse_csv(fpath, substr, prepend, scanner)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend, input_id)
     else:
         logger.error("File %s is not an XML or CSV.", fpath)
-        return finding_count, err_count + 1
+        return parsed_data, finding_count, err_count + 1
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of parse
 
 
-def _parse_csv(fpath, substr, prepend, scanner):
+def _parse_csv(fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
+    
     # Keep track of row number and errors
     row_num = 0
     total_rows = 0
@@ -88,7 +88,7 @@ def _parse_csv(fpath, substr, prepend, scanner):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             
                 # Resolve language of the file
                 lang = resolve_lang_from_ext(os.path.splitext(row['Path'])[1])
@@ -112,7 +112,7 @@ def _parse_csv(fpath, substr, prepend, scanner):
                 #id = "SRM{:04}".format(finding_count+1)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:Fieldnames.DEFAULT_CONF.value,
                                     Fieldnames.MATURITY.value:Fieldnames.DEFAULT_MATURITY.value,
                                     Fieldnames.MITIGATION.value:Fieldnames.DEFAULT_MITIGATION.value,
@@ -135,10 +135,12 @@ def _parse_csv(fpath, substr, prepend, scanner):
             except Exception:
                 logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_csv
 
-def _parse_xml(fpath, substr, prepend, scanner):
+def _parse_xml(fpath, scanner, substr, prepend, input_id):
+    parsed_data = []
+    
     # Keep track of issue number and errors
     finding_num = 0
     finding_count = 0
@@ -159,7 +161,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
     for finding in findings:
         finding_num += 1
         try:
-            progress_bar(finding_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE))
+            progress_bar(finding_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
             
             # Get finding ID for logging
             finding_id = finding.get('id', '')
@@ -280,7 +282,7 @@ def _parse_xml(fpath, substr, prepend, scanner):
                     id = idgenerator.hash(preimage)
 
                 # Write row to outfile
-                parser_writer.write_row({Fieldnames.SCORING_BASIS.value:cwe,
+                parsed_data.append({Fieldnames.SCORING_BASIS.value:cwe,
                                     Fieldnames.CONFIDENCE.value:confidence,
                                     Fieldnames.MATURITY.value:maturity,
                                     Fieldnames.MITIGATION.value:mitigation,
@@ -303,5 +305,5 @@ def _parse_xml(fpath, substr, prepend, scanner):
         except Exception:
             logger.error("Finding with ID %s in \'%s\': %s", finding_id, fpath, traceback.format_exc())
             err_count += 1
-    return finding_count, err_count
+    return parsed_data, finding_count, err_count
 # End of _parse_xml
