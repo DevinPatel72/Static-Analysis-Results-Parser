@@ -25,7 +25,6 @@ from parsers.parser_tools.gui.app_controller import close_splash
 from parsers.parser_tools.begin_parse import begin
 from parsers.initialization import init_globals, init_main_logger
 from parsers.parser_tools.gui.app_controller import SARPApp
-from update import check_version
 
 ################################
 # Main
@@ -36,10 +35,14 @@ def main():
     init_main_logger()
     
     # Check for updates first
-    rv = check_version(parsers.VERSION)
-    if rv is not None and isinstance(rv, str) and len(rv) > 0:
-        close_splash()
-        logger.console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info')
+    try:
+        from update import check_version
+        rv = check_version(parsers.VERSION)
+        if rv is not None and isinstance(rv, str) and len(rv) > 0:
+            close_splash()
+            logger.console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info')
+    except (ImportError, ModuleNotFoundError) as exc:
+        logger.warning("%s: %s. Skipping check for updates.", exc.__class__.__name__, exc.msg)
     
     parser_inputs = []
     parser_outfile = ""

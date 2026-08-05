@@ -26,7 +26,6 @@ import traceback
 from multiprocessing import freeze_support
 from datetime import datetime
 import parsers
-from update import check_version
 from parsers.parser_tools import parser_writer, preflight, parser_logger as logger
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, InputAdditionalOptions, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs
 from parsers.parser_tools.begin_parse import begin
@@ -156,9 +155,13 @@ def main():
         sys.exit(0)
     
     # Check for updates
-    rv = check_version(parsers.VERSION)
-    if rv is not None and isinstance(rv, str) and len(rv) > 0:
-        logger.console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info')
+    try:
+        from update import check_version
+        rv = check_version(parsers.VERSION)
+        if rv is not None and isinstance(rv, str) and len(rv) > 0:
+            logger.console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info')
+    except (ImportError, ModuleNotFoundError) as exc:
+        logger.warning("%s: %s. Skipping check for updates.", exc.__class__.__name__, exc.msg)
     
     # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default <PROG_NAME_ABBR>_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
     if len(args.file) > 0:

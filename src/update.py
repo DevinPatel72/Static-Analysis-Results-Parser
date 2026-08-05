@@ -17,7 +17,6 @@
 import os
 import sys
 import traceback
-import truststore
 import requests
 import platform
 import tempfile
@@ -30,8 +29,13 @@ import re
 import parsers
 from parsers.parser_tools import parser_logger as logger
 
+
 # Configure CA trust
-truststore.inject_into_ssl()
+try:
+    import truststore
+    truststore.inject_into_ssl()
+except (ImportError, ModuleNotFoundError) as exc:
+    logger.warning("%s: %s. Unable to inject truststore certificates. This may produce issues with network proxy configurations.", exc.__class__.__name__, exc.msg)
 
 
 ################################
