@@ -15,6 +15,8 @@ def _fix_scanner_name(scanner):
 def dupe_scan_consolidation(data):
     from .parser_writer import search_row, update_row
     
+    fixed_scanner_cache = {}
+    
     if not parsers.control_flags[InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag]:
         return -1
     
@@ -27,9 +29,17 @@ def dupe_scan_consolidation(data):
         if (row[Fieldnames.CONFIDENCE.value].lower() == Fieldnames.DUPLICATE_CONF.value.lower()):
             continue
         
+        # Cache scanner name normalization
+        scanner = row[Fieldnames.SCANNER.value]
+        normalized_scanner_name = fixed_scanner_cache.get(scanner)
+
+        if normalized_scanner_name is None:
+            normalized_scanner_name = _fix_scanner_name(scanner)
+            fixed_scanner_cache[scanner] = normalized_scanner_name
+        
         # Check to see if the row exists
         matches = search_row([(Fieldnames.TYPE.value, row[Fieldnames.TYPE.value], True),
-                            (Fieldnames.SCANNER.value, _fix_scanner_name(row[Fieldnames.SCANNER.value]), False),
+                            (Fieldnames.SCANNER.value, normalized_scanner_name, False),
                             (Fieldnames.PATH.value, row[Fieldnames.PATH.value], True),
                             (Fieldnames.LINE.value, row[Fieldnames.LINE.value], True)
                         ],
@@ -47,8 +57,7 @@ def dupe_scan_consolidation(data):
                                 Fieldnames.MITIGATION.value: row[Fieldnames.MITIGATION.value],
                                 Fieldnames.ID.value: row[Fieldnames.ID.value],
                                 Fieldnames.VALIDATOR_COMMENT.value: validator_comment_replacement
-                            },
-                            skip_ids=row[Fieldnames.ID.value])
+                            })
             except ValueError:
                 continue
         dupe_count += len(matches)

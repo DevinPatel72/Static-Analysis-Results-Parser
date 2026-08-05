@@ -5,6 +5,7 @@ import re
 import csv
 import time
 import json
+from itertools import chain
 import parsers
 from . import parser_logger as logger
 from .toolbox import Fieldnames, InputConfigFlags, Scanners, check_all_CWEs, format_time, select_scanner
@@ -22,7 +23,7 @@ except (ImportError, ModuleNotFoundError):
     logger.warning('Module \'openpyxl\' not found, defaulting output to CSV.')
 
 __filepath = None
-__parser_data = []
+__parser_data = {} # Dictionary of rows keyed by their ID {row['ID']: row}
 __excel_workbook = None
 __fieldnames = None
 
@@ -48,10 +49,8 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
             elif __excel_enabled:
                 if not outfile.lower().endswith('.xlsx'):
                     outfile = os.path.splitext(outfile)[0] + '.xlsx'
-                __excel_workbook = openpyxl.Workbook()
-                temp = __excel_workbook.active
-                temp.title = sheet_name
-                temp.append([header for header in __fieldnames])
+                __excel_workbook = openpyxl.Workbook(write_only=True)
+                __excel_workbook.active.title = sheet_name
             else:
                 if not outfile.lower().endswith('.csv'):
                     outfile = os.path.splitext(outfile)[0] + '.csv'
@@ -78,13 +77,13 @@ def write_row(r):
     for k in r.keys():
         if r[k] is None:
             r[k] = ''
-    __parser_data.append(r)
+    __parser_data.setdefault(r[Fieldnames.ID.value], []).append(r)
 
 def write_rows(data):
     for row in data:
         write_row(row)
         
-def search_row(tuples, skip_ids='', match_once=False):
+def search_row(search_params, skip_ids='', match_once=False):
     """
     Searches existing rows for parsed findings.
     
@@ -95,110 +94,109 @@ def search_row(tuples, skip_ids='', match_once=False):
     """
     global __parser_data
     from .toolbox import Fieldnames
+    
+    if not isinstance(skip_ids, str):
+        skip_ids = set(skip_ids)
+    
     row_matches = []
-    for row in __parser_data:
-        matches = []
-        # Skip id's
-        if (len(skip_ids) > 0 and row[Fieldnames.ID.value] in skip_ids):
-            continue
-        for header, keyword, exact_str_match in tuples:
-            lookup = row.get(header, '')
-        
-            # First check for NULL
-            if lookup is not None:
-                # If string, check for length and if keyword is contained in lookup
-                if isinstance(lookup, str) and len(lookup) > 0:
-                    if exact_str_match:
-                        matches.append(str(keyword) == lookup)
-                    else: matches.append(str(keyword).lower() in lookup.lower())
-                
-                # If integer, check for exact match
-                elif isinstance(lookup, int):
-                    try:
-                        matches.append(int(keyword) == lookup)
-                    except ValueError:
-                        logger.error("Invalid search lookup. Expected integer input for \"%s\", got string keyword \"%s\"", lookup, keyword)
-                        matches.append(False)
+    for row_id, rows in __parser_data.items():
+        for row in rows:
+            matches = []
+            # Skip id's
+            if (len(skip_ids) > 0 and row_id in skip_ids):
+                continue
+            for header, keyword, exact_str_match in search_params:
+                lookup = row.get(header, '')
+            
+                # First check for NULL
+                if lookup is not None:
+                    # If string, check for length and if keyword is contained in lookup
+                    if isinstance(lookup, str) and len(lookup) > 0:
+                        if exact_str_match:
+                            matches.append(keyword == lookup)
+                        else: matches.append(keyword.lower() in lookup.lower())
+                    
+                    # If integer, check for exact match
+                    elif isinstance(lookup, int):
+                        try:
+                            matches.append(int(keyword) == lookup)
+                        except ValueError:
+                            logger.error("Invalid search lookup. Expected integer input for \"%s\", got string keyword \"%s\"", lookup, keyword)
+                            matches.append(False)
+                            break
+                    
+                    else:
+                        matches.append(keyword == lookup)
                         break
-                
-                else:
-                    matches.append(keyword == lookup)
-                    break
-        if all(matches):
-            row_matches.append({
-                Fieldnames.SCORING_BASIS.value: row[Fieldnames.SCORING_BASIS.value],
-                Fieldnames.CONFIDENCE.value: row[Fieldnames.CONFIDENCE.value],
-                Fieldnames.MATURITY.value: row[Fieldnames.MATURITY.value],
-                Fieldnames.MITIGATION.value: row[Fieldnames.MITIGATION.value],
-                Fieldnames.PROPOSED_MITIGATION.value: row[Fieldnames.PROPOSED_MITIGATION.value],
-                Fieldnames.VALIDATOR_COMMENT.value: row[Fieldnames.VALIDATOR_COMMENT.value],
-                Fieldnames.ID.value: row[Fieldnames.ID.value]
-            })
-            if match_once: return row_matches[0]
+            if all(matches):
+                row_matches.append({
+                    Fieldnames.SCORING_BASIS.value: row[Fieldnames.SCORING_BASIS.value],
+                    Fieldnames.CONFIDENCE.value: row[Fieldnames.CONFIDENCE.value],
+                    Fieldnames.MATURITY.value: row[Fieldnames.MATURITY.value],
+                    Fieldnames.MITIGATION.value: row[Fieldnames.MITIGATION.value],
+                    Fieldnames.PROPOSED_MITIGATION.value: row[Fieldnames.PROPOSED_MITIGATION.value],
+                    Fieldnames.VALIDATOR_COMMENT.value: row[Fieldnames.VALIDATOR_COMMENT.value],
+                    Fieldnames.ID.value: row[Fieldnames.ID.value]
+                })
+                if match_once: return row_matches[0]
     return row_matches
 
-def update_row(id, updates, skip_ids='', match_once=False):
+def update_row(id, updates):
     """
     Searches for the provided ID and updates row data. Updates all findings with the provided ID or just the first match.
     
     :param id: ID of finding(s) to be updated
     :param updates: Dictionary with format {Fieldnames.[Header].value: replacement_def}
-    :param skip_ids: Iterable of string IDs to skip over when searching. A ValueError will be raised if parameter 'id' exists in this iterable.
-    :param match_once: Boolean value that triggers an early exit upon first match
     :return: Number of findings that were updated
     """
     global __parser_data
-    from .toolbox import Fieldnames
     
     updated_rows_count = 0
     
-    # Basic check
-    if id in skip_ids:
-        raise ValueError('Defined search ID also exists in skip_ids')
+    # Get rows with corresponding IDs
+    rows = __parser_data.get(id, [])
     
-    for row in __parser_data:
-        # Skip id's
-        if (len(skip_ids) > 0 and row[Fieldnames.ID.value] in skip_ids):
-            continue
-        # Check if ID matches
-        if id == row[Fieldnames.ID.value]:
-            # Perform updates
-            for fieldname, replacement in updates.items():
-                row[fieldname] = replacement
-            updated_rows_count += 1
-            
-            # Update only the first found row if defined
-            if match_once: return updated_rows_count
+    for row in rows:
+        # Perform updates
+        row.update(updates)
+        updated_rows_count += 1
+    
     return updated_rows_count
+
+def flatten_data(data):
+    return list(chain.from_iterable(data.values()))
 
 def close_writer():
     global __filepath, __excel_workbook, __export_sarif, __fieldnames, __excel_enabled, __parser_data
     from parsers import GUI_MODE
     
+    flattened_data = flatten_data(__parser_data)
+    
     # Track time for outfile holding
     elapsed_time = -1
     
     # Post-processing of data
-    if len(__parser_data) > 0:
+    if len(flattened_data) > 0:
         # Set spacing in terminal if in CLI mode
         if not GUI_MODE: print()
         
         # Duplicate Scanner Consolidation
-        dupe_scan_consolidation(__parser_data)
+        dupe_scan_consolidation(flattened_data)
         
         # Perform preflighting
-        apply_prules(__parser_data)
+        apply_prules(flattened_data)
         
         # Check for CWE category mappings
-        check_all_CWEs(__parser_data)
+        check_all_CWEs(flattened_data)
         
         # Write out parser data to file
         if __filepath is not None:
+            logger.info("Beginning writing results to file")
             if __export_sarif:
                 while True:
                     try:
                         with open(__filepath, 'w', encoding='utf-8-sig') as out:
-                            json.dump(rows_to_sarif(__parser_data), out, indent=2)
+                            json.dump(rows_to_sarif(flattened_data), out, indent=2)
                         break
                     except PermissionError:
                         if GUI_MODE:
@@ -213,8 +211,11 @@ def close_writer():
                             elapsed_time += 1
             elif __excel_enabled:
                 temp = __excel_workbook.active
-                for r in __parser_data:
-                    temp.append([r.get(header, '') for header in __fieldnames])
+                append_func = temp.append
+                headers = tuple(__fieldnames)
+                append_func(headers)
+                for row in flattened_data:
+                    append_func(tuple(row.get(h, "") for h in headers))
                 while True:
                     try:
                         __excel_workbook.save(__filepath)
@@ -232,9 +233,9 @@ def close_writer():
                             elapsed_time += 1
             else:
                 with open(__filepath, 'w', newline='', encoding='utf-8-sig') as o:
-                    csv_writer = csv.DictWriter(o, fieldnames=__fieldnames)
-                    csv_writer.writeheader()
-                    csv_writer.writerows(__parser_data)
+                    csv_writer = csv.writer(o)
+                    csv_writer.writerow(__fieldnames)
+                    csv_writer.writerows((row.get(h, "") for h in __fieldnames) for row in flattened_data)
 
     if not GUI_MODE and elapsed_time >= 0:
         print()
