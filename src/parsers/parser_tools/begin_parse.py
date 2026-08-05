@@ -16,17 +16,11 @@ from .reporting import Report
 _report = None
 
 def begin(parser_inputs):
-    global _report
+    global _report, _srm_inputs
     
     if len(parser_inputs) <= 0:
         logger.console(f"No inputs defined. Terminating {parsers.PROG_NAME_ABBR}.", 'No Inputs Defined', level='info', orig_name=__name__)
         sys.exit(0)
-    
-    # Put SRM in the back
-    for i, inp in enumerate(parser_inputs, start=0):
-        if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in Scanners.SRM.keywords):
-            parser_inputs.append(parser_inputs.pop(i))
-            break
     
     # Assign an input ID for each input
     for i, inp in enumerate(parser_inputs, start=1):
@@ -43,7 +37,7 @@ def begin(parser_inputs):
     
         threading.Thread(
             target=run_parsers,
-            args=(parser_inputs, parsers.progress_queue, parsers.control_flags),
+            args=(parser_inputs,),
             daemon=True
         ).start()
 
@@ -55,7 +49,7 @@ def begin(parser_inputs):
             sys.exit(0)
     # CLI mode
     else:
-        run_parsers(parser_inputs, control_flags=parsers.control_flags)
+        run_parsers(parser_inputs)
     
     # Generate report
     _report.generate_report()
@@ -68,10 +62,16 @@ def begin(parser_inputs):
             print(f"Errors have been detected while parsing files. Please see logfile \"{parsers.LOGFILE}\" for more details.")
 
 # Executed in a worker thread in GUI mode or in the main thread in CLI mode
-def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
+def run_parsers(parser_inputs):
     global _report
-    parsers.progress_queue = progress_queue
-    parsers.control_flags = control_flags
+    
+    # Save SRM for last once everything is done
+    srm_inputs = []
+    for i, inp in enumerate(parser_inputs, start=0):
+        if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in Scanners.SRM.keywords):
+            srm_inputs.append(parser_inputs.pop(i))
+            break
+    
     results = []
     
     # Init logger queue and start listener
@@ -81,7 +81,7 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
     
     try:
         # Init multithreading pool
-        pool = multiprocessing.Pool(processes=parsers.additional_options.get(InputAdditionalOptions.JOBS.opt, InputAdditionalOptions.JOBS.default), initializer=init_worker, initargs=(progress_queue, control_flags, log_queue, parsers.GUI_MODE))
+        pool = multiprocessing.Pool(processes=parsers.additional_options.get(InputAdditionalOptions.JOBS.opt, InputAdditionalOptions.JOBS.default), initializer=init_worker, initargs=(parsers.progress_queue, parsers.control_flags, log_queue, parsers.GUI_MODE))
         
         # Start multithreading pool
         result = pool.map_async(parse_input, parser_inputs)
@@ -98,9 +98,17 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
         if pool is not None: pool.join()
     
     results = result.get()
-        
+    
     # Merge results
     for result in results:
+        parser_writer.write_rows(result['rows'])
+        scanner = result['scanner']
+        _report.counts[scanner][0] += result['finding_count']
+        _report.counts[scanner][1] += result['err_count']
+    
+    # Now do SRM so that dupes can be identified
+    for inp in srm_inputs:
+        result = parse_input(inp)
         parser_writer.write_rows(result['rows'])
         scanner = result['scanner']
         _report.counts[scanner][0] += result['finding_count']

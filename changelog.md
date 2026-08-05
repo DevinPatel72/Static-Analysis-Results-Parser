@@ -1,6 +1,7 @@
 # Change Log
 
 ## [Version 2.10.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.1) (2026-08-05)
+- Fixed bug introduced in SARP 2.10.0 where SRM fails to identify duplicates from sub-scanners such as CPPCheck, Pylint, ESLint, etc.
 - Significantly improved Fortify and Preflight performance.
 - Fixed bug where a Keyboard Interrupt (Ctrl+C) does not exit the program.
 - Fixed reporting of critical log messages.

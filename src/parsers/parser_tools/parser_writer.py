@@ -50,7 +50,7 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
                 if not outfile.lower().endswith('.xlsx'):
                     outfile = os.path.splitext(outfile)[0] + '.xlsx'
                 __excel_workbook = openpyxl.Workbook(write_only=True)
-                __excel_workbook.active.title = sheet_name
+                __excel_workbook.create_sheet(title=sheet_name)
             else:
                 if not outfile.lower().endswith('.csv'):
                     outfile = os.path.splitext(outfile)[0] + '.csv'
@@ -210,8 +210,8 @@ def close_writer():
                             time.sleep(1)
                             elapsed_time += 1
             elif __excel_enabled:
-                temp = __excel_workbook.active
-                append_func = temp.append
+                sheet = __excel_workbook.worksheets[0]
+                append_func = sheet.append
                 headers = tuple(__fieldnames)
                 append_func(headers)
                 for row in flattened_data:

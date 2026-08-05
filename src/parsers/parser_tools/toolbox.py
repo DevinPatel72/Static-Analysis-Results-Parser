@@ -19,7 +19,6 @@ except (ImportError, ModuleNotFoundError):
 
 LARGE_FILE_THRESHOLD_MB = 40
 FILE_SIZE_WARNED_ONCE = False
-FORTIFY_FILE_WARNED_ONCE = False
 
 class GuiWindow(Enum):
     JsonInputPreviewGUI = 'JsonInputPreviewGUI'
@@ -326,7 +325,7 @@ class Scanners(Enum):
                     for valid_ext in scanner.valid_ext])
 
 def validate_path_and_scanner(fpath, scanner):
-    global __excel_enabled, FILE_SIZE_WARNED_ONCE, FORTIFY_FILE_WARNED_ONCE
+    global __excel_enabled, FILE_SIZE_WARNED_ONCE
     scan_match = scanner.lower().replace(' ', '')
     
     if not any(s in scan_match for s in Scanners.all_keywords()):
@@ -373,15 +372,6 @@ def validate_path_and_scanner(fpath, scanner):
         ext = os.path.splitext(fpath)[1]
         if ext not in Scanners.FORTIFY.valid_ext:
             return f"File extension \'{ext}\' not supported for {scanner} input"
-        
-        # Alert for fortify fpr files
-        if not FORTIFY_FILE_WARNED_ONCE and os.path.isfile(fpath) and fpath.endswith('.fpr'):
-            FORTIFY_FILE_WARNED_ONCE = True
-            if parsers.GUI_MODE:
-                _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
-            else:
-                _end = ""
-            logger.console(f"A Fortify .fpr file has been detected. Fpr files are compressed archives that require unzipping. Processing times will be fairly long if the uncompressed data is large, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='FPR File Detected', level='warning')
         
         # For fortify inputs, check if the audit.fvdl file is present in the fpr archive
         from parsers.fortify import check_fvdl # This import statement is necessary because directly calling 'parsers.fortify.check_fvdl' results in a failed import resolution

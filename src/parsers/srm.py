@@ -141,6 +141,17 @@ def _parse_csv(fpath, scanner, substr, prepend, input_id):
 def _parse_xml(fpath, scanner, substr, prepend, input_id):
     parsed_data = []
     
+    path_cache = {}
+    def _normalize_path(path):
+        try:
+            return path_cache[path]
+        except KeyError:
+            p = os.path.join(prepend, path.replace(substr, "", 1)).replace("\\", "/")
+            lang = resolve_lang_from_ext(os.path.splitext(p)[1])
+            path_cache[path] = (p, lang)
+            return p, lang
+    # End of _normalize_path
+    
     # Keep track of issue number and errors
     finding_num = 0
     finding_count = 0
@@ -174,11 +185,7 @@ def _parse_xml(fpath, scanner, substr, prepend, input_id):
             line = int(line) if str(line).isdigit() else line
             
             # Cut and prepend the paths and convert all backslashes to forwardslashes
-            path = path.replace(substr, "", 1)
-            path = os.path.join(prepend, path).replace('\\', '/')
-            
-            # Resolve language of the file
-            lang = resolve_lang_from_ext(os.path.splitext(path)[1])
+            path, lang = _normalize_path(path)
             
             # Get cwe
             if finding.find('cwe') is not None:
@@ -201,8 +208,9 @@ def _parse_xml(fpath, scanner, substr, prepend, input_id):
                 rule_code = rule.get('code', '')
                 
                 # Get result CWE since that is more accurate
-                if result.find('cwe') is not None:
-                    cwe = result.find('cwe').get('id', finding_cwe)
+                result_cwe = result.find('cwe')
+                if result_cwe is not None:
+                    cwe = result_cwe.get('id', finding_cwe)
                 else:
                     cwe = finding_cwe
                 
@@ -247,7 +255,7 @@ def _parse_xml(fpath, scanner, substr, prepend, input_id):
                 message = result.findtext('description', '').strip()
                 
                 # Get trace if dataflow tag exists
-                trace = ''
+                trace_parts = []
                 dataflow = result.find('dataflows/dataflow')
                 if dataflow is not None:
                     nodes = dataflow.findall('node')
@@ -259,21 +267,20 @@ def _parse_xml(fpath, scanner, substr, prepend, input_id):
                         
                         for i, node in enumerate(iteratable, start=1):
                             if node == '...':
-                                trace += "...\n"
+                                trace_parts.append("...")
                                 continue
                             remark = node.findtext('remark', '')
                             loc = node.find('location')
                             t_path = loc.get('path', '')
-                            t_line_xml = location.find('line')
+                            t_line_xml = loc.find('line')
                             t_line = t_line_xml.get('end', t_line_xml.get('start', ''))
                             
                             # Cut and prepend the paths and convert all backslashes to forwardslashes
-                            t_path = t_path.replace(substr, "", 1)
-                            t_path = os.path.join(prepend, t_path).replace('\\', '/')
+                            t_path, _ = _normalize_path(t_path)
                             
                             # Append to trace
-                            trace += f"{i}) {t_path}:{t_line}: {remark}\n"
-                trace = trace.strip()
+                            trace_parts.append(f"{i}) {t_path}:{t_line}: {remark}")
+                trace = "\n".join(trace_parts).strip()
                 
                 
                 # The SHA256 ID from the result is a duplicate across multiple findings, so use our own generated ID
