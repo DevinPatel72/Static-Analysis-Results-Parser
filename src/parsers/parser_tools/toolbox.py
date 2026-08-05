@@ -385,8 +385,8 @@ def validate_path_and_scanner(fpath, scanner):
         
         # For fortify inputs, check if the audit.fvdl file is present in the fpr archive
         from parsers.fortify import check_fvdl # This import statement is necessary because directly calling 'parsers.fortify.check_fvdl' results in a failed import resolution
-        if any(s in scan_match for s in Scanners.FORTIFY.keywords) and not check_fvdl(fpath):
-            return "The specified Fortify FPR archive does not contain an \'audit.fvdl\' file. The archive may be corrupted or the scanner output is invalid."
+        if any(s in scan_match for s in Scanners.FORTIFY.keywords) and (exc_msg := check_fvdl(fpath)) is not None:
+            return f"The specified Fortify FPR archive \"{fpath}\" encountered an error: {exc_msg}."
 
     # All other inputs
     elif os.path.isfile(fpath):
@@ -629,7 +629,7 @@ def get_all_previews(inputs):
     results = []
     
     # Skip multithreading if number of jobs is 1. Slightly improves performance
-    if parsers.jobs > 1:
+    if parsers.additional_options.get(InputAdditionalOptions.JOBS.opt, InputAdditionalOptions.JOBS.default) > 1:
         # Init logger queue and start listener
         log_queue = logger.initialize_multiprocessing()
         
@@ -637,10 +637,14 @@ def get_all_previews(inputs):
         
         try:
             # Init multithreading pool
-            pool = multiprocessing.Pool(processes=parsers.jobs, initializer=_init_worker, initargs=(parsers.control_flags, log_queue, parsers.GUI_MODE))
+            pool = multiprocessing.Pool(processes=parsers.additional_options.get(InputAdditionalOptions.JOBS.opt, InputAdditionalOptions.JOBS.default), initializer=_init_worker, initargs=(parsers.control_flags, log_queue, parsers.GUI_MODE))
             
             # Start multithreading pool
-            results = pool.map(worker_get_preview, inputs)
+            result = pool.map_async(worker_get_preview, inputs)
+            
+            while not result.ready():
+                result.wait(0.1)
+            
         except KeyboardInterrupt:
             if pool is not None: pool.terminate()
             raise
@@ -648,6 +652,8 @@ def get_all_previews(inputs):
             if pool is not None: pool.close()
         finally:
             if pool is not None: pool.join()
+        
+        results = result.get()
     else:
         results = [
             worker_get_preview(inp)

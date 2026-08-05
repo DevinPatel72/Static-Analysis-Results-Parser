@@ -119,7 +119,7 @@ def main():
             f"--{option.opt.lower().replace(' ', '-')}",
             dest=option.opt.lower().replace(' ', '-'),
             type=type(option.default),
-            default=option.default,
+            default=None,
             help=option.description
         )
     
@@ -270,6 +270,9 @@ def main():
 
     # Put control_flags into module variable
     parsers.control_flags = control_flags
+    
+    # Put additional_options into module variable
+    parsers.additional_options = additional_options
 
     # Output confirmation
     print_inputs(parser_inputs, parser_outfile, control_flags, additional_options)

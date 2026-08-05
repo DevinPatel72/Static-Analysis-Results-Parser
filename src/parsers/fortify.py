@@ -4,7 +4,6 @@ import os
 import traceback
 import xml.etree.ElementTree as ET
 import zipfile
-import tempfile
 import re
 from .parser_tools import idgenerator, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
@@ -14,19 +13,18 @@ from .parser_tools.toolbox import Fieldnames
 def path_preview(fpath):
     # Parse the input file
     try:
-        # Create a temporary directory to extract files
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Extract the FPR archive
-            with zipfile.ZipFile(fpath, 'r') as zip_ref:
-                zip_ref.extractall(temp_dir)
-
-            # Locate the audit.fvdl file
-            fvdl_path = os.path.join(temp_dir, "audit.fvdl")
-            if not os.path.exists(fvdl_path):
+        # Open FVDL file
+        with zipfile.ZipFile(fpath) as zf:
+            tree = None
+            try:
+                with zf.open("audit.fvdl") as fp:
+                    tree = ET.parse(fp)
+            except KeyError:
                 return "[ERROR]  audit.fvdl not found in the provided FPR file"
+            except ET.ParseError:
+                return "[ERROR]  audit.fvdl contains malformed XML"
 
             # Parse the audit.fvdl file
-            tree = ET.parse(fvdl_path)
             root = tree.getroot()
             namespace = {'ns': 'xmlns://www.fortifysoftware.com/schema/fvdl'}
 
@@ -74,20 +72,23 @@ def parse(fpath, scanner, substr, prepend, input_id):
     vulnerability_num = 0
     total_vulnerabilities = 0
     
-    # Create a temporary directory to extract files
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # Extract the FPR archive
-        with zipfile.ZipFile(fpath, 'r') as zip_ref:
-            zip_ref.extractall(temp_dir)
-
-        # Locate the audit.fvdl file
-        fvdl_path = os.path.join(temp_dir, "audit.fvdl")
-        if not os.path.exists(fvdl_path):
+    # Other assets
+    replace_key_pattern = re.compile(r'<Replace key="(.+?)"/>')
+    
+    # Open FVDL file
+    with zipfile.ZipFile(fpath) as zf:
+        tree = None
+        try:
+            with zf.open("audit.fvdl") as fp:
+                tree = ET.parse(fp)
+        except KeyError:
             logger.error("audit.fvdl not found in the provided FPR file. Skipping fortify parsing.")
+            return parsed_data, finding_count, err_count + 1
+        except ET.ParseError:
+            logger.error("audit.fvdl contains malformed XML. Skipping fortify parsing.")
             return parsed_data, finding_count, err_count + 1
 
         # Parse the audit.fvdl file
-        tree = ET.parse(fvdl_path)
         root = tree.getroot()
         namespace = {'ns': 'xmlns://www.fortifysoftware.com/schema/fvdl'}
         
@@ -101,6 +102,20 @@ def parse(fpath, scanner, substr, prepend, input_id):
         source_base_path_elem = root.find('.//ns:SourceBasePath', namespace)
         source_base_path = source_base_path_elem.text if source_base_path_elem is not None and source_base_path_elem.text is not None else ""
 
+        # Extract description map
+        description_map = {}
+        for desc in root.findall(".//ns:Description", namespace):
+            description_map[desc.get("classID")] = desc
+        
+        # Extract rules
+        rule_map = {}
+        for rule in root.findall(".//ns:Rule", namespace):
+            rule_map[rule.get("id")] = rule
+        
+        # Extract Unified Node Pool for trace
+        unified_node_pool = root.findall("ns:UnifiedNodePool/ns:Node", namespace)
+        unified_node_map = {node.get("id"): node for node in unified_node_pool}
+        
         # Extract vulnerability data
         for vulnerability in root.findall('.//ns:Vulnerability', namespace):
             symbol = ''
@@ -163,25 +178,20 @@ def parse(fpath, scanner, substr, prepend, input_id):
                     replacement_defs[str(definition.get('key'))] = str(definition.get('value'))
                 
                 # Extract description
-                description = ''
-                for desc in root.findall('.//ns:Description', namespace):
-                    # Description is in its own section. Search for it using the rule_id
-                    if desc.get('classID') == rule_id:
-                        description = ET.tostring(desc.find('ns:Abstract', namespace), encoding='unicode', method='text').strip()
-                        
-                        # Replace all replacement definitions here
-                        replace_key_pattern = r'<Replace key="(.+?)"/>'
-                        matches = re.findall(replace_key_pattern, description)
-                        for m in matches:
-                            try:
-                                description = description.replace(f"<Replace key=\"{m}\"/>", replacement_defs[m])
-                            except KeyError:
-                                logger.warning("Vulnerability %d (Rule ID: %s) does not have a replacement definition for key '%s'. All keys for '%s' in the message column will be output as '[[%s]]'", vulnerability_num, rule_id, m, m, m)
-                                description = description.replace(f"<Replace key=\"{m}\"/>", f"[[{m}]]")
-                        description = re.sub("</?(Content|Paragraph|AltParagraph|code)>", '', description)
-                            
-                        # Break when done
-                        break
+                if (description_object := description_map.get(rule_id, None)) is not None:
+                    description = ET.tostring(description_object.find('ns:Abstract', namespace), encoding='unicode', method='text').strip()
+                else:
+                    description = ''
+                
+                # Replace all replacement definitions here
+                matches = re.findall(replace_key_pattern, description)
+                for m in matches:
+                    try:
+                        description = description.replace(f"<Replace key=\"{m}\"/>", replacement_defs[m])
+                    except KeyError:
+                        logger.warning("Vulnerability %d (Rule ID: %s) does not have a replacement definition for key '%s'. All keys for '%s' in the message column will be output as '[[%s]]'", vulnerability_num, rule_id, m, m, m)
+                        description = description.replace(f"<Replace key=\"{m}\"/>", f"[[{m}]]")
+                description = re.sub("</?(Content|Paragraph|AltParagraph|code)>", '', description)
 
                 # Set symbol to be function context
                 context_node = vulnerability.find("./ns:AnalysisInfo/ns:Unified/ns:Context/ns:Function", namespace)
@@ -192,7 +202,6 @@ def parse(fpath, scanner, substr, prepend, input_id):
                 
                 # Walk through the trace entries and compile a string
                 trace = ''
-                unified_node_pool = root.findall("ns:UnifiedNodePool/ns:Node", namespace)
                 
                 for i, entry in enumerate(events, start=1):
                     t_path = ''
@@ -205,14 +214,14 @@ def parse(fpath, scanner, substr, prepend, input_id):
                     # If it is a NodeRef, perform a search for a node with the matching ID
                     node_ref = entry.find('./ns:NodeRef', namespace)
                     if node_ref is not None:
-                        if len(unified_node_pool) > 0:
+                        if len(unified_node_map) > 0:
                             ref_id = node_ref.get('id')
-                            for pool_node in unified_node_pool:
-                                if ref_id == pool_node.get('id'):
-                                    # Ref ID matched with node in UnifiedNodePool
-                                    srcLocation = pool_node.find('./ns:SourceLocation', namespace)
-                                    t_path = srcLocation.get('path')
-                                    t_line = srcLocation.get('line')
+                            if (pool_node := unified_node_map.get(ref_id, None)) is not None:
+                                # Ref ID matched with node in UnifiedNodePool
+                                srcLocation = pool_node.find('./ns:SourceLocation', namespace)
+                                t_path = srcLocation.get('path')
+                                t_line = srcLocation.get('line')
+                            
                         else:
                             logger.error("Vulnerability %d (Rule ID: %s): Cannot resolve NodeRef ID %s in UnifiedNodePool", vulnerability_num, rule_id, node_ref.get('id'))
                     # No NodeRef tag means it is a main node
@@ -251,14 +260,11 @@ def parse(fpath, scanner, substr, prepend, input_id):
                 description = description.strip()
 
                 # Map rule ID to CWE
-                cwe = ''
-                raw_cwe = ''
-                for rule in root.findall('.//ns:Rule', namespace):
-                    if rule.get('id') == rule_id:
-                        raw_cwe = rule.find('.//ns:Group[@name="altcategoryCWE"]', namespace).text
-                        # Going to stick with the first cwe entry even though there are multiple in the file
-                        cwe = raw_cwe.split(',')[0].replace('CWE ID ', '')
-                        break
+                rule = rule_map.get(rule_id, None)
+                raw_cwe = rule.find('.//ns:Group[@name="altcategoryCWE"]', namespace).text if rule is not None else ''
+                
+                # Going to stick with the first cwe entry even though there are multiple in the file
+                cwe = raw_cwe.split(',')[0].replace('CWE ID ', '') if len(raw_cwe) > 0 else ''
                 
                 # Get tool cwe before any overrides are performed
                 if len(raw_cwe) <= 0:
@@ -326,14 +332,14 @@ def parse(fpath, scanner, substr, prepend, input_id):
 
 
 def check_fvdl(fpath):
-    # Create a temporary directory to extract files
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # Extract the FPR archive
-        with zipfile.ZipFile(fpath, 'r') as zip_ref:
-            zip_ref.extractall(temp_dir)
-
-        # Locate the audit.fvdl file
-        fvdl_path = os.path.join(temp_dir, "audit.fvdl")
-        if not os.path.exists(fvdl_path):
-            return False
-        else: return True
+    try:
+        with zipfile.ZipFile(fpath) as zf:
+            with zf.open("audit.fvdl") as fp:
+                tree = ET.parse(fp)
+                return None
+    except KeyError:
+        return "audit.fvdl not found in the provided FPR file"
+    except ET.ParseError:
+        return "audit.fvdl contains malformed XML"
+    except Exception as exc:
+        return str(exc)

@@ -1,7 +1,7 @@
 # Version String
 PROG_NAME = 'Static Analysis Results Parser'
 PROG_NAME_ABBR = 'SARP'
-VERSION = '2.10.0'
+VERSION = '2.10.1'
 
 # Project Info
 PROJ_NAME = ""
@@ -25,7 +25,10 @@ prules = []
 security_prules = []
 
 # Control Flags
-control_flags = []
+control_flags = {}
+
+# Additional Options
+additional_options = {}
 
 # CWE Category Mappings
 cwe_categories = {}
@@ -44,7 +47,6 @@ INPUTS_PATH = ''
 
 # Multithreading globals
 progress_queue = None
-jobs = 1
 
 # Updater globals
 REPO_BASE_URL = "https://api.github.com/repos/DevinPatel72/Static-Analysis-Results-Parser"

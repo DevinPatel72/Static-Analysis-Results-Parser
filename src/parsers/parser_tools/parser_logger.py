@@ -47,6 +47,7 @@ def initialize_main(logfile):
     file = logging.FileHandler(logfile, encoding="utf-8", mode='w')
     formatter = logging.Formatter(fmt='%(name)-18s :: %(levelname)-8s :: %(message)s')
     file.setFormatter(formatter)
+    file.setLevel(logging.INFO)
     
     consoleHandler = logging.StreamHandler()
     consoleHandler.setLevel(logging.CRITICAL)
@@ -77,7 +78,8 @@ def initialize_multiprocessing():
     if _listener is None:
         _listener = logging.handlers.QueueListener(
             _queue,
-            *_logger.handlers
+            *_logger.handlers,
+            respect_handler_level=True
         )
         _listener.start()
     
@@ -112,7 +114,9 @@ def debug(msg, *args, **kwargs):
 
 
 def message_box(title, msg, level):
-    if level == 'error':
+    if level == 'critical':
+        messagebox.showerror(title, msg)
+    elif level == 'error':
         messagebox.showerror(title, msg)
     elif level == 'warning':
         messagebox.showwarning(title, msg)
@@ -139,7 +143,7 @@ def console(msg, title='', level='info', *, no_console=False, no_logging=False):
         if parsers.GUI_MODE:
             message_box(title, msg, level)
         elif level == 'critical':
-            print(f"[CRITICAL]  {msg}")
+            pass
         else:
             print(f'[{level.upper()}]  {msg}')
 

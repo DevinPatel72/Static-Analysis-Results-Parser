@@ -1,5 +1,11 @@
 # Change Log
 
+## [Version 2.10.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.1) (2026-08-05)
+- Significantly improved Fortify performance.
+- Fixed bug where a Keyboard Interrupt (Ctrl+C) does not exit the program.
+- Fixed reporting of critical log messages.
+- Added some guards for missing dependencies in `update.py` when running using the python interpreter.
+
 ## [Version 2.10.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.0) (2026-08-04)
 - Added multithreading to speed up parsing of results. By default executes with only 1 job. Jobs can be set via CLI option `--jobs` or GUI.
 - Fixed bug in Flawfinder where IDs are identical between two distinct findings

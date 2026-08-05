@@ -54,10 +54,12 @@ def main():
     parser_outfile = app.parser_outfile
     control_flags = app.control_flags
     additional_options = app.additional_options
-    parsers.jobs = additional_options.get(InputAdditionalOptions.JOBS.opt, InputAdditionalOptions.JOBS.default)
     
     # Put control_flags into module variable
     parsers.control_flags = control_flags
+    
+    # Put additional_options into module variable
+    parsers.additional_options = additional_options
     
     # Log the configuration
     s = "Reading from files:\n"

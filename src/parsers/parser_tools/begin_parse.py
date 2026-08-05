@@ -8,7 +8,7 @@ import importlib
 import parsers
 from parsers.initialization import init_globals
 from . import parser_writer, parser_logger as logger
-from .toolbox import InputDictKeys, Scanners, select_scanner
+from .toolbox import InputDictKeys, InputAdditionalOptions, Scanners, select_scanner
 from .gui.loading_screen import LoadingWindow
 from .reporting import Report
 
@@ -81,10 +81,14 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
     
     try:
         # Init multithreading pool
-        pool = multiprocessing.Pool(processes=parsers.jobs, initializer=init_worker, initargs=(progress_queue, control_flags, log_queue, parsers.GUI_MODE))
+        pool = multiprocessing.Pool(processes=parsers.additional_options.get(InputAdditionalOptions.JOBS.opt, InputAdditionalOptions.JOBS.default), initializer=init_worker, initargs=(progress_queue, control_flags, log_queue, parsers.GUI_MODE))
         
         # Start multithreading pool
-        results = pool.map(parse_input, parser_inputs)
+        result = pool.map_async(parse_input, parser_inputs)
+        
+        while not result.ready():
+            result.wait(0.1)
+        
     except KeyboardInterrupt:
         if pool is not None: pool.terminate()
         raise
@@ -92,6 +96,8 @@ def run_parsers(parser_inputs, progress_queue=None, control_flags=None):
         if pool is not None: pool.close()
     finally:
         if pool is not None: pool.join()
+    
+    results = result.get()
         
     # Merge results
     for result in results:
