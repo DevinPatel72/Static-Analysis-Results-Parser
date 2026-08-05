@@ -92,7 +92,6 @@ def apply_prules(data):
     
     # Ensure prules are sorted by precedence
     parsers.prules.sort(key=lambda rule: int(rule.precedence))
-    parsers.security_prules.sort(key=lambda rule: int(rule.precedence))
     
     def loop_rules(rules, row):
         for pr in rules:

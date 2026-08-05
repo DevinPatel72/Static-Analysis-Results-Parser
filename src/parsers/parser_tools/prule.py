@@ -21,29 +21,33 @@ class Strictness(str, Enum):
         obj.func = func
         return obj
 
-    def matches(self, value, pattern, case_sensitive=False):
-        if case_sensitive:
-            return self.func(value, pattern)
-        else:
-            value = value.lower() if isinstance(value, str) else value
-            pattern = pattern.lower() if isinstance(pattern, str) else pattern
-            return self.func(value, pattern)
+    def matches(self, value, pattern):
+        return self.func(value, pattern)
 
 
 class Condition:
 
     def __init__(self, fieldname, pattern, strictness=Strictness.CONTAINS, case_sensitive=False):
         self.fieldname = fieldname
-        self.pattern = pattern
         self.strictness = strictness
         self.case_sensitive = case_sensitive
+        
+        # Strictness match function
+        self.matcher = strictness.func
+        
+        # Pattern
+        if strictness == Strictness.REGEX:
+            self.pattern = re.compile(pattern)
+        else:
+            self.pattern = str(pattern).lower() if not case_sensitive else str(pattern)
 
     def evaluate(self, target):
         if self.fieldname not in target:
             return False
 
-        value = target[self.fieldname]
-        return self.strictness.matches(str(value), str(self.pattern), case_sensitive=self.case_sensitive)
+        value = str(target[self.fieldname])
+        value = value.lower() if not self.case_sensitive else value
+        return self.matcher(value, self.pattern)
     
     def to_dict(self):
         return {
