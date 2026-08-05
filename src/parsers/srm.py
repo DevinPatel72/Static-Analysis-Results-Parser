@@ -231,13 +231,12 @@ def _parse_xml(fpath, scanner, substr, prepend, input_id):
                 # Check for duplicate findings from standalone scanners
                 confidence = Fieldnames.DEFAULT_CONF.value
                 tool_code = tool.get('code', '').strip()
-                if m := parser_writer.search_row([(Fieldnames.TYPE.value, tool_code, True),
-                                                      (Fieldnames.SCANNER.value, tool_name.lower(), False),
-                                                      (Fieldnames.PATH.value, path, True),
-                                                      (Fieldnames.LINE.value, line, True)
-                                                      ],
-                                                 match_once=True):
-                        # None check
+                if matches := parser_writer.search_row({Fieldnames.TYPE.value: tool_code,
+                                                      Fieldnames.SCANNER.value: tool_name.lower(),
+                                                      Fieldnames.PATH.value: path,
+                                                      Fieldnames.LINE.value: line
+                                                }):
+                        m = matches[0]
                         for k, v in m.items():
                             m[k] = "" if v is None else v
                         cwe = m[Fieldnames.SCORING_BASIS.value]

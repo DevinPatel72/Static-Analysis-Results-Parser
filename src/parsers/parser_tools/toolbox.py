@@ -1,6 +1,7 @@
 # toolbox.py
 
 import os
+import re
 import json
 import importlib
 from enum import Enum
@@ -323,6 +324,12 @@ class Scanners(Enum):
         return set([valid_ext
                     for scanner in cls
                     for valid_ext in scanner.valid_ext])
+
+def fix_scanner_name(scanner):
+    if match := re.match(r"^(.*?)\s+v?\d+(?:\.\d+)*$", scanner):
+        return match.group(1).lower()
+    else:
+        return scanner.lower()
 
 def validate_path_and_scanner(fpath, scanner):
     global __excel_enabled, FILE_SIZE_WARNED_ONCE

@@ -1,16 +1,9 @@
 # dupe_scan_consolidation.py
 
-import re
 import parsers
 from . import parser_logger as logger
-from .toolbox import Fieldnames, InputConfigFlags
+from .toolbox import Fieldnames, InputConfigFlags, fix_scanner_name
 from .progressbar import progress_bar,SPACE
-
-def _fix_scanner_name(scanner):
-    if match := re.match(r"^(.*?)\s+v?\d+(?:\.\d+)*$", scanner):
-        return match.group(1).lower()
-    else:
-        return scanner.lower()
 
 def dupe_scan_consolidation(data):
     from .parser_writer import search_row, update_row
@@ -34,16 +27,15 @@ def dupe_scan_consolidation(data):
         normalized_scanner_name = fixed_scanner_cache.get(scanner)
 
         if normalized_scanner_name is None:
-            normalized_scanner_name = _fix_scanner_name(scanner)
+            normalized_scanner_name = fix_scanner_name(scanner)
             fixed_scanner_cache[scanner] = normalized_scanner_name
         
         # Check to see if the row exists
-        matches = search_row([(Fieldnames.TYPE.value, row[Fieldnames.TYPE.value], True),
-                            (Fieldnames.SCANNER.value, normalized_scanner_name, False),
-                            (Fieldnames.PATH.value, row[Fieldnames.PATH.value], True),
-                            (Fieldnames.LINE.value, row[Fieldnames.LINE.value], True)
-                        ],
-                        skip_ids=row[Fieldnames.ID.value])
+        matches = search_row({Fieldnames.TYPE.value: row[Fieldnames.TYPE.value],
+                            Fieldnames.SCANNER.value: normalized_scanner_name,
+                            Fieldnames.PATH.value: row[Fieldnames.PATH.value],
+                            Fieldnames.LINE.value: row[Fieldnames.LINE.value]
+        })
         for m in matches:
             # Replace all matches with the current row's data
             _end = f". {row[Fieldnames.VALIDATOR_COMMENT.value]}" if len(row[Fieldnames.VALIDATOR_COMMENT.value]) > 0 else row[Fieldnames.VALIDATOR_COMMENT.value]

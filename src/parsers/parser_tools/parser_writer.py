@@ -8,7 +8,7 @@ import json
 from itertools import chain
 import parsers
 from . import parser_logger as logger
-from .toolbox import Fieldnames, InputConfigFlags, Scanners, check_all_CWEs, format_time, select_scanner
+from .toolbox import Fieldnames, InputConfigFlags, Scanners, check_all_CWEs, format_time, select_scanner, fix_scanner_name
 from .preflight import apply_prules
 from .dupe_scan_consolidation import dupe_scan_consolidation
 
@@ -24,6 +24,7 @@ except (ImportError, ModuleNotFoundError):
 
 __filepath = None
 __parser_data = {} # Dictionary of rows keyed by their ID {row['ID']: row}
+__duplicate_index = {} # Dictionary of lists containing duplicate rows keyed by PATH, LINE, TYPE, and SCANNER
 __excel_workbook = None
 __fieldnames = None
 
@@ -69,15 +70,24 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
                 elapsed_time += 1
     if not GUI_MODE and elapsed_time >= 0:
         print()
-                
-            
+
 def write_row(r):
-    global __parser_data
+    global __parser_data, __duplicate_index
     # Remove any None values
     for k in r.keys():
         if r[k] is None:
             r[k] = ''
+    # Add ID row
     __parser_data.setdefault(r[Fieldnames.ID.value], []).append(r)
+    
+    # Cache for duplicate index
+    key = (
+        r[Fieldnames.TYPE.value],
+        fix_scanner_name(r[Fieldnames.SCANNER.value]),
+        r[Fieldnames.PATH.value],
+        r[Fieldnames.LINE.value],
+    )
+    __duplicate_index.setdefault(key, []).append(r)
 
 def write_rows(data):
     for row in data:
@@ -92,54 +102,10 @@ def search_row(search_params, skip_ids='', match_once=False):
     :param match_once: True to return only the first match. False to return a list of all matches.
     :return: All rows that match or only the first match, otherwise None.
     """
-    global __parser_data
-    from .toolbox import Fieldnames
+    global __duplicate_index
+    matches = __duplicate_index.get(tuple(search_params.values()), [])
+    return matches
     
-    if not isinstance(skip_ids, str):
-        skip_ids = set(skip_ids)
-    
-    row_matches = []
-    for row_id, rows in __parser_data.items():
-        for row in rows:
-            matches = []
-            # Skip id's
-            if (len(skip_ids) > 0 and row_id in skip_ids):
-                continue
-            for header, keyword, exact_str_match in search_params:
-                lookup = row.get(header, '')
-            
-                # First check for NULL
-                if lookup is not None:
-                    # If string, check for length and if keyword is contained in lookup
-                    if isinstance(lookup, str) and len(lookup) > 0:
-                        if exact_str_match:
-                            matches.append(keyword == lookup)
-                        else: matches.append(keyword.lower() in lookup.lower())
-                    
-                    # If integer, check for exact match
-                    elif isinstance(lookup, int):
-                        try:
-                            matches.append(int(keyword) == lookup)
-                        except ValueError:
-                            logger.error("Invalid search lookup. Expected integer input for \"%s\", got string keyword \"%s\"", lookup, keyword)
-                            matches.append(False)
-                            break
-                    
-                    else:
-                        matches.append(keyword == lookup)
-                        break
-            if all(matches):
-                row_matches.append({
-                    Fieldnames.SCORING_BASIS.value: row[Fieldnames.SCORING_BASIS.value],
-                    Fieldnames.CONFIDENCE.value: row[Fieldnames.CONFIDENCE.value],
-                    Fieldnames.MATURITY.value: row[Fieldnames.MATURITY.value],
-                    Fieldnames.MITIGATION.value: row[Fieldnames.MITIGATION.value],
-                    Fieldnames.PROPOSED_MITIGATION.value: row[Fieldnames.PROPOSED_MITIGATION.value],
-                    Fieldnames.VALIDATOR_COMMENT.value: row[Fieldnames.VALIDATOR_COMMENT.value],
-                    Fieldnames.ID.value: row[Fieldnames.ID.value]
-                })
-                if match_once: return row_matches[0]
-    return row_matches
 
 def update_row(id, updates):
     """
@@ -191,7 +157,9 @@ def close_writer():
         
         # Write out parser data to file
         if __filepath is not None:
-            logger.info("Beginning writing results to file")
+            logger.info("Initializing writing results to file")
+            if not parsers.GUI_MODE:
+                print("\nInitializing writing results to file")
             if __export_sarif:
                 while True:
                     try:
