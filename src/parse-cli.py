@@ -161,7 +161,7 @@ def main():
         if rv is not None and isinstance(rv, str) and len(rv) > 0:
             logger.console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info')
     except (ImportError, ModuleNotFoundError) as exc:
-        logger.warning("%s: %s. Skipping check for updates.", exc.__class__.__name__, exc.msg)
+        logger.console(f"Missing module \"{exc.name}.\" Skipping check for updates.", "Check For Updates Failed", level='warning')
     
     # Use file arg if it is passed. If not, check if any input args have been passed. If no input args, then use default <PROG_NAME_ABBR>_inputs.json path. If there are input args, set to blank string so those inputs can be parsed.
     if len(args.file) > 0:

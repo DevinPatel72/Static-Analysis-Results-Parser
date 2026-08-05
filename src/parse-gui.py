@@ -42,7 +42,7 @@ def main():
             close_splash()
             logger.console(f'A new version of {parsers.PROG_NAME_ABBR} is available. To upgrade to {rv}, run the update executable.', 'New Version Available', level='info')
     except (ImportError, ModuleNotFoundError) as exc:
-        logger.warning("%s: %s. Skipping check for updates.", exc.__class__.__name__, exc.msg)
+        logger.console(f"Missing module \"{exc.name}.\" Skipping check for updates.", "Check For Updates Failed", level='warning')
     
     parser_inputs = []
     parser_outfile = ""

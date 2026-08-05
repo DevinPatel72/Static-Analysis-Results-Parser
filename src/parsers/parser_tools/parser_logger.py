@@ -47,8 +47,12 @@ def initialize_main(logfile):
     file = logging.FileHandler(logfile, encoding="utf-8", mode='w')
     formatter = logging.Formatter(fmt='%(name)-18s :: %(levelname)-8s :: %(message)s')
     file.setFormatter(formatter)
+    
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setLevel(logging.CRITICAL)
+    consoleHandler.setFormatter(logging.Formatter(fmt='\n[%(levelname)s]  %(message)s'))
 
-    initialize(handlers=[file])
+    initialize(handlers=[file, consoleHandler])
 
 
 def initialize_worker(queue):
