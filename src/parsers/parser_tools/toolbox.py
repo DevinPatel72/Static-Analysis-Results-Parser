@@ -18,9 +18,6 @@ try:
 except (ImportError, ModuleNotFoundError):
     __excel_enabled = False
 
-LARGE_FILE_THRESHOLD_MB = 40
-FILE_SIZE_WARNED_ONCE = False
-
 class GuiWindow(Enum):
     JsonInputPreviewGUI = 'JsonInputPreviewGUI'
     InputsGUI = 'InputsGUI'
@@ -332,20 +329,11 @@ def fix_scanner_name(scanner):
         return scanner.lower()
 
 def validate_path_and_scanner(fpath, scanner):
-    global __excel_enabled, FILE_SIZE_WARNED_ONCE
+    global __excel_enabled
     scan_match = scanner.lower().replace(' ', '')
     
     if not any(s in scan_match for s in Scanners.all_keywords()):
         return "{} does not currently support input from {}. A list of acceptable scanners and their file types is in the readme.txt file.".format(parsers.PROG_NAME, scanner)
-    
-    # Alert for large file size for CLI
-    if not FILE_SIZE_WARNED_ONCE and os.path.isfile(fpath) and get_file_size_mb(fpath) > LARGE_FILE_THRESHOLD_MB:
-        FILE_SIZE_WARNED_ONCE = True
-        if parsers.GUI_MODE:
-            _end = f" If {parsers.PROG_NAME_ABBR} takes too long to complete, stop execution at the loading screen and immediately rerun using the CLI executable."
-        else:
-            _end = ""
-        logger.console(f"A large input file has been detected. Processing times may be fairly long, so {parsers.PROG_NAME_ABBR} will appear to freeze or hang." + _end, title='Large File Detected', level='warning')
     
     # AIO parser inputs
     elif any(s in scan_match for s in Scanners.SARP.keywords) and os.path.isfile(fpath):
@@ -608,11 +596,6 @@ def generate_preview(preview, remove_substr='', add_substr=''):
         preview = add_substr + preview
     
     return preview
-
-def get_file_size_mb(path):
-    size_bytes = os.path.getsize(path)
-    size_mb = size_bytes // (1024 * 1024)
-    return size_mb
 
 def format_time(seconds):
     hours = int(seconds // 3600)
