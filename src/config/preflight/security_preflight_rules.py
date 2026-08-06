@@ -1212,7 +1212,7 @@ PRULES = [
                     ]),
                     ConditionGroup(operator="OR", conditions=[
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantAssignment", strictness=Strictness.EXACT, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant assignment of Variable to itself", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant assignment of Variable to itself", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
@@ -1256,6 +1256,11 @@ PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantInitialization", strictness=Strictness.EXACT, case_sensitive=False),
+                    
+                    ConditionGroup(operator="OR", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"redundantInitialization", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Redundant initialization for variable", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1164', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
