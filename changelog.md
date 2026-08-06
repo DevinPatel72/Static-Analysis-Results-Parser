@@ -8,6 +8,7 @@
 - Added guards for missing dependencies in `update.py` when running using the python interpreter.
 
 ## [Version 2.10.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.0) (2026-08-04)
+- ***Release executables have been removed because they contain a critical bug.***
 - Added multithreading to speed up parsing of results. By default executes with only 1 job. Jobs can be set via CLI option `--jobs` or GUI.
 - Fixed bug in Flawfinder where IDs are identical between two distinct findings
 - Changed and added Default Rules
