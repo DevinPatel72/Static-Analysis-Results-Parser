@@ -180,7 +180,7 @@ class Report:
         root.title(f"{PROG_NAME} Report")
         
         # Set geometry
-        if max([len(i) for i in list(self.counts.keys())]) > 25:
+        if max(len(i) for i in list(self.counts.keys())) > 25:
             width = 1000
             height = 800
         else:
@@ -438,8 +438,8 @@ class Report:
         gui_root.wait_window(root)
     
     def _cli_table(self):
-        _max_key_len = max([len(k) for k in self.counts.keys()])
-        _max_val_len = max([len(str(v[0])) for v in self.counts.values()])
+        _max_key_len = max(len(k) for k in self.counts.keys())
+        _max_val_len = max(len(str(v[0])) for v in self.counts.values())
         
         if _max_key_len <= 10 or _max_val_len <= 3:
             _pad = 4

@@ -4,9 +4,8 @@ import os
 import traceback
 import re
 import json
-from .parser_tools import idgenerator, parser_logger as logger
+from .parser_tools import progressbar, idgenerator, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
-from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames, Scanners
 
 def path_preview(fpath):
@@ -104,7 +103,7 @@ def _parse_sarif(data, fpath, scanner, substr, prepend, input_id):
     for result in results:
         result_num += 1
         try:
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+            progressbar.progress_bar(result_num, total_results, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
         
             # Get rule_id
             rule_id = result['ruleId']
@@ -227,7 +226,7 @@ def _parse_json(data, fpath, scanner, substr, prepend, input_id):
     for result in results:
         result_num += 1
         try:
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+            progressbar.progress_bar(result_num, total_results, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
         
             # Get path/line
             path = result['path']

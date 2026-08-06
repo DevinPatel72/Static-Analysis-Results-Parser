@@ -5,9 +5,8 @@
 import os
 import traceback
 import importlib
-from . import parser_logger as logger
-from .toolbox import Fieldnames, InputConfigFlags
-from .progressbar import progress_bar,SPACE
+from . import progressbar, parser_logger as logger
+from .toolbox import InputConfigFlags
 import parsers
 
 _LOADED_ONCE = False
@@ -106,7 +105,7 @@ def apply_prules(data):
                         row[fieldname] = replacement[fieldname]
     
     for i, row in enumerate(data, start=1):
-        progress_bar(i, len(data), prefix=InputConfigFlags.PREFLIGHT_RULES.flag.rjust(SPACE), input_id=InputConfigFlags.PREFLIGHT_RULES.flag)
+        progressbar.progress_bar(i, len(data), prefix=InputConfigFlags.PREFLIGHT_RULES.flag.rjust(progressbar.SPACE), input_id=InputConfigFlags.PREFLIGHT_RULES.flag)
         
         # Default prules first
         if parsers.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag]:

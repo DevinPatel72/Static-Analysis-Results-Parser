@@ -230,7 +230,7 @@ class InputsGUI:
         # Scanner dropdown (Combobox)
         scanner_dropdown_placeholder = self._select_scanner(entry[InputDictKeys.SCANNER.value]) if len(entry) > 0 else 'Select Scanner...'
         scanners = Scanners.all_names()
-        scanner_dropdown = ttk.Combobox(row_frame, values=scanners, width=max([len(i) for i in scanners])+3, state='readonly')
+        scanner_dropdown = ttk.Combobox(row_frame, values=scanners, width=max(len(i) for i in scanners)+3, state='readonly')
         scanner_dropdown.set(scanner_dropdown_placeholder) # Set to current entry or placeholder
         scanner_dropdown.pack(side=tk.LEFT, padx=5)
 

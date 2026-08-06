@@ -4,8 +4,7 @@ import os
 import json
 import traceback
 import xml.etree.ElementTree as ET
-from .parser_tools import idgenerator, parser_logger as logger
-from .parser_tools.progressbar import SPACE,progress_bar
+from .parser_tools import progressbar, idgenerator, parser_logger as logger
 from .parser_tools.toolbox import Fieldnames
 
 spotbugs_bug_patterns = {}
@@ -110,7 +109,7 @@ def _parse_sarif(fpath, scanner, substr, prepend, input_id):
     for result in data['results']:
         try:
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+            progressbar.progress_bar(result_num, total_results, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
         
             # Type
             bug_type = result['ruleId']
@@ -217,7 +216,7 @@ def _parse_xml(fpath, scanner, substr, prepend, input_id):
     for instance in instances:
         try:
             instance_num += 1
-            progress_bar(instance_num, total_instances, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+            progressbar.progress_bar(instance_num, total_instances, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
             
             # Type
             bug_type = instance.get('type')

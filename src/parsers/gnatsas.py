@@ -4,8 +4,7 @@ import csv
 import json
 import re
 import traceback
-from .parser_tools import idgenerator, parser_logger as logger
-from .parser_tools.progressbar import SPACE,progress_bar
+from .parser_tools import progressbar, idgenerator, parser_logger as logger
 from .parser_tools.toolbox import Fieldnames
 
 def path_preview(fpath):
@@ -78,7 +77,7 @@ def _parse_sarif(fpath, scanner, substr, prepend, input_id):
         try:
             fingerprint_checksum = result['fingerprints']['checksum']
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+            progressbar.progress_bar(result_num, total_results, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
         
             # Type
             t = result['ruleId']
@@ -219,7 +218,7 @@ def _parse_csv(fpath, scanner, substr, prepend, input_id):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+                progressbar.progress_bar(row_num, total_rows, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
             
                 cwe = row['cwe']
                 

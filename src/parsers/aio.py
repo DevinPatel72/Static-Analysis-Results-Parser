@@ -3,8 +3,7 @@ import os
 import csv
 import json
 import traceback
-from .parser_tools import parser_logger as logger
-from .parser_tools.progressbar import SPACE, progress_bar
+from .parser_tools import progressbar, parser_logger as logger
 from .parser_tools.toolbox import Fieldnames
 
 __excel_enabled = False
@@ -102,7 +101,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
     for row in data:
         try:
             row_num += 1
-            progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+            progressbar.progress_bar(row_num, total_rows, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
 
             # Cut and prepend the paths and convert all backslashes to forward slashes
             path = str(row[Fieldnames.PATH.value]).replace(substr, "", 1)
@@ -150,7 +149,7 @@ def _parse_sarp_sarif(fpath, scanner, substr, prepend, input_id):
         # Iterate through results and rebuild excel column
         for result in run.get('results', []):
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+            progressbar.progress_bar(result_num, total_results, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
             try:
                 finding_id = result.get('partialFingerprints', {}).get('findingId', '')
                 new_row = {

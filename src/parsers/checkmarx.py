@@ -3,8 +3,7 @@ import os
 import traceback
 import csv
 import xml.etree.ElementTree as ET
-from .parser_tools import idgenerator, parser_logger as logger
-from .parser_tools.progressbar import SPACE, progress_bar
+from .parser_tools import progressbar, idgenerator, parser_logger as logger
 from .parser_tools.toolbox import Fieldnames
 
 checkmarx_cdata = []
@@ -97,7 +96,7 @@ def _parse_csv(fpath, substr, prepend, total_findings, scanner, input_id):
         for row in csv_dict_reader:
             row_num += 1
             try:
-                progress_bar(row_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+                progressbar.progress_bar(row_num, total_findings, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
         
                 # row variable is a dictionary that represents a row in csv
                 lang = row['QueryPath'].split('\\')[0]
@@ -221,7 +220,7 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner, input_id):
             
             for result in results:
                 i += 1
-                progress_bar(i, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+                progressbar.progress_bar(i, total_findings, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
                 try:
                     # Get result ID for logging purposes
                     result_id = result.get('NodeId', '')

@@ -3,8 +3,7 @@ import os
 import traceback
 import json
 import parsers
-from .parser_tools import idgenerator, parser_logger as logger
-from .parser_tools.progressbar import SPACE, progress_bar
+from .parser_tools import progressbar, idgenerator, parser_logger as logger
 from .parser_tools.toolbox import Fieldnames
 
 eslint_cdata = {}
@@ -49,7 +48,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
         for message in file['messages']:
             try:
                 issue_num += 1
-                progress_bar(issue_num, total_issues, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+                progressbar.progress_bar(issue_num, total_issues, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
                 
                 rule_id = message['ruleId']
                 

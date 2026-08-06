@@ -19,8 +19,8 @@ import traceback
 from multiprocessing import freeze_support
 from datetime import datetime
 import parsers
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, InputAdditionalOptions, Fieldnames, load_config_cwe_category_mappings, export_config
-from parsers.parser_tools import parser_writer, preflight, parser_logger as logger
+from parsers.parser_tools import progressbar, parser_writer, preflight, parser_logger as logger
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_cwe_category_mappings, export_config
 from parsers.parser_tools.gui.app_controller import close_splash
 from parsers.parser_tools.begin_parse import begin
 from parsers.initialization import init_globals, init_main_logger
@@ -31,7 +31,7 @@ from parsers.parser_tools.gui.app_controller import SARPApp
 ################################
 
 def main():
-    init_globals(gui_mode=True)
+    init_globals(gui_mode=True, progressbar_space=progressbar.SPACE)
     init_main_logger()
     
     # Check for updates first

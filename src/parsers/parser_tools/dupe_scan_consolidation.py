@@ -1,9 +1,8 @@
 # dupe_scan_consolidation.py
 
 import parsers
-from . import parser_logger as logger
+from . import progressbar, parser_logger as logger
 from .toolbox import Fieldnames, InputConfigFlags, fix_scanner_name
-from .progressbar import progress_bar,SPACE
 
 def dupe_scan_consolidation(data):
     from .parser_writer import search_row, update_row
@@ -16,7 +15,7 @@ def dupe_scan_consolidation(data):
     # Perform dupe searching
     dupe_count = 0
     for i, row in enumerate(data, start=1):
-        progress_bar(i, len(data), prefix=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag.rjust(SPACE), input_id=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag)
+        progressbar.progress_bar(i, len(data), prefix=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag.rjust(progressbar.SPACE), input_id=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag)
         
         # Check to see if this is already a duplicate row or if it is designated as a canon row
         if (row[Fieldnames.CONFIDENCE.value].lower() == Fieldnames.DUPLICATE_CONF.value.lower()):

@@ -3,8 +3,7 @@
 import os
 import traceback
 import json
-from .parser_tools import idgenerator, parser_logger as logger
-from .parser_tools.progressbar import SPACE,progress_bar
+from .parser_tools import progressbar, idgenerator, parser_logger as logger
 from .parser_tools.toolbox import Fieldnames
 
 # Remaps all known severity values to keywords supported by SARIF standard
@@ -77,7 +76,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
         # Iterate through results and rebuild excel column
         for result in run.get('results', []):
             result_num += 1
-            progress_bar(result_num, total_results, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+            progressbar.progress_bar(result_num, total_results, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
             try:
                 finding_id = _fetch_fingerprint(result)
                 new_row = {

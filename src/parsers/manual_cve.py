@@ -4,8 +4,7 @@ import os
 import re
 import csv
 import traceback
-from .parser_tools import idgenerator, parser_logger as logger
-from .parser_tools.progressbar import SPACE,progress_bar
+from .parser_tools import progressbar, idgenerator, parser_logger as logger
 from .parser_tools.toolbox import Fieldnames
 
 def path_preview(fpath):
@@ -52,7 +51,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+                progressbar.progress_bar(row_num, total_rows, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
                 
                 # Extract CWE
                 cwe = row['CWE']

@@ -9,7 +9,7 @@ DISABLE_PROGRESS_BAR = False
 _modulo = -1
 _old_total = -1
 
-def progress_bar(iteration, total, input_id='', prefix='', suffix='', decimals=2, length=50, fill='█', unfill='-', print_end="\r"):
+def progress_bar(iteration, total, input_id='', prefix='', suffix='', decimals=2, length=40, fill='█', unfill='-', print_end="\r"):
     r"""
     Call this function in a loop to create terminal progress bar
     

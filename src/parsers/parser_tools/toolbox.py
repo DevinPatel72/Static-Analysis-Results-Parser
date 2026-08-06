@@ -4,11 +4,11 @@ import os
 import re
 import json
 import importlib
+import signal
 from enum import Enum
 import multiprocessing
-from . import parser_logger as logger
+from . import progressbar, parser_logger as logger
 from parsers.initialization import init_globals
-from .progressbar import progress_bar,SPACE
 import parsers
 
 __excel_enabled = False
@@ -545,7 +545,7 @@ def check_all_CWEs(data):
     for i, row in enumerate(data, start=1):
         # Control flag check
         if parsers.control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
-            progress_bar(i, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(SPACE), input_id=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag)
+            progressbar.progress_bar(i, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(progressbar.SPACE), input_id=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag)
             row[Fieldnames.SCORING_BASIS.value], count = check_CWE_category(row[Fieldnames.SCORING_BASIS.value], count)
         
         # Turn CWE into int if capable
@@ -626,12 +626,14 @@ def get_all_previews(inputs):
                 result.wait(0.1)
             
         except KeyboardInterrupt:
-            if pool is not None: pool.terminate()
+            if pool is not None:
+                pool.terminate()
+                pool.join()
             raise
         else:
-            if pool is not None: pool.close()
-        finally:
-            if pool is not None: pool.join()
+            if pool is not None:
+                pool.close()
+                pool.join()
         
         results = result.get()
     else:
@@ -648,6 +650,9 @@ def get_all_previews(inputs):
     return previews
     
 def _init_worker(control_flags, logging_queue, gui_mode=False):
+    # Ignore SIGINT in workers to suppress traceback
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    
     parsers.control_flags = control_flags
     
     # Init globals again since the worker is its own interpreter

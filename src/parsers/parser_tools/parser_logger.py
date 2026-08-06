@@ -123,7 +123,7 @@ def message_box(title, msg, level):
     elif level == 'info':
         messagebox.showinfo(title, msg)
 
-def console(msg, title='', level='info', *, no_console=False, no_logging=False):
+def console(msg, title='', level='info', *, no_console=False, no_logging=False, no_messagebox=False):
     if not no_logging:
         logger = _caller_logger()
         
@@ -139,13 +139,12 @@ def console(msg, title='', level='info', *, no_console=False, no_logging=False):
             logger.debug(msg)
     
     # Once logged, report it
-    if not no_console:
-        if parsers.GUI_MODE:
-            message_box(title, msg, level)
-        elif level == 'critical':
-            pass
-        else:
-            print(f'[{level.upper()}]  {msg}')
+    if parsers.GUI_MODE and not no_messagebox:
+        message_box(title, msg, level)
+    elif level == 'critical':
+        pass
+    elif not no_console:
+        print(f'[{level.upper()}]  {msg}')
 
 def close_logger():
     global _listener

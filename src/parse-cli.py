@@ -26,7 +26,7 @@ import traceback
 from multiprocessing import freeze_support
 from datetime import datetime
 import parsers
-from parsers.parser_tools import parser_writer, preflight, parser_logger as logger
+from parsers.parser_tools import progressbar, parser_writer, preflight, parser_logger as logger
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, InputAdditionalOptions, Fieldnames, load_config_user_inputs, load_config_cwe_category_mappings, export_config, check_input_format, print_user_inputs_template, dedupe_parser_inputs
 from parsers.parser_tools.begin_parse import begin
 from parsers.initialization import init_globals, init_main_logger
@@ -76,7 +76,7 @@ def print_inputs_file_contents(fpath):
 ################################
 
 def main():
-    init_globals(gui_mode=False)
+    init_globals(gui_mode=False, progressbar_space=progressbar.SPACE)
     init_main_logger()
     
     parser_inputs = []
@@ -227,7 +227,6 @@ def main():
             })
     
     if args.disableprogressbar is not None and args.disableprogressbar:
-        from parsers.parser_tools import progressbar
         progressbar.DISABLE_PROGRESS_BAR = True
     
     # Control flags

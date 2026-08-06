@@ -157,9 +157,7 @@ def close_writer():
         
         # Write out parser data to file
         if __filepath is not None:
-            logger.info("Initializing writing results to file")
-            if not parsers.GUI_MODE:
-                print("\nInitializing writing results to file")
+            logger.info("Writing results to file \"%s\"...", __filepath)
             if __export_sarif:
                 while True:
                     try:

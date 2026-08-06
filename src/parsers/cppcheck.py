@@ -4,8 +4,7 @@ import traceback
 import html
 from csv import DictWriter
 import xml.etree.ElementTree as ET
-from .parser_tools import idgenerator, parser_logger as logger
-from .parser_tools.progressbar import SPACE, progress_bar
+from .parser_tools import progressbar, idgenerator, parser_logger as logger
 from .parser_tools.toolbox import Fieldnames
 
 config_errors = ['templateRecursion', 'checkLevelNormal', 'checkersReport', 'missingInclude', 'missingIncludeSystem', 'toomanyconfigs', 'ConfigurationNotChecked', 'normalCheckLevelMaxBranches', 'noValidConfiguration']
@@ -61,7 +60,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
         for error in errors.findall('error'):
             try:
                 error_num += 1
-                progress_bar(error_num, total_errors, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+                progressbar.progress_bar(error_num, total_errors, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
                 
                 if error.get('id') in config_errors:
                     # Config error found. The error will be output to a separate CSV

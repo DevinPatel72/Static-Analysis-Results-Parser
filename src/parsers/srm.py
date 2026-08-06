@@ -5,9 +5,8 @@ import csv
 import xml.etree.ElementTree as ET
 from .eslint import get_eslint_cdata
 from .pylint import get_pylint_cdata
-from .parser_tools import idgenerator, parser_writer, parser_logger as logger
+from .parser_tools import progressbar, idgenerator, parser_writer, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
-from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 
 def path_preview(fpath):
@@ -88,7 +87,7 @@ def _parse_csv(fpath, scanner, substr, prepend, input_id):
         for row in csv_dict_reader:
             try:
                 row_num += 1
-                progress_bar(row_num, total_rows, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+                progressbar.progress_bar(row_num, total_rows, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
             
                 # Resolve language of the file
                 lang = resolve_lang_from_ext(os.path.splitext(row['Path'])[1])
@@ -172,7 +171,7 @@ def _parse_xml(fpath, scanner, substr, prepend, input_id):
     for finding in findings:
         finding_num += 1
         try:
-            progress_bar(finding_num, total_findings, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+            progressbar.progress_bar(finding_num, total_findings, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
             
             # Get finding ID for logging
             finding_id = finding.get('id', '')

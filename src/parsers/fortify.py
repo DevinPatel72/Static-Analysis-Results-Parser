@@ -5,9 +5,8 @@ import traceback
 import xml.etree.ElementTree as ET
 import zipfile
 import re
-from .parser_tools import idgenerator, parser_logger as logger
+from .parser_tools import progressbar, idgenerator, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
-from .parser_tools.progressbar import SPACE,progress_bar
 from .parser_tools.toolbox import Fieldnames
 
 def path_preview(fpath):
@@ -121,7 +120,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
             symbol = ''
             try:
                 vulnerability_num += 1
-                progress_bar(vulnerability_num, total_vulnerabilities, prefix=f'Parsing {os.path.basename(fpath)}'.rjust(SPACE), input_id=input_id)
+                progressbar.progress_bar(vulnerability_num, total_vulnerabilities, prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
                 
                 # Extract class information
                 class_info = vulnerability.find('./ns:ClassInfo', namespace)

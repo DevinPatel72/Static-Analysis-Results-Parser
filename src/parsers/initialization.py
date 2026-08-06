@@ -3,18 +3,18 @@
 import os
 import sys
 import parsers
-import parsers.parser_tools.progressbar
-import parsers.parser_tools.parser_logger as logger
+from parsers.parser_tools import progressbar, parser_logger as logger
 
 
-def init_globals(gui_mode=False):
+def init_globals(gui_mode=False, progressbar_space=34):
     # Init GUI if true
     if gui_mode:
         import tkinter as tk
         parsers.gui_root = tk.Tk()
         parsers.gui_root.withdraw()
-        parsers.GUI_MODE = gui_mode
-        parsers.parser_tools.progressbar.DISABLE_PROGRESS_BAR = gui_mode
+    parsers.GUI_MODE = gui_mode
+    progressbar.DISABLE_PROGRESS_BAR = gui_mode
+    progressbar.SPACE = progressbar_space
     
     # Configure root path and important dirs of script
     if getattr(sys, 'frozen', False):
