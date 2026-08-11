@@ -20,7 +20,7 @@ from multiprocessing import freeze_support
 from datetime import datetime
 import parsers
 from parsers.parser_tools import progressbar, parser_writer, preflight, parser_logger as logger
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, load_config_cwe_category_mappings, export_config
+from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, export_config
 from parsers.parser_tools.gui.app_controller import close_splash
 from parsers.parser_tools.begin_parse import begin
 from parsers.initialization import init_globals, init_main_logger
@@ -85,10 +85,6 @@ def main():
     
     # Save the preflight rules
     preflight.save_prules(parsers.prules)
-    
-    # Load the mapping if true
-    if control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
-        parsers.cwe_categories = load_config_cwe_category_mappings()
 
     # Init the outfile
     force_csv = parser_outfile.lower().endswith('.csv')

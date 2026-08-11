@@ -539,6 +539,7 @@ def dedupe_parser_inputs(p_inputs):
     return inputs
 
 def check_all_CWEs(data):
+    parsers.cwe_categories = load_config_cwe_category_mappings()
     count = 0
     
     # Check if cwe is in categories dict

@@ -7,7 +7,7 @@ from .eslint import get_eslint_cdata
 from .pylint import get_pylint_cdata
 from .parser_tools import progressbar, idgenerator, parser_writer, parser_logger as logger
 from .parser_tools.language_resolver import resolve_lang_from_ext
-from .parser_tools.toolbox import Fieldnames
+from .parser_tools.toolbox import Fieldnames, check_CWE_category
 
 def path_preview(fpath):
     # Parse the input file
@@ -238,7 +238,10 @@ def _parse_xml(fpath, scanner, substr, prepend, input_id):
                         m = matches[0]
                         for k, v in m.items():
                             m[k] = "" if v is None else v
-                        cwe = m[Fieldnames.SCORING_BASIS.value]
+                        t_cwe = m[Fieldnames.SCORING_BASIS.value]
+                        # If cwe from match is a category, fall back to current cwe but only if it also isn't a category.
+                        if not (':' in str(check_CWE_category(t_cwe)[0]) and ':' not in str(check_CWE_category(cwe)[0])):
+                            cwe = t_cwe
                         confidence = Fieldnames.DUPLICATE_CONF.value
                         maturity = m[Fieldnames.MATURITY.value]
                         mitigation = m[Fieldnames.MITIGATION.value]
