@@ -627,7 +627,8 @@ PRULES = [
                     ConditionGroup(operator="OR", conditions=[
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Class has user-written copy constructor but no user-written assignment operator", strictness=Strictness.EXACT, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Class that owns resources lacks a user-written assignment operator", strictness=Strictness.EXACT, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Class that owns resources lacks a user-written copy constructor", strictness=Strictness.EXACT, case_sensitive=False)
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Class that owns resources lacks a user-written copy constructor", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Class should have an operator=", strictness=Strictness.EXACT, case_sensitive=False)
                     ])
                 ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '664', Fieldnames.VALIDATOR_COMMENT.value: "Neglecting to create a copy constructor or operator= definition will prompt the compiler to auto-generate a shallow copy constructor or operator= override, which will result in downstream weaknesses if one instance executes its destructor (e.g., double free, use after free, expired pointer dereference, resource race conditions)."}
