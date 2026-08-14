@@ -1287,7 +1287,7 @@ PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"returnByReference", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '562'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
         ),
         PRule(
             rule_id = "cppcheck_returnImplicitInt",
