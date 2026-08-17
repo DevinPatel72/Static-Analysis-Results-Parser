@@ -34,7 +34,7 @@ def path_preview(fpath):
                             continue
             return p
         elif __excel_enabled:
-            workbook = openpyxl.load_workbook(fpath)
+            workbook = openpyxl.load_workbook(fpath, read_only=True, data_only=True)
             sheet = workbook[workbook.sheetnames[0]]
             
             # Extract Path header
@@ -76,7 +76,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
     
     # Excel - Set data iterable and total_rows
     elif __excel_enabled and fpath.endswith('.xlsx'):
-        workbook = openpyxl.load_workbook(fpath)
+        workbook = openpyxl.load_workbook(fpath, read_only=True, data_only=True)
         sheet = workbook[workbook.sheetnames[0]]
         headers = [cell.value for cell in sheet[1]]
         

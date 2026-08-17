@@ -345,7 +345,7 @@ def validate_path_and_scanner(fpath, scanner):
         # Diverge depending on .xlsx, .json, .sarif, or .csv
         if __excel_enabled and ext == '.xlsx':
             # Excel - Extract headers
-            workbook = openpyxl.load_workbook(fpath)
+            workbook = openpyxl.load_workbook(fpath, read_only=True, data_only=True)
             sheet = workbook[workbook.sheetnames[0]]
             headers = [cell.value for cell in sheet[1]]
         # SARIF format
