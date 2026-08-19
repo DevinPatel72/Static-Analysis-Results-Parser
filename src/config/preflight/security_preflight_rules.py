@@ -280,7 +280,7 @@ PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Recursion in included header files", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1047', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "coverity_increment_of_pointer_address_not_pointed_data",
@@ -415,7 +415,7 @@ PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Recursion in included headers", strictness=Strictness.EXACT, case_sensitive=False)
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1047', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "coverity_result_is_not_floating_point",
@@ -1470,7 +1470,7 @@ PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"templateRecursion", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '758'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1047', Fieldnames.CONFIDENCE.value: 'Info'}
         ),
         PRule(
             rule_id = "cppcheck_threadsafety_unsafe_call",
