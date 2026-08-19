@@ -16,7 +16,7 @@ Static Analysis Results Parser (SARP) will parse a set of output files from stat
 | Scanner                                                      | Results File Format    |
 | ------------------------------------------------------------ | ---------------------- |
 | SARP                                                         | Excel, SARIF, CSV      |
-| SARIF                                                        | SARIF                  |
+| Generic SARIF                                                | SARIF                  |
 | Checkmarx                                                    | XML\*\*, CSV           |
 | CppCheck                                                     | XML                    |
 | Coverity                                                     | JSON                   |
