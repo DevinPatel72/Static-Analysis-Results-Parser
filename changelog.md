@@ -1,5 +1,10 @@
 # Change Log
 
+## [Version 2.10.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.2) (2026-08-19)
+- Fixed bug where Fortify parser will cause a soft lock if an FPR file with no findings is passed
+- Updated MITRE Category Mappings to be comprehensive.
+- Updated default preflight rules
+
 ## [Version 2.10.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.1) (2026-08-06)
 - Significantly improved SARP performance.
 - Fixed bug introduced in SARP 2.10.0 where SRM fails to identify duplicates from sub-scanners such as CPPCheck, Pylint, ESLint, etc.
