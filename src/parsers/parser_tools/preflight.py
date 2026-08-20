@@ -3,8 +3,6 @@
 # Handles loading, dumping, and application of preflight rules
 
 import os
-import traceback
-import importlib
 import ast
 from . import progressbar, parser_logger as logger
 from .prule import PRule, ConditionGroup, Condition, Strictness
