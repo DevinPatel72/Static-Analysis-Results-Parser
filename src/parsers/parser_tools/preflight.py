@@ -5,20 +5,27 @@
 import os
 import traceback
 import importlib
+import ast
 from . import progressbar, parser_logger as logger
-from .toolbox import InputConfigFlags
+from .prule import PRule, ConditionGroup, Condition, Strictness
+from .toolbox import Fieldnames, InputConfigFlags
 import parsers
 
-_LOADED_ONCE = False
+# Definitions for AST whitelisted import of a preflight rules py file
+class UnsafeRuleError(ValueError):
+    """Raised when a rule file contains unsupported Python syntax."""
 
-def load_prules():
-    global _LOADED_ONCE
+_ALLOWED_CONSTRUCTORS = {
+    'PRule': PRule,
+    'ConditionGroup': ConditionGroup,
+    'Condition': Condition,
+}   
+
+def load_prules(file='preflight_rules.py'):
     from parsers import PREFLIGHT_DIR
-    
-    if _LOADED_ONCE:
-        return
 
-    data_path = os.path.join(PREFLIGHT_DIR, 'preflight_rules.py')
+    prules = []
+    data_path = os.path.join(PREFLIGHT_DIR, file)
     
     # If the py file doesn't exist
     if not os.path.isfile(data_path):
@@ -26,37 +33,14 @@ def load_prules():
     else:
         # py file does exist
         try:
-            spec = importlib.util.spec_from_file_location("preflight_rules", data_path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-
-            parsers.prules = module.PRULES
-            parsers.prules.sort(key=lambda rule: int(rule.precedence))
-            logger.info("Preflight rules loaded successfully")
-        except:
-            logger.error("Failed to import PRULES from \'%s\'\n%s", data_path, traceback.format_exc())
-            parsers.prules = []
+            prules = _load_prules_from_file(data_path)
+            prules.sort(key=lambda rule: int(rule.precedence))
+            logger.info("Preflight rules \'%s\' loaded successfully", file)
+        except UnsafeRuleError as ure:
+            logger.error("Failed to import PRULES from \'%s\': %s", data_path, str(ure))
+            prules = []
     
-    # Now load security rules
-    data_path = os.path.join(PREFLIGHT_DIR, 'security_preflight_rules.py')
-    
-    if not os.path.isfile(data_path):
-        logger.warning("Unable to load security preflight rules: 'security_preflight_rules.py' does not exist in config/preflight directory.")
-        parsers.security_prules = []
-    else:
-        try:
-            spec = importlib.util.spec_from_file_location("security_preflight_rules", data_path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-
-            parsers.security_prules = module.PRULES
-            parsers.security_prules.sort(key=lambda rule: int(rule.precedence))
-            logger.info("Security preflight rules loaded successfully")
-        except:
-            logger.error("Failed to import SECURITY_PRULES from \'%s\'\n%s", data_path, traceback.format_exc())
-            parsers.security_prules = []
-    
-    _LOADED_ONCE = True
+    return prules
 
 
 def save_prules(prules):
@@ -116,8 +100,313 @@ def apply_prules(data):
         def_len = len(parsers.security_prules)
     else: def_len = 0
     logger.info("Preflight: Applied %d user rules and %d default rules", len(parsers.prules), def_len)
-        
-    
+
+
+def _validate_node(node):
+    """
+    Validate an AST node against the allowed PRULES syntax.
+
+    This function never executes the node.
+    """
+
+    # ---------------------------------------------------------------
+    # Constants
+    # ---------------------------------------------------------------
+
+    if isinstance(node, ast.Constant):
+        if type(node.value) not in {
+            str,
+            int,
+            float,
+            bool,
+            type(None),
+        }:
+            raise UnsafeRuleError(
+                f"Constant type '{type(node.value).__name__}' is not allowed"
+            )
+
+        return
+
+    # ---------------------------------------------------------------
+    # Lists
+    # ---------------------------------------------------------------
+
+    if isinstance(node, ast.List):
+        for element in node.elts:
+            _validate_node(element)
+
+        return
+
+    # ---------------------------------------------------------------
+    # Dictionaries
+    # ---------------------------------------------------------------
+
+    if isinstance(node, ast.Dict):
+        for key, value in zip(node.keys, node.values):
+
+            # **kwargs / **dict
+            if key is None:
+                raise UnsafeRuleError(
+                    "Dictionary unpacking is not allowed"
+                )
+
+            _validate_node(key)
+            _validate_node(value)
+
+        return
+
+    # ---------------------------------------------------------------
+    # Names
+    # ---------------------------------------------------------------
+
+    if isinstance(node, ast.Name):
+        if node.id not in {'True', 'False', 'None'}:
+            raise UnsafeRuleError(
+                f"Name '{node.id}' is not allowed"
+            )
+
+        return
+
+    # ---------------------------------------------------------------
+    # Attribute access
+    #
+    # Allowed:
+    #
+    #     Fieldnames.PATH.value
+    #     Strictness.CONTAINS
+    # ---------------------------------------------------------------
+
+    if isinstance(node, ast.Attribute):
+
+        # Fieldnames.X.value
+        if (
+            node.attr == 'value'
+            and isinstance(node.value, ast.Attribute)
+            and isinstance(node.value.value, ast.Name)
+            and node.value.value.id == 'Fieldnames'
+        ):
+            member_name = node.value.attr
+
+            if not hasattr(Fieldnames, member_name):
+                raise UnsafeRuleError(
+                    f"Unknown Fieldnames member '{member_name}'"
+                )
+
+            return
+
+        # Strictness.X
+        if (
+            isinstance(node.value, ast.Name)
+            and node.value.id == 'Strictness'
+        ):
+            member_name = node.attr
+
+            if not hasattr(Strictness, member_name):
+                raise UnsafeRuleError(
+                    f"Unknown Strictness member '{member_name}'"
+                )
+
+            return
+
+        raise UnsafeRuleError(
+            f"Attribute access '{ast.unparse(node)}' is not allowed"
+        )
+
+    # ---------------------------------------------------------------
+    # Constructor calls
+    # ---------------------------------------------------------------
+
+    if isinstance(node, ast.Call):
+
+        if not isinstance(node.func, ast.Name):
+            raise UnsafeRuleError(
+                f"Only direct constructor calls are allowed: "
+                f"'{ast.unparse(node)}'"
+            )
+
+        if node.func.id not in _ALLOWED_CONSTRUCTORS:
+            raise UnsafeRuleError(
+                f"Function '{node.func.id}' is not allowed"
+            )
+
+        # Reject *args.
+        for arg in node.args:
+            if isinstance(arg, ast.Starred):
+                raise UnsafeRuleError(
+                    "*args unpacking is not allowed"
+                )
+
+            _validate_node(arg)
+
+        # Reject **kwargs.
+        for keyword in node.keywords:
+            if keyword.arg is None:
+                raise UnsafeRuleError(
+                    "**kwargs unpacking is not allowed"
+                )
+
+            _validate_node(keyword.value)
+
+        return
+
+    # ---------------------------------------------------------------
+    # Everything else is forbidden.
+    # ---------------------------------------------------------------
+
+    raise UnsafeRuleError(
+        f"AST node '{type(node).__name__}' is not allowed"
+    )
+
+
+def _evaluate_node(node):
+    """
+    Evaluate a node that has already passed _validate_node().
+    """
+
+    if isinstance(node, ast.Constant):
+        return node.value
+
+    if isinstance(node, ast.List):
+        return [
+            _evaluate_node(element)
+            for element in node.elts
+        ]
+
+    if isinstance(node, ast.Dict):
+        return {
+            _evaluate_node(key): _evaluate_node(value)
+            for key, value in zip(node.keys, node.values)
+        }
+
+    if isinstance(node, ast.Name):
+        return {
+            'True': True,
+            'False': False,
+            'None': None,
+        }[node.id]
+
+    if isinstance(node, ast.Attribute):
+
+        # Fieldnames.X.value
+        if (
+            node.attr == 'value'
+            and isinstance(node.value, ast.Attribute)
+            and isinstance(node.value.value, ast.Name)
+            and node.value.value.id == 'Fieldnames'
+        ):
+            return getattr(
+                Fieldnames,
+                node.value.attr
+            ).value
+
+        # Strictness.X
+        if (
+            isinstance(node.value, ast.Name)
+            and node.value.id == 'Strictness'
+        ):
+            return getattr(
+                Strictness,
+                node.attr
+            )
+
+    if isinstance(node, ast.Call):
+
+        constructor = _ALLOWED_CONSTRUCTORS[node.func.id]
+
+        args = [
+            _evaluate_node(arg)
+            for arg in node.args
+        ]
+
+        kwargs = {
+            keyword.arg: _evaluate_node(keyword.value)
+            for keyword in node.keywords
+        }
+
+        return constructor(*args, **kwargs)
+
+    raise UnsafeRuleError(
+        f"Cannot evaluate AST node '{type(node).__name__}'"
+    )
+
+
+def _load_prules_from_file(filename):
+    """
+    Load valid PRules from a Python rule file.
+
+    All module-level code is ignored. Only assignments to PRULES
+    are considered.
+
+    Individual PRules that fail AST validation or construction are
+    silently skipped.
+    """
+
+    with open(filename, 'r', encoding='utf-8') as f:
+        source = f.read()
+
+    try:
+        tree = ast.parse(
+            source,
+            filename=filename,
+            mode='exec',
+        )
+    except SyntaxError:
+        return []
+
+    rules = []
+
+    for statement in tree.body:
+
+        # -----------------------------------------------------------
+        # Ignore EVERYTHING except:
+        #
+        #     PRULES = [...]
+        # -----------------------------------------------------------
+
+        if not isinstance(statement, ast.Assign):
+            continue
+
+        if len(statement.targets) != 1:
+            continue
+
+        target = statement.targets[0]
+
+        if not isinstance(target, ast.Name):
+            continue
+
+        if target.id != 'PRULES':
+            continue
+
+        # -----------------------------------------------------------
+        # PRULES must be a literal list.
+        # -----------------------------------------------------------
+
+        if not isinstance(statement.value, ast.List):
+            continue
+
+        # -----------------------------------------------------------
+        # Process each PRule independently.
+        # -----------------------------------------------------------
+
+        for i, rule_node in enumerate(statement.value.elts, start=1):
+
+            try:
+                # Validate before executing/constructing anything.
+                _validate_node(rule_node)
+
+                rule = _evaluate_node(rule_node)
+
+                if not isinstance(rule, PRule):
+                    continue
+
+                rules.append(rule)
+
+            except (UnsafeRuleError, TypeError, ValueError) as exc:
+                # Invalid PRule: ignore it and continue
+                logger.warning("Invalid or malicious rule detected. Rule %d: %s", i, str(exc))
+                continue
+
+    return rules
 
 HEADER = '''#############################################################
 # Parameter Definitions

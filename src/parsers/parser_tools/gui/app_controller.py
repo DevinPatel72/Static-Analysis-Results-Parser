@@ -59,9 +59,9 @@ class SARPApp:
                             and self.select_input.execute_now
                         ):
                             self.current_window = None
-                            
-                            # Load the preflight rules
-                            preflight.load_prules()
+                            # Load prules
+                            self.load_prules()
+                            self.load_security_prules()
                         else:
                             self.current_window = GuiWindow.InputsGUI
                     # Else exit
@@ -117,8 +117,8 @@ class SARPApp:
                 case GuiWindow.RuleBuilderGUI:
                     # If the checkbox was enabled, ask if user wants to edit the preflight rules
                     if self.control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
-                        # Load the preflight rules
-                        preflight.load_prules()
+                        # Load prules
+                        self.load_prules()
 
                         rulebuildergui = RuleBuilderGUI(parsers.gui_root, parsers.prules, self.control_flags)
                         
@@ -136,8 +136,10 @@ class SARPApp:
                             else:
                                 self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
                             self.current_window = None
+                            self.load_security_prules()
                     else:
                         parsers.prules = []
+                        parsers.security_prules = []
                         self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
                         self.current_window = None
                 # All inputs windows are finished
@@ -145,6 +147,20 @@ class SARPApp:
                     break
             # End match
         # End while
+    
+    
+    def load_prules(self):
+        # Load preflight rules if true
+        if self.control_flags.get(InputConfigFlags.PREFLIGHT_RULES.flag, InputConfigFlags.PREFLIGHT_RULES.default):
+            parsers.prules = preflight.load_prules()
+        else:
+            parsers.prules = []
+    
+    def load_security_prules(self):
+        if self.control_flags.get(InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag, InputConfigFlags.SECURITY_PREFLIGHT_RULES.default):
+            parsers.security_prules = preflight.load_prules(parsers.SECURITY_PREFLIGHT_FILE)
+        else:
+            parsers.security_prules = []
 
 def close_splash():
     # Pyinstaller splash screen

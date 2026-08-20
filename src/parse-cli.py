@@ -291,8 +291,12 @@ def main():
         export_config(parser_inputs, parser_outfile, control_flags, additional_options)
     
     # Load preflight rules if true
-    if control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
-        preflight.load_prules()
+    if control_flags.get(InputConfigFlags.PREFLIGHT_RULES.flag, InputConfigFlags.PREFLIGHT_RULES.default):
+        parsers.prules = preflight.load_prules()
+        if control_flags.get(InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag, InputConfigFlags.SECURITY_PREFLIGHT_RULES.default):
+            parsers.security_prules = preflight.load_prules(parsers.SECURITY_PREFLIGHT_FILE)
+        else:
+            parsers.security_prules = []
     else:
         parsers.prules = []
 
