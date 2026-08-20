@@ -401,7 +401,7 @@ def _load_prules_from_file(filename):
 
             except (UnsafeRuleError, TypeError, ValueError) as exc:
                 # Invalid PRule: ignore it and continue
-                logger.warning("Invalid or malicious rule detected. Rule %d: %s", i, str(exc))
+                logger.warning("Invalid or malicious preflight rule detected in \'%s\'. Rule %d: %s", filename, i, str(exc))
                 continue
 
     return rules
