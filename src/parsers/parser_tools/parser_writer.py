@@ -27,12 +27,14 @@ __parser_data = {} # Dictionary of rows keyed by their ID {row['ID']: row}
 __duplicate_index = {} # Dictionary of lists containing duplicate rows keyed by PATH, LINE, TYPE, and SCANNER
 __excel_workbook = None
 __fieldnames = None
+__set_fieldnames = set() # Maintain a set copy of __fieldnames for quicker lookups in write_row()
 
 def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force_sarif=False):
-    global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __export_sarif
+    global __filepath, __excel_workbook, __fieldnames, __excel_enabled, __export_sarif, __set_fieldnames
     from parsers import GUI_MODE
     
     __fieldnames = fieldnames
+    __set_fieldnames = set(fieldnames)
     __export_sarif = force_sarif
     
     # Track time for outfile holding
@@ -72,11 +74,23 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
         print()
 
 def write_row(r):
-    global __parser_data, __duplicate_index
+    global __parser_data, __duplicate_index, __fieldnames
     # Remove any None values
     for k in r:
         if r[k] is None:
             r[k] = ''
+    
+    # Update fieldnames if they contain new headers
+    for h in r:
+        if h not in __set_fieldnames:
+            __fieldnames.append(h)
+            __set_fieldnames.add(h)
+    
+    # Ensure every key in fieldnames is defined for the row dictionary
+    for h in __fieldnames:
+        if h not in r:
+            r[h] = ''
+    
     # Add ID row
     __parser_data.setdefault(r[Fieldnames.ID.value], []).append(r)
     
@@ -93,7 +107,7 @@ def write_rows(data):
     for row in data:
         write_row(row)
         
-def search_row(search_params, skip_ids='', match_once=False):
+def search_row(search_params):
     """
     Searches existing rows for parsed findings.
     

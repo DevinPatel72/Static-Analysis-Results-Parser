@@ -108,6 +108,7 @@ class Fieldnames(Enum):
     
     HEADERS = [SCORING_BASIS, CONFIDENCE, MATURITY, MITIGATION, PROPOSED_MITIGATION, VALIDATOR_COMMENT, ID, PATH, LINE, TYPE, MESSAGE, TRACE, SYMBOL, TOOL_CWE, TOOL, SCANNER, LANGUAGE, SEVERITY]
     EDITABLE_HEADERS = [SCORING_BASIS, CONFIDENCE, MATURITY, MITIGATION, PROPOSED_MITIGATION, VALIDATOR_COMMENT]
+    REQUIRED_HEADERS = [ID, PATH, LINE, TYPE, MESSAGE]
     DEFAULT_CONF = 'To Verify'
     DUPLICATE_CONF = 'DUPLICATE'
     DEFAULT_MATURITY = 'Unreported'
@@ -358,9 +359,9 @@ def validate_path_and_scanner(fpath, scanner):
                 headers = f.readline().strip().split(',')
         
         # Check headers
-        if len(headers) > 0 and not all(h in Fieldnames.HEADERS.value for h in headers):
+        if len(headers) > 0 and not all(h in headers for h in Fieldnames.REQUIRED_HEADERS.value):
             # Doesn't match any expected headers
-            return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match the following format:\n    {Fieldnames.HEADERS.value}"
+            return f"Input for scanner {scanner} does not match expected fieldnames.\n    {headers}\n  Ensure all of the headers match the following format:\n    {Fieldnames.REQUIRED_HEADERS.value}"
 
     # Fortify inputs
     elif any(s in scan_match for s in Scanners.FORTIFY.keywords) and os.path.isfile(fpath):
