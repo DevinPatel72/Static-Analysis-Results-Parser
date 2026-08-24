@@ -84,7 +84,7 @@ def main():
     export_config(parser_inputs, parser_outfile, control_flags, additional_options, no_overwrite=no_overwrite)
     
     # Save the preflight rules
-    preflight.save_prules(parsers.prules)
+    preflight.save_prules(parsers.prules, app.preflight_rules_path)
 
     # Init the outfile
     force_csv = parser_outfile.lower().endswith('.csv')

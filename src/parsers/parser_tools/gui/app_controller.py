@@ -18,6 +18,7 @@ class SARPApp:
         self.control_flags = {}
         self.additional_options = {}
         self.select_input = None
+        self.preflight_rules_path = 'preflight_rules.py'
         self.current_window = GuiWindow.JsonInputPreviewGUI
         
         # Set icon

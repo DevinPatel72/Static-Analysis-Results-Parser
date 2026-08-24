@@ -20,14 +20,13 @@ _ALLOWED_CONSTRUCTORS = {
 }   
 
 def load_prules(file='preflight_rules.py'):
-    from parsers import PREFLIGHT_DIR
 
     prules = []
-    data_path = os.path.join(PREFLIGHT_DIR, file)
+    data_path = os.path.join(parsers.PREFLIGHT_DIR, file)
     
     # If the py file doesn't exist
     if not os.path.isfile(data_path):
-        logger.warning("Unable to load preflight rules: 'preflight_rules.py' does not exist in config/preflight directory.")
+        logger.warning("Unable to load preflight rules: '%s' does not exist in the config/preflight directory.", file)
     else:
         # py file does exist
         try:
@@ -35,20 +34,21 @@ def load_prules(file='preflight_rules.py'):
             prules.sort(key=lambda rule: int(rule.precedence))
             logger.info("Preflight rules \'%s\' loaded successfully", file)
         except UnsafeRuleError as ure:
-            logger.error("Failed to import PRULES from \'%s\': %s", data_path, str(ure))
+            logger.console(f"Failed to import PRULES from \'{data_path}\': {ure}", title='Failed Preflight Rules Import', level='error')
             prules = []
     
     return prules
 
 
-def save_prules(prules):
-    from parsers import PREFLIGHT_DIR
+def save_prules(prules, outfile='preflight_rules.py'):
     
     # Don't save if preflight rules were disabled
-    if not parsers.control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
+    if not parsers.control_flags[InputConfigFlags.PREFLIGHT_RULES.flag] or len(outfile) <= 0:
         return
     
-    data_path = os.path.join(PREFLIGHT_DIR, 'preflight_rules.py')
+    outfile = outfile+'.py' if not outfile.endswith('.py') else outfile
+    
+    data_path = os.path.join(parsers.PREFLIGHT_DIR, outfile)
     
     prules.sort(key=lambda rule: int(rule.precedence))
 

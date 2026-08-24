@@ -45,6 +45,7 @@ class InputDictKeys(Enum):
         return [cls.PATH.value, cls.SCANNER.value, cls.PREPEND.value, cls.REMOVE.value]
 
 class InputConfigFlags(Enum):
+    # tuple(flag name, default value, required, help description, GUI module visibility)
     DUPE_SCAN_CONSOLIDATION = (parsers.FLAG_DUPE_SCAN_CONSOLIDATION, False, False, "If enabled, this will identify duplicate findings for results from identical scanners. This option might significantly increase completion time, so it is recommended to leave it disabled unless there is a need for deduplication of findings from the same scanner.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
     PREFLIGHT_RULES = (parsers.FLAG_PREFLIGHT_RULES, True, True, "If enabled, this will change final output values according to user-defined rules.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
     OVERRIDE_VULN_MAPPING = (parsers.FLAG_CATEGORY_MAPPING, True, True, "If enabled, this will append \":CATEGORY\", \":DISCOURAGED\", etc. to the end of CWE numbers.", (GuiWindow.OutfileFlagsGUI, GuiWindow.LoadingWindow))
