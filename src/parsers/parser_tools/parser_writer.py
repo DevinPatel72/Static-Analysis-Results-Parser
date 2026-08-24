@@ -40,6 +40,8 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
     # Track time for outfile holding
     elapsed_time = -1
     
+    sheet_name = 'Sheet1' if len(sheet_name.strip()) <= 0 else sheet_name.strip()
+    
     # Update the boolean to include whether the user requests CSV
     __excel_enabled = __excel_enabled and not force_csv
     
