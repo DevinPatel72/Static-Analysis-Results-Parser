@@ -171,15 +171,15 @@ def parse(fpath, scanner, substr, prepend, input_id):
                 new_row[Fieldnames.TRACE.value] = trace.strip()
                 
                 # Final check to fill in empty headers
-                if Fieldnames.CONFIDENCE.value not in new_row.keys():
+                if Fieldnames.CONFIDENCE.value not in new_row:
                     new_row[Fieldnames.CONFIDENCE.value] = Fieldnames.DEFAULT_CONF.value
-                if Fieldnames.MATURITY.value not in new_row.keys():
+                if Fieldnames.MATURITY.value not in new_row:
                     new_row[Fieldnames.MATURITY.value] = Fieldnames.DEFAULT_MATURITY.value
-                if Fieldnames.MITIGATION.value not in new_row.keys():
+                if Fieldnames.MITIGATION.value not in new_row:
                     new_row[Fieldnames.MITIGATION.value] = Fieldnames.DEFAULT_MITIGATION.value
                     
                 for fieldname in Fieldnames.HEADERS.value:
-                    if fieldname not in new_row.keys():
+                    if fieldname not in new_row:
                         new_row[fieldname] = ''
             
                 # Write row to outfile

@@ -342,7 +342,7 @@ def get_spotbugs_bug_description(*args, bug_type, default=('', '')):
     if len(spotbugs_bug_patterns) <= 0:
         load_spotbugs_bug_patterns()
     
-    if bug_type in spotbugs_bug_patterns.keys():
+    if bug_type in spotbugs_bug_patterns:
         # Get description
         if len(args) > 0:
             # Replace all {#} tags

@@ -232,7 +232,7 @@ def main():
     # Control flags
     for f in InputConfigFlags:
         # Fill in any empty control flags with default value
-        if f.flag not in control_flags.keys():
+        if f.flag not in control_flags:
             control_flags[f.flag] = f.default
         
         # Check if argument was passed and overwrite what is there
@@ -242,7 +242,7 @@ def main():
     # Additional options
     for option in InputAdditionalOptions:
         # Fill in any empty options with default value
-        if option.opt not in additional_options.keys():
+        if option.opt not in additional_options:
             additional_options[option.opt] = option.default
             
         # Check if argument was passed and overwrite what is there

@@ -238,7 +238,7 @@ def _parse_sarp_sarif(fpath, scanner, substr, prepend, input_id):
                 
                 # Final loop to fill in empty headers
                 for fieldname in Fieldnames.HEADERS.value:
-                    if fieldname not in new_row.keys():
+                    if fieldname not in new_row:
                         new_row[fieldname] = ''
             
                 # Write row to outfile

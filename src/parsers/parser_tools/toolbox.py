@@ -437,7 +437,7 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
         parsers.PROJ_VERSION = user_inputs.get('project_version', "")
         
         # Attempt to parse the main inputs
-        if 'main' not in user_inputs.keys() and len(user_inputs['main']) <= 0:
+        if 'main' not in user_inputs and len(user_inputs['main']) <= 0:
             return f"Error in parsing config file \'{inputs_path}\'. No inputs defined in \"main\"."
         
         # Check if each input contains the right keys
@@ -449,7 +449,7 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
         parser_inputs = user_inputs['main']
         
         # Check for outfile
-        if 'outfile' in user_inputs.keys():
+        if 'outfile' in user_inputs:
             if user_inputs['outfile'] is not None or len(user_inputs['outfile']) > 0:
                 parser_outfile = user_inputs['outfile'] 
             else: parser_outfile = default_outfile
@@ -460,7 +460,7 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
             parser_outfile = os.path.join(os.getcwd(), parser_outfile)
         
         # Check for control flags
-        if 'flags' in user_inputs.keys():
+        if 'flags' in user_inputs:
             for k in user_inputs['flags'].keys():
                 if k not in [f.flag for f in InputConfigFlags]:
                     return f"Error in parsing config file \'{inputs_path}\'. " + "Invalid key \'{}\' detected in \"flags\". Only the following keys are permitted: {}.".format(k, ", ".join([f.flag for f in InputConfigFlags]))
@@ -472,15 +472,15 @@ def load_config_user_inputs(inputs_path, default_outfile="output.xlsx", default_
         
         # Fill in empty flags with default values
         for f in InputConfigFlags:
-            if f.flag not in control_flags.keys():
+            if f.flag not in control_flags:
                 control_flags[f.flag] = f.default
         
         # Check for options
         options = {}
-        if 'options' in user_inputs.keys():
+        if 'options' in user_inputs:
             options = user_inputs['options']
             for opt in InputAdditionalOptions:
-                if opt.opt not in options.keys():
+                if opt.opt not in options:
                     options[opt.opt] = opt.default
         
         # Set inputs path global for export
@@ -520,7 +520,7 @@ def check_input_format(inputs, outfile, flags):
             success = False
     
     # Check if all control flags are present
-    missing = [f"\'{f}\'" for f in [t_f.flag for t_f in InputConfigFlags] if f not in flags.keys()]
+    missing = [f"\'{f}\'" for f in [t_f.flag for t_f in InputConfigFlags] if f not in flags]
     if len(missing) > 0 and not parsers.GUI_MODE:
         logger.console(f"Missing control flag{'s' if len(missing) > 1 else ''} {', '.join(missing)}", title='Invalid Config Input', level='error')
         success = False
@@ -535,7 +535,7 @@ def dedupe_parser_inputs(p_inputs):
     seen = set()
     inputs = [
         d for d in p_inputs
-        if (key := tuple(d[k] for k in d.keys())) not in seen and not seen.add(key)
+        if (key := tuple(d[k] for k in d)) not in seen and not seen.add(key)
     ]
     return inputs
 

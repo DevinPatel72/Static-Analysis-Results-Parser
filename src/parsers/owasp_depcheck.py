@@ -32,7 +32,7 @@ def path_preview(fpath):
             with open(fpath, "r", encoding='utf-8-sig') as read_obj:
                 data = json.load(read_obj)
             for dep in data['dependencies']:
-                if 'filePath' in dep.keys():
+                if 'filePath' in dep:
                     return dep['filePath']
             return "[ERROR] No paths found in input file."
         

@@ -79,7 +79,7 @@ def apply_prules(data):
             # Returns None if row does not match a rule
             if replacement := pr.apply_rule(row):
                 # Update row fieldnames defined in the rule's replacement dict
-                for fieldname in replacement.keys():
+                for fieldname in replacement:
                     # Cast to integer if possible, else just replace
                     if isinstance(replacement[fieldname], str) and replacement[fieldname].isdigit():
                         row[fieldname] = int(replacement[fieldname])

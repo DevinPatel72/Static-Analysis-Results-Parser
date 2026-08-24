@@ -74,7 +74,7 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
 def write_row(r):
     global __parser_data, __duplicate_index
     # Remove any None values
-    for k in r.keys():
+    for k in r:
         if r[k] is None:
             r[k] = ''
     # Add ID row
@@ -285,7 +285,7 @@ def rows_to_sarif(data):
             result['level'] = severity
         
         # Trace
-        if Fieldnames.TRACE.value in row.keys() and len(row[Fieldnames.TRACE.value]) > 0:
+        if Fieldnames.TRACE.value in row and len(row[Fieldnames.TRACE.value]) > 0:
             trace = row[Fieldnames.TRACE.value].strip().split('\n')
             locations = []
             for t in trace:

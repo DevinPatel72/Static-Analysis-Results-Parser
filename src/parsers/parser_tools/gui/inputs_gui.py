@@ -393,7 +393,7 @@ class InputsGUI:
         # Detect duplicate entries
         seen = set()
         for d in results:
-            key = tuple(d[k] for k in d.keys())
+            key = tuple(d[k] for k in d)
 
             if key in seen and not self.dupe_detected_submit_again:
                 messagebox.showwarning("Invalid Input", "Duplicate input entries detected. If this is intentional, submit again.")

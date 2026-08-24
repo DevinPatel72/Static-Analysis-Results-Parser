@@ -125,7 +125,7 @@ def _parse_sarif(fpath, scanner, substr, prepend, input_id):
             # Message + Trace
             message = result['message']['text']
             trace = ""
-            if 'codeFlows' in result.keys() and 'threadFlows' in result['codeFlows'][0]:
+            if 'codeFlows' in result and 'threadFlows' in result['codeFlows'][0]:
                 threadflow = result['codeFlows'][0]['threadFlows'][0]
                 if len(threadflow['locations']) > 1:
                     # If more than 8 locations, take first 3 and last 5

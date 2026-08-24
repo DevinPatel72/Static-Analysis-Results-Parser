@@ -123,7 +123,7 @@ def get_pylint_cdata(message_id, default=''):
     if len(pylint_cdata) <= 0:
         pylint_cdata = load_pylint_cdata()
     
-    if message_id in pylint_cdata.keys():
+    if message_id in pylint_cdata:
         return pylint_cdata[message_id]
     elif message_id[0] == 'R':
         return '710'
