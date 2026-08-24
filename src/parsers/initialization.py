@@ -22,17 +22,16 @@ def init_globals(gui_mode=False, progressbar_space=34):
         parsers.EXE_ROOT_DIR = os.path.dirname(sys.executable)
         logname = os.path.splitext(os.path.basename(sys.executable))[0]+'.log'
         parsers.ASSETS_DIR = os.path.join(sys._MEIPASS, parsers.ASSETS_DIR)
-        parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-256.png')
-        if not os.path.isfile(parsers.LOGO_PATH):
-            parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-1024.png')
     else:
         # Running as script
         parsers.EXE_ROOT_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
         logname = os.path.splitext(os.path.basename(os.path.abspath(sys.argv[0])))[0]+'.log'
         parsers.ASSETS_DIR = os.path.join(parsers.EXE_ROOT_DIR, parsers.ASSETS_DIR)
-        parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-256.png')
-        if not os.path.isfile(parsers.LOGO_PATH):
-            parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-1024.png')
+    
+    # Set logo path
+    parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-256.png')
+    if not os.path.isfile(parsers.LOGO_PATH):
+        parsers.LOGO_PATH = os.path.join(parsers.ASSETS_DIR, 'logos', 'sarp-logo-1024.png')
 
     # Capitalized drive letter if on Windows
     drive, rest = os.path.splitdrive(parsers.EXE_ROOT_DIR)
