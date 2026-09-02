@@ -1,5 +1,9 @@
 # Change Log
 
+## [Version 2.10.2 Hotfix 1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.2-hotfix.1) (2026-09-02)
+- Quick hotfix to patch Checkmarx parsing.
+- Bug patches for GUI elements are still in-progress and will be available in version 2.10.3.
+
 ## [Version 2.10.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.2) (2026-08-19)
 - Fixed bug where Fortify parser will cause a soft lock if an FPR file with no findings is passed
 - Updated MITRE Category Mappings to be comprehensive.
