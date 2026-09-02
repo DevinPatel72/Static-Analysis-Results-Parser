@@ -86,7 +86,7 @@ def run_parsers(parser_inputs):
     
     try:
         # Init multithreading pool
-        pool = multiprocessing.Pool(processes=parsers.additional_options.get(InputAdditionalOptions.JOBS.opt, InputAdditionalOptions.JOBS.default), initializer=init_worker, initargs=(parsers.progress_queue, parsers.control_flags, log_queue, parsers.GUI_MODE, progressbar.SPACE))
+        pool = multiprocessing.Pool(processes=parsers.additional_options.get(InputAdditionalOptions.JOBS.opt, InputAdditionalOptions.JOBS.default), initializer=init_worker, initargs=(parsers.progress_queue, parsers.control_flags, log_queue, parsers.GUI_MODE, None, progressbar.SPACE))
         
         # Start multithreading pool
         result = pool.map_async(parse_input, parser_inputs)
@@ -125,7 +125,7 @@ def run_parsers(parser_inputs):
     parser_writer.close_writer()
     
 
-def init_worker(progress_queue=None, control_flags=None, logging_queue=None, gui_mode=False, progressbar_space=34):
+def init_worker(progress_queue=None, control_flags=None, logging_queue=None, gui_mode=False, gui_root=None, progressbar_space=34):
     # Ignore SIGINT in workers to suppress traceback
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     
@@ -134,7 +134,7 @@ def init_worker(progress_queue=None, control_flags=None, logging_queue=None, gui
     parsers.control_flags = control_flags
     
     # Init globals again since the worker is its own interpreter
-    init_globals(gui_mode, progressbar_space)
+    init_globals(gui_mode, progressbar_space, gui_root)
     
     # Logging
     logger.initialize_worker(logging_queue)

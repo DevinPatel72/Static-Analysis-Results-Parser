@@ -18,6 +18,7 @@ import sys
 import traceback
 from multiprocessing import freeze_support
 from datetime import datetime
+import tkinter as tk
 import parsers
 from parsers.parser_tools import progressbar, parser_writer, preflight, parser_logger as logger
 from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, export_config
@@ -31,7 +32,8 @@ from parsers.parser_tools.gui.app_controller import SARPApp
 ################################
 
 def main():
-    init_globals(gui_mode=True, progressbar_space=progressbar.SPACE)
+    gui_root = tk.Tk()
+    init_globals(gui_mode=True, progressbar_space=progressbar.SPACE, gui_root=gui_root)
     init_main_logger()
     
     # Check for updates first

@@ -39,15 +39,14 @@ EXT_TO_FORMAT = {
 }
 
 
-def create_tk_variable(value):
+def create_tk_variable(value, master=None):
     var_type = {
         int: tk.IntVar,
         bool: tk.BooleanVar,
         float: tk.DoubleVar,
         str: tk.StringVar,
     }.get(type(value), tk.StringVar)
-
-    return var_type(value=value)
+    return var_type(master=master, value=value)
 
 
 class PathInputWithPlaceholder(tk.Entry):
@@ -504,8 +503,8 @@ class AdjustPathsGUI:
             remove = item.get(InputDictKeys.REMOVE.value, "")
             prepend = item.get(InputDictKeys.PREPEND.value, "")
 
-            remove_var = tk.StringVar()
-            add_var = tk.StringVar()
+            remove_var = tk.StringVar(master=self.root)
+            add_var = tk.StringVar(master=self.root)
 
             remove_entry = tk.Entry(table_frame, textvariable=remove_var)
             remove_entry.delete(0, tk.END)
@@ -605,8 +604,8 @@ class OutfileFlagsGUI:
         y = ((screen_height - height) // 2) - 50
         self.root.geometry(f"{width}x{height}+{x}+{y}")
 
-        self.output_path = tk.StringVar()
-        self.output_format = tk.StringVar(value="Excel")
+        self.output_path = tk.StringVar(master=self.root)
+        self.output_format = tk.StringVar(master=self.root, value="Excel")
         self._updating = False
 
         # ─── File Path Selector and Format ────────────────────
@@ -651,7 +650,7 @@ class OutfileFlagsGUI:
             if GuiWindow.OutfileFlagsGUI not in f.module_visibility:
                 continue
             
-            self.flag_bool_vars[f.flag] = tk.BooleanVar(value=self.initial_flags.get(f.flag, f.default))
+            self.flag_bool_vars[f.flag] = tk.BooleanVar(master=self.root, value=self.initial_flags.get(f.flag, f.default))
 
             self.add_checkbox_with_tooltip(
                 checkbox_frame,
@@ -670,7 +669,7 @@ class OutfileFlagsGUI:
             if GuiWindow.OutfileFlagsGUI not in opt.module_visibility:
                 continue
             
-            self.additional_option_vars[opt.opt] = create_tk_variable(value=self.initial_additional_options.get(opt.opt, opt.default))
+            self.additional_option_vars[opt.opt] = create_tk_variable(value=self.initial_additional_options.get(opt.opt, opt.default), master=self.root)
 
             self.add_dropdown_with_tooltip(
                 options_frame,

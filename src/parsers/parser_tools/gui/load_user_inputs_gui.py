@@ -51,7 +51,7 @@ class JsonInputPreviewGUI:
         self.root.update()
         self.root.attributes("-topmost", False)
         
-        self.selected_file_var = tk.StringVar(value="")
+        self.selected_file_var = tk.StringVar(master=self.root, value="")
 
         self._build_gui()
         self._load_json_files()
@@ -147,7 +147,7 @@ class JsonInputPreviewGUI:
             
         )
 
-        self.selected_file_var = tk.StringVar(value="")
+        self.selected_file_var = tk.StringVar(master=self.root, value="")
 
         self.file_selection_canvas = tk.Canvas(
             self.left_frame,
@@ -516,9 +516,7 @@ class JsonInputPreviewGUI:
             anchor="w"
         )
 
-        expanded = tk.BooleanVar(
-            value=False
-        )
+        expanded = tk.BooleanVar(master=self.root, value=False)
 
         body_frame = ttk.Frame(
             section_frame

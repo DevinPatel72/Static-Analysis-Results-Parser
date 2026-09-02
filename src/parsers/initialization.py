@@ -6,12 +6,12 @@ import parsers
 from parsers.parser_tools import progressbar, parser_logger as logger
 
 
-def init_globals(gui_mode=False, progressbar_space=34):
+def init_globals(gui_mode=False, progressbar_space=34, gui_root=None):
     # Init GUI if true
     if gui_mode:
-        import tkinter as tk
-        parsers.gui_root = tk.Tk()
-        parsers.gui_root.withdraw()
+        parsers.gui_root = gui_root
+        if parsers.gui_root is not None:
+            parsers.gui_root.withdraw()
     parsers.GUI_MODE = gui_mode
     progressbar.DISABLE_PROGRESS_BAR = gui_mode
     progressbar.SPACE = progressbar_space

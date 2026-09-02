@@ -24,7 +24,8 @@ def set_widget_bg(widget, bg):
 
 class ConditionFrame:
     def __init__(self, master, bg=None, remove_callback=None):
-        self.frame = tk.Frame(master, relief=tk.RIDGE, borderwidth=1, bg=bg)
+        self.master = master
+        self.frame = tk.Frame(self.master, relief=tk.RIDGE, borderwidth=1, bg=bg)
 
         self.remove_callback = remove_callback
 
@@ -52,7 +53,7 @@ class ConditionFrame:
         self.pattern = tk.Entry(self.frame)
         self.pattern.grid(row=0, column=5, padx=5, sticky="ew")
 
-        self.case = tk.BooleanVar()
+        self.case = tk.BooleanVar(master=self.master)
         tk.Checkbutton(
             self.frame,
             text="Case Sensitive",
@@ -379,7 +380,7 @@ class RuleFrame:
 
         tk.Label(header, text="Precedence", bg=self.bg).pack(side=tk.LEFT)
 
-        self.precedence_var = tk.StringVar(value="1")
+        self.precedence_var = tk.StringVar(master=self.master, value="1")
 
         self.precedence = tk.Label(
             header,
@@ -642,9 +643,9 @@ class RuleBuilderGUI:
         
         # Enable Default Rules checkbox
         if self.control_flags is not None:
-            self.cb_enable_security_rules = tk.BooleanVar(value=self.control_flags.get(InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag, InputConfigFlags.SECURITY_PREFLIGHT_RULES.default))
+            self.cb_enable_security_rules = tk.BooleanVar(master=self.root, value=self.control_flags.get(InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag, InputConfigFlags.SECURITY_PREFLIGHT_RULES.default))
         else:
-            self.cb_enable_security_rules = tk.BooleanVar(value=InputConfigFlags.SECURITY_PREFLIGHT_RULES.default)
+            self.cb_enable_security_rules = tk.BooleanVar(master=self.root, value=InputConfigFlags.SECURITY_PREFLIGHT_RULES.default)
 
         tk.Checkbutton(
             control,

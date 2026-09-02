@@ -13,6 +13,7 @@ from parsers.parser_tools import preflight, parser_logger as logger
 class SARPApp:
     
     def __init__(self):
+        self._LOADED_PRULES_ONCE = False
         self.parser_inputs = []
         self.parser_outfile = ""
         self.control_flags = {}
@@ -118,11 +119,12 @@ class SARPApp:
                 case GuiWindow.RuleBuilderGUI:
                     # If the checkbox was enabled, ask if user wants to edit the preflight rules
                     if self.control_flags[InputConfigFlags.PREFLIGHT_RULES.flag]:
-                        # Load prules
-                        self.load_prules()
+                        # Load prules initially
+                        if not self._LOADED_PRULES_ONCE:
+                            self.load_prules()
+                            self._LOADED_PRULES_ONCE = True
 
                         rulebuildergui = RuleBuilderGUI(parsers.gui_root, parsers.prules, self.control_flags)
-                        
                         if rulebuildergui.cleanexit:
                             parsers.prules = rulebuildergui.result
                         else:
@@ -141,7 +143,7 @@ class SARPApp:
                     else:
                         parsers.prules = []
                         parsers.security_prules = []
-                        self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
+                        self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = False
                         self.current_window = None
                 # All inputs windows are finished
                 case _:
