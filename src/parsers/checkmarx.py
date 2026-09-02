@@ -33,7 +33,7 @@ def path_preview(fpath):
     # No data, return error message
     return f"[ERROR] No data found in Checkmarx file \'{fpath}\'"
 
-def parse(fpath, scanner, substr, prepend):
+def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)
     parsed_data = []
     
@@ -45,9 +45,9 @@ def parse(fpath, scanner, substr, prepend):
     
     # Parse the file
     if fpath.endswith('.xml'):
-        parsed_data, finding_count, err_count = _parse_xml(fpath, substr, prepend, total_findings, scanner)
+        parsed_data, finding_count, err_count = _parse_xml(fpath, substr, prepend, total_findings, scanner, input_id)
     elif fpath.endswith('.csv'):
-        parsed_data, finding_count, err_count = _parse_csv(fpath, substr, prepend, total_findings, scanner)
+        parsed_data, finding_count, err_count = _parse_csv(fpath, substr, prepend, total_findings, scanner, input_id)
     else:
         logger.error("File %s is not an XML or CSV.", fpath)
         
