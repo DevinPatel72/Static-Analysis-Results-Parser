@@ -1285,9 +1285,12 @@ PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"cppcheck", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern="srm", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
-                    Condition(fieldname=Fieldnames.TYPE.value, pattern=r"returnByReference", strictness=Strictness.EXACT, case_sensitive=False),
+                    ConditionGroup(operator="AND", conditions=[
+                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"returnByReference", strictness=Strictness.EXACT, case_sensitive=False),
+                        Condition(fieldname=Fieldnames.MESSAGE.value, pattern=r"by const reference", strictness=Strictness.CONTAINS, case_sensitive=False),
+                    ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '710'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '710', Fieldnames.CONFIDENCE.value: 'Info', Fieldnames.VALIDATOR_COMMENT.value: "CPPCheck is suggesting to return variables as const references to improve performance by avoiding unnecessary copying. However, this may introduce complications such as the need to pay attention to expired pointers or dangling references."}
         ),
         PRule(
             rule_id = "cppcheck_returnImplicitInt",
