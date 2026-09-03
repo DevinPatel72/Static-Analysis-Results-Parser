@@ -185,9 +185,12 @@ PRULES = [
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad comparison of floating-point expressions", strictness=Strictness.EXACT, case_sensitive=False),
+                        ConditionGroup(operator="OR", conditions=[
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Floating-point expressions shall not be directly or indirectly tested for equality or inequality.", strictness=Strictness.EXACT, case_sensitive=False),
+                            Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Bad comparison of floating-point expressions", strictness=Strictness.EXACT, case_sensitive=False),
+                        ]),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1077'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '1077', Fieldnames.VALIDATOR_COMMENT.value: "Floating point values are not precise. Even a trivial equality expression may evaluate to False due to the way floating points are represented. For instance, the expression 0.1 + 0.2 == 0.3 will return False"}
         ),
         PRule(
             rule_id = "coverity_comparing_two_pointers_not_into_the_same_object",
@@ -251,15 +254,6 @@ PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Expression with no effect", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
             replacement = {Fieldnames.SCORING_BASIS.value: '1164'}
-        ),
-        PRule(
-            rule_id = "coverity_floating_point_expressions_shall_not_be_directly_or_indirectly_tested_for_equality_or_inequality",
-            precedence = 0,
-            condition=ConditionGroup(operator="AND", conditions=[
-                        Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
-                        Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Floating-point expressions shall not be directly or indirectly tested for equality or inequality.", strictness=Strictness.EXACT, case_sensitive=False),
-                    ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '1077'}
         ),
         PRule(
             rule_id = "coverity_header_file_included_but_not_used",
