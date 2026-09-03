@@ -445,7 +445,7 @@ PRULES = [
                         Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"coverity", strictness=Strictness.CONTAINS, case_sensitive=False),
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"This class has user-definitions for at least one but not all of its special functions (copy constructor, copy assignment operator, destructor).", strictness=Strictness.CONTAINS, case_sensitive=False),
                     ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '825'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '825', Fieldnames.VALIDATOR_COMMENT.value: 'Neglecting to provide an implementation for one or several of the following: Copy constructor, operator= override, copy assignment; will result in the compiler auto-generating an implementation for them that will only perform shallow copies. If the class is intended to create and store memory allocations, a shallow copy will only copy memory addresses, leading to multiple class instances storing references to the same region of memory. If one instance gets destructed, then the zombie references in the remaining instances will result in a double free or use after free.'}
         ),
         PRule(
             rule_id = "coverity_variable_copied_instead_of_moved",
@@ -631,7 +631,7 @@ PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Class should have an operator=", strictness=Strictness.EXACT, case_sensitive=False)
                     ])
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '664', Fieldnames.VALIDATOR_COMMENT.value: "Neglecting to create a copy constructor or operator= definition will prompt the compiler to auto-generate a shallow copy constructor or operator= override, which will result in downstream weaknesses if one instance executes its destructor (e.g., double free, use after free, expired pointer dereference, resource race conditions)."}
+            replacement = {Fieldnames.SCORING_BASIS.value: '825', Fieldnames.VALIDATOR_COMMENT.value: "Neglecting to create a copy constructor or operator= definition will prompt the compiler to auto-generate a shallow copy constructor or operator= override, which will result in downstream weaknesses if one instance executes its destructor (e.g., double free, use after free, expired pointer dereference, resource race conditions)."}
         ),
         PRule(
             rule_id = "cppcheck_class_lacks_move_assignment",
@@ -1069,7 +1069,7 @@ PRULES = [
                         Condition(fieldname=Fieldnames.TYPE.value, pattern=r"Class should have copy constructor", strictness=Strictness.EXACT, case_sensitive=False),
                     ]),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '825'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '825', Fieldnames.VALIDATOR_COMMENT.value: 'Neglecting to provide an implementation for one or several of the following: Copy constructor, operator= override, copy assignment; will result in the compiler auto-generating an implementation for them that will only perform shallow copies. If the class is intended to create and store memory allocations, a shallow copy will only copy memory addresses, leading to multiple class instances storing references to the same region of memory. If one instance gets destructed, then the zombie references in the remaining instances will result in a double free or use after free.'}
         ),
         PRule(
             rule_id = "cppcheck_noexplicitconstructor",
@@ -1093,7 +1093,7 @@ PRULES = [
                     ]),
                     Condition(fieldname=Fieldnames.TYPE.value, pattern=r"noOperatorEq", strictness=Strictness.EXACT, case_sensitive=False),
                 ]),
-            replacement = {Fieldnames.SCORING_BASIS.value: '825'}
+            replacement = {Fieldnames.SCORING_BASIS.value: '825', Fieldnames.VALIDATOR_COMMENT.value: 'Neglecting to provide an implementation for one or several of the following: Copy constructor, operator= override, copy assignment; will result in the compiler auto-generating an implementation for them that will only perform shallow copies. If the class is intended to create and store memory allocations, a shallow copy will only copy memory addresses, leading to multiple class instances storing references to the same region of memory. If one instance gets destructed, then the zombie references in the remaining instances will result in a double free or use after free.'}
         ),
         PRule(
             rule_id = "cppcheck_operatoreqvarerror",
