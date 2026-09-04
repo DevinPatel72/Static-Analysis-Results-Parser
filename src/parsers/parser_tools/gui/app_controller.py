@@ -33,6 +33,7 @@ class SARPApp:
         # Set icon
         icon = tk.PhotoImage(file=parsers.LOGO_PATH)
         parsers.gui_root.iconphoto(True, icon)
+        close_splash()
         
         # GUI feedback loop
         while True:
@@ -41,7 +42,6 @@ class SARPApp:
                 case GuiWindow.JsonInputPreviewGUI:
                     # Load inputs if there are any
                     self.json_input_preview_gui.load_view()
-                    close_splash()
 
                     # Load inputs from config file
                     if self.json_input_preview_gui.cleanexit and self.json_input_preview_gui.results is not None:
