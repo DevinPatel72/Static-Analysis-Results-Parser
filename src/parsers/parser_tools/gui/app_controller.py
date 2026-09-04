@@ -20,9 +20,11 @@ class SARPApp:
         self.parser_outfile = ""
         self.control_flags = {}
         self.additional_options = {}
-        self.select_input = None
+        self.json_input_preview_gui = None
         self.preflight_rules_path = 'preflight_rules.py'
         self.current_window = GuiWindow.JsonInputPreviewGUI
+        self.json_input_preview_gui = JsonInputPreviewGUI(parsers.gui_root)
+        self.inputs_gui = InputsGUI(parsers.gui_root)
         
         # Set icon
         icon = tk.PhotoImage(file=parsers.LOGO_PATH)
@@ -34,15 +36,14 @@ class SARPApp:
                 # User selects input profile
                 case GuiWindow.JsonInputPreviewGUI:
                     # Load inputs if there are any
-                    self.select_input = JsonInputPreviewGUI(parsers.gui_root)
+                    self.json_input_preview_gui.load_view()
                     close_splash()
-                    parsers.gui_root.wait_window(self.select_input.root)
 
                     # Load inputs from config file
-                    if self.select_input.cleanexit and self.select_input.results is not None:
-                        rv = load_config_user_inputs(self.select_input.results)
+                    if self.json_input_preview_gui.cleanexit and self.json_input_preview_gui.results is not None:
+                        rv = load_config_user_inputs(self.json_input_preview_gui.results)
                         if isinstance(rv, str):
-                            if f"Config file {self.select_input.results} not found." != rv:
+                            if f"Config file {self.json_input_preview_gui.results} not found." != rv:
                                 logger.console(f"{rv}\n\nDefaulting to using blank fields.", "Cannot load config", "warning")
                             self.parser_inputs = []
                             self.parser_outfile = ""
@@ -53,14 +54,14 @@ class SARPApp:
                         # Check inputs format
                         if len(self.parser_inputs) > 0:
                             if not check_input_format(self.parser_inputs, self.parser_outfile, self.control_flags):
-                                self.select_input.execute_now = False
+                                self.json_input_preview_gui.execute_now = False
                         
                         # Dedupe self.parser_inputs
                         self.parser_inputs = dedupe_parser_inputs(self.parser_inputs)
                         
                         # Window finished, set current window to the next window. If executing now, go to default case.
                         if (not (len(self.parser_inputs) <= 0 or len(self.parser_outfile) <= 0 or len(self.control_flags) <= 0)
-                            and self.select_input.execute_now
+                            and self.json_input_preview_gui.execute_now
                         ):
                             self.current_window = None
                             # Load prules
@@ -74,17 +75,17 @@ class SARPApp:
                 
                 # User passes scanner and path inputs
                 case GuiWindow.InputsGUI:
-                    inputs_gui = InputsGUI(parsers.gui_root, self.parser_inputs)
-                    if not inputs_gui.cleanexit:
+                    self.inputs_gui.load_view(self.parser_inputs)
+                    if not self.inputs_gui.cleanexit:
                         sys.exit(0)
                     
                     # Go back if selected
-                    if inputs_gui.back:
+                    if self.inputs_gui.back:
                         self.current_window = GuiWindow.JsonInputPreviewGUI
                     else:
-                        self.parser_inputs = inputs_gui.results
-                        parsers.PROJ_NAME = inputs_gui.results_project_name
-                        parsers.PROJ_VERSION = inputs_gui.results_project_version
+                        self.parser_inputs = self.inputs_gui.results
+                        parsers.PROJ_NAME = self.inputs_gui.results_project_name
+                        parsers.PROJ_VERSION = self.inputs_gui.results_project_version
                         self.current_window = GuiWindow.AdjustPathsGUI
             
                 # User passes remove/prepend paths

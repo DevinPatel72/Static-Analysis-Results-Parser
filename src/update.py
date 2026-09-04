@@ -79,7 +79,11 @@ def join_url(base, *segments):
 def version_key(version, parts=3):
     nums = version.removeprefix("v").split(".")
     nums.extend(["0"] * (parts - len(nums)))
-    return tuple(map(int, nums[:parts]))
+
+    return tuple(
+        int(re.match(r"\d+", n).group())
+        for n in nums[:parts]
+    )
 
 # Check repository for most recent version
 def check_version(current_version):

@@ -80,9 +80,9 @@ def main():
     logger.info("\n".join(['    ' + l for l in s.split('\n')]))
     
     # Export parser inputs to config file for reruns. If reading from a selected inputs file, overwrite it instead of creating a new file.
-    if app.select_input is None:
+    if app.json_input_preview_gui is None:
         no_overwrite = False
-    else: no_overwrite = not (app.select_input.results is not None and len(app.select_input.results) > 0)
+    else: no_overwrite = not (app.json_input_preview_gui.results is not None and len(app.json_input_preview_gui.results) > 0)
     export_config(parser_inputs, parser_outfile, control_flags, additional_options, no_overwrite=no_overwrite)
     
     # Save the preflight rules

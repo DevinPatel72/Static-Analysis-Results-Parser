@@ -28,7 +28,10 @@ class JsonInputPreviewGUI:
 
         self.root = tk.Toplevel(root)
         self.root.title(PROG_NAME)
-        
+
+        # Keep the window hidden until load_view() is called.
+        self.root.withdraw()
+
         # Set geometry
         width = 1300
         height = 500
@@ -38,28 +41,58 @@ class JsonInputPreviewGUI:
         x = (screen_width - width) // 2
         y = ((screen_height - height) // 2) - 50
         self.root.geometry(f"{width}x{height}+{x}+{y}")
-        
+
         self.root.protocol(
             "WM_DELETE_WINDOW",
             self._on_close
         )
 
+        self.selected_file_var = tk.StringVar(
+            master=self.root,
+            value=""
+        )
+
+        self._build_gui()
+        self._load_json_files()
+
+    def load_view(self):
+        """
+        Show the window, bring it to the foreground, and run
+        the Tk event loop until hide_view() or _on_close() is called.
+        """
+        self.root.withdraw()
+        self.cleanexit = False
+        self.results = None
+        self.execute_now = False
+        self._refresh_profiles()
+        
         self.root.deiconify()
         self.root.lift()
         self.root.focus_force()
         self.root.attributes("-topmost", True)
         self.root.update()
         self.root.attributes("-topmost", False)
-        
-        self.selected_file_var = tk.StringVar(master=self.root, value="")
 
-        self._build_gui()
-        self._load_json_files()
+        self.root.mainloop()
 
+    def hide_view(self):
+        """
+        Hide the window and exit the current mainloop without
+        destroying the window.
+        """
+        self.root.withdraw()
+        self.root.update_idletasks()
+        self.root.quit()
 
     def _on_close(self):
+        """
+        Permanently close the window.
+        """
         self.cleanexit = False
         self.results = None
+
+        # Exit mainloop before destroying the window.
+        self.root.quit()
         self.root.destroy()
 
     def _build_gui(self):
@@ -325,8 +358,8 @@ class JsonInputPreviewGUI:
     def _submit(self):
         self.results = self.selected_file_var.get()
         self.cleanexit = True
-        self.root.destroy()
-    
+        self.hide_view()
+
     def _execute(self):
         self.execute_now = True
         self._submit()
