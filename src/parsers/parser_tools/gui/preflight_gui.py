@@ -1,5 +1,4 @@
 # preflight_gui.py
-
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -7,7 +6,7 @@ from .version_label import VersionLabel
 from ..prule import PRule, Condition, ConditionGroup, Strictness
 from ..toolbox import Fieldnames, InputConfigFlags
 
-WINDOW_TITLE = "Rule Builder"
+WINDOW_TITLE = "Preflight Rule Builder"
 WINDOW_LENGTH = 1100
 WINDOW_HEIGHT = 750
 
@@ -162,6 +161,7 @@ class ConditionGroupFrame:
         self.children.append(group)
 
     def remove_child(self, child):
+
         child.frame.destroy()
         self.children.remove(child)
 
@@ -235,11 +235,15 @@ class ReplacementEditor:
         return [row[0].get() for row in self.rows if row[0].get()]
 
     def refresh_dropdowns(self):
+
         used = self.get_used_fields()
 
         for dropdown, _ in self.rows:
             current = dropdown.get()
-            available = [f for f in self.fieldnames if f not in used or f == current]
+            available = [
+                f for f in self.fieldnames
+                if f not in used or f == current
+            ]
             dropdown['values'] = available
 
     def add_row(self, field=None, value=""):
@@ -266,9 +270,16 @@ class ReplacementEditor:
             self.rows.remove((dropdown, entry))
             self.refresh_dropdowns()
 
-        tk.Button(row_frame, text="Delete", command=remove).pack(side=tk.LEFT)
+        tk.Button(
+            row_frame,
+            text="Delete",
+            command=remove
+        ).pack(side=tk.LEFT)
 
-        dropdown.bind("<<ComboboxSelected>>", lambda e: self.refresh_dropdowns())
+        dropdown.bind(
+            "<<ComboboxSelected>>",
+            lambda e: self.refresh_dropdowns()
+        )
 
         self.rows.append((dropdown, entry))
         self.refresh_dropdowns()
@@ -283,10 +294,12 @@ class ReplacementEditor:
         for dropdown, entry in self.rows:
             field = dropdown.get()
             val = entry.get()
+
             if field:
                 self.result[field] = val
 
         self.root.destroy()
+
 
 class RootConditionFrame(ConditionGroupFrame):
 
@@ -341,6 +354,7 @@ class RootConditionFrame(ConditionGroupFrame):
         self.children.append(group)
 
     def remove_child(self, child):
+
         child.frame.destroy()
         self.children.remove(child)
 
@@ -352,8 +366,10 @@ class RootConditionFrame(ConditionGroupFrame):
         conditions = []
 
         for child in self.children:
+
             if isinstance(child, ConditionFrame):
                 conditions.append(child.get_condition())
+
             else:
                 conditions.append(child.get_group())
 
@@ -362,7 +378,15 @@ class RootConditionFrame(ConditionGroupFrame):
 
 class RuleFrame:
 
-    def __init__(self, master, index=0, remove_callback=None, move_up=None, move_down=None, rule_data=None):
+    def __init__(
+        self,
+        master,
+        index=0,
+        remove_callback=None,
+        move_up=None,
+        move_down=None,
+        rule_data=None
+    ):
 
         self.master = master
         self.remove_callback = remove_callback
@@ -371,18 +395,46 @@ class RuleFrame:
 
         self.bg = BG_COLOR1 if index % 2 == 0 else BG_COLOR2
 
-        self.frame = tk.Frame(master, relief=tk.RAISED, borderwidth=2, bg=self.bg)
+        self.frame = tk.Frame(
+            master,
+            relief=tk.RAISED,
+            borderwidth=2,
+            bg=self.bg
+        )
 
-        header = tk.Frame(self.frame, bg=self.bg)
+        header = tk.Frame(
+            self.frame,
+            bg=self.bg
+        )
+
         header.pack(fill="x")
 
-        tk.Label(header, text="Rule ID", bg=self.bg).pack(side=tk.LEFT)
-        self.rule_id = tk.Entry(header, width=20)
-        self.rule_id.pack(side=tk.LEFT, padx=5)
+        tk.Label(
+            header,
+            text="Rule ID",
+            bg=self.bg
+        ).pack(side=tk.LEFT)
 
-        tk.Label(header, text="Precedence", bg=self.bg).pack(side=tk.LEFT)
+        self.rule_id = tk.Entry(
+            header,
+            width=20
+        )
 
-        self.precedence_var = tk.StringVar(master=self.master, value="1")
+        self.rule_id.pack(
+            side=tk.LEFT,
+            padx=5
+        )
+
+        tk.Label(
+            header,
+            text="Precedence",
+            bg=self.bg
+        ).pack(side=tk.LEFT)
+
+        self.precedence_var = tk.StringVar(
+            master=self.master,
+            value="1"
+        )
 
         self.precedence = tk.Label(
             header,
@@ -390,7 +442,11 @@ class RuleFrame:
             width=3,
             relief=tk.SUNKEN
         )
-        self.precedence.pack(side=tk.LEFT, padx=5)
+
+        self.precedence.pack(
+            side=tk.LEFT,
+            padx=5
+        )
 
         tk.Button(
             header,
@@ -408,7 +464,10 @@ class RuleFrame:
             header,
             text="Edit Replacement",
             command=self.edit_replacement
-        ).pack(side=tk.LEFT, padx=10)
+        ).pack(
+            side=tk.LEFT,
+            padx=10
+        )
 
         tk.Button(
             header,
@@ -416,8 +475,16 @@ class RuleFrame:
             command=self.remove
         ).pack(side=tk.RIGHT)
 
-        self.group = RootConditionFrame(self.frame, bg=self.bg)
-        self.group.frame.pack(fill="both", expand=True, pady=5)
+        self.group = RootConditionFrame(
+            self.frame,
+            bg=self.bg
+        )
+
+        self.group.frame.pack(
+            fill="both",
+            expand=True,
+            pady=5
+        )
         
         self.replacement = {}
 
@@ -426,7 +493,10 @@ class RuleFrame:
 
     def set_bg(self, bg):
         self.bg = bg
-        set_widget_bg(self.frame, bg)
+        set_widget_bg(
+            self.frame,
+            bg
+        )
 
     def move_up(self):
         if self.move_up_callback:
@@ -447,28 +517,54 @@ class RuleFrame:
         return int(self.precedence_var.get())
 
     def edit_replacement(self):
-        editor = ReplacementEditor(self.frame, getattr(self, 'replacement', {}), Fieldnames.EDITABLE_HEADERS.value, self.rule_id.get(), self.get_precedence())
+
+        editor = ReplacementEditor(
+            self.frame,
+            getattr(self, 'replacement', {}),
+            Fieldnames.EDITABLE_HEADERS.value,
+            self.rule_id.get(),
+            self.get_precedence()
+        )
+
         self.replacement = editor.result
         
     def load_rule(self, rule):
 
-        self.rule_id.insert(0, rule.rule_id)
+        self.rule_id.insert(
+            0,
+            rule.rule_id
+        )
 
-        self.replacement = rule.replacement.copy() if rule.replacement else {}
+        self.replacement = (
+            rule.replacement.copy()
+            if rule.replacement
+            else {}
+        )
 
         # Load condition tree
         self.group.frame.destroy()
+
         self.group = RootConditionFrame(
             self.frame,
             bg=self.bg
         )
-        self.group.frame.pack(fill="both", expand=True, pady=5)
 
-        self.load_root(self.group, rule.condition)
+        self.group.frame.pack(
+            fill="both",
+            expand=True,
+            pady=5
+        )
+
+        self.load_root(
+            self.group,
+            rule.condition
+        )
     
     def load_group(self, group_frame, group_data):
 
-        group_frame.operator.set(group_data.operator)
+        group_frame.operator.set(
+            group_data.operator
+        )
 
         # remove default child
         for child in group_frame.children[:]:
@@ -485,12 +581,28 @@ class RuleFrame:
                     remove_callback=group_frame.remove_child
                 )
 
-                cf.field.set(cond.fieldname)
-                cf.pattern.insert(0, cond.pattern)
-                cf.strictness.set(cond.strictness.value)
-                cf.case.set(cond.case_sensitive)
+                cf.field.set(
+                    cond.fieldname
+                )
 
-                cf.frame.pack(fill="x", pady=2)
+                cf.pattern.insert(
+                    0,
+                    cond.pattern
+                )
+
+                cf.strictness.set(
+                    cond.strictness.value
+                )
+
+                cf.case.set(
+                    cond.case_sensitive
+                )
+
+                cf.frame.pack(
+                    fill="x",
+                    pady=2
+                )
+
                 group_frame.children.append(cf)
 
             else:
@@ -501,10 +613,17 @@ class RuleFrame:
                     remove_callback=group_frame.remove_child
                 )
 
-                sub.frame.pack(fill="x", pady=5)
+                sub.frame.pack(
+                    fill="x",
+                    pady=5
+                )
+
                 group_frame.children.append(sub)
 
-                self.load_group(sub, cond)
+                self.load_group(
+                    sub,
+                    cond
+                )
     
     def load_root(self, root_frame, group_data):
 
@@ -513,6 +632,7 @@ class RuleFrame:
             root_frame.children.remove(child)
 
         if hasattr(group_data, 'conditions'):
+
             for cond in group_data.conditions:
 
                 if isinstance(cond, Condition):
@@ -523,12 +643,28 @@ class RuleFrame:
                         remove_callback=root_frame.remove_child
                     )
 
-                    cf.field.set(cond.fieldname)
-                    cf.pattern.insert(0, cond.pattern)
-                    cf.strictness.set(cond.strictness.value)
-                    cf.case.set(cond.case_sensitive)
+                    cf.field.set(
+                        cond.fieldname
+                    )
 
-                    cf.frame.pack(fill="x", pady=2)
+                    cf.pattern.insert(
+                        0,
+                        cond.pattern
+                    )
+
+                    cf.strictness.set(
+                        cond.strictness.value
+                    )
+
+                    cf.case.set(
+                        cond.case_sensitive
+                    )
+
+                    cf.frame.pack(
+                        fill="x",
+                        pady=2
+                    )
+
                     root_frame.children.append(cf)
 
                 else:
@@ -539,11 +675,20 @@ class RuleFrame:
                         remove_callback=root_frame.remove_child
                     )
 
-                    sub.frame.pack(fill="x", pady=5)
+                    sub.frame.pack(
+                        fill="x",
+                        pady=5
+                    )
+
                     root_frame.children.append(sub)
 
-                    self.load_group(sub, cond)
+                    self.load_group(
+                        sub,
+                        cond
+                    )
+
         else: # group_data is the condition
+
             if isinstance(group_data, Condition):
             
                 cf = ConditionFrame(
@@ -552,37 +697,60 @@ class RuleFrame:
                     remove_callback=root_frame.remove_child
                 )
             
-                cf.field.set(group_data.fieldname)
-                cf.pattern.insert(0, group_data.pattern)
-                cf.strictness.set(group_data.strictness.value)
-                cf.case.set(group_data.case_sensitive)
-            
-                cf.frame.pack(fill="x", pady=2)
-                root_frame.children.append(cf)
+                cf.field.set(
+                    group_data.fieldname
+                )
 
+                cf.pattern.insert(
+                    0,
+                    group_data.pattern
+                )
+
+                cf.strictness.set(
+                    group_data.strictness.value
+                )
+
+                cf.case.set(
+                    group_data.case_sensitive
+                )
+            
+                cf.frame.pack(
+                    fill="x",
+                    pady=2
+                )
+
+                root_frame.children.append(cf)
+    
     def get_rule(self):
 
         return PRule(
             rule_id=self.rule_id.get(),
-            precedence=max(1, self.get_precedence()),
+            precedence=max(
+                1,
+                self.get_precedence()
+            ),
             condition=ConditionGroup(
                 operator="AND",
                 conditions=self.group.get_conditions()
             ),
-            replacement=getattr(self, 'replacement', {})
+            replacement=getattr(
+                self,
+                'replacement',
+                {}
+            )
         )
 
 
 class RuleBuilderGUI:
 
-    def __init__(self, root: tk.Tk, rules=None, control_flags=None):
+    def __init__(self, root: tk.Tk):
 
         self.result = None
         self.enable_security_rules = None
         self.cleanexit = False
         self.back = False
         self.rules = []
-        self.control_flags = control_flags
+        self.control_flags = None
 
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
@@ -595,95 +763,362 @@ class RuleBuilderGUI:
 
         x = (screen_width - width) // 2
         y = ((screen_height - height) // 2) - 50
-        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        self.root.geometry(
+            f"{width}x{height}+{x}+{y}"
+        )
 
         container = tk.Frame(self.root)
-        container.pack(fill="both", expand=True, padx=10, pady=10)
+        container.pack(
+            fill="both",
+            expand=True,
+            padx=10,
+            pady=10
+        )
 
         canvas = tk.Canvas(container)
-        scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
+
+        scrollbar = tk.Scrollbar(
+            container,
+            orient="vertical",
+            command=canvas.yview
+        )
 
         self.rule_frame = tk.Frame(canvas)
 
-        window = canvas.create_window((0, 0), window=self.rule_frame, anchor="nw")
+        window = canvas.create_window(
+            (0, 0),
+            window=self.rule_frame,
+            anchor="nw"
+        )
         
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.root.protocol(
+            "WM_DELETE_WINDOW",
+            self.on_close
+        )
 
         def on_config(event):
-            canvas.configure(scrollregion=canvas.bbox("all"))
+            canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
 
         def on_canvas(event):
-            canvas.itemconfig(window, width=event.width)
+            canvas.itemconfig(
+                window,
+                width=event.width
+            )
 
-        self.rule_frame.bind("<Configure>", on_config)
-        canvas.bind("<Configure>", on_canvas)
+        self.rule_frame.bind(
+            "<Configure>",
+            on_config
+        )
 
-        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.bind(
+            "<Configure>",
+            on_canvas
+        )
+
+        canvas.configure(
+            yscrollcommand=scrollbar.set
+        )
         
         # Mousewheel scrolling
         def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            canvas.yview_scroll(
+                int(-1 * (event.delta / 120)),
+                "units"
+            )
 
         def _bind_mousewheel(event):
-            canvas.bind_all("<MouseWheel>", _on_mousewheel)
-            canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))
-            canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))
+            canvas.bind_all(
+                "<MouseWheel>",
+                _on_mousewheel
+            )
+
+            canvas.bind_all(
+                "<Button-4>",
+                lambda e: canvas.yview_scroll(
+                    -1,
+                    "units"
+                )
+            )
+
+            canvas.bind_all(
+                "<Button-5>",
+                lambda e: canvas.yview_scroll(
+                    1,
+                    "units"
+                )
+            )
 
         def _unbind_mousewheel(event):
-            canvas.unbind_all("<MouseWheel>")
-            canvas.unbind_all("<Button-4>")
-            canvas.unbind_all("<Button-5>")
+            canvas.unbind_all(
+                "<MouseWheel>"
+            )
 
-        canvas.bind("<Enter>", _bind_mousewheel)
-        canvas.bind("<Leave>", _unbind_mousewheel)
+            canvas.unbind_all(
+                "<Button-4>"
+            )
 
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill="y")
+            canvas.unbind_all(
+                "<Button-5>"
+            )
+
+        canvas.bind(
+            "<Enter>",
+            _bind_mousewheel
+        )
+
+        canvas.bind(
+            "<Leave>",
+            _unbind_mousewheel
+        )
+
+        canvas.pack(
+            side="left",
+            fill="both",
+            expand=True
+        )
+
+        scrollbar.pack(
+            side=tk.RIGHT,
+            fill="y"
+        )
 
         control = tk.Frame(self.root)
         control.pack()
         
         # Enable Default Rules checkbox
-        if self.control_flags is not None:
-            self.cb_enable_security_rules = tk.BooleanVar(master=self.root, value=self.control_flags.get(InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag, InputConfigFlags.SECURITY_PREFLIGHT_RULES.default))
-        else:
-            self.cb_enable_security_rules = tk.BooleanVar(master=self.root, value=InputConfigFlags.SECURITY_PREFLIGHT_RULES.default)
+        self.cb_enable_security_rules = tk.BooleanVar(
+            master=self.root,
+            value=InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
+        )
 
         tk.Checkbutton(
             control,
             text=f"Enable {InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag}",
             variable=self.cb_enable_security_rules
-        ).pack(side=tk.TOP, pady=6)
+        ).pack(
+            side=tk.TOP,
+            pady=6
+        )
 
         add_button = tk.Button(
             control,
             text="Add Rule",
             command=self.add_rule
         )
-        add_button.pack(side=tk.TOP, pady=10)
+
+        add_button.pack(
+            side=tk.TOP,
+            pady=10
+        )
 
         button_frame = tk.Frame(control)
-        button_frame.pack(pady=10)
+        button_frame.pack(
+            pady=10
+        )
         
-        back_button = tk.Button(button_frame, text="Go Back", command=self.go_back)
-        back_button.pack(side=tk.LEFT, padx=(0, 10))
-        
-        submit_button = tk.Button(button_frame, text="Submit", command=self.submit)
-        submit_button.pack(side=tk.LEFT)
+        back_button = tk.Button(
+            button_frame,
+            text="Go Back",
+            command=self.go_back
+        )
 
-        if rules is not None:
-            for rule in rules:
-                self.add_rule(rule)
-        else: self.add_rule()
+        back_button.pack(
+            side=tk.LEFT,
+            padx=(0, 10)
+        )
+        
+        submit_button = tk.Button(
+            button_frame,
+            text="Submit",
+            command=self.submit
+        )
+
+        submit_button.pack(
+            side=tk.LEFT
+        )
 
         # Version text
-        VersionLabel(self.root).pack(side=tk.BOTTOM, pady=5)
+        VersionLabel(
+            self.root
+        ).pack(
+            side=tk.BOTTOM,
+            pady=5
+        )
 
-        root.wait_window(self.root)
+        self._view_done = tk.BooleanVar(
+            master=self.root,
+            value=False
+        )
+
+        # Do not populate or show the window here.
+        # load_view() handles that each time it is called.
+        self.root.withdraw()
+
+    def _populate_view(
+        self,
+        rules=None,
+        control_flags=None
+    ):
+
+        self.result = None
+        self.enable_security_rules = None
+        self.cleanexit = False
+        self.back = False
+
+        self.control_flags = control_flags
+
+        # Remove rules from the previous invocation.
+        for rule in self.rules:
+            self._release_condition_variables(
+                getattr(rule, "group", None)
+            )
+            rule.precedence_var = None
+
+        for child in self.rule_frame.winfo_children():
+            child.destroy()
+
+        self.rules.clear()
+
+        # Populate the security rules checkbox each time.
+        if self.control_flags is not None:
+            self.cb_enable_security_rules.set(
+                self.control_flags.get(
+                    InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag,
+                    InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
+                )
+            )
+        else:
+            self.cb_enable_security_rules.set(
+                InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
+            )
+
+        # Populate the rules each time load_view() is called.
+        if rules is not None:
+
+            for rule in rules:
+                self.add_rule(rule)
+
+        else:
+            self.add_rule()
+
+    def load_view(
+        self,
+        rules=None,
+        control_flags=None
+    ):
+
+        # Keep the window completely hidden while the rules
+        # and all of their child widgets are being constructed.
+        self.root.withdraw()
+
+        self._populate_view(
+            rules,
+            control_flags
+        )
+
+        # Reset the completion state before displaying the window.
+        self._view_done.set(False)
+
+        # Force Tk to finish all pending geometry calculations
+        # before the window becomes visible.
+        self.root.update_idletasks()
+
+        # Now show the completely populated window.
+        self.root.deiconify()
+
+        self.root.update_idletasks()
+
+        # Put the window on top.
+        self.root.lift()
+        self.root.focus_force()
+
+        self.root.attributes(
+            "-topmost",
+            True
+        )
+
+        self.root.update()
+
+        self.root.attributes(
+            "-topmost",
+            False
+        )
+
+        self.root.grab_set()
+
+        # Wait until Submit, Go Back, or the window close button
+        # signals that this invocation of the view is finished.
+        self.root.wait_variable(
+            self._view_done
+        )
+
+        if self.root.winfo_exists():
+            self.root.grab_release()
+
+    def hide_view(self):
+
+        # Hide the window without destroying it.
+        self.root.withdraw()
+        self.root.update_idletasks()
+
+        # Release load_view().
+        self._view_done.set(True)
+
+    def destroy_view(self):
+        """
+        Permanently destroy the RuleBuilderGUI.
+
+        Use this only when the entire application is exiting.
+        Do not use this when switching to another GUI.
+        """
+
+        # Destroy all dynamically-created rule widgets first.
+        for rule in self.rules:
+            try:
+                rule.frame.destroy()
+            except tk.TclError:
+                pass
+
+            # Explicitly release the Tk variables held by RuleFrame.
+            rule.precedence_var = None
+
+            # Release the variables held by all ConditionFrames.
+            self._release_condition_variables(
+                getattr(rule, "group", None)
+            )
+
+        self.rules.clear()
+
+        # Destroy the RuleBuilder window while the Tcl interpreter
+        # is still available.
+        try:
+            self.root.destroy()
+        except tk.TclError:
+            pass
+
+
+    def _release_condition_variables(self, group):
+        if group is None:
+            return
+
+        for child in getattr(group, "children", []):
+            if isinstance(child, ConditionFrame):
+                child.case = None
+            else:
+                self._release_condition_variables(child)
 
     def refresh_colors(self):
+
         for i, rule in enumerate(self.rules):
-            bg = BG_COLOR1 if i % 2 == 0 else BG_COLOR2
+
+            bg = (
+                BG_COLOR1
+                if i % 2 == 0
+                else BG_COLOR2
+            )
+
             rule.set_bg(bg)
 
     def add_rule(self, rule_data=None):
@@ -697,20 +1132,27 @@ class RuleBuilderGUI:
             rule_data=rule_data
         )
 
-        rule.frame.pack(fill="x", pady=5)
+        rule.frame.pack(
+            fill="x",
+            pady=5
+        )
 
         self.rules.append(rule)
+
         self.update_precedence()
         self.refresh_colors()
 
     def remove_rule(self, rule):
+
         rule.frame.destroy()
         self.rules.remove(rule)
+
         self.update_precedence()
         self.reorder()
         self.refresh_colors()
 
     def validate(self):
+
         if self.back:
             return self.back
 
@@ -721,17 +1163,32 @@ class RuleBuilderGUI:
             rid = rule.rule_id.get().strip()
 
             if not rid:
-                messagebox.showerror("Error", "Rule ID cannot be empty")
+
+                messagebox.showerror(
+                    "Error",
+                    "Rule ID cannot be empty"
+                )
+
                 return False
 
             if rid in ids:
-                messagebox.showerror("Error", f"Duplicate Rule ID: {rid}")
+
+                messagebox.showerror(
+                    "Error",
+                    f"Duplicate Rule ID: {rid}"
+                )
+
                 return False
 
             ids.add(rid)
 
             if rule.get_precedence() <= 0:
-                messagebox.showerror("Error", "Precedence must be > 0")
+
+                messagebox.showerror(
+                    "Error",
+                    "Precedence must be > 0"
+                )
+
                 return False
 
         return True
@@ -742,38 +1199,69 @@ class RuleBuilderGUI:
             rule.frame.pack_forget()
 
         for rule in self.rules:
-            rule.frame.pack(fill="x", pady=5)
+
+            rule.frame.pack(
+                fill="x",
+                pady=5
+            )
 
         self.refresh_colors()
 
     def update_precedence(self):
-        for i, rule in enumerate(self.rules, start=1):
+
+        for i, rule in enumerate(
+            self.rules,
+            start=1
+        ):
+
             rule.set_precedence(i)
 
     def move_up(self, rule):
+
         index = self.rules.index(rule)
+
         if index > 0:
-            self.rules[index], self.rules[index-1] = self.rules[index-1], self.rules[index]
+
+            self.rules[index], self.rules[index - 1] = (
+                self.rules[index - 1],
+                self.rules[index]
+            )
+
             self.update_precedence()
             self.reorder()
 
     def move_down(self, rule):
+
         index = self.rules.index(rule)
-        if index < len(self.rules)-1:
-            self.rules[index], self.rules[index+1] = self.rules[index+1], self.rules[index]
+
+        if index < len(self.rules) - 1:
+
+            self.rules[index], self.rules[index + 1] = (
+                self.rules[index + 1],
+                self.rules[index]
+            )
+
             self.update_precedence()
             self.reorder()
 
     def on_close(self):
+
+        # Treat closing the window as an application exit.
         self.result = None
         self.enable_security_rules = None
-        self.root.destroy()
+        self.cleanexit = False
+        self.back = False
+        self._view_done.set(True)
+
+        self.hide_view()
 
     def go_back(self):
+
         self.back = True
         self.submit()
 
     def submit(self):
+
         if not self.validate():
             return
 
@@ -782,10 +1270,17 @@ class RuleBuilderGUI:
         self.result = []
 
         for rule in self.rules:
-            self.result.append(rule.get_rule())
+            self.result.append(
+                rule.get_rule()
+            )
 
-        self.enable_security_rules = self.cb_enable_security_rules.get()
+        self.enable_security_rules = (
+            self.cb_enable_security_rules.get()
+        )
         
         self.cleanexit = True
         
-        self.root.destroy()
+        # Do not destroy the window. Hide it so that
+        # load_view() can return to the outer while loop
+        # and the same window can be reused.
+        self.hide_view()

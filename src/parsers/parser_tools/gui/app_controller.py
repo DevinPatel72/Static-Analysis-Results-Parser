@@ -27,6 +27,7 @@ class SARPApp:
         self.inputs_gui = InputsGUI(parsers.gui_root)
         self.adjust_paths_gui = AdjustPathsGUI(parsers.gui_root)
         self.outfile_flags_gui = OutfileFlagsGUI(parsers.gui_root)
+        self.rulebuildergui = RuleBuilderGUI(parsers.gui_root)
         
         # Set icon
         icon = tk.PhotoImage(file=parsers.LOGO_PATH)
@@ -129,18 +130,19 @@ class SARPApp:
                             self.load_prules()
                             self._LOADED_PRULES_ONCE = True
 
-                        rulebuildergui = RuleBuilderGUI(parsers.gui_root, parsers.prules, self.control_flags)
-                        if rulebuildergui.cleanexit:
-                            parsers.prules = rulebuildergui.result
+                        self.rulebuildergui.load_view(parsers.prules, self.control_flags)
+                        if self.rulebuildergui.cleanexit:
+                            parsers.prules = self.rulebuildergui.result
                         else:
+                            self.rulebuildergui.destroy_view()
                             sys.exit(0)
                         
                         # Go back
-                        if rulebuildergui.back:
+                        if self.rulebuildergui.back:
                             self.current_window = GuiWindow.OutfileFlagsGUI
                         else:
-                            if rulebuildergui.enable_security_rules is not None:
-                                self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = rulebuildergui.enable_security_rules
+                            if self.rulebuildergui.enable_security_rules is not None:
+                                self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = self.rulebuildergui.enable_security_rules
                             else:
                                 self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
                             self.current_window = None
