@@ -4,7 +4,7 @@ from PyInstaller.building.splash import Splash
 
 hiddenimports = (
     collect_submodules('parsers') +
-    ['tkinter', 'openpyxl', 'xml.etree.ElementTree', 'json', 'html', 'csv', 'fnmatch', 'matplotlib', 'requests', 'urllib']
+    ['tkinter', 'openpyxl', 'xml.etree.ElementTree', 'json', 'html', 'csv', 'fnmatch', 'requests', 'urllib']
 )
 
 a = Analysis(
