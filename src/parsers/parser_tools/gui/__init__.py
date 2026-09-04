@@ -48,4 +48,4 @@ def center_window(window, width, height):
     x = (screen_width - width) // 2
     y = (screen_height - height) // 2
 
-    window.geometry(f"{width}x{height}+{x}+{y}")
+    window.geometry(f"+{x}+{y}")

@@ -17,11 +17,6 @@ class AdjustPathsGUI:
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
 
-        # Set geometry
-        width = min(WINDOW_LENGTH + 200, self.root.winfo_screenwidth())
-        height = WINDOW_HEIGHT
-        center_window(self.root, width, height)
-
         self.updated_paths = []
 
         # Scrollable area
@@ -505,6 +500,11 @@ class AdjustPathsGUI:
         self._path_vars.clear()
 
         self._populate_view(current_inputs)
+        
+        # Set geometry
+        width = min(WINDOW_LENGTH + 200, self.root.winfo_screenwidth())
+        height = WINDOW_HEIGHT
+        center_window(self.root, width, height)
 
         self.root.update_idletasks()
         self.root.deiconify()

@@ -773,11 +773,6 @@ class RuleBuilderGUI:
 
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
-        
-        # Set geometry
-        width = WINDOW_LENGTH
-        height = WINDOW_HEIGHT
-        center_window(self.root, width, height)
 
         container = tk.Frame(self.root)
         container.pack(
@@ -1013,6 +1008,11 @@ class RuleBuilderGUI:
         self.result = None
         self.enable_security_rules = None
         self._populate_view(rules, control_flags)
+
+        # Set geometry
+        width = WINDOW_LENGTH
+        height = WINDOW_HEIGHT
+        center_window(self.root, width, height)
 
         # Put the window on top.
         self.root.update_idletasks()

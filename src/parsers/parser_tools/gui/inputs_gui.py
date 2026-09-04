@@ -70,11 +70,6 @@ class InputsGUI:
         # Constant
         self.row_frame_pady = 4
 
-        # Set geometry
-        width = WINDOW_LENGTH
-        height = WINDOW_HEIGHT
-        center_window(self.root, width, height)
-
         # Top row: Project Name + Version
         top_frame = tk.Frame(self.root)
         top_frame.pack(pady=(10, 0), padx=10, fill="x")
@@ -374,6 +369,11 @@ class InputsGUI:
         self.cleanexit = False
 
         self._populate_view(inputs)
+        
+        # Set geometry
+        width = WINDOW_LENGTH
+        height = WINDOW_HEIGHT
+        center_window(self.root, width, height)
 
         self.root.update_idletasks()
         self.root.deiconify()

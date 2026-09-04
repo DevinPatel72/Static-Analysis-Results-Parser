@@ -34,11 +34,6 @@ class JsonInputPreviewGUI:
         # Keep the window hidden until load_view() is called.
         self.root.withdraw()
 
-        # Set geometry
-        width = 1300
-        height = 500
-        center_window(self.root, width, height)
-
         self.root.protocol(
             "WM_DELETE_WINDOW",
             self._on_close
@@ -57,7 +52,15 @@ class JsonInputPreviewGUI:
         self.cleanexit = False
         self.results = None
         self.execute_now = False
+        
+        # Set geometry
+        width = 1300
+        height = 500
+        
         self._refresh_profiles()
+        
+        center_window(self.root, width, height)
+        
         self.root.update_idletasks()
         self.root.deiconify()
         self.root.lift()

@@ -23,11 +23,6 @@ class OutfileFlagsGUI:
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
 
-        # Set geometry
-        width = 550
-        height = 200 + (25 * (len(InputConfigFlags) + 2))
-        center_window(self.root, width, height)
-
         self.output_path = tk.StringVar(
             master=self.root
         )
@@ -278,6 +273,12 @@ class OutfileFlagsGUI:
         self.back = False
         self.cleanexit = False
         self._populate_view(outfile, control_flags, initial_additional_options)
+        
+        # Set geometry
+        width = 550
+        height = 200 + (25 * (len(InputConfigFlags) + 2))
+        center_window(self.root, width, height)
+        
         self.root.update_idletasks()
         self.root.deiconify()
         self.root.lift()
