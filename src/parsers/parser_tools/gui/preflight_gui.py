@@ -947,11 +947,6 @@ class RuleBuilderGUI:
             pady=5
         )
 
-        self._view_done = tk.BooleanVar(
-            master=self.root,
-            value=False
-        )
-
         # Do not populate or show the window here.
         # load_view() handles that each time it is called.
         self.root.withdraw()
@@ -1008,63 +1003,33 @@ class RuleBuilderGUI:
         rules=None,
         control_flags=None
     ):
-
-        # Keep the window completely hidden while the rules
-        # and all of their child widgets are being constructed.
         self.root.withdraw()
 
-        self._populate_view(
-            rules,
-            control_flags
-        )
-
-        # Reset the completion state before displaying the window.
-        self._view_done.set(False)
-
-        # Force Tk to finish all pending geometry calculations
-        # before the window becomes visible.
-        self.root.update_idletasks()
-
-        # Now show the completely populated window.
-        self.root.deiconify()
-
-        self.root.update_idletasks()
+        self._populate_view(rules, control_flags)
 
         # Put the window on top.
+        self.root.update_idletasks()
+        self.root.deiconify()
+        self.root.update_idletasks()
         self.root.lift()
         self.root.focus_force()
-
-        self.root.attributes(
-            "-topmost",
-            True
-        )
-
+        self.root.attributes("-topmost", True)
         self.root.update()
-
-        self.root.attributes(
-            "-topmost",
-            False
-        )
+        self.root.attributes("-topmost", False)
 
         self.root.grab_set()
 
-        # Wait until Submit, Go Back, or the window close button
-        # signals that this invocation of the view is finished.
-        self.root.wait_variable(
-            self._view_done
-        )
-
-        if self.root.winfo_exists():
-            self.root.grab_release()
+        self.root.mainloop()
 
     def hide_view(self):
+        if self.root.winfo_exists():
+            try:
+                self.root.grab_release()
+            except tk.TclError:
+                pass
 
-        # Hide the window without destroying it.
-        self.root.withdraw()
-        self.root.update_idletasks()
-
-        # Release load_view().
-        self._view_done.set(True)
+            self.root.withdraw()
+            self.root.quit()
 
     def destroy_view(self):
         """
@@ -1251,7 +1216,6 @@ class RuleBuilderGUI:
         self.enable_security_rules = None
         self.cleanexit = False
         self.back = False
-        self._view_done.set(True)
 
         self.hide_view()
 
