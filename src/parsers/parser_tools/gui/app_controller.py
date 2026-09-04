@@ -145,6 +145,7 @@ class SARPApp:
                                 self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = self.rulebuildergui.enable_security_rules
                             else:
                                 self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
+                            self.rulebuildergui.destroy_view()
                             self.current_window = None
                             self.load_security_prules()
                     else:
@@ -154,6 +155,7 @@ class SARPApp:
                         self.current_window = None
                 # All inputs windows are finished
                 case _:
+                    self.destroy_gui()
                     break
             # End match
         # End while
@@ -171,6 +173,15 @@ class SARPApp:
             parsers.security_prules = preflight.load_prules(parsers.SECURITY_PREFLIGHT_FILE)
         else:
             parsers.security_prules = []
+
+    def destroy_gui(self):
+        self.json_input_preview_gui.destroy_view()
+        self.inputs_gui.destroy_view()
+        self.adjust_paths_gui.destroy_view()
+        self.outfile_flags_gui.destroy_view()
+        self.rulebuildergui.destroy_view()
+
+        parsers.gui_root.destroy()
 
 def close_splash():
     # Pyinstaller splash screen

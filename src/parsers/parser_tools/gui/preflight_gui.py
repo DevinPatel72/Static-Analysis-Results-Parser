@@ -1036,28 +1036,25 @@ class RuleBuilderGUI:
         Permanently destroy the RuleBuilderGUI.
 
         Use this only when the entire application is exiting.
-        Do not use this when switching to another GUI.
         """
 
-        # Destroy all dynamically-created rule widgets first.
+        # Release dynamically-created rule variables
         for rule in self.rules:
             try:
-                rule.frame.destroy()
+                self._release_condition_variables(
+                    getattr(rule, "group", None)
+                )
             except tk.TclError:
                 pass
 
-            # Explicitly release the Tk variables held by RuleFrame.
             rule.precedence_var = None
-
-            # Release the variables held by all ConditionFrames.
-            self._release_condition_variables(
-                getattr(rule, "group", None)
-            )
 
         self.rules.clear()
 
-        # Destroy the RuleBuilder window while the Tcl interpreter
-        # is still available.
+        # Release the GUI's own Tk variables
+        self.cb_enable_security_rules = None
+
+        # Now destroy the Toplevel
         try:
             self.root.destroy()
         except tk.TclError:
