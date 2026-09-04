@@ -14,12 +14,18 @@ from ..toolbox import InputDictKeys, Scanners, validate_path_and_scanner, select
 
 
 class PathInputWithPlaceholder(tk.Entry):
-    def __init__(self, master=None, placeholder="PLACEHOLDER", color='grey', **kwargs):
+    def __init__(
+        self,
+        master=None,
+        placeholder="PLACEHOLDER",
+        color="grey",
+        **kwargs
+    ):
         super().__init__(master, **kwargs)
 
         self.placeholder = placeholder
         self.placeholder_color = color
-        self.default_fg_color = self['fg']
+        self.default_fg_color = self["fg"]
 
         self.bind("<FocusIn>", self._clear_placeholder)
         self.bind("<FocusOut>", self._add_placeholder)
@@ -31,24 +37,28 @@ class PathInputWithPlaceholder(tk.Entry):
             self._clear_placeholder()
             self.delete(0, tk.END)
             self.insert(0, value)
-            self['fg'] = self.default_fg_color
+            self["fg"] = self.default_fg_color
 
     def _clear_placeholder(self, event=None):
-        if self.get() == self.placeholder and self['fg'] == self.placeholder_color:
+        if (
+            self.get() == self.placeholder
+            and self["fg"] == self.placeholder_color
+        ):
             self.delete(0, tk.END)
-        self['fg'] = self.default_fg_color
+
+        self["fg"] = self.default_fg_color
 
     def _add_placeholder(self, event=None):
         if not self.get():
             self.insert(0, self.placeholder)
-            self['fg'] = self.placeholder_color
+            self["fg"] = self.placeholder_color
 
 
 class InputsGUI:
     def __init__(self, root: tk.Tk):
         self.results = {}
-        self.results_project_name = ''
-        self.results_project_version = ''
+        self.results_project_name = ""
+        self.results_project_version = ""
         self.cleanexit = False
         self.back = False
         self.dupe_detected_submit_again = False
@@ -56,7 +66,6 @@ class InputsGUI:
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
         self.root.withdraw()
-        
 
         # Constant
         self.row_frame_pady = 4
@@ -73,9 +82,13 @@ class InputsGUI:
 
         # Top row: Project Name + Version
         top_frame = tk.Frame(self.root)
-        top_frame.pack(pady=(10, 0), padx=10, fill='x')
+        top_frame.pack(pady=(10, 0), padx=10, fill="x")
 
-        tk.Label(top_frame, text="Project:", font=("Arial", 10)).pack(
+        tk.Label(
+            top_frame,
+            text="Project:",
+            font=("Arial", 10)
+        ).pack(
             side=tk.LEFT,
             padx=5
         )
@@ -87,7 +100,11 @@ class InputsGUI:
         )
         self.project_name.pack(side=tk.LEFT, padx=5)
 
-        tk.Label(top_frame, text="Version:", font=("Arial", 10)).pack(
+        tk.Label(
+            top_frame,
+            text="Version:",
+            font=("Arial", 10)
+        ).pack(
             side=tk.LEFT,
             padx=(10, 5)
         )
@@ -97,31 +114,35 @@ class InputsGUI:
             placeholder="v1.0",
             width=30
         )
+
         self.project_version.pack(side=tk.LEFT, padx=5)
 
         # Make version visually smaller
         self.project_version.config(width=10)
 
+        # ---------------------------------------------------------
         # Scrollable frame setup
+        # ---------------------------------------------------------
         container = tk.Frame(self.root)
         container.pack(
             pady=10,
             padx=10,
-            fill='both',
+            fill="both",
             expand=True
         )
 
-        canvas = tk.Canvas(container)
+        self.canvas = tk.Canvas(container)
+
         scrollbar = tk.Scrollbar(
             container,
             orient="vertical",
-            command=canvas.yview
+            command=self.canvas.yview
         )
 
-        self.entry_frame = tk.Frame(canvas)
+        self.entry_frame = tk.Frame(self.canvas)
 
         # Attach the entry_frame inside the canvas
-        entry_window = canvas.create_window(
+        entry_window = self.canvas.create_window(
             (0, 0),
             window=self.entry_frame,
             anchor="nw"
@@ -129,13 +150,13 @@ class InputsGUI:
 
         # When the frame is resized, update scrollregion
         def on_frame_configure(event):
-            canvas.configure(
-                scrollregion=canvas.bbox("all")
+            self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
             )
 
         # When the canvas is resized, match the frame width
         def on_canvas_configure(event):
-            canvas.itemconfig(
+            self.canvas.itemconfig(
                 entry_window,
                 width=event.width
             )
@@ -144,24 +165,43 @@ class InputsGUI:
             "<Configure>",
             on_frame_configure
         )
-        canvas.bind(
+
+        self.canvas.bind(
             "<Configure>",
             on_canvas_configure
         )
 
-        canvas.configure(
+        self.canvas.configure(
             yscrollcommand=scrollbar.set
         )
 
-        canvas.pack(
+        self.canvas.pack(
             side=tk.LEFT,
             fill="both",
             expand=True
         )
+
         scrollbar.pack(
             side=tk.RIGHT,
             fill="y"
         )
+
+        # ---------------------------------------------------------
+        # Mouse-wheel scrolling
+        #
+        # bind_all() is used because the mouse-wheel event is
+        # normally received by whichever child widget is under
+        # the mouse, such as Entry, Button, or Combobox.
+        #
+        # Windows:
+        #     <MouseWheel>
+        #
+        # Linux:
+        #     <Button-4> = wheel up
+        #     <Button-5> = wheel down
+        # ---------------------------------------------------------
+
+        self._mousewheel_bound = False
 
         # Entries setup
         self.entries = []
@@ -184,6 +224,7 @@ class InputsGUI:
             text="Go Back",
             command=self.go_back
         )
+
         back_button.pack(
             side=tk.LEFT,
             padx=(0, 10)
@@ -194,6 +235,7 @@ class InputsGUI:
             text="Submit",
             command=self.submit_data
         )
+
         submit_button.pack(side=tk.LEFT)
 
         # Version text
@@ -210,6 +252,85 @@ class InputsGUI:
             self._on_close
         )
 
+    # -------------------------------------------------------------
+    # Mouse-wheel handling
+    # -------------------------------------------------------------
+
+    def _on_mousewheel(self, event):
+        """Handle mouse-wheel scrolling on Windows/macOS."""
+
+        if not self.root.winfo_exists():
+            return
+
+        # Windows normally reports multiples of 120.
+        #
+        # Some systems can report smaller values, so make sure
+        # at least one unit is scrolled for any non-zero delta.
+        if event.delta:
+            units = int(-event.delta / 120)
+
+            if units == 0:
+                units = -1 if event.delta > 0 else 1
+
+            self.canvas.yview_scroll(units, "units")
+
+    def _on_linux_scroll_up(self, event):
+        """Handle mouse-wheel up on Linux."""
+        if self.root.winfo_exists():
+            self.canvas.yview_scroll(-1, "units")
+
+    def _on_linux_scroll_down(self, event):
+        """Handle mouse-wheel down on Linux."""
+        if self.root.winfo_exists():
+            self.canvas.yview_scroll(1, "units")
+
+    def _bind_mousewheel(self):
+        """
+        Bind mouse-wheel events while this GUI is active.
+
+        bind_all() is intentional here. The mouse pointer can be
+        over an Entry, Combobox, Button, or another child widget,
+        and those widgets would otherwise receive the event instead
+        of the Canvas.
+        """
+
+        if self._mousewheel_bound:
+            return
+
+        self.root.bind_all(
+            "<MouseWheel>",
+            self._on_mousewheel
+        )
+
+        # Linux X11 mouse wheel events
+        self.root.bind_all(
+            "<Button-4>",
+            self._on_linux_scroll_up
+        )
+
+        self.root.bind_all(
+            "<Button-5>",
+            self._on_linux_scroll_down
+        )
+
+        self._mousewheel_bound = True
+
+    def _unbind_mousewheel(self):
+        """Remove the mouse-wheel bindings."""
+
+        if not self._mousewheel_bound:
+            return
+
+        self.root.unbind_all("<MouseWheel>")
+        self.root.unbind_all("<Button-4>")
+        self.root.unbind_all("<Button-5>")
+
+        self._mousewheel_bound = False
+
+    # -------------------------------------------------------------
+    # Populate / display
+    # -------------------------------------------------------------
+
     def _populate_view(self, inputs=None):
         """
         Reset and populate the GUI for a new load_view() call.
@@ -220,8 +341,8 @@ class InputsGUI:
         self.back = False
         self.dupe_detected_submit_again = False
 
-        self.results_project_name = ''
-        self.results_project_version = ''
+        self.results_project_name = ""
+        self.results_project_version = ""
 
         if inputs is None:
             self.results = {}
@@ -253,26 +374,46 @@ class InputsGUI:
 
     def load_view(self, inputs=None):
         self.root.withdraw()
+
         self.back = False
         self.cleanexit = False
+
         self._populate_view(inputs)
+
         self.root.update_idletasks()
         self.root.deiconify()
         self.root.lift()
         self.root.focus_force()
+
         self.root.attributes("-topmost", True)
         self.root.update()
         self.root.attributes("-topmost", False)
+
         self.root.grab_set()
+
+        # Enable mouse-wheel scrolling while this window is active.
+        self._bind_mousewheel()
+
         self.root.mainloop()
+
+        # Remove bindings after the window is no longer active.
+        self._unbind_mousewheel()
+
         if self.root.winfo_exists():
-            try: self.root.grab_release()
-            except tk.TclError: pass
+            try:
+                self.root.grab_release()
+            except tk.TclError:
+                pass
 
     def hide_view(self):
         if self.root.winfo_exists():
-            try: self.root.grab_release()
-            except tk.TclError: pass
+            self._unbind_mousewheel()
+
+            try:
+                self.root.grab_release()
+            except tk.TclError:
+                pass
+
             self.root.withdraw()
             self.root.quit()
 
@@ -284,17 +425,33 @@ class InputsGUI:
     def destroy_view(self):
         if not self.root.winfo_exists():
             return
-        try: self.root.grab_release()
-        except tk.TclError: pass
-        try: self.root.quit()
-        except tk.TclError: pass
-        try: self.root.destroy()
-        except tk.TclError: pass
+
+        self._unbind_mousewheel()
+
+        try:
+            self.root.grab_release()
+        except tk.TclError:
+            pass
+
+        try:
+            self.root.quit()
+        except tk.TclError:
+            pass
+
+        try:
+            self.root.destroy()
+        except tk.TclError:
+            pass
+
+    # -------------------------------------------------------------
+    # Entries
+    # -------------------------------------------------------------
 
     def add_entry(self, p_entry=None):
         row_frame = tk.Frame(self.entry_frame)
+
         row_frame.pack(
-            fill='x',
+            fill="x",
             pady=self.row_frame_pady
         )
 
@@ -309,6 +466,7 @@ class InputsGUI:
             text="↑",
             command=lambda: self.move_up(row_frame)
         )
+
         up_btn.pack(
             side=tk.LEFT,
             padx=2
@@ -319,6 +477,7 @@ class InputsGUI:
             text="↓",
             command=lambda: self.move_down(row_frame)
         )
+
         down_btn.pack(
             side=tk.LEFT,
             padx=2
@@ -330,7 +489,7 @@ class InputsGUI:
                 entry[InputDictKeys.SCANNER.value]
             )
             if len(entry) > 0
-            else 'Select Scanner...'
+            else "Select Scanner..."
         )
 
         scanners = Scanners.all_names()
@@ -339,7 +498,7 @@ class InputsGUI:
             row_frame,
             values=scanners,
             width=max(len(i) for i in scanners) + 3,
-            state='readonly'
+            state="readonly"
         )
 
         scanner_dropdown.set(
@@ -359,9 +518,9 @@ class InputsGUI:
             ):
                 extracted_version = m.group(1)
             else:
-                extracted_version = ''
+                extracted_version = ""
         else:
-            extracted_version = ''
+            extracted_version = ""
 
         version_textbox = PathInputWithPlaceholder(
             row_frame,
@@ -381,7 +540,7 @@ class InputsGUI:
         path_inp_entry = (
             entry[InputDictKeys.PATH.value]
             if len(entry) > 0
-            else ''
+            else ""
         )
 
         path_inp = PathInputWithPlaceholder(
@@ -392,7 +551,7 @@ class InputsGUI:
         path_inp.pack(
             side=tk.LEFT,
             expand=True,
-            fill='x',
+            fill="x",
             padx=5
         )
 
@@ -440,7 +599,7 @@ class InputsGUI:
 
         for frame, *_ in self.entries:
             frame.pack(
-                fill='x',
+                fill="x",
                 pady=self.row_frame_pady
             )
 
@@ -456,6 +615,7 @@ class InputsGUI:
                 self.entries[index - 1],
                 self.entries[index]
             )
+
             self.reorder()
 
     def move_down(self, row_frame):
@@ -470,11 +630,16 @@ class InputsGUI:
                 self.entries[index + 1],
                 self.entries[index]
             )
+
             self.reorder()
+
+    # -------------------------------------------------------------
+    # File selection
+    # -------------------------------------------------------------
 
     def ask_open_filename(self, title, file_filters=None):
         if file_filters is None:
-            file_filters = ''
+            file_filters = ""
 
         if platform.system() == "Linux" and shutil.which("zenity"):
             result = subprocess.run(
@@ -504,7 +669,7 @@ class InputsGUI:
     def browse_file(self, entry_widget, scanner):
         file_filters = None
 
-        if scanner != 'Select Scanner...':
+        if scanner != "Select Scanner...":
             selected_scanner = select_scanner(scanner)
 
             filter_str = ", ".join(
@@ -554,6 +719,10 @@ class InputsGUI:
 
         row_frame.destroy()
 
+    # -------------------------------------------------------------
+    # Navigation / submission
+    # -------------------------------------------------------------
+
     def go_back(self):
         self.back = True
         self.cleanexit = True
@@ -569,13 +738,13 @@ class InputsGUI:
             project_name == ""
             or project_name == self.project_name.placeholder
         ):
-            project_name = ''
+            project_name = ""
 
         if (
             project_version == ""
             or project_version == self.project_version.placeholder
         ):
-            project_version = ''
+            project_version = ""
 
         self.results_project_name = project_name
         self.results_project_version = project_version
@@ -628,7 +797,7 @@ class InputsGUI:
                 version == ""
                 or version == version_entry.placeholder
             ):
-                scanner += ' ' + version
+                scanner += " " + version
 
             results.append({
                 InputDictKeys.PATH.value: path,
@@ -687,6 +856,6 @@ class InputsGUI:
         selected_scanner = select_scanner(scanner)
 
         if selected_scanner is None:
-            return 'Select Scanner...'
+            return "Select Scanner..."
         else:
             return selected_scanner.sname

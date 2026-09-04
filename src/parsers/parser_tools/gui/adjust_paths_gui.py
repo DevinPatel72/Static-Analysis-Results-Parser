@@ -32,7 +32,7 @@ class AdjustPathsGUI:
         # Scrollable area
         container = tk.Frame(self.root)
         container.pack(
-            fill='both',
+            fill="both",
             expand=True,
             padx=10,
             pady=10
@@ -87,6 +87,9 @@ class AdjustPathsGUI:
             fill="y"
         )
 
+        # Track whether the mouse-wheel bindings are active.
+        self._mousewheel_bound = False
+
         self.path_entries = []
         self._path_vars = []
 
@@ -98,6 +101,7 @@ class AdjustPathsGUI:
             text="Go Back",
             command=self.go_back
         )
+
         self.back_button.pack(
             side=tk.LEFT,
             padx=(0, 10)
@@ -108,6 +112,7 @@ class AdjustPathsGUI:
             text="Save Adjusted Paths",
             command=self.collect_paths
         )
+
         self.submit_button.pack(
             side=tk.LEFT
         )
@@ -125,6 +130,101 @@ class AdjustPathsGUI:
             "WM_DELETE_WINDOW",
             self._on_close
         )
+
+    # ------------------------------------------------------------------
+    # Mouse-wheel handling
+    # ------------------------------------------------------------------
+
+    def _on_mousewheel(self, event):
+        """
+        Handle mouse-wheel scrolling on Windows/macOS.
+
+        bind_all() is used because the widget under the mouse may be
+        an Entry or another child of the canvas rather than the canvas
+        itself.
+        """
+
+        if not self.root.winfo_exists():
+            return
+
+        if event.delta:
+            # Windows normally reports +/-120 per wheel notch.
+            # Some platforms can report smaller values, so make sure
+            # a non-zero delta always results in at least one unit.
+            units = int(-event.delta / 120)
+
+            if units == 0:
+                units = -1 if event.delta > 0 else 1
+
+            self.canvas.yview_scroll(
+                units,
+                "units"
+            )
+
+    def _on_linux_scroll_up(self, event):
+        """Handle mouse-wheel up on Linux/X11."""
+
+        if self.root.winfo_exists():
+            self.canvas.yview_scroll(
+                -1,
+                "units"
+            )
+
+    def _on_linux_scroll_down(self, event):
+        """Handle mouse-wheel down on Linux/X11."""
+
+        if self.root.winfo_exists():
+            self.canvas.yview_scroll(
+                1,
+                "units"
+            )
+
+    def _bind_mousewheel(self):
+        """
+        Enable mouse-wheel scrolling while this GUI is active.
+
+        bind_all() is intentional. Without it, the wheel event can be
+        consumed by an Entry widget contained inside the scrolling
+        frame instead of reaching the Canvas.
+        """
+
+        if self._mousewheel_bound:
+            return
+
+        # Windows / macOS
+        self.root.bind_all(
+            "<MouseWheel>",
+            self._on_mousewheel
+        )
+
+        # Linux/X11
+        self.root.bind_all(
+            "<Button-4>",
+            self._on_linux_scroll_up
+        )
+
+        self.root.bind_all(
+            "<Button-5>",
+            self._on_linux_scroll_down
+        )
+
+        self._mousewheel_bound = True
+
+    def _unbind_mousewheel(self):
+        """Disable mouse-wheel scrolling."""
+
+        if not self._mousewheel_bound:
+            return
+
+        self.root.unbind_all("<MouseWheel>")
+        self.root.unbind_all("<Button-4>")
+        self.root.unbind_all("<Button-5>")
+
+        self._mousewheel_bound = False
+
+    # ------------------------------------------------------------------
+    # Populate view
+    # ------------------------------------------------------------------
 
     def _populate_view(self, current_inputs):
         """
@@ -219,10 +319,10 @@ class AdjustPathsGUI:
                 var2.get()
             )
 
-            box.config(state='normal')
+            box.config(state="normal")
             box.delete(0, tk.END)
             box.insert(0, r)
-            box.config(state='readonly')
+            box.config(state="readonly")
 
         # Add path editing rows
         for idx, item in enumerate(
@@ -289,7 +389,7 @@ class AdjustPathsGUI:
 
             preview_box = tk.Entry(
                 self.table_frame,
-                state='normal',
+                state="normal",
                 readonlybackground="#f0f0f0"
             )
 
@@ -303,7 +403,7 @@ class AdjustPathsGUI:
             )
 
             preview_box.config(
-                state='readonly'
+                state="readonly"
             )
 
             # Place them in grid
@@ -359,7 +459,7 @@ class AdjustPathsGUI:
             )
 
             remove_var.trace_add(
-                'write',
+                "write",
                 lambda *args,
                        v1=remove_var,
                        v2=add_var,
@@ -374,7 +474,7 @@ class AdjustPathsGUI:
             )
 
             add_var.trace_add(
-                'write',
+                "write",
                 lambda *args,
                        v1=remove_var,
                        v2=add_var,
@@ -398,29 +498,53 @@ class AdjustPathsGUI:
                 )
             )
 
+    # ------------------------------------------------------------------
+    # View lifecycle
+    # ------------------------------------------------------------------
+
     def load_view(self, current_inputs):
         self.root.withdraw()
+
         self.back = False
         self.cleanexit = False
         self._path_vars.clear()
+
         self._populate_view(current_inputs)
+
         self.root.update_idletasks()
         self.root.deiconify()
         self.root.lift()
         self.root.focus_force()
+
         self.root.attributes("-topmost", True)
         self.root.update()
         self.root.attributes("-topmost", False)
+
         self.root.grab_set()
+
+        # Enable scrolling while this window is active.
+        self._bind_mousewheel()
+
         self.root.mainloop()
+
+        # Remove scrolling bindings after this view exits.
+        self._unbind_mousewheel()
+
         if self.root.winfo_exists():
-            try: self.root.grab_release()
-            except tk.TclError: pass
+            try:
+                self.root.grab_release()
+            except tk.TclError:
+                pass
 
     def hide_view(self):
         if self.root.winfo_exists():
-            try: self.root.grab_release()
-            except tk.TclError: pass
+            self._unbind_mousewheel()
+
+            try:
+                self.root.grab_release()
+            except tk.TclError:
+                pass
+
             self.root.withdraw()
             self.root.quit()
 
@@ -432,18 +556,38 @@ class AdjustPathsGUI:
     def destroy_view(self):
         if not self.root.winfo_exists():
             return
-        try: self.root.grab_release()
-        except tk.TclError: pass
+
+        self._unbind_mousewheel()
+
+        try:
+            self.root.grab_release()
+        except tk.TclError:
+            pass
+
         self._path_vars.clear()
-        try: self.root.quit()
-        except tk.TclError: pass
-        try: self.root.destroy()
-        except tk.TclError: pass
+
+        try:
+            self.root.quit()
+        except tk.TclError:
+            pass
+
+        try:
+            self.root.destroy()
+        except tk.TclError:
+            pass
+
+    # ------------------------------------------------------------------
+    # Navigation
+    # ------------------------------------------------------------------
 
     def go_back(self):
         self.back = True
         self.cleanexit = True
         self.hide_view()
+
+    # ------------------------------------------------------------------
+    # Collect paths
+    # ------------------------------------------------------------------
 
     def collect_paths(self):
         self.results = []
