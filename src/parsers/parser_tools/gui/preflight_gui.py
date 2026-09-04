@@ -195,7 +195,8 @@ class ReplacementEditor:
 
         self.root = tk.Toplevel(parent)
         self.root.title(f"Replacement for {rule_id} ({precedence})")
-        self.root.geometry("400x400")
+        self.root.geometry("500x400")
+        self.root.minsize(500, 300)
         
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
@@ -247,34 +248,52 @@ class ReplacementEditor:
             dropdown['values'] = available
 
     def add_row(self, field=None, value=""):
-
         row_frame = tk.Frame(self.rows_frame)
-        row_frame.pack(fill="x", pady=2)
+        row_frame.pack(
+            fill="x",
+            pady=2
+        )
 
         dropdown = ttk.Combobox(
             row_frame,
-            state="readonly"
+            state="readonly",
+            width=15
         )
 
         if field:
             dropdown.set(field)
 
-        dropdown.pack(side=tk.LEFT, padx=5)
+        dropdown.pack(
+            side=tk.LEFT,
+            padx=5
+        )
 
         entry = tk.Entry(row_frame)
         entry.insert(0, value)
-        entry.pack(side=tk.LEFT, fill="x", expand=True, padx=5)
+
+        entry.pack(
+            side=tk.LEFT,
+            fill="x",
+            expand=True,
+            padx=5
+        )
 
         def remove():
             row_frame.destroy()
             self.rows.remove((dropdown, entry))
             self.refresh_dropdowns()
 
-        tk.Button(
+        delete_button = tk.Button(
             row_frame,
             text="Delete",
-            command=remove
-        ).pack(side=tk.LEFT)
+            command=remove,
+            width=7
+        )
+
+        delete_button.pack(
+            side=tk.LEFT,
+            padx=5
+        )
 
         dropdown.bind(
             "<<ComboboxSelected>>",
