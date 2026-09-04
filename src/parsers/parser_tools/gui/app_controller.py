@@ -3,7 +3,9 @@
 import sys
 import tkinter as tk
 import parsers
-from parsers.parser_tools.gui.inputs_gui import InputsGUI, AdjustPathsGUI, OutfileFlagsGUI
+from parsers.parser_tools.gui.inputs_gui import InputsGUI
+from parsers.parser_tools.gui.adjust_paths_gui import AdjustPathsGUI
+from parsers.parser_tools.gui.outfile_flags_gui import OutfileFlagsGUI
 from parsers.parser_tools.gui.load_user_inputs_gui import JsonInputPreviewGUI
 from parsers.parser_tools.gui.preflight_gui import RuleBuilderGUI
 from parsers.parser_tools.toolbox import GuiWindow, InputDictKeys, InputConfigFlags, InputAdditionalOptions, load_config_user_inputs, check_input_format, dedupe_parser_inputs

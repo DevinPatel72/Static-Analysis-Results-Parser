@@ -21,7 +21,7 @@ from datetime import datetime
 import tkinter as tk
 import parsers
 from parsers.parser_tools import progressbar, parser_writer, preflight, parser_logger as logger
-from parsers.parser_tools.toolbox import InputDictKeys, InputConfigFlags, Fieldnames, export_config
+from parsers.parser_tools.toolbox import InputDictKeys, Fieldnames, export_config
 from parsers.parser_tools.gui.app_controller import close_splash
 from parsers.parser_tools.begin_parse import begin
 from parsers.initialization import init_globals, init_main_logger

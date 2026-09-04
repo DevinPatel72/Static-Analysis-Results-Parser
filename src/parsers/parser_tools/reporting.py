@@ -2,7 +2,6 @@
 
 import os
 from .gui.version_label import VersionLabel
-from parsers import PROG_NAME_ABBR
 from . import parser_logger as logger
 
 _enable_matplotlib = False
