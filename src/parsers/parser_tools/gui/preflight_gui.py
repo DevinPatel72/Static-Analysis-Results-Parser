@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
+from . import center_window
 from .version_label import VersionLabel
 from ..prule import PRule, Condition, ConditionGroup, Strictness
 from ..toolbox import Fieldnames, InputConfigFlags
@@ -776,14 +777,7 @@ class RuleBuilderGUI:
         # Set geometry
         width = WINDOW_LENGTH
         height = WINDOW_HEIGHT
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-
-        x = (screen_width - width) // 2
-        y = ((screen_height - height) // 2) - 50
-        self.root.geometry(
-            f"{width}x{height}+{x}+{y}"
-        )
+        center_window(self.root, width, height)
 
         container = tk.Frame(self.root)
         container.pack(

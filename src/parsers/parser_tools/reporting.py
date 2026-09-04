@@ -1,6 +1,7 @@
 # reporting.py
 
 import os
+from .gui import center_window
 from .gui.version_label import VersionLabel
 from . import parser_logger as logger
 
@@ -186,12 +187,7 @@ class Report:
             width = 900
             height = 800
             
-        screen_width = root.winfo_screenwidth()
-        screen_height = root.winfo_screenheight()
-
-        x = (screen_width - width) // 2
-        y = ((screen_height - height) // 2) - 50
-        root.geometry(f"{width}x{height}+{x}+{y}")
+        center_window(root, width, height)
         
         root.minsize(700, 600)
 
@@ -433,6 +429,15 @@ class Report:
         
         # Version text
         VersionLabel(root).pack(side=tk.BOTTOM, pady=5)
+        
+        root.update_idletasks()
+        root.deiconify()
+        root.lift()
+        root.focus_force()
+
+        root.attributes("-topmost", True)
+        root.update()
+        root.attributes("-topmost", False)
 
         gui_root.wait_window(root)
     

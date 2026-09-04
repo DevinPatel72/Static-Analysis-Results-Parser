@@ -4,7 +4,7 @@ import os
 import tkinter as tk
 
 from .version_label import VersionLabel
-from . import WINDOW_TITLE, WINDOW_HEIGHT, WINDOW_LENGTH
+from . import WINDOW_TITLE, WINDOW_HEIGHT, WINDOW_LENGTH, center_window
 from ..toolbox import InputDictKeys, get_all_previews, generate_preview
 
 
@@ -20,12 +20,7 @@ class AdjustPathsGUI:
         # Set geometry
         width = min(WINDOW_LENGTH + 200, self.root.winfo_screenwidth())
         height = WINDOW_HEIGHT
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-
-        x = (screen_width - width) // 2
-        y = ((screen_height - height) // 2) - 50
-        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        center_window(self.root, width, height)
 
         self.updated_paths = []
 

@@ -10,7 +10,7 @@ from tkinter import filedialog, messagebox
 
 from .version_label import VersionLabel
 from .tooltip import ToolTip
-from . import WINDOW_TITLE, FORMAT_MAP, EXT_TO_FORMAT, create_tk_variable
+from . import WINDOW_TITLE, FORMAT_MAP, EXT_TO_FORMAT, create_tk_variable, center_window
 from ..toolbox import GuiWindow, InputDictKeys, InputConfigFlags, InputAdditionalOptions
 
 
@@ -26,12 +26,7 @@ class OutfileFlagsGUI:
         # Set geometry
         width = 550
         height = 200 + (25 * (len(InputConfigFlags) + 2))
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-
-        x = (screen_width - width) // 2
-        y = ((screen_height - height) // 2) - 50
-        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        center_window(self.root, width, height)
 
         self.output_path = tk.StringVar(
             master=self.root

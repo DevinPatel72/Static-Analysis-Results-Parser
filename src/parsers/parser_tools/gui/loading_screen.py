@@ -2,6 +2,7 @@
 
 import re
 import parsers
+from . import center_window
 from ..toolbox import InputConfigFlags, GuiWindow
 import tkinter as tk
 from tkinter import ttk
@@ -176,13 +177,7 @@ class LoadingWindow:
             width = 500
             height = row * 35
 
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-
-        x = (screen_width - width) // 2
-        y = (screen_height - height) // 2 - 50
-
-        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        center_window(self.root, width, height)
 
         self.root.after(100, self.poll_queue)
         

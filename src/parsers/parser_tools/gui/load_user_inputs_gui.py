@@ -9,6 +9,7 @@ from tkinter import ttk, messagebox
 import tkinter.font as tkfont
 
 from ... import PROG_NAME
+from . import center_window
 from .. import parser_logger as logger
 from ..toolbox import InputDictKeys, InputSchemaKeys, InputConfigFlags, InputAdditionalOptions
 from .version_label import VersionLabel
@@ -36,12 +37,7 @@ class JsonInputPreviewGUI:
         # Set geometry
         width = 1300
         height = 500
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-
-        x = (screen_width - width) // 2
-        y = ((screen_height - height) // 2) - 50
-        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        center_window(self.root, width, height)
 
         self.root.protocol(
             "WM_DELETE_WINDOW",

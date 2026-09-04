@@ -36,3 +36,16 @@ def create_tk_variable(value, master=None):
         str: tk.StringVar,
     }.get(type(value), tk.StringVar)
     return var_type(master=master, value=value)
+
+def center_window(window, width, height):
+    window.withdraw()
+    window.geometry(f"{width}x{height}")
+    window.update_idletasks()
+
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+
+    x = (screen_width - width) // 2
+    y = (screen_height - height) // 2
+
+    window.geometry(f"{width}x{height}+{x}+{y}")
