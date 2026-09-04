@@ -19,7 +19,7 @@ class ToolTip:
         self.tip_window = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(True)  # Remove window decorations
         tw.wm_geometry(f"+{x}+{y}")
-        label = tk.Label(tw, text=self.text, background="lightyellow",
+        label = tk.Label(tw, text=self._wrap_text(self.text), background="lightyellow",
                          relief="solid", borderwidth=1, padx=5, pady=3,
                          font=("Arial", 9))
         label.pack()
@@ -28,3 +28,23 @@ class ToolTip:
         if self.tip_window:
             self.tip_window.destroy()
             self.tip_window = None
+    
+    def _wrap_text(self, text, max_length=100):
+        words = text.split()
+        lines = []
+        current_line = []
+
+        for word in words:
+            # Length excluding whitespace
+            current_length = sum(len(w) for w in current_line)
+
+            if current_line and current_length + len(word) > max_length:
+                lines.append(" ".join(current_line))
+                current_line = [word]
+            else:
+                current_line.append(word)
+
+        if current_line:
+            lines.append(" ".join(current_line))
+
+        return "\n".join(lines)

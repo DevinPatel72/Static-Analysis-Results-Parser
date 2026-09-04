@@ -26,6 +26,7 @@ class SARPApp:
         self.json_input_preview_gui = JsonInputPreviewGUI(parsers.gui_root)
         self.inputs_gui = InputsGUI(parsers.gui_root)
         self.adjust_paths_gui = AdjustPathsGUI(parsers.gui_root)
+        self.outfile_flags_gui = OutfileFlagsGUI(parsers.gui_root)
         
         # Set icon
         icon = tk.PhotoImage(file=parsers.LOGO_PATH)
@@ -103,18 +104,18 @@ class SARPApp:
 
                 # User chooses outfile location and control flags
                 case GuiWindow.OutfileFlagsGUI:
-                    outfile_flags_gui = OutfileFlagsGUI(parsers.gui_root, self.parser_outfile, self.control_flags, self.additional_options)
-                    if not outfile_flags_gui.cleanexit:
+                    self.outfile_flags_gui.load_view(self.parser_outfile, self.control_flags, self.additional_options)
+                    if not self.outfile_flags_gui.cleanexit:
                         sys.exit(0)
                     
-                    self.parser_outfile = outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
-                    self.additional_options[InputAdditionalOptions.JOBS.opt] = outfile_flags_gui.results[InputAdditionalOptions.JOBS.opt]
-                    self.control_flags = {f.flag: outfile_flags_gui.results[f.flag]
+                    self.parser_outfile = self.outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
+                    self.additional_options[InputAdditionalOptions.JOBS.opt] = self.outfile_flags_gui.results[InputAdditionalOptions.JOBS.opt]
+                    self.control_flags = {f.flag: self.outfile_flags_gui.results[f.flag]
                                         for f in InputConfigFlags
                                         if GuiWindow.OutfileFlagsGUI in f.module_visibility}
                     
                     # Go back
-                    if outfile_flags_gui.back:
+                    if self.outfile_flags_gui.back:
                         self.current_window = GuiWindow.AdjustPathsGUI
                     else:
                         self.current_window = GuiWindow.RuleBuilderGUI

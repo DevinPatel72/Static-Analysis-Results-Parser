@@ -469,7 +469,7 @@ class AdjustPathsGUI:
 
         self.cleanexit = False
         self.results = {}
-
+        self._view_done.set(True)
         self.root.quit()
         self.root.destroy()
 
