@@ -8,8 +8,8 @@ from . import parser_logger as logger
 _enable_matplotlib = False
 
 try:
-    import matplotlib.pyplot as plt
     from matplotlib.figure import Figure
+    from matplotlib.patches import Circle
     _enable_matplotlib = True
 except (ImportError, ModuleNotFoundError):
     _enable_matplotlib = False
@@ -98,7 +98,6 @@ class Report:
             return autopct
         
         if sum(findings) <= 0:
-            from matplotlib.patches import Circle
             ax.clear()
             ax.set_axis_off()
 
@@ -135,7 +134,7 @@ class Report:
         )
 
         # Donut center
-        centre_circle = plt.Circle(
+        centre_circle = Circle(
             (0, 0),
             0.60,
             fc="white"
