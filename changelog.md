@@ -1,8 +1,14 @@
 # Change Log
 
+## [Version 2.11.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.0) (2026-09-04)
+- Implemented security hardening to preflight rules files so custom code cannot be executed from any of the preflight rules files. The interpreter will not execute any statement in preflight `.py` files.
+- SARP reingestion now preserves any additional headers in the file instead of requiring an exact match. A minimum set of headers is still required.
+- Fixed a hidden exception that gets thrown in the GUI executable that sometimes resulted in a soft-lock during parsing.
+- Significantly reworked GUI to patch minor bugs and improve performance.
+
 ## [Version 2.10.2 Hotfix 1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.2-hotfix.1) (2026-09-02)
 - Quick hotfix to patch Checkmarx parsing.
-- Bug patches for GUI elements are still in-progress and will be available in version 2.10.3.
+- Bug patches for GUI elements are still in-progress and will be available in the next version.
 
 ## [Version 2.10.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.10.2) (2026-08-19)
 - Fixed bug where Fortify parser will cause a soft lock if an FPR file with no findings is passed
