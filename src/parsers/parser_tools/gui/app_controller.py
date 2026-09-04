@@ -25,6 +25,7 @@ class SARPApp:
         self.current_window = GuiWindow.JsonInputPreviewGUI
         self.json_input_preview_gui = JsonInputPreviewGUI(parsers.gui_root)
         self.inputs_gui = InputsGUI(parsers.gui_root)
+        self.adjust_paths_gui = AdjustPathsGUI(parsers.gui_root)
         
         # Set icon
         icon = tk.PhotoImage(file=parsers.LOGO_PATH)
@@ -90,14 +91,14 @@ class SARPApp:
             
                 # User passes remove/prepend paths
                 case GuiWindow.AdjustPathsGUI:
-                    adjust_paths_gui = AdjustPathsGUI(parsers.gui_root, self.parser_inputs)
-                    if not adjust_paths_gui.cleanexit:
+                    self.adjust_paths_gui.load_view(self.parser_inputs)
+                    if not self.adjust_paths_gui.cleanexit:
                         sys.exit(0)
                     
-                    if adjust_paths_gui.back:
+                    if self.adjust_paths_gui.back:
                         self.current_window = GuiWindow.InputsGUI
                     else:
-                        self.parser_inputs = adjust_paths_gui.results
+                        self.parser_inputs = self.adjust_paths_gui.results
                         self.current_window = GuiWindow.OutfileFlagsGUI
 
                 # User chooses outfile location and control flags
