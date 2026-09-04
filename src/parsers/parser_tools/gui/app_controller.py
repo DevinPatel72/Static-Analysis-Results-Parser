@@ -116,9 +116,13 @@ class SARPApp:
                     
                     self.parser_outfile = self.outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
                     self.additional_options[InputAdditionalOptions.JOBS.opt] = self.outfile_flags_gui.results[InputAdditionalOptions.JOBS.opt]
-                    self.control_flags = {f.flag: self.outfile_flags_gui.results[f.flag]
-                                        for f in InputConfigFlags
-                                        if GuiWindow.OutfileFlagsGUI in f.module_visibility}
+                    self.control_flags.update(
+                        {
+                            f.flag: self.outfile_flags_gui.results[f.flag]
+                            for f in InputConfigFlags
+                            if GuiWindow.OutfileFlagsGUI in f.module_visibility
+                        }
+                    )
                     
                     # Go back
                     if self.outfile_flags_gui.back:
@@ -136,20 +140,22 @@ class SARPApp:
                             self._LOADED_PRULES_ONCE = True
 
                         self.rulebuildergui.load_view(parsers.prules, self.control_flags)
-                        if self.rulebuildergui.cleanexit:
-                            parsers.prules = self.rulebuildergui.result
-                        else:
+                        if not self.rulebuildergui.cleanexit:
                             self.destroy_gui()
                             sys.exit(0)
+                        
+                        # This needs to be done regardless of go back or not
+                        parsers.prules = self.rulebuildergui.result
+                        
+                        if self.rulebuildergui.enable_security_rules is not None:
+                            self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = self.rulebuildergui.enable_security_rules
+                        else:
+                            self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
                         
                         # Go back
                         if self.rulebuildergui.back:
                             self.current_window = GuiWindow.OutfileFlagsGUI
                         else:
-                            if self.rulebuildergui.enable_security_rules is not None:
-                                self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = self.rulebuildergui.enable_security_rules
-                            else:
-                                self.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag] = InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
                             self.rulebuildergui.destroy_view()
                             self.current_window = None
                             self.load_security_prules()

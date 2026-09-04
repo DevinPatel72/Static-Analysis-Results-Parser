@@ -769,7 +769,6 @@ class RuleBuilderGUI:
         self.cleanexit = False
         self.back = False
         self.rules = []
-        self.control_flags = None
 
         self.root = tk.Toplevel(root)
         self.root.title(WINDOW_TITLE)
@@ -976,14 +975,7 @@ class RuleBuilderGUI:
         control_flags=None
     ):
 
-        self.result = None
-        self.enable_security_rules = None
-        self.cleanexit = False
-        self.back = False
-
-        self.control_flags = control_flags
-
-        # Remove rules from the previous invocation.
+        # Remove rules from the previous invocation
         for rule in self.rules:
             self._release_condition_variables(
                 getattr(rule, "group", None)
@@ -995,10 +987,10 @@ class RuleBuilderGUI:
 
         self.rules.clear()
 
-        # Populate the security rules checkbox each time.
-        if self.control_flags is not None:
+        # Populate the security rules checkbox each time
+        if control_flags is not None:
             self.cb_enable_security_rules.set(
-                self.control_flags.get(
+                control_flags.get(
                     InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag,
                     InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
                 )
@@ -1008,12 +1000,10 @@ class RuleBuilderGUI:
                 InputConfigFlags.SECURITY_PREFLIGHT_RULES.default
             )
 
-        # Populate the rules each time load_view() is called.
+        # Populate the rules each time load_view() is called
         if rules is not None:
-
             for rule in rules:
                 self.add_rule(rule)
-
         else:
             self.add_rule()
 
@@ -1230,7 +1220,6 @@ class RuleBuilderGUI:
         self.hide_view()
 
     def go_back(self):
-
         self.back = True
         self.submit()
 
@@ -1248,13 +1237,7 @@ class RuleBuilderGUI:
                 rule.get_rule()
             )
 
-        self.enable_security_rules = (
-            self.cb_enable_security_rules.get()
-        )
+        self.enable_security_rules = self.cb_enable_security_rules.get()
         
         self.cleanexit = True
-        
-        # Do not destroy the window. Hide it so that
-        # load_view() can return to the outer while loop
-        # and the same window can be reused.
         self.hide_view()
