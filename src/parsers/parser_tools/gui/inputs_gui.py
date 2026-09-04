@@ -57,10 +57,6 @@ class InputsGUI:
         self.root.title(WINDOW_TITLE)
         self.root.withdraw()
         
-        self._view_done = tk.BooleanVar(
-            master=self.root,
-            value=False
-        )
 
         # Constant
         self.row_frame_pady = 4
@@ -257,39 +253,43 @@ class InputsGUI:
 
     def load_view(self, inputs=None):
         self.root.withdraw()
+        self.back = False
+        self.cleanexit = False
         self._populate_view(inputs)
         self.root.update_idletasks()
-
-        self._view_done.set(False)
-
         self.root.deiconify()
-        self.root.update_idletasks()
         self.root.lift()
         self.root.focus_force()
         self.root.attributes("-topmost", True)
         self.root.update()
         self.root.attributes("-topmost", False)
-
         self.root.grab_set()
-
-        self.root.wait_variable(self._view_done)
-
-        self.root.grab_release()
+        self.root.mainloop()
+        if self.root.winfo_exists():
+            try: self.root.grab_release()
+            except tk.TclError: pass
 
     def hide_view(self):
-        self.root.withdraw()
-        self._view_done.set(True)
+        if self.root.winfo_exists():
+            try: self.root.grab_release()
+            except tk.TclError: pass
+            self.root.withdraw()
+            self.root.quit()
 
     def _on_close(self):
-        """
-        Permanently close the window.
-        """
-
         self.cleanexit = False
         self.results = {}
-        self._view_done.set(True)
-        self.root.quit()
-        self.root.destroy()
+        self.hide_view()
+
+    def destroy_view(self):
+        if not self.root.winfo_exists():
+            return
+        try: self.root.grab_release()
+        except tk.TclError: pass
+        try: self.root.quit()
+        except tk.TclError: pass
+        try: self.root.destroy()
+        except tk.TclError: pass
 
     def add_entry(self, p_entry=None):
         row_frame = tk.Frame(self.entry_frame)

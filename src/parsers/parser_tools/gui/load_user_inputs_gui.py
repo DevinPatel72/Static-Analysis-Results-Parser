@@ -21,6 +21,7 @@ class JsonInputPreviewGUI:
         self.json_folder = parsers.INPUTS_DIR
         self.project_files = {}
         self.scanner_sections = []
+        self._tk_vars = []
 
         self.current_wraplength = 0
         self._tooltip = None
@@ -56,44 +57,55 @@ class JsonInputPreviewGUI:
         self._load_json_files()
 
     def load_view(self):
-        """
-        Show the window, bring it to the foreground, and run
-        the Tk event loop until hide_view() or _on_close() is called.
-        """
         self.root.withdraw()
         self.cleanexit = False
         self.results = None
         self.execute_now = False
         self._refresh_profiles()
-        
+        self.root.update_idletasks()
         self.root.deiconify()
         self.root.lift()
         self.root.focus_force()
         self.root.attributes("-topmost", True)
         self.root.update()
         self.root.attributes("-topmost", False)
-
+        self.root.grab_set()
         self.root.mainloop()
+        if self.root.winfo_exists():
+            try: self.root.grab_release()
+            except tk.TclError: pass
 
     def hide_view(self):
-        """
-        Hide the window and exit the current mainloop without
-        destroying the window.
-        """
-        self.root.withdraw()
-        self.root.update_idletasks()
-        self.root.quit()
+        if self.root.winfo_exists():
+            try: self.root.grab_release()
+            except tk.TclError: pass
+            self.root.withdraw()
+            self.root.quit()
 
     def _on_close(self):
-        """
-        Permanently close the window.
-        """
         self.cleanexit = False
         self.results = None
+        self.hide_view()
 
-        # Exit mainloop before destroying the window.
-        self.root.quit()
-        self.root.destroy()
+    def destroy_view(self):
+        if not self.root.winfo_exists():
+            return
+        try: self.root.grab_release()
+        except tk.TclError: pass
+        self._tk_vars.clear()
+        self.selected_file_var = None
+        if self._tooltip_after_id:
+            try: self.root.after_cancel(self._tooltip_after_id)
+            except tk.TclError: pass
+            self._tooltip_after_id = None
+        if self._tooltip is not None:
+            try: self._tooltip.destroy()
+            except tk.TclError: pass
+            self._tooltip = None
+        try: self.root.quit()
+        except tk.TclError: pass
+        try: self.root.destroy()
+        except tk.TclError: pass
 
     def _build_gui(self):
         
@@ -550,6 +562,7 @@ class JsonInputPreviewGUI:
         )
 
         expanded = tk.BooleanVar(master=self.root, value=False)
+        self._tk_vars.append(expanded)
 
         body_frame = ttk.Frame(
             section_frame

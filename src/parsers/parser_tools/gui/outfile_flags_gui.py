@@ -200,12 +200,6 @@ class OutfileFlagsGUI:
             pady=5
         )
 
-        # Used by load_view() / hide_view() to wait until
-        # the user has finished interacting with the window.
-        self._view_done = tk.BooleanVar(
-            master=self.root,
-            value=False
-        )
 
         # Keep the window hidden until load_view() is called.
         self.root.withdraw()
@@ -284,89 +278,49 @@ class OutfileFlagsGUI:
         # Make sure the path/format relationship is updated.
         self._path_changed()
 
-    def load_view(
-        self,
-        outfile="",
-        control_flags=None,
-        initial_additional_options=None
-    ):
-        """
-        Populate, show, and run the view.
-
-        The window remains alive between calls. The function
-        returns when hide_view() or _on_close() is called.
-        """
-
-        # Make absolutely sure the window is hidden while
-        # the fields are being populated.
+    def load_view(self, outfile="", control_flags=None, initial_additional_options=None):
         self.root.withdraw()
-
-        self._populate_view(
-            outfile,
-            control_flags,
-            initial_additional_options
-        )
-
-        # Reset the completion variable before showing the window.
-        self._view_done.set(False)
-
-        # Force Tk to finish all pending geometry/layout work
-        # before displaying the window.
+        self.back = False
+        self.cleanexit = False
+        self._populate_view(outfile, control_flags, initial_additional_options)
         self.root.update_idletasks()
-
-        # Now show the fully populated window.
         self.root.deiconify()
-        self.root.update_idletasks()
-
-        # Put the window on top.
         self.root.lift()
         self.root.focus_force()
-
-        self.root.attributes(
-            "-topmost",
-            True
-        )
-
+        self.root.attributes("-topmost", True)
         self.root.update()
-
-        self.root.attributes(
-            "-topmost",
-            False
-        )
-
-        # Prevent interaction with other application windows
-        # while this view is active.
+        self.root.attributes("-topmost", False)
         self.root.grab_set()
-
-        # Wait until submit(), go_back(), or _on_close()
-        # signals that this view is finished.
-        self.root.wait_variable(
-            self._view_done
-        )
-
-        self.root.grab_release()
+        self.root.mainloop()
+        if self.root.winfo_exists():
+            try: self.root.grab_release()
+            except tk.TclError: pass
 
     def hide_view(self):
-        """
-        Hide the window and return from load_view() without
-        destroying the window.
-        """
-
-        self.root.withdraw()
-        self.root.update_idletasks()
-
-        self._view_done.set(True)
+        if self.root.winfo_exists():
+            try: self.root.grab_release()
+            except tk.TclError: pass
+            self.root.withdraw()
+            self.root.quit()
 
     def _on_close(self):
-        """
-        Permanently close the window.
-        """
-
         self.cleanexit = False
         self.results = {}
-        self._view_done.set(True)
-        self.root.quit()
-        self.root.destroy()
+        self.hide_view()
+
+    def destroy_view(self):
+        if not self.root.winfo_exists():
+            return
+        try: self.root.grab_release()
+        except tk.TclError: pass
+        self.output_path = None
+        self.output_format = None
+        self.flag_bool_vars.clear()
+        self.additional_option_vars.clear()
+        try: self.root.quit()
+        except tk.TclError: pass
+        try: self.root.destroy()
+        except tk.TclError: pass
 
     def browse_file(self):
         fmt = FORMAT_MAP[

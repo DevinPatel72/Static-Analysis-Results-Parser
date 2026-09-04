@@ -1,6 +1,7 @@
 # app_controller.py
 
 import sys
+import gc
 import tkinter as tk
 import parsers
 from parsers.parser_tools.gui.inputs_gui import InputsGUI
@@ -74,12 +75,14 @@ class SARPApp:
                             self.current_window = GuiWindow.InputsGUI
                     # Else exit
                     else:
+                        self.destroy_gui()
                         sys.exit(0)
                 
                 # User passes scanner and path inputs
                 case GuiWindow.InputsGUI:
                     self.inputs_gui.load_view(self.parser_inputs)
                     if not self.inputs_gui.cleanexit:
+                        self.destroy_gui()
                         sys.exit(0)
                     
                     # Go back if selected
@@ -95,6 +98,7 @@ class SARPApp:
                 case GuiWindow.AdjustPathsGUI:
                     self.adjust_paths_gui.load_view(self.parser_inputs)
                     if not self.adjust_paths_gui.cleanexit:
+                        self.destroy_gui()
                         sys.exit(0)
                     
                     if self.adjust_paths_gui.back:
@@ -107,6 +111,7 @@ class SARPApp:
                 case GuiWindow.OutfileFlagsGUI:
                     self.outfile_flags_gui.load_view(self.parser_outfile, self.control_flags, self.additional_options)
                     if not self.outfile_flags_gui.cleanexit:
+                        self.destroy_gui()
                         sys.exit(0)
                     
                     self.parser_outfile = self.outfile_flags_gui.results[InputDictKeys.OUTFILE.value]
@@ -134,7 +139,7 @@ class SARPApp:
                         if self.rulebuildergui.cleanexit:
                             parsers.prules = self.rulebuildergui.result
                         else:
-                            self.rulebuildergui.destroy_view()
+                            self.destroy_gui()
                             sys.exit(0)
                         
                         # Go back
@@ -161,6 +166,21 @@ class SARPApp:
         # End while
     
     
+    def destroy_gui(self):
+        for gui in (
+            self.json_input_preview_gui,
+            self.inputs_gui,
+            self.adjust_paths_gui,
+            self.outfile_flags_gui,
+            self.rulebuildergui,
+        ):
+            if gui is not None:
+                try:
+                    gui.destroy_view()
+                except (tk.TclError, AttributeError):
+                    pass
+            gc.collect()
+
     def load_prules(self):
         # Load preflight rules if true
         if self.control_flags.get(InputConfigFlags.PREFLIGHT_RULES.flag, InputConfigFlags.PREFLIGHT_RULES.default):
@@ -173,15 +193,6 @@ class SARPApp:
             parsers.security_prules = preflight.load_prules(parsers.SECURITY_PREFLIGHT_FILE)
         else:
             parsers.security_prules = []
-
-    def destroy_gui(self):
-        self.json_input_preview_gui.destroy_view()
-        self.inputs_gui.destroy_view()
-        self.adjust_paths_gui.destroy_view()
-        self.outfile_flags_gui.destroy_view()
-        self.rulebuildergui.destroy_view()
-
-        parsers.gui_root.destroy()
 
 def close_splash():
     # Pyinstaller splash screen

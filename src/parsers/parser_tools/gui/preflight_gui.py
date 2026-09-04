@@ -1005,6 +1005,10 @@ class RuleBuilderGUI:
     ):
         self.root.withdraw()
 
+        self.back = False
+        self.cleanexit = False
+        self.result = None
+        self.enable_security_rules = None
         self._populate_view(rules, control_flags)
 
         # Put the window on top.
@@ -1032,34 +1036,24 @@ class RuleBuilderGUI:
             self.root.quit()
 
     def destroy_view(self):
-        """
-        Permanently destroy the RuleBuilderGUI.
+        if not self.root.winfo_exists():
+            return
+        try: self.root.grab_release()
+        except tk.TclError: pass
 
-        Use this only when the entire application is exiting.
-        """
-
-        # Release dynamically-created rule variables
         for rule in self.rules:
-            try:
-                self._release_condition_variables(
-                    getattr(rule, "group", None)
-                )
-            except tk.TclError:
-                pass
-
+            try: rule.frame.destroy()
+            except tk.TclError: pass
             rule.precedence_var = None
+            self._release_condition_variables(getattr(rule, "group", None))
 
         self.rules.clear()
-
-        # Release the GUI's own Tk variables
         self.cb_enable_security_rules = None
 
-        # Now destroy the Toplevel
-        try:
-            self.root.destroy()
-        except tk.TclError:
-            pass
-
+        try: self.root.quit()
+        except tk.TclError: pass
+        try: self.root.destroy()
+        except tk.TclError: pass
 
     def _release_condition_variables(self, group):
         if group is None:

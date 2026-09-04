@@ -88,6 +88,7 @@ class AdjustPathsGUI:
         )
 
         self.path_entries = []
+        self._path_vars = []
 
         self.button_frame = tk.Frame(self.root)
         self.button_frame.pack(pady=10)
@@ -115,13 +116,6 @@ class AdjustPathsGUI:
         VersionLabel(self.root).pack(
             side=tk.BOTTOM,
             pady=5
-        )
-
-        # Used by load_view() / hide_view() to wait for the
-        # user to finish interacting with this window.
-        self._view_done = tk.BooleanVar(
-            master=self.root,
-            value=False
         )
 
         # Keep window hidden until load_view() is called.
@@ -405,73 +399,46 @@ class AdjustPathsGUI:
             )
 
     def load_view(self, current_inputs):
-        """
-        Populate, show, and run the view.
-
-        The window remains alive between calls. The function
-        returns when hide_view() or _on_close() is called.
-        """
-
-        # Make absolutely sure the window is hidden while
-        # the contents are being rebuilt.
         self.root.withdraw()
-
+        self.back = False
+        self.cleanexit = False
+        self._path_vars.clear()
         self._populate_view(current_inputs)
-
-        # Force Tk to finish all geometry/layout calculations
-        # before the window becomes visible.
         self.root.update_idletasks()
-
-        # Now reveal the fully populated window.
         self.root.deiconify()
-        self.root.update_idletasks()
-
         self.root.lift()
         self.root.focus_force()
-
-        self.root.attributes(
-            "-topmost",
-            True
-        )
-
+        self.root.attributes("-topmost", True)
         self.root.update()
-
-        self.root.attributes(
-            "-topmost",
-            False
-        )
-
+        self.root.attributes("-topmost", False)
         self.root.grab_set()
-
-        self._view_done.set(False)
-
-        self.root.wait_variable(
-            self._view_done
-        )
-
-        self.root.grab_release()
+        self.root.mainloop()
+        if self.root.winfo_exists():
+            try: self.root.grab_release()
+            except tk.TclError: pass
 
     def hide_view(self):
-        """
-        Hide the window and return from load_view() without
-        destroying the window.
-        """
-
-        self.root.withdraw()
-        self.root.update_idletasks()
-
-        self._view_done.set(True)
+        if self.root.winfo_exists():
+            try: self.root.grab_release()
+            except tk.TclError: pass
+            self.root.withdraw()
+            self.root.quit()
 
     def _on_close(self):
-        """
-        Permanently close the window.
-        """
-
         self.cleanexit = False
         self.results = {}
-        self._view_done.set(True)
-        self.root.quit()
-        self.root.destroy()
+        self.hide_view()
+
+    def destroy_view(self):
+        if not self.root.winfo_exists():
+            return
+        try: self.root.grab_release()
+        except tk.TclError: pass
+        self._path_vars.clear()
+        try: self.root.quit()
+        except tk.TclError: pass
+        try: self.root.destroy()
+        except tk.TclError: pass
 
     def go_back(self):
         self.back = True
