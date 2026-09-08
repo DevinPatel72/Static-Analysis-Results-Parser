@@ -1,5 +1,9 @@
 # Change Log
 
+## [Version 2.11.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.1) (2026-09-08)
+- Fixed bug where Checkmarx parser did not output the correct Symbol value (previously used value for 'SrcName', now uses value for  'DestName')
+- Fixed fault where locking the output file resulted in an uncaught exception when a message box attempts to spawn in GUI mode
+
 ## [Version 2.11.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.0) (2026-09-04)
 - Implemented security hardening to preflight rules files so custom code cannot be executed from any of the preflight rules files. The interpreter will not execute any statement in preflight `.py` files.
 - SARP reingestion now preserves any additional headers in the file instead of requiring an exact match. A minimum set of headers is still required.
