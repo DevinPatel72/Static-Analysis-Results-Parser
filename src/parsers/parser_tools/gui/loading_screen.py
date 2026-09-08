@@ -221,8 +221,7 @@ class LoadingWindow:
                         self.completed.add(progress_id)
 
                     if self.completed >= self.expected:
-                        self.cleanexit = True
-                        self.root.destroy()
+                        self.close_window(cleanexit=True)
                         return
 
                 ###############################################################
@@ -230,7 +229,7 @@ class LoadingWindow:
                 ###############################################################
 
                 elif msg_type == "stop":
-                    self.root.destroy()
+                    self.close_window(cleanexit=False)
                     return
 
         except Empty:
@@ -252,3 +251,7 @@ class LoadingWindow:
 
         widgets["status"].config(text=msg.get("status", ""))
         widgets["percent"].config(text="{:.0f} %".format(msg.get("percent", 0)))
+
+    def close_window(self, cleanexit=False):
+        self.cleanexit = cleanexit
+        self.root.destroy()

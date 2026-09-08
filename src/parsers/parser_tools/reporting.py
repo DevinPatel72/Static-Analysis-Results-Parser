@@ -439,6 +439,9 @@ class Report:
         root.attributes("-topmost", False)
 
         gui_root.wait_window(root)
+        
+        if root.winfo_exists():
+            root.destroy()
     
     def _cli_table(self):
         _max_key_len = max(len(k) for k in self.counts.keys())

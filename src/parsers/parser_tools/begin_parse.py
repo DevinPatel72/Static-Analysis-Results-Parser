@@ -40,14 +40,21 @@ def begin(parser_inputs):
         parsers.progress_queue = multiprocessing.Queue()
         loading_window = LoadingWindow(parsers.gui_root, scanner_ids=[(os.path.basename(i[InputDictKeys.PATH.value]), i[InputDictKeys.INPUT_ID.value]) for i in parser_inputs], progress_queue=parsers.progress_queue)
     
-        threading.Thread(
+        parser_thread = threading.Thread(
             target=run_parsers,
             args=(parser_inputs,),
             daemon=True
-        ).start()
+        )
+        parser_thread.start()
 
         # Loading screen mainloop to wait until the "complete" status type is reached in run_parsers
         parsers.gui_root.wait_window(loading_window.root)
+        
+        # Wait until thread finishes
+        parser_thread.join()
+        
+        # Write findings to file
+        parser_writer.close_writer()
     
         # Handle unclean exit
         if not loading_window.cleanexit:
@@ -121,9 +128,7 @@ def run_parsers(parser_inputs):
         _report.counts[scanner][0] += result['finding_count']
         _report.counts[scanner][1] += result['err_count']
     
-    # Write findings to file
-    parser_writer.close_writer()
-    
+    parser_writer.post_process_findings()
 
 def init_worker(progress_queue=None, control_flags=None, logging_queue=None, gui_mode=False, gui_root=None, progressbar_space=34):
     # Ignore SIGINT in workers to suppress traceback

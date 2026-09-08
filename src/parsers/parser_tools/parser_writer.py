@@ -25,6 +25,7 @@ except (ImportError, ModuleNotFoundError):
 __filepath = None
 __parser_data = {} # Dictionary of rows keyed by their ID {row['ID']: row}
 __duplicate_index = {} # Dictionary of lists containing duplicate rows keyed by PATH, LINE, TYPE, and SCANNER
+__flattened_data = None # Flattened version of __parser_data
 __excel_workbook = None
 __fieldnames = None
 __set_fieldnames = set() # Maintain a set copy of __fieldnames for quicker lookups in write_row()
@@ -63,8 +64,7 @@ def open_writer(outfile, fieldnames, sheet_name='Sheet1', force_csv=False, force
             break
         except PermissionError:
             if GUI_MODE:
-                from tkinter import messagebox
-                messagebox.showerror("Unable to open file", f"File \"{outfile}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
+                logger.console(f"File \"{outfile}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.", title="Unable to open file", level='error')
             else:
                 if elapsed_time < 0:
                     print(f"\n[ERROR]  Output file \"{outfile}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
@@ -148,14 +148,11 @@ def update_row(id, updates):
 def flatten_data(data):
     return list(chain.from_iterable(data.values()))
 
-def close_writer():
-    global __filepath, __excel_workbook, __export_sarif, __fieldnames, __excel_enabled, __parser_data
+def post_process_findings():
+    global __parser_data, __flattened_data
     from parsers import GUI_MODE
     
     flattened_data = flatten_data(__parser_data)
-    
-    # Track time for outfile holding
-    elapsed_time = -1
     
     # Post-processing of data
     if len(flattened_data) > 0:
@@ -170,7 +167,21 @@ def close_writer():
         
         # Check for CWE category mappings
         check_all_CWEs(flattened_data)
-        
+    
+    __flattened_data = flattened_data
+
+def close_writer():
+    global __filepath, __excel_workbook, __export_sarif, __fieldnames, __excel_enabled, __parser_data, __flattened_data
+    from parsers import GUI_MODE
+    
+    if __flattened_data is None:
+        __flattened_data = flatten_data(__parser_data)
+    
+    # Track time for outfile holding
+    elapsed_time = -1
+    
+    # Post-processing of data
+    if len(__flattened_data) > 0:
         # Write out parser data to file
         if __filepath is not None:
             logger.info("Writing results to file \"%s\"...", __filepath)
@@ -178,12 +189,11 @@ def close_writer():
                 while True:
                     try:
                         with open(__filepath, 'w', encoding='utf-8-sig') as out:
-                            json.dump(rows_to_sarif(flattened_data), out, indent=2)
+                            json.dump(rows_to_sarif(__flattened_data), out, indent=2)
                         break
                     except PermissionError:
                         if GUI_MODE:
-                            from tkinter import messagebox
-                            messagebox.showerror("Unable to open file", f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
+                            logger.console(f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.", title="Unable to open file", level='error', no_logging=True)
                         else:
                             if elapsed_time < 0:
                                 print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
@@ -196,7 +206,7 @@ def close_writer():
                 append_func = sheet.append
                 headers = tuple(__fieldnames)
                 append_func(headers)
-                for row in flattened_data:
+                for row in __flattened_data:
                     append_func(tuple(row.get(h, "") for h in headers))
                 while True:
                     try:
@@ -204,8 +214,7 @@ def close_writer():
                         break
                     except PermissionError:
                         if GUI_MODE:
-                            from tkinter import messagebox
-                            messagebox.showerror("Unable to open file", f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.")
+                            logger.console(f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.", title="Unable to open file", level='error', no_logging=True)
                         else:
                             if elapsed_time < 0:
                                 print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
@@ -217,7 +226,7 @@ def close_writer():
                 with open(__filepath, 'w', newline='', encoding='utf-8-sig') as o:
                     csv_writer = csv.writer(o)
                     csv_writer.writerow(__fieldnames)
-                    csv_writer.writerows((row.get(h, "") for h in __fieldnames) for row in flattened_data)
+                    csv_writer.writerows((row.get(h, "") for h in __fieldnames) for row in __flattened_data)
 
     if not GUI_MODE and elapsed_time >= 0:
         print()

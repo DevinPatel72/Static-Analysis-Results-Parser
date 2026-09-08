@@ -114,14 +114,13 @@ def debug(msg, *args, **kwargs):
 
 
 def message_box(title, msg, level):
-    if level == 'critical':
-        messagebox.showerror(title, msg)
-    elif level == 'error':
-        messagebox.showerror(title, msg)
+    if level in ('critical', 'error'):
+        messagebox.showerror(title, msg, parent=parsers.gui_root)
     elif level == 'warning':
-        messagebox.showwarning(title, msg)
+        messagebox.showwarning(title, msg, parent=parsers.gui_root)
     elif level == 'info':
-        messagebox.showinfo(title, msg)
+        messagebox.showinfo(title, msg, parent=parsers.gui_root)
+
 
 def console(msg, title='', level='info', *, no_console=False, no_logging=False, no_messagebox=False):
     if not no_logging:
