@@ -208,7 +208,6 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner, input_id):
                 tool_cwe = '(blank)'
             else: tool_cwe = int(cwe) if str(cwe).isdigit() else cwe
             
-            
             # Adjust lang
             if lang == 'CPP': lang = 'c/c++'
             else: lang = lang.lower()
@@ -258,15 +257,15 @@ def _parse_xml(fpath, substr, prepend, total_findings, scanner, input_id):
                             t_path = t_path.replace(substr, "", 1)
                             t_path = os.path.join(prepend, t_path).replace('\\', '/')
                             
-                            if int(node_id) == 1:
-                                symbol = t_name
-                            
-                            # Update t_path and t_line to be dest path/line if it exists and is a number
+                            # Update path/line/symbol to be dest path/line/symbol if it exists and is a number
                             if t_path is not None and len(str(t_path)) > 0:
                                 path = t_path
                             
                             if t_line is not None and len(str(t_line)) > 0 and str(t_line).isdigit():
                                 line = int(t_line)
+                                
+                            if t_name is not None and len(str(t_name)) > 0:
+                                symbol = t_name
                             
                             trace += f"{node_id}) {t_path}:{t_line}: {t_name}\n"
                         message = "{} - {}:{}: {}".format(query_name, path_nodes[-1].findtext('FileName', ''), path_nodes[-1].findtext('Line', ''), path_nodes[-1].findtext('Name', ''))
