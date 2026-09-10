@@ -62,6 +62,7 @@ def begin(parser_inputs):
     # CLI mode
     else:
         run_parsers(parser_inputs)
+        parser_writer.close_writer()
     
     # Generate report
     _report.generate_report()

@@ -1,7 +1,7 @@
 # Change Log
 
 ## [Version 2.11.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.1) (2026-09-08)
-- Fixed bug where Checkmarx parser did not output the correct Symbol value (previously used value for 'SrcName', now uses value for  'DestName')
+- Fixed bug where Checkmarx parser did not output the correct Symbol value (previously used value for 'SrcName', now uses value for 'DestName')
 - Fixed fault where locking the output file resulted in an uncaught exception when a message box attempts to spawn in GUI mode
 
 ## [Version 2.11.0](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.0) (2026-09-04)
