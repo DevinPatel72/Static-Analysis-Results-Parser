@@ -228,10 +228,12 @@ def close_writer():
                     csv_writer.writerow(__fieldnames)
                     csv_writer.writerows((row.get(h, "") for h in __fieldnames) for row in __flattened_data)
 
-    if not GUI_MODE and elapsed_time >= 0:
-        print()
-    
-    logger.info("Output saved to %s", __filepath)
+        if not GUI_MODE and elapsed_time >= 0:
+            print()
+        
+        logger.info("Output saved to %s", __filepath)
+    else:
+        logger.info("No findings were parsed. There are no results to write to an output file.")
     __filepath = None
 
 # Converts list of dictionaries to SARIF format
