@@ -83,7 +83,6 @@ def run_parsers(parser_inputs):
     for i, inp in enumerate(parser_inputs, start=0):
         if any(s in inp[InputDictKeys.SCANNER.value].lower().replace(' ', '') for s in Scanners.SRM.keywords):
             srm_inputs.append(parser_inputs.pop(i))
-            break
     
     results = []
     

@@ -93,6 +93,8 @@ def apply_prules(data):
         if parsers.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag]:
             loop_rules(parsers.security_prules, row)
         loop_rules(parsers.prules, row)
+    else: # Zero findings
+        progressbar.progress_bar(1, len(data), prefix=InputConfigFlags.PREFLIGHT_RULES.flag.rjust(progressbar.SPACE), input_id=InputConfigFlags.PREFLIGHT_RULES.flag)
     
     if parsers.control_flags[InputConfigFlags.SECURITY_PREFLIGHT_RULES.flag]:
         def_len = len(parsers.security_prules)

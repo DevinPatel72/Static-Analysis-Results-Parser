@@ -155,18 +155,18 @@ def post_process_findings():
     flattened_data = flatten_data(__parser_data)
     
     # Post-processing of data
-    if len(flattened_data) > 0:
-        # Set spacing in terminal if in CLI mode
-        if not GUI_MODE: print()
-        
-        # Duplicate Scanner Consolidation
-        dupe_scan_consolidation(flattened_data)
-        
-        # Perform preflighting
-        apply_prules(flattened_data)
-        
-        # Check for CWE category mappings
-        check_all_CWEs(flattened_data)
+    
+    # Set spacing in terminal if in CLI mode
+    if not GUI_MODE: print()
+    
+    # Duplicate Scanner Consolidation
+    dupe_scan_consolidation(flattened_data)
+    
+    # Perform preflighting
+    apply_prules(flattened_data)
+    
+    # Check for CWE category mappings
+    check_all_CWEs(flattened_data)
     
     __flattened_data = flattened_data
 

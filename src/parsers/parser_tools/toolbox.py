@@ -602,6 +602,8 @@ def check_all_CWEs(data):
         
         # Turn CWE into int if capable
         row[Fieldnames.SCORING_BASIS.value] = int(row[Fieldnames.SCORING_BASIS.value]) if str(row[Fieldnames.SCORING_BASIS.value]).isdigit() else row[Fieldnames.SCORING_BASIS.value]
+    else: # Zero findings
+        progressbar.progress_bar(1, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(progressbar.SPACE), input_id=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag)
     logger.info("Identified %d CWE IDs that may require remapping", count)
 
 def check_CWE_category(cwe, count=0):

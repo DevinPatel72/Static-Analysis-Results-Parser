@@ -52,5 +52,7 @@ def dupe_scan_consolidation(data):
             except ValueError:
                 continue
         dupe_count += len(matches)
+    else: # Zero findings
+        progressbar.progress_bar(1, len(data), prefix=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag.rjust(progressbar.SPACE), input_id=InputConfigFlags.DUPE_SCAN_CONSOLIDATION.flag)
     logger.info("Discovered %d duplicate findings", dupe_count)
     return dupe_count
