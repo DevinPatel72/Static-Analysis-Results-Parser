@@ -111,7 +111,7 @@ class InputAdditionalOptions(Enum):
         "jobs",
         1,
         "Define the number of processors to complete parsing. By default uses 1 processor.",
-        (GuiWindow.OutfileFlagsGUI),
+        (GuiWindow.OutfileFlagsGUI,),
         (1, os.cpu_count())
     )
 
