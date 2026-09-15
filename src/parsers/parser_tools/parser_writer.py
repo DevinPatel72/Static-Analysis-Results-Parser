@@ -180,60 +180,56 @@ def close_writer():
     # Track time for outfile holding
     elapsed_time = -1
     
-    # Post-processing of data
-    if len(__flattened_data) > 0:
-        # Write out parser data to file
-        if __filepath is not None:
-            logger.info("Writing results to file \"%s\"...", __filepath)
-            if __export_sarif:
-                while True:
-                    try:
-                        with open(__filepath, 'w', encoding='utf-8-sig') as out:
-                            json.dump(rows_to_sarif(__flattened_data), out, indent=2)
-                        break
-                    except PermissionError:
-                        if GUI_MODE:
-                            logger.console(f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.", title="Unable to open file", level='error', no_logging=True)
-                        else:
-                            if elapsed_time < 0:
-                                print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
-                                elapsed_time = 0
-                            print('Waiting for unlock: ' + format_time(elapsed_time), end='\r')
-                            time.sleep(1)
-                            elapsed_time += 1
-            elif __excel_enabled:
-                sheet = __excel_workbook.worksheets[0]
-                append_func = sheet.append
-                headers = tuple(__fieldnames)
-                append_func(headers)
-                for row in __flattened_data:
-                    append_func(tuple(row.get(h, "") for h in headers))
-                while True:
-                    try:
-                        __excel_workbook.save(__filepath)
-                        break
-                    except PermissionError:
-                        if GUI_MODE:
-                            logger.console(f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.", title="Unable to open file", level='error', no_logging=True)
-                        else:
-                            if elapsed_time < 0:
-                                print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
-                                elapsed_time = 0
-                            print('Waiting for unlock: ' + format_time(elapsed_time), end='\r')
-                            time.sleep(1)
-                            elapsed_time += 1
-            else:
-                with open(__filepath, 'w', newline='', encoding='utf-8-sig') as o:
-                    csv_writer = csv.writer(o)
-                    csv_writer.writerow(__fieldnames)
-                    csv_writer.writerows((row.get(h, "") for h in __fieldnames) for row in __flattened_data)
+    # Write out parser data to file
+    if __filepath is not None:
+        logger.info("Writing results to file \"%s\"...", __filepath)
+        if __export_sarif:
+            while True:
+                try:
+                    with open(__filepath, 'w', encoding='utf-8-sig') as out:
+                        json.dump(rows_to_sarif(__flattened_data), out, indent=2)
+                    break
+                except PermissionError:
+                    if GUI_MODE:
+                        logger.console(f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.", title="Unable to open file", level='error', no_logging=True)
+                    else:
+                        if elapsed_time < 0:
+                            print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
+                            elapsed_time = 0
+                        print('Waiting for unlock: ' + format_time(elapsed_time), end='\r')
+                        time.sleep(1)
+                        elapsed_time += 1
+        elif __excel_enabled:
+            sheet = __excel_workbook.worksheets[0]
+            append_func = sheet.append
+            headers = tuple(__fieldnames)
+            append_func(headers)
+            for row in __flattened_data:
+                append_func(tuple(row.get(h, "") for h in headers))
+            while True:
+                try:
+                    __excel_workbook.save(__filepath)
+                    break
+                except PermissionError:
+                    if GUI_MODE:
+                        logger.console(f"File \"{__filepath}\" cannot be opened.\n\nTo continue, please make sure the file is not already open in another program.", title="Unable to open file", level='error', no_logging=True)
+                    else:
+                        if elapsed_time < 0:
+                            print(f"\n[ERROR]  Output file \"{__filepath}\" cannot be opened. To continue, please make sure the file is not already open in another program.")
+                            elapsed_time = 0
+                        print('Waiting for unlock: ' + format_time(elapsed_time), end='\r')
+                        time.sleep(1)
+                        elapsed_time += 1
+        else:
+            with open(__filepath, 'w', newline='', encoding='utf-8-sig') as o:
+                csv_writer = csv.writer(o)
+                csv_writer.writerow(__fieldnames)
+                csv_writer.writerows((row.get(h, "") for h in __fieldnames) for row in __flattened_data)
 
-        if not GUI_MODE and elapsed_time >= 0:
-            print()
-        
-        logger.info("Output saved to %s", __filepath)
-    else:
-        logger.info("No findings were parsed. There are no results to write to an output file.")
+    if not GUI_MODE and elapsed_time >= 0:
+        print()
+    
+    logger.info("Output saved to %s", __filepath)
     __filepath = None
 
 # Converts list of dictionaries to SARIF format
@@ -369,7 +365,7 @@ def rows_to_sarif(data):
         run["results"].append(result)
 
     for run in runs.values():
-        del run['_rules']
+        run.pop('_rules', None)
 
     sarif = {
         "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
