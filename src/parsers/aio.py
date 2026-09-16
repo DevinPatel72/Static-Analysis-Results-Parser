@@ -78,7 +78,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
     
     # SARIF Move to different helper function
     if fpath.endswith(('.sarif', '.json')):
-        finding_count, err_count = _parse_sarp_sarif(fpath, scanner, substr, prepend, input_id)
+        parsed_data, finding_count, err_count = _parse_sarp_sarif(fpath, scanner, substr, prepend, input_id)
         return parsed_data, finding_count, err_count
     
     # Excel - Set data iterable and total_rows

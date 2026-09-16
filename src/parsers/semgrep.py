@@ -57,7 +57,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
             if fpath.endswith(Scanners.SEMGREP.valid_ext):
                 data = json.load(r)
             else:
-                logger.error("Unsupported file type for semgrep results: %s", fpath)
+                logger.error("Unsupported file type for Semgrep results: %s", fpath)
                 return parsed_data, finding_count, err_count + 1
     except json.JSONDecodeError:
         logger.error("Invalid JSON format: %s", fpath)
@@ -66,11 +66,20 @@ def parse(fpath, scanner, substr, prepend, input_id):
         logger.error("Unable to read file: %s", fpath)
         return parsed_data, finding_count, err_count + 1
     
+    # Quick check to see if there are zero findings
+    if len(data.get('runs', '')) <= 0:
+        logger.warning("No findings in file \'%s\'", fpath)
+        return parsed_data, finding_count, err_count
+    
     # Parse
     if fpath.endswith('.json'):
         parsed_data, finding_count, err_count = _parse_json(data, fpath, scanner, substr, prepend, input_id)
     else:
-        parsed_data, finding_count, err_count = _parse_sarif(data, fpath, scanner, substr, prepend, input_id)
+        try:
+            parsed_data, finding_count, err_count = _parse_sarif(data, fpath, scanner, substr, prepend, input_id)
+        except KeyError:
+            logger.error("Improperly formatted SARIF file \'%s\'. Skipping parsing for this file.", fpath)
+            err_count += 1
     
     logger.info("Successfully processed %d results", finding_count)
     logger.info("Number of erroneous results: %d", err_count)
@@ -92,7 +101,7 @@ def _parse_sarif(data, fpath, scanner, substr, prepend, input_id):
     if len(scanner_version) > 0:
         scanner = f"{scanner_name} {scanner_version}"
     
-    results = data['runs'][0]['results']
+    results = data['runs'][0].get('results', [])
     
     # Get total number of results
     total_results = len(results)

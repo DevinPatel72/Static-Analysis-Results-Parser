@@ -325,7 +325,7 @@ def parse(fpath, scanner, substr, prepend, input_id):
     
     if err_count > 0:
         logger.warning("Errors have been detected while parsing a Fortify .fpr file. To troubleshoot, unzip the .fpr file and manually search the \"audit.fvdl\" file for the problematic vulnerabilities.")
-        
+
     return parsed_data, finding_count, err_count
 # End of parse
 

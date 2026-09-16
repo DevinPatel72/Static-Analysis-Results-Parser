@@ -51,8 +51,8 @@ def parse(fpath, scanner, substr, prepend, input_id):
     elif fpath.endswith('.csv'):
         parsed_data, finding_count, err_count = _parse_csv(fpath, substr, prepend, total_findings, scanner, input_id)
     else:
-        logger.error("File %s is not an XML or CSV.", fpath)
-        
+        logger.error("File \'%s\' is not an XML or CSV.", fpath)
+        err_count += 1
         
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)

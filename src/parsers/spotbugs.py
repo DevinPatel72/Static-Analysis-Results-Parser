@@ -52,8 +52,11 @@ def parse(fpath, scanner, substr, prepend, input_id):
     if fpath.endswith('.xml'):
         parsed_data, finding_count, err_count = _parse_xml(fpath, scanner, substr, prepend, input_id)
     else:
-        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend, input_id)
-    
+        try:
+            parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend, input_id)
+        except KeyError:
+            logger.error("Improperly formatted SARIF file \'%s\'. Skipping parsing for this file.", fpath)
+            err_count += 1
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
@@ -76,9 +79,12 @@ def _parse_sarif(fpath, scanner, substr, prepend, input_id):
     except (FileNotFoundError, json.JSONDecodeError) as exc:
         err_count += 1
         logger.error("Unable to parse input file \"%s\": %s. Ensure %s is configured to output in SARIF format.", fpath, str(exc), scanner)
-        return parsed_data, finding_count, err_count
+        return parsed_data, finding_count, err_count + 1
     
     # Get runs
+    if len(data.get('runs', '')) <= 0:
+        logger.warning("No findings in file \'%s\'", fpath)
+        return parsed_data, finding_count, err_count
     data = data['runs'][0]
     
     # Get total number of findings
@@ -209,7 +215,7 @@ def _parse_xml(fpath, scanner, substr, prepend, input_id):
     total_instances = len(instances)
     if total_instances <= 0:
         logger.warning("No entries found in the XML file. Skipping %s parsing.", scanner)
-        return 0, 0
+        return parsed_data, finding_count, err_count
     
     scanner_version = root.get('version', '')
     scanner = f"Spotbugs {scanner_version}" if len(scanner_version) > 0 else scanner

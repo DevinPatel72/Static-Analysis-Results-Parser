@@ -42,10 +42,10 @@ def parse(fpath, scanner, substr, prepend, input_id):
     total_entries = len(errors.findall('error'))
     if total_entries <= 0:
         logger.warning("No entries found in the XML file. Skipping %s parsing.", scanner)
-        return 0, 0
+        return parsed_data, finding_count, err_count
     
     scanner_version = root.find('cppcheck').get('version')
-    scanner = f"CppCheck {scanner_version}"
+    scanner = f"CPPCheck {scanner_version}"
     
     # Keep track of error number for debug
     error_num = 0

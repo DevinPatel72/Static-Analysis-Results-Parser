@@ -45,7 +45,11 @@ def parse(fpath, scanner, substr, prepend, input_id):
     if fpath.endswith('.csv'):
         parsed_data, finding_count, err_count = _parse_csv(fpath, scanner, substr, prepend, input_id)
     else:
-        parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend, input_id)
+        try:
+            parsed_data, finding_count, err_count = _parse_sarif(fpath, scanner, substr, prepend, input_id)
+        except KeyError:
+            logger.error("Improperly formatted SARIF file \'%s\'. Skipping parsing for this file.", fpath)
+            err_count += 1
     
     logger.info("Successfully processed %d findings", finding_count)
     logger.info("Number of erroneous rows: %d", err_count)
@@ -69,6 +73,9 @@ def _parse_sarif(fpath, scanner, substr, prepend, input_id):
         return parsed_data, finding_count, err_count
     
     # Get runs
+    if len(data.get('runs', '')) <= 0:
+        logger.warning("No findings in file \'%s\'", fpath)
+        return parsed_data, finding_count, err_count
     data = data['runs'][0]
     
     # Get total number of findings
@@ -314,8 +321,6 @@ def _parse_csv(fpath, scanner, substr, prepend, input_id):
             except Exception:
                 logger.error("Row %d of \'%s\': %s", row_num, fpath, traceback.format_exc())
                 err_count += 1
-    logger.info("Successfully processed %d findings", finding_count)
-    logger.info("Number of erroneous rows: %d", err_count)
     return parsed_data, finding_count, err_count
 # End of parse
 

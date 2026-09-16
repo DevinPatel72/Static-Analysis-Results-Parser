@@ -65,3 +65,16 @@ def progress_bar(iteration, total, input_id='', prefix='', suffix='', decimals=2
         # Print new line on complete
         if iteration >= l_total:
             print()
+
+def send_complete(prefix='', input_id=''):
+    # If GUI mode, send message to loading screen
+    if parsers.GUI_MODE:
+        # Complete
+        parsers.progress_queue.put({
+            "type": "complete",
+            "status": f"Finished {prefix.strip()}",
+            "id": input_id
+        })
+    # If CLI mode, print if progress bar is not disabled
+    elif not DISABLE_PROGRESS_BAR:
+        progress_bar(1, 1, input_id=input_id, prefix=prefix)
