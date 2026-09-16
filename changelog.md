@@ -2,7 +2,9 @@
 
 ## [Version 2.11.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.2) (2026-09-16)
 - Changed SARP output behavior to always write a file even if no findings have been parsed
+- Fixed bugs where CPPCheck and Spotbugs files with no findings will result in a crash
 - Fixed reporting for path preview errors if input files contain no findings
+- Fixed alignment in terminal table report and fixed spacing in CLI progress bars
 
 ## [Version 2.11.1](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.1) (2026-09-08)
 - Fixed bug where Checkmarx parser did not output the correct Symbol value (previously used value for 'SrcName', now uses value for 'DestName')
