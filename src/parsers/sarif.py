@@ -15,7 +15,7 @@ def path_preview(fpath):
         # Get first result
         with open(fpath, "r", encoding='utf-8-sig') as read_obj:
             data = json.load(read_obj)
-        p = "[ERROR] No path found"
+        p = "[WARNING] No findings found in input file"
         for run in data.get('runs', []):
             for result in run.get('results', []):
                 for location in result.get('locations', []):
@@ -23,7 +23,7 @@ def path_preview(fpath):
                         p = location['physicalLocation']['artifactLocation']['uri']
                         return p
                     except KeyError:
-                        p = "[ERROR] No path found"
+                        p = "[WARNING] No findings found in input file"
                         continue
         return p
     except Exception as e:

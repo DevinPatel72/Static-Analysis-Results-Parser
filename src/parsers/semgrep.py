@@ -14,9 +14,11 @@ def path_preview(fpath):
         with open(fpath, 'r', encoding='utf-8-sig') as r:
             data = json.load(r)
             if fpath.endswith('.json'):
-                results = data['results']
+                results = data.get('results', [])
             elif fpath.endswith('.sarif'):
-                results = data['runs'][0]['results']
+                if len(data.get('runs', '')) <= 0:
+                    return '[WARNING] No findings found in input file'
+                results = data['runs'][0].get('results', [])
             else:
                 return "[ERROR] Unsupported file type for Semgrep"
         for result in results:
@@ -37,7 +39,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
     
     # No data, return error message
-    return f"[ERROR] No data found in \'{fpath}\'"
+    return '[WARNING] No findings found in input file'
 
 def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)

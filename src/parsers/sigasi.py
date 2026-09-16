@@ -14,7 +14,7 @@ def path_preview(fpath):
     try:
         with open(fpath, 'r', encoding='utf-8-sig') as r:
             data = json.load(r)
-        for issue in data['issues']:
+        for issue in data.get('issues', []):
             preview = issue.get('resource', '')
             if len(preview) > 0:
                 return preview
@@ -24,7 +24,7 @@ def path_preview(fpath):
         return f"[ERROR] {e}"
     
     # No data, return error message
-    return f"[ERROR] No data found in \'{fpath}\'"
+    return '[WARNING] No findings found in input file'
 
 def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)

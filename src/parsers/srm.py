@@ -18,6 +18,8 @@ def path_preview(fpath):
             tree = ET.parse(fpath)
             root = tree.getroot()
             findings = root.find('findings')
+            if findings is None:
+                return '[WARNING] No findings found in input file'
             
             for finding in findings:
                 location = finding.find('location')
@@ -29,19 +31,19 @@ def path_preview(fpath):
         elif fpath.endswith('.csv'):
             with open(fpath, "r", encoding='utf-8-sig') as read_obj:
                 csv_reader = csv.DictReader(read_obj)
-                first_row = next(csv_reader)
-                cell_preview = first_row['Path']
-                return cell_preview
+                for row in csv_reader:
+                    cell_preview = row['Path']
+                    if cell_preview is not None and len(cell_preview) > 0:
+                        return cell_preview
+            return "[WARNING] No findings found in input file"
         else:
             return "[ERROR] Unsupported file type for SRM"
-    except StopIteration:
-        pass # Thrown by next() once a CSV file is done iterating (i.e., it has no data)
     
     except Exception as e:
         return f"[ERROR] {e}" # Immediately return unknown exception message
     
     # No data, return error message
-    return f"[ERROR] No data found in \'{fpath}\'"
+    return f"[WARNING] No findings found in input file"
 
 def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)

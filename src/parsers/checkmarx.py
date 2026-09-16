@@ -24,14 +24,16 @@ def path_preview(fpath):
                 csv_reader = csv.DictReader(read_obj)
                 for row in csv_reader:
                     cell_preview = row.get('DestFileName', '')
-                    if len(cell_preview) > 0:
+                    if cell_preview is not None and len(cell_preview) > 0:
                         return cell_preview # Immediately return valid value
-    
+        else:
+            return "[ERROR] Unsupported file type for SRM"
+
     except Exception as e:
-        return f"[ERROR] {e}" # Immediately return unknown exception message
+        return f"[ERROR] {e}"
     
     # No data, return error message
-    return f"[ERROR] No data found in Checkmarx file \'{fpath}\'"
+    return "[WARNING] No findings found in input file"
 
 def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)

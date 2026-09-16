@@ -25,22 +25,24 @@ def path_preview(fpath):
                 
                 # Read first row of csv
                 csv_reader = csv.DictReader(read_obj, delimiter=delim)
-                first_row = next(csv_reader)
-                cell_preview = first_row['DependencyPath']
-                return cell_preview
+                for row in csv_reader:
+                    cell_preview = row['DependencyPath']
+                    if cell_preview is not None and len(cell_preview) > 0:
+                        return cell_preview
         else:
             with open(fpath, "r", encoding='utf-8-sig') as read_obj:
                 data = json.load(read_obj)
-            for dep in data['dependencies']:
+            for dep in data.get('dependencies', []):
                 if 'filePath' in dep:
                     return dep['filePath']
-            return "[ERROR] No paths found in input file."
         
     except json.JSONDecodeError:
         return "[ERROR] Improperly formatted input file. Ensure GNAT SAS is configured to output in SARIF format."
         
     except Exception as e:
         return f"[ERROR] {e}"
+    
+    return "[WARNING] No findings found in input file"
 
 def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)

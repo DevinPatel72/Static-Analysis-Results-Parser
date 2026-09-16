@@ -15,11 +15,13 @@ def path_preview(fpath):
         tree = ET.parse(fpath)
         root = tree.getroot()
         errors = root.find('errors')
+        if errors is None:
+            return '[WARNING] No findings found in input file'
         for error in errors.findall('error'):
             location = error.find('location')
             if location is not None:
                 return html.unescape(location.get('file', '[ERROR] Key error: \'location\''))
-        return '[ERROR] No paths found'
+        return '[WARNING] No findings found in input file'
     except Exception as e:
         return f"[ERROR] {e}"
 

@@ -37,7 +37,7 @@ def path_preview(fpath):
                 vulnerabilities = root.findall('.//ns:Vulnerability', namespace)
                 if vulnerabilities is None or len(vulnerabilities) <= 0:
                     logger.warning('No findings in Fortify file \'%s\'', fpath)
-                    return "[ERROR] No findings found. See logfile for details."
+                    return "[WARNING] No findings found in input file. See logfile for details."
                 for vulnerability in vulnerabilities:
                     entries = vulnerability.findall('./ns:AnalysisInfo/ns:Unified/ns:Trace/ns:Primary/ns:Entry', namespace)
                     if len(entries) <= 0:

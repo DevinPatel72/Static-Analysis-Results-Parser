@@ -16,23 +16,27 @@ def path_preview(fpath):
         if fpath.endswith('.csv'):
             with open(fpath, "r", encoding='utf-8-sig') as read_obj:
                 csv_reader = csv.DictReader(read_obj)
-                first_row = next(csv_reader)
-                cell_preview = first_row['File']
-                return cell_preview
+                for row in csv_reader:
+                    cell_preview = row['File']
+                    if cell_preview is not None and len(cell_preview) > 0:
+                        return cell_preview
         else:
             with open(fpath, "r", encoding='utf-8-sig') as read_obj:
                 data = json.load(read_obj)
                 # Keep going until valid path is found
-                for r in data['runs'][0]['results']:
+                if len(data.get('runs', '')) <= 0:
+                    return '[WARNING] No findings found in input file'
+                for r in data['runs'][0].get('results', []):
                     try:
                         return _normalize_text(r['locations'][0]['physicalLocation']['artifactLocation']['uri'])
                     except KeyError:
                         continue
-                return "[ERROR] No paths found in input file."
     except json.JSONDecodeError:
         return "[ERROR] Improperly formatted input file. Ensure Spotbugs is configured to output in SARIF format."
     except Exception as e:
         return f"[ERROR] {e}"
+    
+    return "[WARNING] No findings found in input file"
 
 def parse(fpath, scanner, substr, prepend, input_id):
     logger.info("Parsing %s - %s", scanner, fpath)

@@ -22,7 +22,7 @@ def path_preview(fpath):
         if fpath.endswith(('.sarif', '.json')):
             with open(fpath, "r", encoding='utf-8-sig') as read_obj:
                 data = json.load(read_obj)
-            p = "[ERROR] No path found"
+            p = "[WARNING] No findings found in input file"
             for run in data.get('runs', []):
                 for result in run.get('results', []):
                     for location in result.get('locations', []):
@@ -30,7 +30,7 @@ def path_preview(fpath):
                             p = location['physicalLocation']['artifactLocation']['uri']
                             return p
                         except KeyError:
-                            p = "[ERROR] No path found"
+                            p = "[WARNING] No findings found in input file"
                             continue
             return p
         elif __excel_enabled:
@@ -44,16 +44,23 @@ def path_preview(fpath):
                     path_col = cell.column
             
             if path_col is None:
-                raise ValueError("No \'Path\' column found")
+                return "[ERROR] No \'Path\' column found"
 
-            cell_preview = sheet.cell(row=2, column=path_col).value
-            return cell_preview
+            for row in sheet.iter_rows(min_row=2, min_col=path_col, max_col=path_col, values_only=True):
+                cell_preview = row[0].value
+                if cell_preview is not None and len(cell_preview) > 0:
+                    return cell_preview
+            return "[WARNING] No findings found in input file"
         else:
             with open(fpath, "r", encoding='utf-8-sig') as read_obj:
                 csv_reader = csv.DictReader(read_obj)
-                first_row = next(csv_reader)
-                cell_preview = first_row[Fieldnames.PATH.value]
-                return cell_preview
+                for row in csv_reader:
+                    cell_preview = row[Fieldnames.PATH.value]
+                    if cell_preview is not None and len(cell_preview) > 0:
+                        return cell_preview
+            return "[WARNING] No findings found in input file"
+    except json.JSONDecodeError:
+        return "[ERROR] Invalid JSON format"
     except Exception as e:
         return f"[ERROR] {e}"
 

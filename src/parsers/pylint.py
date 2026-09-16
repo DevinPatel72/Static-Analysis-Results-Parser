@@ -13,8 +13,10 @@ def path_preview(fpath):
         with open(fpath, mode='r', encoding='utf-8-sig') as f:
             data = json.load(f)
             return data[0]['path']
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, KeyError):
         return "[ERROR] Invalid JSON format"
+    except IndexError:
+        return "[WARNING] No findings found in input file"
     except Exception as e:
         return f"[ERROR] {e}"
 

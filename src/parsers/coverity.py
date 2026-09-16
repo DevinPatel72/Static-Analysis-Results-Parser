@@ -11,6 +11,10 @@ def path_preview(fpath):
         with open(fpath, mode='r', encoding='utf-8-sig') as f:
             data = json.load(f)
             return data['issues'][0]['mainEventFilePathname']
+    except (json.JSONDecodeError, KeyError):
+        return "[ERROR] Invalid JSON format"
+    except IndexError:
+        return "[WARNING] No findings found in input file"
     except Exception as e:
         return f"[ERROR] {e}"
     

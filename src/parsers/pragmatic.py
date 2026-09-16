@@ -10,9 +10,11 @@ def path_preview(fpath):
     try:
         with open(fpath, "r", encoding='utf-8-sig') as read_obj:
             csv_reader = csv.DictReader(read_obj)
-            first_row = next(csv_reader)
-            cell_preview = first_row['Filename']
-            return cell_preview
+            for row in csv_reader:
+                cell_preview = row['Filename']
+                if cell_preview is not None and len(cell_preview) > 0:
+                    return cell_preview
+        return "[WARNING] No findings found in input file"
     except Exception as e:
         return f"[ERROR] {e}"
 
