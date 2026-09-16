@@ -175,7 +175,7 @@ def parse_input(entry):
         parsed_results, finding_count, err_count = module.parse(path, scanner, substr, prepend, input_id)
     
     # Send message that parser is done
-    progressbar.send_complete(prefix=os.path.basename(fpath), input_id=input_id)
+    progressbar.send_complete(prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
     
     return {
         "scanner": scanner,

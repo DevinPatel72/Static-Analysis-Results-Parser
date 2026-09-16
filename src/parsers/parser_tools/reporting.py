@@ -444,36 +444,65 @@ class Report:
             root.destroy()
     
     def _cli_table(self):
-        _max_key_len = max(len(k) for k in self.counts.keys())
-        _max_val_len = max(len(str(v[0])) for v in self.counts.values())
-        
-        if _max_key_len <= 10 or _max_val_len <= 3:
-            _pad = 4
-        else:
-            _pad = 0
-        
-        outstr = "\nScanner{}\tFindings\tPercentage\tErrors".format(' '*(max(_max_key_len-len("Findings")-1, _pad)))
-        outstr += "\n"+("—"*75)+"\n"
-        
         total_findings = self.get_total_findings()
         total_errors = self.get_total_errors()
+
+        # Column widths
+        scanner_width = max(len("Scanner"), max((len(k) for k in self.counts), default=0), len("Total"))
+        findings_width = max(len("Findings"), max((len(str(v[0])) for v in self.counts.values()), default=0), len(str(total_findings)))
+        percentage_width = len("Percentage")
+        errors_width = max(len("Errors"), max((len(str(v[1])) for v in self.counts.values()), default=0), len(str(total_errors)))
+
+        # Add a little spacing between columns
+        gap = 4
+
+        # Header
+        outstr = (
+            "\n"
+            f"{'Scanner':<{scanner_width}}{' ' * gap}"
+            f"{'Findings':>{findings_width}}{' ' * gap}"
+            f"{'Percentage':>{percentage_width}}{' ' * gap}"
+            f"{'Errors':>{errors_width}}"
+            "\n"
+        )
+
+        # Separator
+        table_width = (
+            scanner_width +
+            gap +
+            findings_width +
+            gap +
+            percentage_width +
+            gap +
+            errors_width
+        )
+
+        outstr += "—" * table_width + "\n"
+
+        # Rows
         for k, v in self.counts.items():
-            # Findings count
-            percentage = f"{(v[0] / total_findings)*100:.1f}%" if total_findings != 0 else "0.0%"
-            space = ' '*(max(_max_key_len-len(k), _pad))
-            outstr += f"{k}:{space}\t{str(v[0]).rjust(_max_val_len)}\t\t{percentage.rjust(6)}"
-            
-            # Error count
-            outstr += f"\t\t{v[1]}"
-            outstr += '\n'
-        
-        # Calculate total
-        space = ' '*(max(_max_key_len-len("Total")+1, _pad))
-        outstr += f"\nTotal:{space}\t{str(total_findings).rjust(_max_val_len)}\t\t{'100.0%'.rjust(6)}"
-        total_errors = self.get_total_errors()
-        outstr += f"\t\t{total_errors}"
-        
-        outstr += '\n'
-        outstr += "—"*75
-        
+            percentage = (
+                f"{(v[0] / total_findings) * 100:.1f}%"
+                if total_findings != 0
+                else "0.0%"
+            )
+
+            outstr += (
+                f"{k:<{scanner_width}}{' ' * gap}"
+                f"{v[0]:>{findings_width}}{' ' * gap}"
+                f"{percentage:>{percentage_width}}{' ' * gap}"
+                f"{v[1]:>{errors_width}}\n"
+            )
+
+        # Total
+        outstr += "\n"
+        outstr += (
+            f"{'Total':<{scanner_width}}{' ' * gap}"
+            f"{total_findings:>{findings_width}}{' ' * gap}"
+            f"{'100.0%':>{percentage_width}}{' ' * gap}"
+            f"{total_errors:>{errors_width}}\n"
+        )
+
+        outstr += "—" * table_width
+
         return outstr
