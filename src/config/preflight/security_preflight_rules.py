@@ -1848,6 +1848,15 @@ PRULES = [
             replacement = {Fieldnames.SCORING_BASIS.value: '457'}
         ),
         PRule(
+                    rule_id = "gnatsas_subp_always_fails",
+                    precedence = 0,
+                    condition=ConditionGroup(operator="AND", conditions=[
+                                Condition(fieldname=Fieldnames.SCANNER.value, pattern=r"gnatsas", strictness=Strictness.CONTAINS, case_sensitive=False),
+                                Condition(fieldname=Fieldnames.TYPE.value, pattern=r"subp always fails", strictness=Strictness.EXACT, case_sensitive=False),
+                            ]),
+                    replacement = {Fieldnames.SCORING_BASIS.value: '573'}
+                ),
+        PRule(
             rule_id = "gnatsas_suspicious_precondition",
             precedence = 0,
             condition=ConditionGroup(operator="AND", conditions=[
