@@ -242,7 +242,9 @@ def rows_to_sarif(data):
         scanner = row[Fieldnames.SCANNER.value]
         selected_scanner = select_scanner(scanner)
         if selected_scanner == Scanners.SRM:
-            selected_scanner = select_scanner(row[Fieldnames.TOOL.value])
+            t_selected_scanner = select_scanner(row[Fieldnames.TOOL.value])
+            if t_selected_scanner is not None:
+                selected_scanner = t_selected_scanner
         
         if scanner not in runs:
             runs[scanner] = {

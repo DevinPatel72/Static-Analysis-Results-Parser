@@ -744,6 +744,7 @@ def select_scanner(scanner):
     if any(s in scan_match for s in Scanners.SARIF.keywords):
         return scanner_enum
     
+    logger.error('Cannot find scanner %s. Match pattern: %s', scanner, scan_match)
     return None
     
 
