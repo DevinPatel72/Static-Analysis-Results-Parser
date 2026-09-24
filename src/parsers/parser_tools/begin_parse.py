@@ -174,8 +174,8 @@ def parse_input(entry):
         module = importlib.import_module(selected_scanner.module)
         parsed_results, finding_count, err_count = module.parse(path, scanner, substr, prepend, input_id)
     
-    # Send message that parser is done
-    progressbar.send_complete(prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id)
+    # Send message that parser is done. Don't print CLI progress bar if there are results.
+    progressbar.send_complete(prefix=os.path.basename(fpath).rjust(progressbar.SPACE), input_id=input_id, no_print=(len(parsed_results) > 0))
     
     return {
         "scanner": scanner,
