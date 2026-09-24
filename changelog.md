@@ -2,7 +2,7 @@
 
 ## [Version 2.11.3](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.3) (2026-09-24)
 - Fixed bug where running a tool in SRM that is unsupported by SARP directly results in failure to output for SARIF format
-- Fixed bug where CLI prints two progress bars for each input.
+- Fixed bug where CLI prints two progress bars for each input
 
 ## [Version 2.11.2](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.2) (2026-09-16)
 - Changed SARP output behavior to always write a file even if no findings have been parsed
