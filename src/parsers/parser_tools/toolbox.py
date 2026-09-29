@@ -589,16 +589,28 @@ def dedupe_parser_inputs(p_inputs):
     ]
     return inputs
 
-def check_all_CWEs(data):
+def final_postprocessing_loop(data):
+    """
+    Checks to perform:
+        - Perform CWE vulnerability mappings
+        - Neutralize formulas by prepending a ' to the front of each string
+        - Convert integer values from string type to int
+    """
+    
     parsers.cwe_categories = load_config_cwe_category_mappings()
     count = 0
     
-    # Check if cwe is in categories dict
     for i, row in enumerate(data, start=1):
-        # Control flag check
+        # CWE vulnerability mapping
         if parsers.control_flags[InputConfigFlags.OVERRIDE_VULN_MAPPING.flag]:
             progressbar.progress_bar(i, len(data), prefix=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag.rjust(progressbar.SPACE), input_id=InputConfigFlags.OVERRIDE_VULN_MAPPING.flag)
             row[Fieldnames.SCORING_BASIS.value], count = check_CWE_category(row[Fieldnames.SCORING_BASIS.value], count)
+        
+        # Formulas check
+        for k in row:
+            # Prepend ' in front so the formula gets treated like text
+            if isinstance(row[k], str) and row[k].startswith('='):
+                row[k] = '\'' + row[k]
         
         # Turn CWE into int if capable
         row[Fieldnames.SCORING_BASIS.value] = int(row[Fieldnames.SCORING_BASIS.value]) if str(row[Fieldnames.SCORING_BASIS.value]).isdigit() else row[Fieldnames.SCORING_BASIS.value]
@@ -607,7 +619,7 @@ def check_all_CWEs(data):
     logger.info("Identified %d CWE IDs that may require remapping", count)
 
 def check_CWE_category(cwe, count=0):
-    if str(cwe) in parsers.cwe_categories.keys():
+    if str(cwe) in parsers.cwe_categories:
         return f"{cwe}:{parsers.cwe_categories[str(cwe)]}", count + 1
     else:
         return cwe, count

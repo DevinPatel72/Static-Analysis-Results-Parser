@@ -8,7 +8,7 @@ import json
 from itertools import chain
 import parsers
 from . import parser_logger as logger
-from .toolbox import Fieldnames, InputConfigFlags, Scanners, check_all_CWEs, format_time, select_scanner, fix_scanner_name
+from .toolbox import Fieldnames, InputConfigFlags, Scanners, final_postprocessing_loop, format_time, select_scanner, fix_scanner_name
 from .preflight import apply_prules
 from .dupe_scan_consolidation import dupe_scan_consolidation
 
@@ -165,8 +165,8 @@ def post_process_findings():
     # Perform preflighting
     apply_prules(flattened_data)
     
-    # Check for CWE category mappings
-    check_all_CWEs(flattened_data)
+    # Final checks go here
+    final_postprocessing_loop(flattened_data)
     
     __flattened_data = flattened_data
 
