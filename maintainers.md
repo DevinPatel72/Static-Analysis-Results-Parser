@@ -5,8 +5,8 @@
 Static Analysis Results Parser (SARP) is maintained by **Devin Patel**.
 
 * **Repository:** [DevinPatel72/Static-Analysis-Results-Parser](https://github.com/DevinPatel72/Static-Analysis-Results-Parser)
-* **Primary responsibilities:** Project development, code review, issue triage, release management, and security maintenance.
 * **Email:** `devin.patel72@gmail.com`
+* **Primary responsibilities:** Project development, code review, issue triage, release management, and security maintenance.
 
 ## Maintainer Responsibilities
 
