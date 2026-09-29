@@ -1,5 +1,8 @@
 # Change Log
 
+## [Version 2.11.4](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.4) (2026-09-29)
+- Addressed [this security advisory](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/security/advisories/GHSA-65r5-r7mp-mhr6) concerning the lack of neutralization of Excel formulas before writing to an Excel workbook or CSV.
+
 ## [Version 2.11.3](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.3) (2026-09-24)
 - Fixed bug where running a tool in SRM that is unsupported by SARP directly results in failure to output for SARIF format
 - Fixed bug where CLI prints two progress bars for each input

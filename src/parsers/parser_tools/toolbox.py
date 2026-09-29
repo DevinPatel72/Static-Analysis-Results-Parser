@@ -608,10 +608,13 @@ def final_postprocessing_loop(data):
         
         # Formulas check
         for k in row:
-            # Prepend ' in front so the formula gets treated like text
-            if isinstance(row[k], str) and row[k].startswith('='):
-                row[k] = '\'' + row[k]
-        
+            if isinstance(row[k], str):
+                # Strip whitespace to cover tabs and carriage returns
+                row[k] = row[k].strip()
+                # Prepend ' in front so the formula gets treated like text
+                if row[k].startswith(('=', '+', '-', '@')):
+                    row[k] = '\'' + row[k]
+                
         # Turn CWE into int if capable
         row[Fieldnames.SCORING_BASIS.value] = int(row[Fieldnames.SCORING_BASIS.value]) if str(row[Fieldnames.SCORING_BASIS.value]).isdigit() else row[Fieldnames.SCORING_BASIS.value]
     else: # Zero findings
