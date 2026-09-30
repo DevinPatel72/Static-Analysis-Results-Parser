@@ -2,6 +2,7 @@
 
 ## [Version 2.11.4](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.4) (2026-09-30)
 - Addressed [this security advisory](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/security/advisories/GHSA-65r5-r7mp-mhr6) concerning the lack of neutralization of Excel formulas before writing to an Excel workbook or CSV. All strings are stripped of trailing and preceding whitespace characters (including tabs and carriage returns), and all strings beginning with an Excel Formula delimiter (i.e., =, +, -, @) will have an apostrophe `'` prepended to it.
+- Fixed bug where Regex matching in Preflight is forced to be case sensitive even when optioned otherwise
 
 ## [Version 2.11.3](https://github.com/DevinPatel72/Static-Analysis-Results-Parser/releases/tag/v2.11.3) (2026-09-24)
 - Fixed bug where running a tool in SRM that is unsupported by SARP directly results in failure to output for SARIF format
