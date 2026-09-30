@@ -184,10 +184,11 @@ def close_writer():
     if __filepath is not None:
         logger.info("Writing results to file \"%s\"...", __filepath)
         if __export_sarif:
+            sarif_rows = rows_to_sarif(__flattened_data)
             while True:
                 try:
                     with open(__filepath, 'w', encoding='utf-8-sig') as out:
-                        json.dump(rows_to_sarif(__flattened_data), out, indent=2)
+                        json.dump(sarif_rows, out, indent=2)
                     break
                 except PermissionError:
                     if GUI_MODE:
