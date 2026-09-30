@@ -37,7 +37,7 @@ class Condition:
         
         # Pattern
         if strictness == Strictness.REGEX:
-            self.pattern = re.compile(pattern)
+            self.pattern = re.compile(pattern, flags=re.IGNORECASE) if not case_sensitive else re.compile(pattern)
         else:
             self.pattern = str(pattern).lower() if not case_sensitive else str(pattern)
 
