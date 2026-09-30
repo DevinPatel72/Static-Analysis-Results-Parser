@@ -5,6 +5,7 @@ import re
 import json
 import importlib
 import signal
+import unicodedata
 from enum import Enum
 import multiprocessing
 from . import progressbar, parser_logger as logger
@@ -611,8 +612,10 @@ def final_postprocessing_loop(data):
             if isinstance(row[k], str):
                 # Strip whitespace to cover tabs and carriage returns
                 row[k] = row[k].strip()
+                # Normalize unicode wide characters before checking
+                temp = unicodedata.normalize("NFKC", row[k])
                 # Prepend ' in front so the formula gets treated like text
-                if row[k].startswith(('=', '+', '-', '@')):
+                if temp.startswith(('=', '+', '-', '@')):
                     row[k] = '\'' + row[k]
                 
         # Turn CWE into int if capable
